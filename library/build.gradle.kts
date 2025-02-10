@@ -6,6 +6,9 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.vanniktech.mavenPublish)
+    alias(libs.plugins.kotlinSerialization)
+    alias(libs.plugins.composeMultiplatform)
+    alias(libs.plugins.composeCompiler)
 }
 
 group = "io.github.aughtone"
@@ -23,12 +26,21 @@ kotlin {
     iosX64()
     iosArm64()
     iosSimulatorArm64()
-    linuxX64()
+//    linuxX64()
 
     sourceSets {
         val commonMain by getting {
             dependencies {
-                //put your multiplatform dependencies here
+//                implementation(compose.runtime)
+//                implementation(compose.foundation)
+//                implementation(compose.material3)
+                implementation(compose.ui)
+                implementation(compose.components.resources)
+                api(libs.kotlin.serialization)
+                // XXX This might require additional libraries if you enable WASM or JS.
+                //  See: https://klibs.io/project/Kotlin/kotlinx-datetime#using-in-your-projects
+                api(libs.kotlinx.datetime)
+                api(libs.kotlinx.coroutines.core)
             }
         }
         val commonTest by getting {
@@ -39,8 +51,14 @@ kotlin {
     }
 }
 
+compose.resources {
+    publicResClass = true
+    packageOfResClass = "io.github.aughtone.datetime.format.resources"
+    generateResClass = always
+}
+
 android {
-    namespace = "io.github.aughtone.geohash"
+    namespace = "io.github.aughtone.datetime.format"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
     defaultConfig {
         minSdk = libs.versions.android.minSdk.get().toInt()
@@ -56,13 +74,13 @@ mavenPublishing {
 
     signAllPublications()
 
-    coordinates(group.toString(), "geohash-multiplatform", version.toString())
+    coordinates(group.toString(), "datetime-format", version.toString())
 
     pom {
-        name = "Geohash Multiplatform Library"
+        name = "DateTime Format Multiplatform"
         description = "A library."
         inceptionYear = "2025"
-        url = "https://github.com/aughtone/geohash-multiplatform"
+        url = "https://github.com/aughtone/datetime-format"
         licenses {
             license {
                 name = "The Apache License, Version 2.0"
@@ -78,9 +96,9 @@ mavenPublishing {
             }
         }
         scm {
-            url = "https://github.com/aughtone/geohash-multiplatform"
-            connection = "https://github.com/aughtone/geohash-multiplatform.git"
-            developerConnection = "git@github.com:aughtone/geohash-multiplatform.git"
+            url = "https://github.com/aughtone/datetime-format"
+            connection = "https://github.com/aughtone/datetime-format.git"
+            developerConnection = "git@github.com:aughtone/datetime-format.git"
         }
     }
 }
