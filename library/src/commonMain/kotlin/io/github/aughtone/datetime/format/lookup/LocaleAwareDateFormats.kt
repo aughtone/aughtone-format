@@ -2,8 +2,8 @@ package io.github.aughtone.datetime.format.lookup
 
 import androidx.compose.ui.text.intl.Locale
 import io.github.aughtone.datetime.format.resources.StyledDateTimeFormats
-import io.github.aughtone.datetime.format.resources.dateformats.CALocalDateFormats
-import io.github.aughtone.datetime.format.resources.dateformats.USLocalDateFormats
+import io.github.aughtone.datetime.format.resources.dateformats.LocalDateFormats0CA
+import io.github.aughtone.datetime.format.resources.dateformats.LocalDateFormats0US
 import kotlinx.datetime.LocalDate
 
 object LocaleAwareDateFormats: LocaleAwareLookup<StyledDateTimeFormats<LocalDate>> {
@@ -12,9 +12,9 @@ object LocaleAwareDateFormats: LocaleAwareLookup<StyledDateTimeFormats<LocalDate
         abbreviated: Boolean,
         fallbackTo: StyledDateTimeFormats<LocalDate>?,
     ): StyledDateTimeFormats<LocalDate> =when (locale.region) {
-        "US" -> USLocalDateFormats
-        "CA" -> CALocalDateFormats
-        else -> fallbackTo?: CALocalDateFormats
+        "US" -> LocalDateFormats0US
+        "CA" -> LocalDateFormats0CA
+        else -> fallbackTo?: LocalDateFormats0CA
     }
 
 

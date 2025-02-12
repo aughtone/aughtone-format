@@ -1,9 +1,9 @@
 package io.github.aughtone.datetime.format.lookup
 
 import androidx.compose.ui.text.intl.Locale
-import io.github.aughtone.datetime.format.resources.dayofweeknames.EnDayOfWeekNames
-import io.github.aughtone.datetime.format.resources.dayofweeknames.EsDayOfWeekNames
-import io.github.aughtone.datetime.format.resources.dayofweeknames.FrDayOfWeekNames
+import io.github.aughtone.datetime.format.resources.dayofweeknames.DayOfWeekNames0en
+import io.github.aughtone.datetime.format.resources.dayofweeknames.DayOfWeekNames0es
+import io.github.aughtone.datetime.format.resources.dayofweeknames.DayOfWeekNames0fr
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.format.DayOfWeekNames
 import kotlinx.datetime.isoDayNumber
@@ -41,16 +41,16 @@ object LocaleAwareDayOfWeekNames: LocaleAwareLookup<DayOfWeekNames> {
     )
 
     private val fullNames: Map<String, DayOfWeekNames> = mapOf(
-        "" to EnDayOfWeekNames.full,
-        "en" to EnDayOfWeekNames.full,
-        "fr" to FrDayOfWeekNames.full,
-        "es" to EsDayOfWeekNames.full
+        "" to DayOfWeekNames0en.full,
+        "en" to DayOfWeekNames0en.full,
+        "fr" to DayOfWeekNames0fr.full,
+        "es" to DayOfWeekNames0es.full
     )
 
     private val abbreviatedNames: Map<String, DayOfWeekNames> = mapOf(
-        "" to EnDayOfWeekNames.abbreviated,
-        "en" to EnDayOfWeekNames.abbreviated,
-        "fr" to FrDayOfWeekNames.abbreviated,
-        "es" to EsDayOfWeekNames.abbreviated
+        "" to DayOfWeekNames0en.abbreviated,
+        "en" to DayOfWeekNames0en.abbreviated,
+        "fr" to DayOfWeekNames0fr.abbreviated,
+        "es" to DayOfWeekNames0es.abbreviated
     )
 }

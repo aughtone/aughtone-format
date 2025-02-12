@@ -1,27 +1,27 @@
 package io.github.aughtone.datetime.format.resources
 
 import androidx.compose.ui.text.intl.Locale
-import io.github.aughtone.datetime.format.resources.dateformats.CALocalDateFormats
-import io.github.aughtone.datetime.format.resources.dateformats.USLocalDateFormats
+import io.github.aughtone.datetime.format.resources.dateformats.LocalDateFormats0CA
+import io.github.aughtone.datetime.format.resources.dateformats.LocalDateFormats0US
 import io.github.aughtone.datetime.format.resources.datetimeformats.CompositLocalDateTimeFormats
-import io.github.aughtone.datetime.format.resources.datetimeformats.ISOLocalDateTimeFormats
-import io.github.aughtone.datetime.format.resources.timeformats.CALocalTimeFormats
-import io.github.aughtone.datetime.format.resources.timeformats.ISOLocalDateFormats
-import io.github.aughtone.datetime.format.resources.timeformats.ISOLocalTimeFormats
-import io.github.aughtone.datetime.format.resources.timeformats.USLocalTimeFormats
+import io.github.aughtone.datetime.format.resources.datetimeformats.LocalDateTimeFormats0ISO
+import io.github.aughtone.datetime.format.resources.timeformats.LocalTimeFormats0CA
+import io.github.aughtone.datetime.format.resources.timeformats.LocalDateFormats0ISO
+import io.github.aughtone.datetime.format.resources.timeformats.LocalTimeFormats0ISO
+import io.github.aughtone.datetime.format.resources.timeformats.LocalTimeFormats0US
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format.FormatStringsInDatetimeFormats
-
+@Deprecated("Marked for refactoring")
 class LocaleAwareLegacyFormats {
-
+    @Deprecated("Marked for refactoring")
     object Defaults {
-        val ISO_TIME = ISOLocalTimeFormats
-        val ISO_DATE = ISOLocalDateFormats
-        val ISO_DATE_TIME = ISOLocalDateTimeFormats
-
+        val ISO_TIME = LocalTimeFormats0ISO
+        val ISO_DATE = LocalDateFormats0ISO
+        val ISO_DATE_TIME = LocalDateTimeFormats0ISO
+        @Deprecated("Marked for refactoring")
         internal fun <T> selectFormat(
             data: Map<String, StyledDateTimeFormats<T>>,
             locale: Locale,
@@ -83,10 +83,10 @@ class LocaleAwareLegacyFormats {
                 Defaults.ISO_DATE_TIME
             ).full(locale, timeZone, twentyFourHour)
 
-        //        2025-02-04 16:08:39.194 24472-24472 FormatStyle SHORT       bpappin.qapital              D  2/4/25, 4:08 PM
-//        2025-02-04 16:08:39.208 24472-24472 FormatStyle MEDIUM      bpappin.qapital                      D  Feb 4, 2025, 4:08:39 PM
-//        2025-02-04 16:08:39.212 24472-24472 FormatStyle LONG        bpappin.qapital                      D  February 4, 2025 at 4:08:39 PM EST
-//        2025-02-04 16:08:39.231 24472-24472 FormatStyle FULL        bpappin.qapital                      D  Tuesday, February 4, 2025 at 4:08:39 PM Eastern Standard Time
+        //        2025-02-04 16:08:39.194 24472-24472 DateTimeStyle SHORT       bpappin.qapital              D  2/4/25, 4:08 PM
+//        2025-02-04 16:08:39.208 24472-24472 DateTimeStyle MEDIUM      bpappin.qapital                      D  Feb 4, 2025, 4:08:39 PM
+//        2025-02-04 16:08:39.212 24472-24472 DateTimeStyle LONG        bpappin.qapital                      D  February 4, 2025 at 4:08:39 PM EST
+//        2025-02-04 16:08:39.231 24472-24472 DateTimeStyle FULL        bpappin.qapital                      D  Tuesday, February 4, 2025 at 4:08:39 PM Eastern Standard Time
 //
         @Deprecated("Marked for refactoring")
         val datetime: Map<String, StyledDateTimeFormats<LocalDateTime>> =
@@ -115,10 +115,10 @@ class LocaleAwareLegacyFormats {
 
         @OptIn(FormatStringsInDatetimeFormats::class)
         val date: Map<String, StyledDateTimeFormats<LocalDate>> = mapOf(
-            "" to CALocalDateFormats, // 'Tuesday, April 12, 1952 AD' or '3:30:42pm PST'.
-            "en" to CALocalDateFormats,
-            "en_CA" to CALocalDateFormats,
-            "en_US" to USLocalDateFormats,
+            "" to LocalDateFormats0CA, // 'Tuesday, April 12, 1952 AD' or '3:30:42pm PST'.
+            "en" to LocalDateFormats0CA,
+            "en_CA" to LocalDateFormats0CA,
+            "en_US" to LocalDateFormats0US,
         )
 
     }
@@ -167,10 +167,10 @@ class LocaleAwareLegacyFormats {
 
         @OptIn(FormatStringsInDatetimeFormats::class)
         val time: Map<String, StyledDateTimeFormats<LocalTime>> = mapOf(
-            "" to CALocalTimeFormats,
-            "en" to CALocalTimeFormats,
-            "en_CA" to CALocalTimeFormats,
-            "en_US" to USLocalTimeFormats,
+            "" to LocalTimeFormats0CA,
+            "en" to LocalTimeFormats0CA,
+            "en_CA" to LocalTimeFormats0CA,
+            "en_US" to LocalTimeFormats0US,
         )
 
     }

@@ -1,12 +1,12 @@
 package io.github.aughtone.datetime.format.lookup
 
 import androidx.compose.ui.text.intl.Locale
-import io.github.aughtone.datetime.format.resources.monthnames.EnMonthNames
-import io.github.aughtone.datetime.format.resources.monthnames.EsMonthNames
-import io.github.aughtone.datetime.format.resources.monthnames.FrMonthNames
-import kotlinx.datetime.Month
+import io.github.aughtone.datetime.format.resources.monthnames.MonthNames0en
+import io.github.aughtone.datetime.format.resources.monthnames.MonthNames0es
+import io.github.aughtone.datetime.format.resources.monthnames.MonthNames0fr
+import io.github.aughtone.datetime.format.resources.monthnames.MonthNames0numbers
+import io.github.aughtone.datetime.format.resources.monthnames.MonthNames0uk
 import kotlinx.datetime.format.MonthNames
-import kotlinx.datetime.number
 
 object LocaleAwareMonthNames : LocaleAwareLookup<MonthNames> {
     /**
@@ -25,41 +25,28 @@ object LocaleAwareMonthNames : LocaleAwareLookup<MonthNames> {
         val language = locale.language
         val region = locale.region
 
+        // Fall back to the numeric versions is we cant produce anything else.
         return if (abbreviated) {
-            (abbreviatedNames["${language}_r${region}"] ?: abbreviatedNames[language]
-            ?: abbreviatedNames[""])
+            (abbreviatedNames("${language}_${region}") ?: abbreviatedNames(language)
+            ?: abbreviatedNames("")) ?: fallbackTo ?: MonthNames0numbers.abbreviated
         } else {
-            (fullNames["${language}_r${region}"] ?: fullNames[language] ?: fullNames[""])
-        } ?: fallbackTo ?: numericNames
+            (fullNames("${language}_${region}") ?: fullNames(language) ?: fullNames(""))
+        } ?: fallbackTo ?: MonthNames0numbers.full
     }
 
-    // Fall back to the numeric versions is we cant produce anything else.
-    private val numericNames = MonthNames(
-        january = Month.JANUARY.number.toString(),
-        february = Month.FEBRUARY.number.toString(),
-        march = Month.MARCH.number.toString(),
-        april = Month.APRIL.number.toString(),
-        may = Month.MAY.number.toString(),
-        june = Month.JUNE.number.toString(),
-        july = Month.JULY.number.toString(),
-        august = Month.AUGUST.number.toString(),
-        september = Month.SEPTEMBER.number.toString(),
-        october = Month.OCTOBER.number.toString(),
-        november = Month.NOVEMBER.number.toString(),
-        december = Month.DECEMBER.number.toString()
-    )
+    private fun fullNames(key: String) = when (key) {
+        "en" -> MonthNames0en.full
+        "fr" -> MonthNames0fr.full
+        "es" -> MonthNames0es.full
+        "uk" -> MonthNames0uk.full
+        else -> null
+    }
 
-    private val fullNames: Map<String, MonthNames> = mapOf(
-        "" to EnMonthNames.full,
-        "en" to EnMonthNames.full,
-        "fr" to FrMonthNames.full,
-        "es" to EsMonthNames.full
-    )
-
-    private val abbreviatedNames: Map<String, MonthNames> = mapOf(
-        "" to EnMonthNames.abbreviated,
-        "en" to EnMonthNames.abbreviated,
-        "fr" to FrMonthNames.abbreviated,
-        "es" to EsMonthNames.abbreviated
-    )
+    private fun abbreviatedNames(key: String) = when (key) {
+        "en" -> MonthNames0en.abbreviated
+        "fr" -> MonthNames0fr.abbreviated
+        "es" -> MonthNames0es.abbreviated
+        "uk" -> MonthNames0uk.abbreviated
+        else -> null
+    }
 }

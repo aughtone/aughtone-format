@@ -4,8 +4,8 @@ import androidx.compose.ui.text.intl.Locale
 import io.github.aughtone.datetime.format.lookup.LocaleAwareDateFormats
 import io.github.aughtone.datetime.format.lookup.LocaleAwareTimeFormats
 import io.github.aughtone.datetime.format.resources.StyledDateTimeFormats
-import io.github.aughtone.datetime.format.resources.timeformats.ISOLocalDateFormats
-import io.github.aughtone.datetime.format.resources.timeformats.ISOLocalTimeFormats
+import io.github.aughtone.datetime.format.resources.timeformats.LocalDateFormats0ISO
+import io.github.aughtone.datetime.format.resources.timeformats.LocalTimeFormats0ISO
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format.DateTimeFormat
@@ -22,7 +22,7 @@ object CompositLocalDateTimeFormats : StyledDateTimeFormats<LocalDateTime> {
                 format = LocaleAwareDateFormats.lookup(
                     locale = locale,
                     abbreviated = false,
-                    fallbackTo = ISOLocalDateFormats
+                    fallbackTo = LocalDateFormats0ISO
                 ).short(locale, timeZone, twentyFourHour)
             )
             char(' ')
@@ -30,7 +30,7 @@ object CompositLocalDateTimeFormats : StyledDateTimeFormats<LocalDateTime> {
                 format = LocaleAwareTimeFormats.lookup(
                     locale = locale,
                     abbreviated = false,
-                    fallbackTo = ISOLocalTimeFormats
+                    fallbackTo = LocalTimeFormats0ISO
                 ).short(locale, timeZone, twentyFourHour)
             )
         }
@@ -45,7 +45,7 @@ object CompositLocalDateTimeFormats : StyledDateTimeFormats<LocalDateTime> {
                 format = LocaleAwareDateFormats.lookup(
                     locale = locale,
                     abbreviated = false,
-                    fallbackTo = ISOLocalDateFormats
+                    fallbackTo = LocalDateFormats0ISO
                 ).medium(locale, timeZone, twentyFourHour)
             )
             char(' ')
@@ -53,7 +53,7 @@ object CompositLocalDateTimeFormats : StyledDateTimeFormats<LocalDateTime> {
                 format = LocaleAwareTimeFormats.lookup(
                     locale = locale,
                     abbreviated = false,
-                    fallbackTo = ISOLocalTimeFormats
+                    fallbackTo = LocalTimeFormats0ISO
                 ).medium(locale, timeZone, twentyFourHour)
             )
         }
@@ -68,7 +68,7 @@ object CompositLocalDateTimeFormats : StyledDateTimeFormats<LocalDateTime> {
                 format = LocaleAwareDateFormats.lookup(
                     locale = locale,
                     abbreviated = false,
-                    fallbackTo = ISOLocalDateFormats
+                    fallbackTo = LocalDateFormats0ISO
                 ).long(locale, timeZone, twentyFourHour)
             )
             char(' ')
@@ -76,7 +76,7 @@ object CompositLocalDateTimeFormats : StyledDateTimeFormats<LocalDateTime> {
                 format = LocaleAwareTimeFormats.lookup(
                     locale = locale,
                     abbreviated = false,
-                    fallbackTo = ISOLocalTimeFormats
+                    fallbackTo = LocalTimeFormats0ISO
                 ).long(locale, timeZone, twentyFourHour)
             )
         }
@@ -91,7 +91,7 @@ object CompositLocalDateTimeFormats : StyledDateTimeFormats<LocalDateTime> {
                 format = LocaleAwareDateFormats.lookup(
                     locale = locale,
                     abbreviated = false,
-                    fallbackTo = ISOLocalDateFormats
+                    fallbackTo = LocalDateFormats0ISO
                 ).full(locale, timeZone, twentyFourHour)
             )
             char(' ')
@@ -99,7 +99,7 @@ object CompositLocalDateTimeFormats : StyledDateTimeFormats<LocalDateTime> {
                 format = LocaleAwareTimeFormats.lookup(
                     locale = locale,
                     abbreviated = false,
-                    fallbackTo = ISOLocalTimeFormats
+                    fallbackTo = LocalTimeFormats0ISO
                 ).full(locale, timeZone, twentyFourHour)
             )
         }
