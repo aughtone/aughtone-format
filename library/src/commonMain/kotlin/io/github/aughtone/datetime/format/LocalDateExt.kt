@@ -9,18 +9,30 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.toLocalDateTime
 
+/**
+ * @param dateStyle [DateTimeStyle] The style to use for the date.
+ * @param locale [Locale] The locale to use for formatting. Defaults to [Locale.current].
+ * @param timeZone [TimeZone] The time zone to use for formatting. Defaults to [TimeZone.currentSystemDefault].
+ * @param usePlatformFormatting [Boolean] Whether to use the underlying platform formatting or not. Defaults to true.
+ * @return [String] The formatted date.
+ */
 fun LocalDate.formatWith(
-    dateStyle: DateTimeStyle = DateTimeStyle.SHORT,
+    dateStyle: DateTimeStyle,
     locale: Locale = Locale.current,
     timeZone: TimeZone = TimeZone.currentSystemDefault(),
-): String = PlatformDateFormatter.formatDateTime(
-    localDateTime = atStartOfDayIn(timeZone = timeZone).toLocalDateTime(timeZone = timeZone),
-    dateStyle = dateStyle,
-    timeStyle = DateTimeStyle.NONE,
-    locale.toLanguageTag(),
-    timeZone = timeZone,
-    twentyFourHour = is24HourFormat(locale = locale)
-) ?: MultiplatformDateFormatter.formatDateTime(
+    usePlatformFormatting: Boolean = true,
+): String = if (usePlatformFormatting) {
+    PlatformDateFormatter.formatDateTime(
+        localDateTime = atStartOfDayIn(timeZone = timeZone).toLocalDateTime(timeZone = timeZone),
+        dateStyle = dateStyle,
+        timeStyle = DateTimeStyle.NONE,
+        locale.toLanguageTag(),
+        timeZone = timeZone,
+        twentyFourHour = is24HourFormat(locale = locale)
+    )
+} else {
+    null
+} ?: MultiplatformDateFormatter.formatDateTime(
     localDateTime = atStartOfDayIn(timeZone = timeZone).toLocalDateTime(timeZone = timeZone),
     dateStyle = dateStyle,
     timeStyle = DateTimeStyle.NONE,

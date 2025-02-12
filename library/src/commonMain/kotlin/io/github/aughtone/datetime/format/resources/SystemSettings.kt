@@ -6,9 +6,9 @@ import io.github.aughtone.datetime.format.lookup.LocaleAwareIs24Hour
 /**
  * Returns true if user preference is set to 24-hour format.
  *
- * Note all platforms has a way to determine if the users system is in 24 hour mode, so if this is
- * running on one of those platforms, this function will take a guess, based on the local.
- * If the local is not recognized, it will default to 12 hour formatting.
+ * **Note**: not all platforms have a way to determine if the users system is in 24 hour mode.
+ * if the code is running on one of those platforms, this function will take a guess, based on
+ * the local. If the local is not recognized, it will default to 12 hour formatting.
  *
  * @return true if 24 hour time format is selected, false otherwise.
  */

@@ -7,23 +7,38 @@ import io.github.aughtone.datetime.format.resources.is24HourFormat
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 
+/**
+ * @param dateStyle [DateTimeStyle] The style to use for the date.
+ * @param timeStyle [DateTimeStyle] The style to use for the time.
+ * @param locale [Locale] The locale to use for formatting. Defaults to [Locale.current].
+ * @param timeZone [TimeZone] The time zone to use for formatting. Defaults to [TimeZone.currentSystemDefault].
+ * @param use24HourClock [Boolean] Whether to use 24 hour clock or not. Defaults to [is24HourFormat].
+ * @param usePlatformFormatting [Boolean] Whether to use the underlying platform formatting or not. Defaults to true.
+ * @return [String] The formatted date and time.
+ */
 fun LocalDateTime.formatWith(
-    dateStyle: DateTimeStyle = DateTimeStyle.SHORT,
-    timeStyle: DateTimeStyle = DateTimeStyle.SHORT,
+    dateStyle: DateTimeStyle,
+    timeStyle: DateTimeStyle,
     locale: Locale = Locale.current,
     timeZone: TimeZone = TimeZone.currentSystemDefault(),
-): String = PlatformDateFormatter.formatDateTime(
+    use24HourClock: Boolean = is24HourFormat(locale = locale),
+    usePlatformFormatting: Boolean = true,
+): String = if (usePlatformFormatting) {
+    PlatformDateFormatter.formatDateTime(
+        localDateTime = this,
+        dateStyle = dateStyle,
+        timeStyle = timeStyle,
+        locale.toLanguageTag(),
+        timeZone = timeZone,
+        twentyFourHour = is24HourFormat(locale = locale)
+    )
+} else {
+    null
+} ?: MultiplatformDateFormatter.formatDateTime(
     localDateTime = this,
     dateStyle = dateStyle,
     timeStyle = timeStyle,
     locale.toLanguageTag(),
     timeZone = timeZone,
-    twentyFourHour = is24HourFormat(locale = locale)
-) ?: MultiplatformDateFormatter.formatDateTime(
-    localDateTime = this,
-    dateStyle = dateStyle,
-    timeStyle = timeStyle,
-    locale.toLanguageTag(),
-    timeZone = timeZone,
-    twentyFourHour = is24HourFormat(locale = locale)
+    twentyFourHour = use24HourClock
 ) ?: toString()
