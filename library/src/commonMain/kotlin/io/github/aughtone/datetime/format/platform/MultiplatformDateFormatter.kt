@@ -14,7 +14,7 @@ import kotlinx.datetime.format.DateTimeFormat
 import kotlinx.datetime.format.Padding
 import kotlinx.datetime.format.char
 
-class MultiplatformDateFormatter : InternalDateFormatter {
+object MultiplatformDateFormatter : InternalDateFormatter {
     override fun formatDateTime(
         localDateTime: LocalDateTime,
         dateStyle: DateTimeStyle,

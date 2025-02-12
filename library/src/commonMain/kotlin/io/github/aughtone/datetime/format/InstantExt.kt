@@ -8,7 +8,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 
 
-fun Instant.formatAs(
+fun Instant.formatWith(
     dateStyle: DateTimeStyle = DateTimeStyle.SHORT,
     timeStyle: DateTimeStyle = DateTimeStyle.SHORT,
     locale: Locale = Locale.current,

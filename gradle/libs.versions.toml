@@ -7,10 +7,14 @@ kotlinx-serialization = "1.8.0" # latest is "2.1.10", but be careful changing th
 kotlinx-datetime = "0.6.1"
 android-minSdk = "26"
 android-compileSdk = "34"
+rules = "1.6.1"
+runner = "1.6.2"
 vanniktech = "0.30.0"
 androidx-startup = "1.2.0"
 
 [libraries]
+androidx-rules = { module = "androidx.test:rules", version.ref = "rules" }
+androidx-runner = { module = "androidx.test:runner", version.ref = "runner" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
