@@ -1,8 +1,8 @@
 package io.github.aughtone.datetime.format.lookup
 
 import androidx.compose.ui.text.intl.Locale
-import io.github.aughtone.datetime.format.resources.era.EnEraNames
 import io.github.aughtone.datetime.format.resources.era.EraNames
+import io.github.aughtone.datetime.format.resources.era.EraNames0en
 
 object LocaleAwareEraNames : LocaleAwareLookup<EraNames> {
     /**
@@ -21,14 +21,16 @@ object LocaleAwareEraNames : LocaleAwareLookup<EraNames> {
         when (locale.language) {
             else -> {
                 val names by lazy {
-                    EnEraNames
+                    EraNames0en
                 }
-                names
+                if (abbreviated) {
+                    names.abbreviated
+                } else {
+                    names.full
+                }
             }
         }
 }
-
-
 
 
 //val answer: Int by lazy {
