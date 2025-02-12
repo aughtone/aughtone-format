@@ -10,23 +10,36 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atDate
 import kotlinx.datetime.todayIn
 
-
+/**
+ * @param timeStyle [DateTimeStyle] The style to use for the time.
+ * @param locale [Locale] The locale to use for formatting. Defaults to [Locale.current].
+ * @param timeZone [TimeZone] The time zone to use for formatting. Defaults to [TimeZone.currentSystemDefault].
+ * @param use24HourClock [Boolean] Whether to use 24 hour clock or not. Defaults to [is24HourFormat].
+ * @param usePlatformFormatting [Boolean] Whether to use the underlying platform formatting or not. Defaults to true.
+ * @return [String] The formatted time.
+ */
 fun LocalTime.formatWith(
-    timeStyle: DateTimeStyle = DateTimeStyle.SHORT,
+    timeStyle: DateTimeStyle,
     locale: Locale = Locale.current,
     timeZone: TimeZone = TimeZone.currentSystemDefault(),
-): String = PlatformDateFormatter.formatDateTime(
+    use24HourClock: Boolean = is24HourFormat(locale = locale),
+    usePlatformFormatting: Boolean = true,
+): String = if (usePlatformFormatting) {
+    PlatformDateFormatter.formatDateTime(
+        localDateTime = atDate(Clock.System.todayIn(timeZone = timeZone)),
+        dateStyle = DateTimeStyle.NONE,
+        timeStyle = timeStyle,
+        locale.toLanguageTag(),
+        timeZone = timeZone,
+        twentyFourHour = is24HourFormat(locale = locale)
+    )
+} else {
+    null
+} ?: MultiplatformDateFormatter.formatDateTime(
     localDateTime = atDate(Clock.System.todayIn(timeZone = timeZone)),
     dateStyle = DateTimeStyle.NONE,
     timeStyle = timeStyle,
     locale.toLanguageTag(),
     timeZone = timeZone,
-    twentyFourHour = is24HourFormat(locale = locale)
-) ?: MultiplatformDateFormatter.formatDateTime(
-    localDateTime = atDate(Clock.System.todayIn(timeZone = timeZone)),
-    dateStyle = DateTimeStyle.NONE,
-    timeStyle = timeStyle,
-    locale.toLanguageTag(),
-    timeZone = timeZone,
-    twentyFourHour = is24HourFormat(locale = locale)
-)?: toString()
+    twentyFourHour = use24HourClock
+) ?: toString()
