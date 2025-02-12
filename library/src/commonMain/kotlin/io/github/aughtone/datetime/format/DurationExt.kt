@@ -10,16 +10,19 @@ fun Duration.formatRelative(
     style: DateTimeStyle,
     relativeTime: RelativeTime = RelativeTime.Present,
     locale: Locale = Locale.current,
+    roundToNearestUnit: Boolean = true,
 ): String = formatRelative(
     style = style,
     relativeTime = relativeTime,
     languageTag = locale.toLanguageTag(),
+    roundToNearestUnit = roundToNearestUnit,
 )
 
 internal fun Duration.formatRelative(
     style: DateTimeStyle,
     relativeTime: RelativeTime = RelativeTime.Present,
     languageTag: String,
+    roundToNearestUnit: Boolean = true,
 ): String {
     return when (style) {
         DateTimeStyle.SHORT -> toString()
