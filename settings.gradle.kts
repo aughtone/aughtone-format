@@ -25,5 +25,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "geohash-multiplatform"
+rootProject.name = "datetime-format"
 include(":library")
