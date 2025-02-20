@@ -108,7 +108,9 @@ android {
 mavenPublishing {
     publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
 
-    signAllPublications()
+    if (!project.hasProperty("skip-signing")) {
+        signAllPublications()
+    }
 
     coordinates(group.toString(), "datetime-format", version.toString())
 
