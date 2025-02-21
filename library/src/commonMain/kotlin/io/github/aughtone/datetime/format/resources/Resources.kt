@@ -20,6 +20,11 @@ import kotlin.toString
 
 object Resources {
 
+//    getPluralString(
+//        resource = past,
+//        quantity = value
+//    )
+
     fun getText(
         locale: Locale = Locale.current,
     ): TextResource = ResourceGroups.text[buildResourceLocaleKey(
