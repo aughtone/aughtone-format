@@ -15,7 +15,7 @@ import kotlinx.datetime.todayIn
  * @param locale [Locale] The locale to use for formatting. Defaults to [Locale.current].
  * @param timeZone [TimeZone] The time zone to use for formatting. Defaults to [TimeZone.currentSystemDefault].
  * @param use24HourClock [Boolean] Whether to use 24 hour clock or not. Defaults to [is24HourFormat].
- * @param usePlatformFormatting [Boolean] Whether to use the underlying platform formatting or not. Defaults to true.
+ * @param useNative [Boolean] Whether to use the underlying platform formatting or not. Defaults to true.
  * @return [String] The formatted time.
  */
 fun LocalTime.formatWith(
@@ -23,8 +23,8 @@ fun LocalTime.formatWith(
     locale: Locale = Locale.current,
     timeZone: TimeZone = TimeZone.currentSystemDefault(),
     use24HourClock: Boolean = is24HourFormat(locale = locale),
-    usePlatformFormatting: Boolean = true,
-): String = if (usePlatformFormatting) {
+    useNative: Boolean = true,
+): String = if (useNative) {
     PlatformDateFormatter.formatDateTime(
         localDateTime = atDate(Clock.System.todayIn(timeZone = timeZone)),
         dateStyle = DateTimeStyle.NONE,

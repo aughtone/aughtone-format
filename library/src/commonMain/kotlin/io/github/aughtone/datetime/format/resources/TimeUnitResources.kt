@@ -1,86 +1,87 @@
 package io.github.aughtone.datetime.format.resources
 
 import io.github.aughtone.datetime.format.RelativeTime
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
-import kotlinx.coroutines.runBlocking
-import org.jetbrains.compose.resources.PluralStringResource
-import org.jetbrains.compose.resources.getPluralString
+import io.github.aughtone.datetime.format.format
+import io.github.aughtone.datetime.format.resources.strings.StringItem
+import io.github.aughtone.datetime.format.resources.strings.StringItem.Plurals
 
 
 internal enum class TimeUnitResources(
-    val past: PluralStringResource,
-    val present: PluralStringResource,
-    val future: PluralStringResource,
+    val past: Plurals,
+    val present: Plurals,
+    val future: Plurals,
 ) {
     Seconds(
-        past = Res.plurals.seconds_past,
-        present = Res.plurals.seconds,
-        future = Res.plurals.seconds_future
+        past = Resources.getText().seconds_past,//Res.plurals.seconds_past,
+        present = Resources.getText().seconds,
+        future = Resources.getText().seconds_future
     ),
     Minutes(
-        past = Res.plurals.minutes_past,
-        present = Res.plurals.minutes,
-        future = Res.plurals.minutes_future
+        past = Resources.getText().minutes_past,
+        present = Resources.getText().minutes,
+        future = Resources.getText().minutes_future
     ),
     Hours(
-        past = Res.plurals.hours_past,
-        present = Res.plurals.hours,
-        future = Res.plurals.hours_future
+        past = Resources.getText().hours_past,
+        present = Resources.getText().hours,
+        future = Resources.getText().hours_future
     ),
     Days(
-        past = Res.plurals.days_past,
-        present = Res.plurals.days,
-        future = Res.plurals.days_future
+        past = Resources.getText().days_past,
+        present = Resources.getText().days,
+        future = Resources.getText().days_future
     ),
     Weeks(
-        past = Res.plurals.weeks_past,
-        present = Res.plurals.weeks,
-        future = Res.plurals.weeks_future
+        past = Resources.getText().weeks_past,
+        present = Resources.getText().weeks,
+        future = Resources.getText().weeks_future
     ),
     Months(
-        past = Res.plurals.months_past,
-        present = Res.plurals.months,
-        future = Res.plurals.months_future
+        past = Resources.getText().months_past,
+        present = Resources.getText().months,
+        future = Resources.getText().months_future
     ),
     Years(
-        past = Res.plurals.years_past,
-        present = Res.plurals.years,
-        future = Res.plurals.years_future
+        past = Resources.getText().years_past,
+        present = Resources.getText().years,
+        future = Resources.getText().years_future
     );
 
-    fun format(value: Int, relativeTime: RelativeTime): String =
-        runBlocking(context = Dispatchers.IO) {
-            // XXX not sure what the fallback logic is here. Current resource handling doesn't work
-            //  the same as the "io.github.skeptick.libres" library.
-            return@runBlocking when (relativeTime) {
-                RelativeTime.Past -> getPluralString(
-                    resource = past,
-                    quantity = value
-                ).ifBlank {
-                    getPluralString(
-                        present,
-                        value
-                    )
-                } //past().optionallyFormat(value) ?: present().format(value)
-                RelativeTime.Present -> getPluralString(
-                    resource = present,
-                    quantity = value
-                ).ifBlank {
-                    getPluralString(
-                        present,
-                        value
-                    )
-                } // present().format(value)
-                RelativeTime.Future -> getPluralString(
-                    resource = future,
-                    quantity = value
-                ).ifBlank {
-                    getPluralString(
-                        present,
-                        value
-                    )
-                } //future().optionallyFormat(value) ?: present().format(value)
-            }
+    private fun getPluralString(plural: StringItem.Plurals, quantity: Int): String =
+        with(getTypeForQuantity(quantity)) {
+            plural.items[this]
+                ?: plural.items[Plurals.Type.Other]
+                ?: error("Quantity string ID=`${plural::class.simpleName}` does not have the pluralization $this for quantity $quantity!")
         }
+
+    private fun getTypeForQuantity(quantity: Int) = when (quantity) {
+        0 -> Plurals.Type.Zero
+        1 -> Plurals.Type.One
+        2 -> Plurals.Type.Two
+        in 2..4 -> Plurals.Type.Few
+        else -> Plurals.Type.Many
+    }
+
+    fun format(value: Int, relativeTime: RelativeTime): String =
+        when (relativeTime) {
+            RelativeTime.Past -> getPluralString(plural = past, quantity = value).ifBlank {
+                getPluralString(
+                    plural = present,
+                    quantity = value
+                )
+            }.format(value)
+            RelativeTime.Present -> getPluralString(plural = present, quantity = value).ifBlank {
+                getPluralString(
+                    plural = present,
+                    quantity = value
+                )
+            }.format(value)
+            RelativeTime.Future -> getPluralString(plural = future, quantity = value).ifBlank {
+                getPluralString(
+                    plural = present,
+                    quantity = value
+                )
+            }.format(value)
+        }
+
 }

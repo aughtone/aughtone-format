@@ -13,15 +13,15 @@ import kotlinx.datetime.toLocalDateTime
  * @param dateStyle [DateTimeStyle] The style to use for the date.
  * @param locale [Locale] The locale to use for formatting. Defaults to [Locale.current].
  * @param timeZone [TimeZone] The time zone to use for formatting. Defaults to [TimeZone.currentSystemDefault].
- * @param usePlatformFormatting [Boolean] Whether to use the underlying platform formatting or not. Defaults to true.
+ * @param useNative [Boolean] Whether to use the underlying platform formatting or not. Defaults to true.
  * @return [String] The formatted date.
  */
 fun LocalDate.formatWith(
     dateStyle: DateTimeStyle,
     locale: Locale = Locale.current,
     timeZone: TimeZone = TimeZone.currentSystemDefault(),
-    usePlatformFormatting: Boolean = true,
-): String = if (usePlatformFormatting) {
+    useNative: Boolean = true,
+): String = if (useNative) {
     PlatformDateFormatter.formatDateTime(
         localDateTime = atStartOfDayIn(timeZone = timeZone).toLocalDateTime(timeZone = timeZone),
         dateStyle = dateStyle,
