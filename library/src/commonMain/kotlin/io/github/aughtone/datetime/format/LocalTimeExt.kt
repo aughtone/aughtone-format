@@ -23,7 +23,7 @@ fun LocalTime.formatWith(
     locale: Locale = Locale.current,
     timeZone: TimeZone = TimeZone.currentSystemDefault(),
     use24HourClock: Boolean = is24HourFormat(locale = locale),
-    useNative: Boolean = true,
+    useNative: Boolean = false,
 ): String = if (useNative) {
     PlatformDateFormatter.formatDateTime(
         localDateTime = atDate(Clock.System.todayIn(timeZone = timeZone)),
