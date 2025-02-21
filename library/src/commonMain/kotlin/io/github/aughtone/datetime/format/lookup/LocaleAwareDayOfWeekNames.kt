@@ -1,9 +1,9 @@
 package io.github.aughtone.datetime.format.lookup
 
 import androidx.compose.ui.text.intl.Locale
-import io.github.aughtone.datetime.format.resources.dayofweeknames.DayOfWeekNames0en
-import io.github.aughtone.datetime.format.resources.dayofweeknames.DayOfWeekNames0es
-import io.github.aughtone.datetime.format.resources.dayofweeknames.DayOfWeekNames0fr
+import io.github.aughtone.datetime.format.resources.strings.dayofweeknames.DayOfWeekNames0en
+import io.github.aughtone.datetime.format.resources.strings.dayofweeknames.DayOfWeekNames0es
+import io.github.aughtone.datetime.format.resources.strings.dayofweeknames.DayOfWeekNames0fr
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.format.DayOfWeekNames
 import kotlinx.datetime.isoDayNumber
