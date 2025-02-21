@@ -1,8 +1,8 @@
 package io.github.aughtone.datetime.format.lookup
 
 import androidx.compose.ui.text.intl.Locale
-import io.github.aughtone.datetime.format.resources.era.EraNames
-import io.github.aughtone.datetime.format.resources.era.EraNames0en
+import io.github.aughtone.datetime.format.resources.strings.era.EraNames
+import io.github.aughtone.datetime.format.resources.strings.era.EraNames0en
 
 object LocaleAwareEraNames : LocaleAwareLookup<EraNames> {
     /**

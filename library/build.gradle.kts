@@ -84,6 +84,10 @@ kotlin {
             }
         }
     }
+
+    compilerOptions {
+        freeCompilerArgs.add("-Xmulti-dollar-interpolation")
+    }
 }
 
 compose.resources {

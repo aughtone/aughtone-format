@@ -1,11 +1,11 @@
 package io.github.aughtone.datetime.format.lookup
 
 import androidx.compose.ui.text.intl.Locale
-import io.github.aughtone.datetime.format.resources.monthnames.MonthNames0en
-import io.github.aughtone.datetime.format.resources.monthnames.MonthNames0es
-import io.github.aughtone.datetime.format.resources.monthnames.MonthNames0fr
-import io.github.aughtone.datetime.format.resources.monthnames.MonthNames0numbers
-import io.github.aughtone.datetime.format.resources.monthnames.MonthNames0uk
+import io.github.aughtone.datetime.format.resources.strings.monthnames.MonthNames0en
+import io.github.aughtone.datetime.format.resources.strings.monthnames.MonthNames0es
+import io.github.aughtone.datetime.format.resources.strings.monthnames.MonthNames0fr
+import io.github.aughtone.datetime.format.resources.strings.monthnames.MonthNames0numbers
+import io.github.aughtone.datetime.format.resources.strings.monthnames.MonthNames0uk
 import kotlinx.datetime.format.MonthNames
 
 object LocaleAwareMonthNames : LocaleAwareLookup<MonthNames> {
