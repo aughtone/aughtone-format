@@ -8,19 +8,24 @@ import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.format.DayOfWeekNames
 import kotlinx.datetime.isoDayNumber
 
-object LocaleAwareDayOfWeekNames: LocaleAwareLookup<DayOfWeekNames> {
+@Deprecated("Use Resources.getDayOfWeekNames(locale, abbreviated) instead")
+object LocaleAwareDayOfWeekNames : LocaleAwareLookup<DayOfWeekNames> {
     /**
      * look up the month names for the given locale.
      * Defaults to english if the locale is not found.
      *
      * falls back to numeric if there was some sort of problem
      *
-     * The order of precedence is: "en_rCA", "en", ""
+     * The order of precedence is: "en_CA", "en", "CA", ""
      */
+    @Deprecated(
+        "Use Resources.getDayOfWeekNames(locale, abbreviated) instead",
+        replaceWith = ReplaceWith("Resources.getDayOfWeekNames(locale, abbreviated)")
+    )
     override fun lookup(
         locale: Locale,
         abbreviated: Boolean,
-        fallbackTo: DayOfWeekNames?
+        fallbackTo: DayOfWeekNames?,
     ): DayOfWeekNames {
         val language = locale.language
         val region = locale.region
@@ -32,7 +37,7 @@ object LocaleAwareDayOfWeekNames: LocaleAwareLookup<DayOfWeekNames> {
             ?: abbreviatedNames[""])
         } else {
             (fullNames["${language}_r${region}"] ?: fullNames[language] ?: fullNames[""])
-        } ?: fallbackTo?: numericNames
+        } ?: fallbackTo ?: numericNames
     }
 
     // Fall back to the numeric versions is we cant produce anything else.

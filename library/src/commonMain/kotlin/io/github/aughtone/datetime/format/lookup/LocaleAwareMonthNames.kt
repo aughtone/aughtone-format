@@ -8,6 +8,7 @@ import io.github.aughtone.datetime.format.resources.strings.monthnames.MonthName
 import io.github.aughtone.datetime.format.resources.strings.monthnames.MonthNames0uk
 import kotlinx.datetime.format.MonthNames
 
+@Deprecated("Use Resources.getMonthNames(locale,abbreviated) instead")
 object LocaleAwareMonthNames : LocaleAwareLookup<MonthNames> {
     /**
      * look up the month names for the given locale.
@@ -15,8 +16,9 @@ object LocaleAwareMonthNames : LocaleAwareLookup<MonthNames> {
      *
      * fales back to numeric if there was some sort of problem
      *
-     * The order of precedence is: "en_rCA", "en", ""
+     * The order of precedence is: "en_CA", "en", "CA", ""
      */
+    @Deprecated("Use Resources.getMonthNames(locale, abbreviated) instead", replaceWith = ReplaceWith("Resources.getMonthNames(locale, abbreviated)"))
     override fun lookup(
         locale: Locale,
         abbreviated: Boolean,

@@ -1,6 +1,4 @@
-package io.github.aughtone.datetime.format.resources.options.is24hour
-
-import io.github.aughtone.datetime.format.resources.strings.monthnames.MonthNamesResource
+package io.github.aughtone.datetime.format.resources.options.clock
 
 
 object Is24HourResourceMap {

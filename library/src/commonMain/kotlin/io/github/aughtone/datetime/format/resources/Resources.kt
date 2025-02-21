@@ -1,29 +1,38 @@
 package io.github.aughtone.datetime.format.resources
 
 import androidx.compose.ui.text.intl.Locale
-import io.github.aughtone.datetime.format.format
-import io.github.aughtone.datetime.format.resources.options.is24hour.Is24Hour
-import io.github.aughtone.datetime.format.resources.options.is24hour.Is24HourResourceMap
+import io.github.aughtone.datetime.format.resources.formats.StyledDateTimeFormats
+import io.github.aughtone.datetime.format.resources.formats.dateformats.LocalDateFormatResourceMap
+import io.github.aughtone.datetime.format.resources.formats.timeformats.LocalTimeFormatResourceMap
+import io.github.aughtone.datetime.format.resources.options.clock.ClockHours
+import io.github.aughtone.datetime.format.resources.options.clock.ClockHoursResourceMap
 import io.github.aughtone.datetime.format.resources.strings.dayofweeknames.DayOfWeekNamesResourceMap
 import io.github.aughtone.datetime.format.resources.strings.era.EraNames
 import io.github.aughtone.datetime.format.resources.strings.era.EraNamesResourceMap
 import io.github.aughtone.datetime.format.resources.strings.monthnames.MonthNamesResourceMap
 import io.github.aughtone.datetime.format.resources.strings.text.TextResource
 import io.github.aughtone.datetime.format.resources.strings.text.TextResourceMap
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalTime
 import kotlinx.datetime.format.DayOfWeekNames
 import kotlinx.datetime.format.MonthNames
-import kotlin.toString
-
-
-
 
 
 object Resources {
 
-//    getPluralString(
-//        resource = past,
-//        quantity = value
-//    )
+    fun getTimeFormat(locale: Locale): StyledDateTimeFormats<LocalTime> =
+        ResourceGroups.timeFormats[buildResourceLocaleKey(
+            ResourceGroups.timeFormats,
+            locale.language,
+            locale.region
+        )] ?: LocalTimeFormatResourceMap.default
+
+    fun getDateFormat(locale: Locale): StyledDateTimeFormats<LocalDate> =
+        ResourceGroups.dateFormats[buildResourceLocaleKey(
+            ResourceGroups.dateFormats,
+            locale.language,
+            locale.region
+        )] ?: LocalDateFormatResourceMap.default
 
     fun getText(
         locale: Locale = Locale.current,
@@ -33,12 +42,12 @@ object Resources {
         locale.region
     )] ?: TextResourceMap.default
 
-    fun get24Hour(locale: Locale): Is24Hour =
-        ResourceGroups.is24Hour[buildResourceLocaleKey(
-            ResourceGroups.is24Hour,
+    fun getClockHours(locale: Locale): ClockHours =
+        ResourceGroups.clockHours[buildResourceLocaleKey(
+            ResourceGroups.clockHours,
             locale.language,
             locale.region
-        )] ?: Is24HourResourceMap.default
+        )] ?: ClockHoursResourceMap.default
 
     fun getEraNames(locale: Locale, abbreviated: Boolean): EraNames =
         with(
@@ -86,6 +95,9 @@ object Resources {
         }
         if (data.containsKey(language)) {
             return language
+        }
+        if (data.containsKey(region)) {
+            return region
         }
         // when nothing found this is the default value.
         return ""

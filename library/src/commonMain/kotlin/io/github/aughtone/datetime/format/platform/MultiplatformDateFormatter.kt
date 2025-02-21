@@ -2,16 +2,13 @@ package io.github.aughtone.datetime.format.platform
 
 import androidx.compose.ui.text.intl.Locale
 import io.github.aughtone.datetime.format.DateTimeStyle
-import io.github.aughtone.datetime.format.lookup.LocaleAwareDateFormats
-import io.github.aughtone.datetime.format.lookup.LocaleAwareMonthNames
-import io.github.aughtone.datetime.format.lookup.LocaleAwareTimeFormats
+import io.github.aughtone.datetime.format.resources.Resources
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
 import kotlinx.datetime.format.DateTimeFormat
-import kotlinx.datetime.format.Padding
 import kotlinx.datetime.format.char
 
 object MultiplatformDateFormatter : InternalDateFormatter {
@@ -50,8 +47,8 @@ object MultiplatformDateFormatter : InternalDateFormatter {
             )
         )
     } else {
-        // if both are NONE, do we return an empty string, or throw and exception?
-        null
+        // if both are NONE, then an empty string results
+        ""
     }
 
     private fun buildLocalDateTimeFormat(
@@ -84,41 +81,25 @@ object MultiplatformDateFormatter : InternalDateFormatter {
         locale: Locale,
         timeZone: TimeZone,
     ): DateTimeFormat<LocalDate> = when (dateStyle) {
-        DateTimeStyle.SHORT -> LocaleAwareDateFormats.lookup(
-            locale = locale,
-            abbreviated = true,
-            fallbackTo = null
-        ).short(
+        DateTimeStyle.SHORT -> Resources.getDateFormat(locale).short(
             locale = locale,
             timeZone = timeZone,
             twentyFourHour = false,
         )
 
-        DateTimeStyle.MEDIUM -> LocaleAwareDateFormats.lookup(
-            locale = locale,
-            abbreviated = true,
-            fallbackTo = null
-        ).medium(
+        DateTimeStyle.MEDIUM -> Resources.getDateFormat(locale).medium(
             locale = locale,
             timeZone = timeZone,
             twentyFourHour = false,
         )
 
-        DateTimeStyle.LONG -> LocaleAwareDateFormats.lookup(
-            locale = locale,
-            abbreviated = false,
-            fallbackTo = null
-        ).long(
+        DateTimeStyle.LONG -> Resources.getDateFormat(locale).long(
             locale = locale,
             timeZone = timeZone,
             twentyFourHour = false,
         )
 
-        DateTimeStyle.FULL -> LocaleAwareDateFormats.lookup(
-            locale = locale,
-            abbreviated = false,
-            fallbackTo = null
-        ).full(
+        DateTimeStyle.FULL -> Resources.getDateFormat(locale).full(
             locale = locale,
             timeZone = timeZone,
             twentyFourHour = false,
@@ -133,45 +114,32 @@ object MultiplatformDateFormatter : InternalDateFormatter {
         timeZone: TimeZone,
         twentyFourHour: Boolean,
     ): DateTimeFormat<LocalTime> = when (timeStyle) {
-        DateTimeStyle.SHORT -> LocaleAwareTimeFormats.lookup(
-            locale = locale,
-            abbreviated = true,
-            fallbackTo = null
-        ).short(
+        DateTimeStyle.SHORT -> Resources.getTimeFormat(locale).short(
             locale = locale,
             timeZone = timeZone,
-            twentyFourHour = twentyFourHour
+            twentyFourHour = twentyFourHour,
         )
 
-        DateTimeStyle.MEDIUM -> LocaleAwareTimeFormats.lookup(
-            locale = locale,
-            abbreviated = true,
-            fallbackTo = null
-        ).medium(
-            locale = locale,
-            timeZone = timeZone,
-            twentyFourHour = twentyFourHour
-        )
+        DateTimeStyle.MEDIUM ->
+            Resources.getTimeFormat(locale).medium(
+                locale = locale,
+                timeZone = timeZone,
+                twentyFourHour = twentyFourHour,
+            )
 
-        DateTimeStyle.LONG -> LocaleAwareTimeFormats.lookup(
-            locale = locale,
-            abbreviated = false,
-            fallbackTo = null
-        ).long(
-            locale = locale,
-            timeZone = timeZone,
-            twentyFourHour = twentyFourHour
-        )
+        DateTimeStyle.LONG ->
+            Resources.getTimeFormat(locale).long(
+                locale = locale,
+                timeZone = timeZone,
+                twentyFourHour = twentyFourHour,
+            )
 
-        DateTimeStyle.FULL -> LocaleAwareTimeFormats.lookup(
-            locale = locale,
-            abbreviated = false,
-            fallbackTo = null
-        ).full(
-            locale = locale,
-            timeZone = timeZone,
-            twentyFourHour = twentyFourHour
-        )
+        DateTimeStyle.FULL ->
+            Resources.getTimeFormat(locale).full(
+                locale = locale,
+                timeZone = timeZone,
+                twentyFourHour = twentyFourHour,
+            )
 
         DateTimeStyle.NONE -> LocalTime.Format { chars("") }
     }
