@@ -20,7 +20,7 @@ fun LocalDate.formatWith(
     dateStyle: DateTimeStyle,
     locale: Locale = Locale.current,
     timeZone: TimeZone = TimeZone.currentSystemDefault(),
-    useNative: Boolean = true,
+    useNative: Boolean = false,
 ): String = if (useNative) {
     PlatformDateFormatter.formatDateTime(
         localDateTime = atStartOfDayIn(timeZone = timeZone).toLocalDateTime(timeZone = timeZone),
