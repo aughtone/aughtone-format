@@ -1,12 +1,19 @@
 package io.github.aughtone.datetime.format.lookup
 
 import androidx.compose.ui.text.intl.Locale
-import io.github.aughtone.datetime.format.resources.StyledDateTimeFormats
+import io.github.aughtone.datetime.format.resources.formats.StyledDateTimeFormats
 import io.github.aughtone.datetime.format.resources.formats.timeformats.LocalTimeFormats0CA
 import io.github.aughtone.datetime.format.resources.formats.timeformats.LocalTimeFormats0US
 import kotlinx.datetime.LocalTime
 
+@Deprecated(
+    "Use Resources.getTimeFormat(locale, abbreviated) instead",
+)
 object LocaleAwareTimeFormats : LocaleAwareLookup<StyledDateTimeFormats<LocalTime>> {
+    @Deprecated(
+        "Use Resources.getTimeFormat(locale, abbreviated) instead",
+        replaceWith = ReplaceWith("Resources.getTimeFormat(locale, abbreviated)")
+    )
     override fun lookup(
         locale: Locale,
         abbreviated: Boolean,

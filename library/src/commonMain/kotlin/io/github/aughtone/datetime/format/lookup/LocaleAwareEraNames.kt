@@ -4,6 +4,7 @@ import androidx.compose.ui.text.intl.Locale
 import io.github.aughtone.datetime.format.resources.strings.era.EraNames
 import io.github.aughtone.datetime.format.resources.strings.era.EraNames0en
 
+@Deprecated("Use Resources.getEraNames(locale) instead")
 object LocaleAwareEraNames : LocaleAwareLookup<EraNames> {
     /**
      * look up the month names for the given locale.
@@ -11,8 +12,9 @@ object LocaleAwareEraNames : LocaleAwareLookup<EraNames> {
      *
      * falls back to numeric if there was some sort of problem
      *
-     * The order of precedence is: "en_rCA", "en", ""
+     * The order of precedence is: "en_CA", "en", "CA", ""
      */
+    @Deprecated("Use Resources.getEraNames(locale, abbreviated) instead", replaceWith = ReplaceWith("Resources.getEraNames(locale, abbreviated)"))
     override fun lookup(
         locale: Locale,
         abbreviated: Boolean,

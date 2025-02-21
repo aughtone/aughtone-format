@@ -4,7 +4,8 @@ import androidx.compose.ui.text.intl.Locale
 import io.github.aughtone.datetime.format.lookup.LocaleAwareDayOfWeekNames
 import io.github.aughtone.datetime.format.lookup.LocaleAwareEraNames
 import io.github.aughtone.datetime.format.lookup.LocaleAwareMonthNames
-import io.github.aughtone.datetime.format.resources.StyledDateTimeFormats
+import io.github.aughtone.datetime.format.resources.Resources
+import io.github.aughtone.datetime.format.resources.formats.StyledDateTimeFormats
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format.DateTimeFormat
@@ -34,7 +35,7 @@ object LocalDateFormats0CA : StyledDateTimeFormats<LocalDate> {
     ): DateTimeFormat<LocalDate> =
         LocalDate.Format {
             LocalDate.Format {
-                monthName(LocaleAwareMonthNames.lookup(locale = locale, abbreviated = true))
+                monthName(Resources.getMonthNames(locale = locale, abbreviated = true))
                 char(' ')
                 dayOfMonth()
                 chars(", ")
@@ -50,11 +51,7 @@ object LocalDateFormats0CA : StyledDateTimeFormats<LocalDate> {
     ): DateTimeFormat<LocalDate> =
         LocalDate.Format {
             LocalDate.Format {
-                monthName(
-                    LocaleAwareMonthNames.lookup(
-                        locale = locale, abbreviated = false
-                    )
-                )
+                monthName(Resources.getMonthNames(locale = locale, abbreviated = false))
                 char(' ')
                 dayOfMonth()
                 chars(", ")
@@ -69,17 +66,9 @@ object LocalDateFormats0CA : StyledDateTimeFormats<LocalDate> {
         twentyFourHour: Boolean,
     ): DateTimeFormat<LocalDate> =
         LocalDate.Format {
-            dayOfWeek(
-                LocaleAwareDayOfWeekNames.lookup(
-                    locale = locale, abbreviated = false
-                )
-            )
+            dayOfWeek(Resources.getDayOfWeekNames(locale = locale, abbreviated = false))
             chars(", ")
-            monthName(
-                LocaleAwareMonthNames.lookup(
-                    locale = locale, abbreviated = false
-                )
-            )
+            monthName(Resources.getMonthNames(locale = locale, abbreviated = false))
             char(' ')
             dayOfMonth()
             chars(", ")
@@ -91,7 +80,6 @@ object LocalDateFormats0CA : StyledDateTimeFormats<LocalDate> {
             //  short order. Should probably file a RFE or Bug in kotlin-datetime:
             //  See: https://github.com/Kotlin/kotlinx-datetime
             char(' ')
-            chars(LocaleAwareEraNames.lookup(locale=locale).ce)
-
+            chars(Resources.getEraNames(locale = locale, abbreviated = false).ce)
         }
 }

@@ -1,7 +1,6 @@
 package io.github.aughtone.datetime.format.resources
 
 import androidx.compose.ui.text.intl.Locale
-import io.github.aughtone.datetime.format.lookup.LocaleAwareIs24Hour
 
 /**
  * Returns true if user preference is set to 24-hour format.
@@ -12,14 +11,13 @@ import io.github.aughtone.datetime.format.lookup.LocaleAwareIs24Hour
  *
  * @return true if 24 hour time format is selected, false otherwise.
  */
-fun is24HourFormat(locale: Locale = Locale.current): Boolean {
-    // XXX Not all platforms know if the users system is in 24 hour mode,
-    //  so if null is returned, we'll take a guess based on locale, adn fall back to false.
-    return isPlatform24HourSettingEnabled() ?: LocaleAwareIs24Hour.lookup(
-        locale = locale,
-        abbreviated = false,
-        fallbackTo = false
-    )
-}
-
-internal expect fun isPlatform24HourSettingEnabled(): Boolean?
+fun is24HourFormat(locale: Locale = Locale.current): Boolean = Resources.getClockHours(locale = locale).is24hour
+//{
+//    // XXX Not all platforms know if the users system is in 24 hour mode,
+//    //  so if null is returned, we'll take a guess based on locale, adn fall back to false.
+//    return LocaleAwareIs24Hour.lookup(
+//        locale = locale,
+//        abbreviated = false,
+//        fallbackTo = false
+//    )
+//}

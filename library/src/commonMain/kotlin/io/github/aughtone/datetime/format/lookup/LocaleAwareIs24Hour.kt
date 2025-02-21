@@ -1,9 +1,10 @@
 package io.github.aughtone.datetime.format.lookup
 
 import androidx.compose.ui.text.intl.Locale
-import io.github.aughtone.datetime.format.resources.options.is24hour.Is24Hour0enCA
-import io.github.aughtone.datetime.format.resources.options.is24hour.Is24Hour0frCA
+import io.github.aughtone.datetime.format.resources.options.clock.ClockHours0EnCA
+import io.github.aughtone.datetime.format.resources.options.clock.ClockHours0FrCA
 
+@Deprecated("Use Resources.get24Hour(locale).is24hour instead")
 object LocaleAwareIs24Hour : LocaleAwareLookup<Boolean> {
     override fun lookup(
         locale: Locale,
@@ -15,7 +16,7 @@ object LocaleAwareIs24Hour : LocaleAwareLookup<Boolean> {
 
     private fun checkRegion(locale: Locale): Boolean? =
         when ("${locale.language}_${locale.region}") {
-            "CA" -> Is24Hour0enCA.is24hour
+            "CA" -> ClockHours0EnCA.is24hour
             else -> null
         }
 
@@ -23,7 +24,7 @@ object LocaleAwareIs24Hour : LocaleAwareLookup<Boolean> {
 
     private fun checkFullLocale(locale: Locale): Boolean? =
         when ("${locale.language}_${locale.region}") {
-            "fr_CA" -> Is24Hour0frCA.is24hour
+            "fr_CA" -> ClockHours0FrCA.is24hour
             else -> null
         }
 

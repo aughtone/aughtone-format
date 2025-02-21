@@ -2,7 +2,6 @@ package io.github.aughtone.datetime.format
 
 import androidx.compose.ui.text.intl.Locale
 import io.github.aughtone.datetime.format.platform.MultiplatformDateFormatter
-import io.github.aughtone.datetime.format.platform.PlatformDateFormatter
 import io.github.aughtone.datetime.format.resources.is24HourFormat
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
@@ -16,25 +15,13 @@ import kotlinx.datetime.TimeZone
  * @param useNative [Boolean] Whether to use the underlying platform formatting or not. Defaults to true.
  * @return [String] The formatted date and time.
  */
-fun LocalDateTime.formatWith(
+fun LocalDateTime.format(
     dateStyle: DateTimeStyle,
     timeStyle: DateTimeStyle,
     locale: Locale = Locale.current,
     timeZone: TimeZone = TimeZone.currentSystemDefault(),
     use24HourClock: Boolean = is24HourFormat(locale = locale),
-    useNative: Boolean = false,
-): String = if (useNative) {
-    PlatformDateFormatter.formatDateTime(
-        localDateTime = this,
-        dateStyle = dateStyle,
-        timeStyle = timeStyle,
-        locale.toLanguageTag(),
-        timeZone = timeZone,
-        twentyFourHour = is24HourFormat(locale = locale)
-    )
-} else {
-    null
-} ?: MultiplatformDateFormatter.formatDateTime(
+): String = MultiplatformDateFormatter.formatDateTime(
     localDateTime = this,
     dateStyle = dateStyle,
     timeStyle = timeStyle,

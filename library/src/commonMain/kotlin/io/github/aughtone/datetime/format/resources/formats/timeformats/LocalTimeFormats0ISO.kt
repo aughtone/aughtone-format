@@ -1,7 +1,7 @@
 package io.github.aughtone.datetime.format.resources.formats.timeformats
 
 import androidx.compose.ui.text.intl.Locale
-import io.github.aughtone.datetime.format.resources.StyledDateTimeFormats
+import io.github.aughtone.datetime.format.resources.formats.StyledDateTimeFormats
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format.DateTimeFormat
