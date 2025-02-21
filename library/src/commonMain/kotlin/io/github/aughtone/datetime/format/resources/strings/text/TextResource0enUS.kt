@@ -1,9 +1,8 @@
 package io.github.aughtone.datetime.format.resources.strings.text
 
-object TextResource0enUS:TextResource {
-    override val am: String by lazy { "am" }
-    override val pm: String by lazy { "pm" }
-    override val time_ago: String by lazy { $$"%1$s ago" }
-    override val time_in_future: String by lazy { $$"in %1$s" }
-    override val time_now: String by lazy { "now" }
+import io.github.aughtone.datetime.format.resources.strings.StringItem.Value
+
+class TextResource0enUS: TextResource0en() {
+    override val am: Value by lazy { Value("AM") }
+    override val pm: Value by lazy { Value("PM") }
 }

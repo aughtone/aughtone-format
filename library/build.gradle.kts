@@ -75,7 +75,7 @@ kotlin {
                 // XXX This might require additional libraries if you enable WASM or JS.
                 //  See: https://klibs.io/project/Kotlin/kotlinx-datetime#using-in-your-projects
                 api(libs.kotlinx.datetime)
-                api(libs.kotlinx.coroutines.core)
+//                api(libs.kotlinx.coroutines.core)
             }
         }
         val commonTest by getting {

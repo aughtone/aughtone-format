@@ -1,6 +1,4 @@
-package io.github.aughtone.datetime.format.resources
-
-
+package io.github.aughtone.datetime.format.resources.strings
 
 sealed interface StringItem {
     data class Value(val text: String) : StringItem
