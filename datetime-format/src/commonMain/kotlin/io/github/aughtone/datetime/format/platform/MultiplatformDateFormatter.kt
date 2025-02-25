@@ -30,6 +30,7 @@ object MultiplatformDateFormatter : InternalDateFormatter {
             )
         )
     } else if (dateStyle != DateTimeStyle.NONE) {
+        println("debug see dateStyle != NONE")
         localDateTime.date.format(
             format = getLocalDateFormat(
                 dateStyle = dateStyle,
