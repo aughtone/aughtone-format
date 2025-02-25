@@ -26,4 +26,5 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "datetime-format"
-include(":library")
+include(":datetime-format")
+include(":datetime-format-platform")
