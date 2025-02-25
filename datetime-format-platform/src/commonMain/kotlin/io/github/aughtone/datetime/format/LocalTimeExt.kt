@@ -17,7 +17,7 @@ import kotlinx.datetime.todayIn
  * @param useNative [Boolean] Whether to use the underlying platform formatting or not. Defaults to true.
  * @return [String] The formatted time.
  */
-fun LocalTime.formatWith(
+fun LocalTime.systemFormat(
     timeStyle: DateTimeStyle,
     locale: Locale = Locale.current,
     timeZone: TimeZone = TimeZone.currentSystemDefault(),

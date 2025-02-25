@@ -5,7 +5,7 @@ import io.github.aughtone.datetime.format.format
 import io.github.aughtone.datetime.format.resources.strings.StringItem
 import io.github.aughtone.datetime.format.resources.strings.StringItem.Plurals
 
-
+// XXX This needs tobe refactored to select resources based on locale.
 internal enum class TimeUnitResources(
     val past: Plurals,
     val present: Plurals,
@@ -46,8 +46,7 @@ internal enum class TimeUnitResources(
         present = Resources.getText().years,
         future = Resources.getText().years_future
     );
-
-    private fun getPluralString(plural: StringItem.Plurals, quantity: Int): String =
+    private fun getPluralString(plural: Plurals, quantity: Int): String =
         with(getTypeForQuantity(quantity)) {
             plural.items[this]
                 ?: plural.items[Plurals.Type.Other]

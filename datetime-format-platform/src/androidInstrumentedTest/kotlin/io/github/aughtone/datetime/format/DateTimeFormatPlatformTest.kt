@@ -20,7 +20,7 @@ class DateTimeFormatPlatformTest {
         assertEquals(
             message = "Formatting short date time",
             expected = "2022-01-01 12:00 p.m.", // 
-            actual = dateTime.formatWith(
+            actual = dateTime.systemFormat(
                 dateStyle = DateTimeStyle.SHORT,
                 timeStyle = DateTimeStyle.SHORT,
                 locale = Locale("en-CA"),
@@ -35,7 +35,7 @@ class DateTimeFormatPlatformTest {
         assertEquals(
             message = "Formatting short date time",
             expected = "1/1/22 12:00 PM", // 
-            actual = dateTime.formatWith(
+            actual = dateTime.systemFormat(
                 dateStyle = DateTimeStyle.SHORT,
                 timeStyle = DateTimeStyle.SHORT,
                 locale = Locale("en-US"),
