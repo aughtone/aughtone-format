@@ -27,12 +27,16 @@ object Resources {
             locale.region
         )] ?: LocalTimeFormatResourceMap.default
 
-    fun getDateFormat(locale: Locale): StyledDateTimeFormats<LocalDate> =
-        ResourceGroups.dateFormats[buildResourceLocaleKey(
+    fun getDateFormat(locale: Locale): StyledDateTimeFormats<LocalDate> {
+
+        val key = buildResourceLocaleKey(
             ResourceGroups.dateFormats,
             locale.language,
             locale.region
-        )] ?: LocalDateFormatResourceMap.default
+        )
+        println("Debug locale = ${locale.toLanguageTag()},  key = $key")
+        return ResourceGroups.dateFormats[key] ?: LocalDateFormatResourceMap.default
+    }
 
     fun getText(
         locale: Locale = Locale.current,

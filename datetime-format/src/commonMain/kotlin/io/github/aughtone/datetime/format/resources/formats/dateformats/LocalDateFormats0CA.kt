@@ -31,13 +31,11 @@ object LocalDateFormats0CA : StyledDateTimeFormats<LocalDate> {
         twentyFourHour: Boolean,
     ): DateTimeFormat<LocalDate> =
         LocalDate.Format {
-            LocalDate.Format {
-                monthName(Resources.getMonthNames(locale = locale, abbreviated = true))
-                char(' ')
-                dayOfMonth()
-                chars(", ")
-                year()
-            }
+            monthName(Resources.getMonthNames(locale = locale, abbreviated = true))
+            char(' ')
+            dayOfMonth()
+            chars(", ")
+            year()
         }
 
     /** January 12, 1952 */
@@ -47,13 +45,11 @@ object LocalDateFormats0CA : StyledDateTimeFormats<LocalDate> {
         twentyFourHour: Boolean,
     ): DateTimeFormat<LocalDate> =
         LocalDate.Format {
-            LocalDate.Format {
-                monthName(Resources.getMonthNames(locale = locale, abbreviated = false))
-                char(' ')
-                dayOfMonth()
-                chars(", ")
-                year()
-            }
+            monthName(Resources.getMonthNames(locale = locale, abbreviated = false))
+            char(' ')
+            dayOfMonth()
+            chars(", ")
+            year()
         }
 
     /** Tuesday, January 12, 1952 AD */
@@ -76,6 +72,7 @@ object LocalDateFormats0CA : StyledDateTimeFormats<LocalDate> {
             //  that should work in most cases, but we'll need to deal with this in
             //  short order. Should probably file a RFE or Bug in kotlin-datetime:
             //  See: https://github.com/Kotlin/kotlinx-datetime
+                // FIXME we can use the same post processing we use for time zones
             char(' ')
             chars(Resources.getEraNames(locale = locale, abbreviated = false).ce)
         }
