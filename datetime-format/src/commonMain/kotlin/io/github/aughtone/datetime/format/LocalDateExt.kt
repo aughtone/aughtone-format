@@ -19,11 +19,12 @@ fun LocalDate.format(
     dateStyle: DateTimeStyle,
     locale: Locale = Locale.current,
     timeZone: TimeZone = TimeZone.currentSystemDefault(),
+    is24HourFormat: Boolean = is24HourFormat(locale = locale),
 ): String = MultiplatformDateFormatter.formatDateTime(
     localDateTime = atStartOfDayIn(timeZone = timeZone).toLocalDateTime(timeZone = timeZone),
     dateStyle = dateStyle,
     timeStyle = DateTimeStyle.NONE,
     languageTag = locale.toLanguageTag(),
     timeZone = timeZone,
-    twentyFourHour = is24HourFormat(locale = locale)
+    twentyFourHour = is24HourFormat
 ) ?: toString()

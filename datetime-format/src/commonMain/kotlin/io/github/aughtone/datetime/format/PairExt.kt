@@ -1,6 +1,7 @@
 package io.github.aughtone.datetime.format
 
 import androidx.compose.ui.text.intl.Locale
+import io.github.aughtone.datetime.format.resources.is24HourFormat
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 
@@ -65,18 +66,21 @@ fun Pair<Instant?, Instant?>.format(
     locale: Locale = Locale.current,
     timeZone: TimeZone = TimeZone.currentSystemDefault(),
     placeholder: String = "?",
+    is24HourFormat: Boolean = is24HourFormat(locale = locale),
 ): String = "${
     first?.format(
         dateStyle = dateStyle,
         timeStyle = timeStyle,
         locale = locale,
-        timeZone = timeZone
+        timeZone = timeZone,
+        is24HourFormat = is24HourFormat,
     ) ?: placeholder
 } - ${
     second?.format(
         dateStyle = dateStyle,
         timeStyle = timeStyle,
         locale = locale,
-        timeZone = timeZone
+        timeZone = timeZone,
+        is24HourFormat = is24HourFormat,
     ) ?: placeholder
 }"

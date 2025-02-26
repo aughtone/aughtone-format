@@ -16,13 +16,14 @@ fun Instant.format(
     timeStyle: DateTimeStyle = DateTimeStyle.LONG,
     locale: Locale = Locale.current,
     timeZone: TimeZone = TimeZone.currentSystemDefault(),
+    is24HourFormat:Boolean = is24HourFormat(locale = locale)
 ): String = MultiplatformDateFormatter.formatDateTime(
     localDateTime = toLocalDateTime(timeZone = timeZone),
     dateStyle = dateStyle,
     timeStyle = timeStyle,
     languageTag = locale.toLanguageTag(),
     timeZone = timeZone,
-    twentyFourHour = is24HourFormat(locale = locale)
+    twentyFourHour = is24HourFormat
 ) ?: toString()
 
 
@@ -52,6 +53,4 @@ fun Instant.formatRelative(
             timeZone = timeZone
         )
     }
-
-
 }
