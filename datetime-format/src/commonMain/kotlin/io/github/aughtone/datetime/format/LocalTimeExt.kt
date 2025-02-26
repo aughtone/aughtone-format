@@ -23,7 +23,7 @@ fun LocalTime.format(
     timeStyle: DateTimeStyle,
     locale: Locale = Locale.current,
     timeZone: TimeZone = TimeZone.currentSystemDefault(),
-    use24HourClock: Boolean = is24HourFormat(locale = locale),
+    is24HourFormat: Boolean = is24HourFormat(locale = locale),
 ): String = MultiplatformPostFormatter.postFormatTime(
     timeStyle = timeStyle,
     timeZone = timeZone,
@@ -34,6 +34,6 @@ fun LocalTime.format(
         timeStyle = timeStyle,
         locale.toLanguageTag(),
         timeZone = timeZone,
-        twentyFourHour = use24HourClock
+        twentyFourHour = is24HourFormat
     )
 ) ?: toString()
