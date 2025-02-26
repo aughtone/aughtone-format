@@ -14,7 +14,14 @@ import androidx.compose.ui.text.intl.Locale
 fun is24HourFormat(locale: Locale = Locale.current): Boolean {
     // XXX Not all platforms know if the users system is in 24 hour mode,
     //  so if null is returned, we'll take a guess based on locale, adn fall back to false.
-    return isPlatform24HourSettingEnabled() ?: Resources.getClockHours(locale = locale).is24hour
+    try {
+        return isPlatform24HourSettingEnabled() ?: Resources.getClockHours(locale = locale).is24hour
+    } catch (e: Exception) {
+        // this exception would happen if the DateTimeFormatInitializer doesn't load on Android.
+        // it also happens during a unit test, so we allow it to fall back.
+        println(e.toString())
+        return Resources.getClockHours(locale = locale).is24hour
+    }
 }
 
 internal expect fun isPlatform24HourSettingEnabled(): Boolean?

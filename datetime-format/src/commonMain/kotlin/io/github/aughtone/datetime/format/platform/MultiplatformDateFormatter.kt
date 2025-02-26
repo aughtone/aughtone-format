@@ -3,6 +3,7 @@ package io.github.aughtone.datetime.format.platform
 import androidx.compose.ui.text.intl.Locale
 import io.github.aughtone.datetime.format.DateTimeStyle
 import io.github.aughtone.datetime.format.resources.Resources
+import io.github.aughtone.datetime.format.resources.is24HourFormat
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime

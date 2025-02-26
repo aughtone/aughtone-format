@@ -6,7 +6,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlinx.datetime.TimeZone
 
-class DateTimeFormatTest {
+class DateTimeFormatExtTest {
 
     val testTimeZone = TimeZone.UTC
 

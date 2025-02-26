@@ -13,14 +13,14 @@ import kotlin.time.Duration.Companion.days
 
 fun Instant.format(
     dateStyle: DateTimeStyle = DateTimeStyle.SHORT,
-    timeStyle: DateTimeStyle = DateTimeStyle.SHORT,
+    timeStyle: DateTimeStyle = DateTimeStyle.LONG,
     locale: Locale = Locale.current,
     timeZone: TimeZone = TimeZone.currentSystemDefault(),
 ): String = MultiplatformDateFormatter.formatDateTime(
     localDateTime = toLocalDateTime(timeZone = timeZone),
     dateStyle = dateStyle,
     timeStyle = timeStyle,
-    locale.toLanguageTag(),
+    languageTag = locale.toLanguageTag(),
     timeZone = timeZone,
     twentyFourHour = is24HourFormat(locale = locale)
 ) ?: toString()
@@ -29,20 +29,20 @@ fun Instant.format(
 fun Instant.formatRelative(
     until: Duration = 5.days,
     dateStyle: DateTimeStyle = DateTimeStyle.SHORT,
-    timeStyle: DateTimeStyle = DateTimeStyle.LONG,
+    timeStyle: DateTimeStyle = DateTimeStyle.SHORT,
+    relativeStyle: RelativeStyle = RelativeStyle.LONG,
     relativeTime: RelativeTime = RelativeTime.Present,
     locale: Locale = Locale.current,
     timeZone: TimeZone = TimeZone.currentSystemDefault(),
-) {
+    relativeTo: Instant = Clock.System.now()
+):String {
     val untilFuture = plus(until)
-    if (Clock.System.now() < untilFuture) {
-        val ago = Clock.System.now().minus(this)
+    return if (relativeTo < untilFuture) {
+        val ago = relativeTo.minus(this)
 
         ago.formatRelative(
-            style = timeStyle,
+            style = relativeStyle,
             relativeTime = relativeTime,
-            languageTag = locale.toLanguageTag(),
-            roundToNearestUnit = true
         )
     } else {
         format(
