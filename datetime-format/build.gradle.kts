@@ -46,6 +46,15 @@ kotlin {
         }
         binaries.executable()
     }
+
+    // See: https://kotlinlang.org/docs/js-project-setup.html
+    js(IR) {
+        browser {
+            generateTypeScriptDefinitions()
+        }
+        useEsModules() // Enables ES2015 modules
+//        binaries.executable()
+    }
     iosX64()
     iosArm64()
     iosSimulatorArm64()
