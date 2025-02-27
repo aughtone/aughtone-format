@@ -1,9 +1,10 @@
 package io.github.aughtone.datetime.format.platform
 
-import io.github.aughtone.datetime.format.DateTimeStyle
 import io.github.aughtone.datetime.format.RelativeStyle
 import io.github.aughtone.datetime.format.RelativeTime
-import io.github.aughtone.datetime.format.resources.TimeUnitResources
+import io.github.aughtone.datetime.format.format
+import io.github.aughtone.datetime.format.resources.Resources
+import io.github.aughtone.datetime.format.resources.strings.TimeUnitPlurals
 import kotlin.math.roundToInt
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
@@ -14,13 +15,27 @@ object MultiplatformDurationFormatter {
         style: RelativeStyle,
         relativeTime: RelativeTime,
     ): String = when (style) {
-        RelativeStyle.SHORT -> duration.toString()
+        RelativeStyle.SHORT -> formatRelativeShort(
+            duration = duration,
+            relativeTime = relativeTime
+        )
+
         RelativeStyle.LONG -> formatRelativeLong(
             duration = duration,
             relativeTime = relativeTime
         )
+
         RelativeStyle.NONE -> ""
     }
+}
+
+private fun formatRelativeShort(
+    duration: Duration,
+    relativeTime: RelativeTime = RelativeTime.Present,
+): String = when (relativeTime) {
+    RelativeTime.Past -> Resources.getText().time_in_past.text.format(duration.toString())
+    RelativeTime.Future -> Resources.getText().time_in_future.text.format(duration.toString())
+    else -> duration.toString()
 }
 
 /**
@@ -40,18 +55,17 @@ private fun formatRelativeLong(
     val monthsAgo = (duration.inWholeDays / 30.5f).roundToInt()
     val yearsAgo = (duration.inWholeDays / 365).toInt()
 
-    return when {
-
+    val formattedTime = when {
         millisecondsAgo < 1000 -> {
             val rounded = duration.absoluteValue.toDouble(DurationUnit.SECONDS).roundToInt()
-            "$rounded ${TimeUnitResources.Seconds.format(rounded, relativeTime)}"
+            "$rounded ${TimeUnitPlurals.Seconds.format(rounded, relativeTime)}"
 
         }
 
         secondsAgo < 60 -> {
             val rounded = duration.absoluteValue.toDouble(DurationUnit.SECONDS).roundToInt()
             "$rounded ${
-                TimeUnitResources.Seconds.format(
+                TimeUnitPlurals.Seconds.format(
                     rounded,
                     relativeTime
                 )
@@ -60,28 +74,34 @@ private fun formatRelativeLong(
 
         secondsAgo < 3600 -> {
             val minutes = duration.inWholeMinutes.toInt()
-            "$minutes ${TimeUnitResources.Minutes.format(minutes, relativeTime)}"
+            "$minutes ${TimeUnitPlurals.Minutes.format(minutes, relativeTime)}"
         }
 
         daysAgo < 1 -> {
-            "$hoursAgo ${TimeUnitResources.Hours.format(hoursAgo, relativeTime)}"
+            "$hoursAgo ${TimeUnitPlurals.Hours.format(hoursAgo, relativeTime)}"
         }
 
         daysAgo < 7 -> {
-            "$daysAgo ${TimeUnitResources.Days.format(daysAgo, relativeTime)}"
+            "$daysAgo ${TimeUnitPlurals.Days.format(daysAgo, relativeTime)}"
         }
 
         daysAgo < 30 -> {
-            "$weeksAgo ${TimeUnitResources.Weeks.format(weeksAgo, relativeTime)}"
+            "$weeksAgo ${TimeUnitPlurals.Weeks.format(weeksAgo, relativeTime)}"
         }
 
         monthsAgo < 12 || yearsAgo == 0 -> {
-            "$monthsAgo ${TimeUnitResources.Months.format(monthsAgo, relativeTime)}"
+            "$monthsAgo ${TimeUnitPlurals.Months.format(monthsAgo, relativeTime)}"
         }
 
         else -> {
-            "$yearsAgo ${TimeUnitResources.Years.format(yearsAgo, relativeTime)}"
+            "$yearsAgo ${TimeUnitPlurals.Years.format(yearsAgo, relativeTime)}"
         }
+    }
+
+    return when (relativeTime) {
+        RelativeTime.Past -> Resources.getText().time_in_past.text.format(formattedTime)
+        RelativeTime.Future -> Resources.getText().time_in_future.text.format(formattedTime)
+        else -> formattedTime
     }
 }
 
@@ -103,32 +123,32 @@ private fun formatHumanReadableRelative(
 
     return when {
         secondsAgo < 60 -> {
-            "$secondsAgo ${TimeUnitResources.Seconds.format(secondsAgo, relativeTime)}"
+            "$secondsAgo ${TimeUnitPlurals.Seconds.format(secondsAgo, relativeTime)}"
         }
 
         secondsAgo < 3600 -> {
             val minutes = duration.inWholeMinutes.toInt()
-            "$minutes ${TimeUnitResources.Minutes.format(minutes, relativeTime)}"
+            "$minutes ${TimeUnitPlurals.Minutes.format(minutes, relativeTime)}"
         }
 
         daysAgo < 1 -> {
-            "$hoursAgo ${TimeUnitResources.Hours.format(hoursAgo, relativeTime)}"
+            "$hoursAgo ${TimeUnitPlurals.Hours.format(hoursAgo, relativeTime)}"
         }
 
         daysAgo < 7 -> {
-            "$daysAgo ${TimeUnitResources.Days.format(daysAgo, relativeTime)}"
+            "$daysAgo ${TimeUnitPlurals.Days.format(daysAgo, relativeTime)}"
         }
 
         daysAgo < 30 -> {
-            "$weeksAgo ${TimeUnitResources.Weeks.format(weeksAgo, relativeTime)}"
+            "$weeksAgo ${TimeUnitPlurals.Weeks.format(weeksAgo, relativeTime)}"
         }
 
         monthsAgo < 12 || yearsAgo == 0 -> {
-            "$monthsAgo ${TimeUnitResources.Months.format(monthsAgo, relativeTime)}"
+            "$monthsAgo ${TimeUnitPlurals.Months.format(monthsAgo, relativeTime)}"
         }
 
         else -> {
-            "$yearsAgo ${TimeUnitResources.Years.format(yearsAgo, relativeTime)}"
+            "$yearsAgo ${TimeUnitPlurals.Years.format(yearsAgo, relativeTime)}"
         }
     }
 }

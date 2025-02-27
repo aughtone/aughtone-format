@@ -2,7 +2,9 @@ package io.github.aughtone.datetime.format
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.minutes
 
 class DurationExtTest {
 
@@ -56,5 +58,54 @@ class DurationExtTest {
         assertEquals("59 minutes", 3540000.milliseconds.formatRelative(RelativeStyle.LONG))
         assertEquals("1 hour", 3600000.milliseconds.formatRelative(RelativeStyle.LONG))
         assertEquals("2 days", 172800000.milliseconds.formatRelative(RelativeStyle.LONG))
+    }
+
+    @Test
+    fun testFormatInThePast() {
+        assertEquals(
+            "2 days ago",
+            2.days.formatRelative(style = RelativeStyle.LONG, relativeTime = RelativeTime.Past)
+        )
+
+        assertEquals(
+            "5 minutes ago",
+            5.minutes.formatRelative(style = RelativeStyle.LONG, relativeTime = RelativeTime.Past)
+        )
+
+        assertEquals(
+            "2d ago",
+            2.days.formatRelative(style = RelativeStyle.SHORT, relativeTime = RelativeTime.Past)
+        )
+
+        assertEquals(
+            "5m ago",
+            5.minutes.formatRelative(style = RelativeStyle.SHORT, relativeTime = RelativeTime.Past)
+        )
+    }
+
+    @Test
+    fun testFormatInTheFuture() {
+        assertEquals(
+            "in 2 days",
+            2.days.formatRelative(style = RelativeStyle.LONG, relativeTime = RelativeTime.Future)
+        )
+
+        assertEquals(
+            "in 5 minutes",
+            5.minutes.formatRelative(style = RelativeStyle.LONG, relativeTime = RelativeTime.Future)
+        )
+
+        assertEquals(
+            "in 2d",
+            2.days.formatRelative(style = RelativeStyle.SHORT, relativeTime = RelativeTime.Future)
+        )
+
+        assertEquals(
+            "in 5m",
+            5.minutes.formatRelative(
+                style = RelativeStyle.SHORT,
+                relativeTime = RelativeTime.Future
+            )
+        )
     }
 }
