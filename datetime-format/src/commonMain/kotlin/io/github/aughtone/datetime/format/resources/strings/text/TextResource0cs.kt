@@ -4,7 +4,7 @@ import io.github.aughtone.datetime.format.resources.strings.StringItem.Plurals
 import io.github.aughtone.datetime.format.resources.strings.StringItem.Value
 
 class TextResource0cs : TextResource0en() {
-    override val time_ago: Value by lazy { Value("před %1") }
+    override val time_in_past: Value by lazy { Value("před %1") }
     override val time_in_future: Value by lazy { Value("za %1") }
     override val time_now: Value by lazy { Value("nyní") }
     override val seconds: Plurals by lazy {

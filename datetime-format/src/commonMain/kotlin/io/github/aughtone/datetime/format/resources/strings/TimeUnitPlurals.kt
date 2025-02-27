@@ -1,15 +1,14 @@
-package io.github.aughtone.datetime.format.resources
+package io.github.aughtone.datetime.format.resources.strings
 
 import io.github.aughtone.datetime.format.RelativeTime
 import io.github.aughtone.datetime.format.format
-import io.github.aughtone.datetime.format.resources.strings.StringItem
-import io.github.aughtone.datetime.format.resources.strings.StringItem.Plurals
+import io.github.aughtone.datetime.format.resources.Resources
 
 // XXX This needs tobe refactored to select resources based on locale.
-internal enum class TimeUnitResources(
-    val past: Plurals,
-    val present: Plurals,
-    val future: Plurals,
+internal enum class TimeUnitPlurals(
+    val past: StringItem.Plurals,
+    val present: StringItem.Plurals,
+    val future: StringItem.Plurals,
 ) {
     Seconds(
         past = Resources.getText().seconds_past,//Res.plurals.seconds_past,
@@ -46,19 +45,19 @@ internal enum class TimeUnitResources(
         present = Resources.getText().years,
         future = Resources.getText().years_future
     );
-    private fun getPluralString(plural: Plurals, quantity: Int): String =
+    private fun getPluralString(plural: StringItem.Plurals, quantity: Int): String =
         with(getTypeForQuantity(quantity)) {
             plural.items[this]
-                ?: plural.items[Plurals.Type.Other]
+                ?: plural.items[StringItem.Plurals.Type.Other]
                 ?: error("Quantity string ID=`${plural::class.simpleName}` does not have the pluralization $this for quantity $quantity!")
         }
 
     private fun getTypeForQuantity(quantity: Int) = when (quantity) {
-        0 -> Plurals.Type.Zero
-        1 -> Plurals.Type.One
-        2 -> Plurals.Type.Two
-        in 2..4 -> Plurals.Type.Few
-        else -> Plurals.Type.Many
+        0 -> StringItem.Plurals.Type.Zero
+        1 -> StringItem.Plurals.Type.One
+        2 -> StringItem.Plurals.Type.Two
+        in 2..4 -> StringItem.Plurals.Type.Few
+        else -> StringItem.Plurals.Type.Many
     }
 
     fun format(value: Int, relativeTime: RelativeTime): String =
