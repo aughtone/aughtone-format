@@ -16,7 +16,7 @@ plugins {
 }
 
 group = "io.github.aughtone"
-version = "1.0.0-alpha1"
+version = libs.versions.versionName.get().toString()
 
 kotlin {
     jvm()
@@ -29,12 +29,12 @@ kotlin {
     }
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs {
-        moduleName = "datetime-format"
+        moduleName = "aughtone-format-datetime"
         browser {
             val rootDirPath = project.rootDir.path
             val projectDirPath = project.projectDir.path
             commonWebpackConfig {
-                outputFileName = "datetime-format.js"
+                outputFileName = "aughtone-format-datetime.js"
                 devServer = (devServer ?: KotlinWebpackConfig.DevServer()).apply {
                     static = (static ?: mutableListOf()).apply {
                         // Serve sources to debug inside browser
@@ -55,9 +55,16 @@ kotlin {
         useEsModules() // Enables ES2015 modules
 //        binaries.executable()
     }
-    iosX64()
-    iosArm64()
-    iosSimulatorArm64()
+    listOf(
+        iosX64(),
+        iosArm64(),
+        iosSimulatorArm64()
+    ).forEach { iosTarget ->
+        iosTarget.binaries.framework {
+            baseName = "FormatDatetimeKit"
+            isStatic = true
+        }
+    }
 //    linuxX64()
 
     sourceSets {
@@ -121,12 +128,12 @@ kotlin {
 
 compose.resources {
     publicResClass = true
-    packageOfResClass = "io.github.aughtone.datetime.format.resources"
+    packageOfResClass = "${libs.versions.applicationId.get().toString()}.resources"
     generateResClass = always
 }
 
 android {
-    namespace = "io.github.aughtone.datetime.format"
+    namespace = libs.versions.applicationId.get().toString()
     compileSdk = libs.versions.android.compileSdk.get().toInt()
     defaultConfig {
         minSdk = libs.versions.android.minSdk.get().toInt()
@@ -145,13 +152,13 @@ mavenPublishing {
         signAllPublications()
     }
 
-    coordinates(group.toString(), "datetime-format", version.toString())
+    coordinates(group.toString(), "format-datetime", version.toString())
 
     pom {
-        name = "DateTime Format Multiplatform"
+        name = "Aughtone Format Multiplatform - Datetime"
         description = "A library."
         inceptionYear = "2025"
-        url = "https://github.com/aughtone/datetime-format"
+        url = "https://github.com/aughtone/aughtone-format"
         licenses {
             license {
                 name = "The Apache License, Version 2.0"
@@ -167,9 +174,9 @@ mavenPublishing {
             }
         }
         scm {
-            url = "https://github.com/aughtone/datetime-format"
-            connection = "https://github.com/aughtone/datetime-format.git"
-            developerConnection = "git@github.com:aughtone/datetime-format.git"
+            url = "https://github.com/aughtone/aughtone-format"
+            connection = "https://github.com/aughtone/aughtone-format.git"
+            developerConnection = "git@github.com:aughtone/aughtone-format.git"
         }
     }
 }
