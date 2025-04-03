@@ -29,7 +29,7 @@ object MultiplatformPostFormatter {
     ): String? {
         val offset: UtcOffset = timeZone.offsetAt(instant)
         return when (timeStyle) {
-            DateTimeStyle.LONG -> {
+            DateTimeStyle.Long -> {
 
                 "$formatedTime ${
                     TimeZoneAbbreviationLookup.getTimeZoneAbbreviation(
@@ -39,7 +39,7 @@ object MultiplatformPostFormatter {
                 }"
             }
 
-            DateTimeStyle.FULL -> {
+            DateTimeStyle.Full -> {
                 "$formatedTime ${
                     TimeZoneAbbreviationLookup.getTimeZoneFullName(
                         timeZone = timeZone,

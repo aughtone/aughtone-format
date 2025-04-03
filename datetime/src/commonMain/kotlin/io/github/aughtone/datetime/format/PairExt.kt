@@ -15,8 +15,8 @@ import kotlinx.datetime.TimeZone
  *
  * If either the first or second element of the Pair is null, it is treated as absent when formatting.
  *
- * @param dateStyle The desired style for formatting the date component. Defaults to [DateTimeStyle.SHORT].
- * @param timeStyle The desired style for formatting the time component. Defaults to [DateTimeStyle.SHORT].
+ * @param dateStyle The desired style for formatting the date component. Defaults to [DateTimeStyle.Short].
+ * @param timeStyle The desired style for formatting the time component. Defaults to [DateTimeStyle.Short].
  * @param locale The locale to use for formatting. Defaults to the current locale ([Locale.current]).
  * @param timeZone The time zone to use for formatting. Defaults to the system's default time zone ([TimeZone.currentSystemDefault()]).
  * @return A formatted string representing the date and time of the pair of milliseconds or an empty string if both are null.
@@ -31,8 +31,8 @@ import kotlinx.datetime.TimeZone
  *     val formattedDateTime2 = epochMillisPair2.formatAsDateTime()
  */
 fun Pair<Long?, Long?>.formatAsDateTime(
-    dateStyle: DateTimeStyle = DateTimeStyle.SHORT,
-    timeStyle: DateTimeStyle = DateTimeStyle.SHORT,
+    dateStyle: DateTimeStyle = DateTimeStyle.Short,
+    timeStyle: DateTimeStyle = DateTimeStyle.Short,
     locale: Locale = Locale.current,
     timeZone: TimeZone = TimeZone.currentSystemDefault(),
     placeholder: String = "?",
@@ -55,14 +55,14 @@ fun Pair<Long?, Long?>.formatAsDateTime(
  * where [start] and [end] are the formatted instants.
  *
  * @receiver [Pair] The pair of instants to format. If one of the instants is null, it will be ignored.
- * @param dateStyle [DateTimeStyle] The date style to use. Defaults to [DateTimeStyle.SHORT].
- * @param timeStyle [DateTimeStyle] The time style to use. Defaults to [DateTimeStyle.SHORT].
+ * @param dateStyle [DateTimeStyle] The date style to use. Defaults to [DateTimeStyle.Short].
+ * @param timeStyle [DateTimeStyle] The time style to use. Defaults to [DateTimeStyle.Short].
  * @param locale [Locale] The locale to use. Defaults to [Locale.current].
  * @param timeZone [TimeZone] The time zone to use. Defaults to [TimeZone.currentSystemDefault].
  */
 fun Pair<Instant?, Instant?>.format(
-    dateStyle: DateTimeStyle = DateTimeStyle.SHORT,
-    timeStyle: DateTimeStyle = DateTimeStyle.SHORT,
+    dateStyle: DateTimeStyle = DateTimeStyle.Short,
+    timeStyle: DateTimeStyle = DateTimeStyle.Short,
     locale: Locale = Locale.current,
     timeZone: TimeZone = TimeZone.currentSystemDefault(),
     placeholder: String = "?",

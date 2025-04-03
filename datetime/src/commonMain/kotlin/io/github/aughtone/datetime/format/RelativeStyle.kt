@@ -5,9 +5,9 @@ package io.github.aughtone.datetime.format
  *
  * The value can be one of the following:
  *```
- * [NONE]: No style - Empty output.
- * [SHORT]: Short text style, typically numeric. For example, the format might be '5d'.
- * [LONG]: Long text style, with lots of detail. For example, the format might be '5 days'.
+ * [None]: No style - Empty output.
+ * [Short]: Short text style, typically numeric. For example, the format might be '5d'.
+ * [Long]: Long text style, with lots of detail. For example, the format might be '5 days'.
  *```
  */
 enum class RelativeStyle {
@@ -15,15 +15,15 @@ enum class RelativeStyle {
      * Short text style, typically numeric.
      * For example, the format might be '5d'.
      */
-    SHORT,
+    Short,
 
     /**
      * Long text style, with lots of detail.
      * For example, the format might be '5 days'.
      * */
-    LONG,
+    Long,
 
     /** No style - Empty output */
-    NONE,
+    None,
 
 }

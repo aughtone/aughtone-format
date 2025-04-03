@@ -20,8 +20,8 @@ class InstantExtTest {
         assertEquals(
             expected = "2022-01-01 12:00 p.m.",
             actual = instant1.format(
-                dateStyle = DateTimeStyle.SHORT,
-                timeStyle = DateTimeStyle.SHORT,
+                dateStyle = DateTimeStyle.Short,
+                timeStyle = DateTimeStyle.Short,
                 locale = Locale("en-CA"),
                 timeZone = testTimeZone
             ),
@@ -31,11 +31,11 @@ class InstantExtTest {
 
     @Test
     fun testRelativeInstant() {
-        assertEquals("5 days", instant1.formatRelative(until = 6.days, relativeTo = instant2, timeStyle = DateTimeStyle.LONG))
-        assertEquals("2022-01-01 7:00:00 a.m.", instant1.formatRelative(until = 5.days, relativeTo = instant2, timeStyle = DateTimeStyle.LONG))
-        assertEquals("2022-01-01 7:00:00 a.m.", instant1.formatRelative(until = 4.days, relativeTo = instant2, timeStyle = DateTimeStyle.LONG))
-        assertEquals("7:00:00 a.m.", instant1.formatRelative(until = 4.days, relativeTo = instant2, timeStyle = DateTimeStyle.LONG, dateStyle = DateTimeStyle.NONE))
-        assertEquals("5d", instant1.formatRelative(until = 6.days, relativeTo = instant2, relativeStyle = RelativeStyle.SHORT))
+        assertEquals("5 days", instant1.formatRelative(until = 6.days, relativeTo = instant2, timeStyle = DateTimeStyle.Long))
+        assertEquals("2022-01-01 7:00:00 a.m.", instant1.formatRelative(until = 5.days, relativeTo = instant2, timeStyle = DateTimeStyle.Long))
+        assertEquals("2022-01-01 7:00:00 a.m.", instant1.formatRelative(until = 4.days, relativeTo = instant2, timeStyle = DateTimeStyle.Long))
+        assertEquals("7:00:00 a.m.", instant1.formatRelative(until = 4.days, relativeTo = instant2, timeStyle = DateTimeStyle.Long, dateStyle = DateTimeStyle.None))
+        assertEquals("5d", instant1.formatRelative(until = 6.days, relativeTo = instant2, relativeStyle = RelativeStyle.Short))
 
     }
 
