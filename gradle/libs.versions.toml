@@ -16,7 +16,7 @@ rules = "1.6.1"
 runner = "1.6.2"
 vanniktech = "0.30.0"
 androidx-startup = "1.2.0"
-datetime-format = "1.0.0-alpha1"
+human-readable = "1.11.0"
 
 [libraries]
 androidx-rules = { module = "androidx.test:rules", version.ref = "rules" }
@@ -27,7 +27,8 @@ kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.
 kotlin-serialization = { module = "org.jetbrains.kotlin:kotlin-serialization", version.ref = "kotlinx-serialization" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
 androidx-startup-runtime  = { module = "androidx.startup:startup-runtime", version.ref = "androidx-startup" }
-datetime-format = { module = "io.github.aughtone:datetime-format", version.ref = "datetime-format" }
+
+jacobras-human-readable = { module = "nl.jacobras:Human-Readable", version.ref = "human-readable" }
 
 
 [plugins]

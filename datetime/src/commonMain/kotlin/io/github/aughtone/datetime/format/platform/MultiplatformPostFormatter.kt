@@ -13,9 +13,9 @@ import kotlinx.datetime.offsetAt
  * it is needed to hande some special cases.
  *
  * The Multiplatform makes some things impossible to do in formatting, because the formatting
- * required knowledge of the datatime being formatted to work.
+ * requires knowledge of the datetime being formatted in order to work.
  *
- * Some good examples of that are the Era, which needs to know if the formatted date is BC or AD.
+ * Some good examples of that are the Era, which needs to know if the formatted date is BCE or CE.
  * and the TimeZone in a format which people generally ready, which also needs to know what the date
  * is so that it can switch from standard to daylight savings time at certain times of year.
  */
