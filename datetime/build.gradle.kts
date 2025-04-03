@@ -1,5 +1,4 @@
 import com.vanniktech.maven.publish.SonatypeHost
-import org.gradle.kotlin.dsl.assign
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
@@ -59,6 +58,7 @@ kotlin {
         iosX64(),
         iosArm64(),
         iosSimulatorArm64()
+    //noinspection WrongGradleMethod
     ).forEach { iosTarget ->
         iosTarget.binaries.framework {
             baseName = "FormatDatetimeKit"
@@ -93,7 +93,7 @@ kotlin {
                 // XXX This might require additional libraries if you enable WASM or JS.
                 //  See: https://klibs.io/project/Kotlin/kotlinx-datetime#using-in-your-projects
                 api(libs.kotlinx.datetime)
-//                api(libs.kotlinx.coroutines.core)
+                implementation(libs.jacobras.human.readable)
             }
         }
         val commonTest by getting {
