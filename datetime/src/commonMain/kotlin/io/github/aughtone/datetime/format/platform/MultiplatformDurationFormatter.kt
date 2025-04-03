@@ -5,9 +5,7 @@ import io.github.aughtone.datetime.format.RelativeTime
 import io.github.aughtone.datetime.format.format
 import io.github.aughtone.datetime.format.resources.Resources
 import nl.jacobras.humanreadable.HumanReadable
-import kotlin.math.roundToInt
 import kotlin.time.Duration
-import kotlin.time.DurationUnit
 
 object MultiplatformDurationFormatter {
     fun formatRelative(
@@ -15,17 +13,17 @@ object MultiplatformDurationFormatter {
         style: RelativeStyle,
         relativeTime: RelativeTime,
     ): String = when (style) {
-        RelativeStyle.SHORT -> formatRelativeShort(
+        RelativeStyle.Short -> formatRelativeShort(
             duration = duration,
             relativeTime = relativeTime
         )
 
-        RelativeStyle.LONG -> formatRelativeLong(
+        RelativeStyle.Long -> formatRelativeLong(
             duration = duration,
             relativeTime = relativeTime
         )
 
-        RelativeStyle.NONE -> ""
+        RelativeStyle.None -> ""
     }
 }
 

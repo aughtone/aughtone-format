@@ -30,7 +30,7 @@ fun LocalTime.format(
     instant = atDate(Clock.System.todayIn(timeZone = timeZone)).toInstant(timeZone),
     formatedTime = MultiplatformDateFormatter.formatDateTime(
         localDateTime = atDate(Clock.System.todayIn(timeZone = timeZone)),
-        dateStyle = DateTimeStyle.NONE,
+        dateStyle = DateTimeStyle.None,
         timeStyle = timeStyle,
         locale.toLanguageTag(),
         timeZone = timeZone,

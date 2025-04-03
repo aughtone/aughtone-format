@@ -17,8 +17,8 @@ class DateTimeFormatExtTest {
         assertEquals(
             expected = "2022-01-01 12:00 p.m.",
             actual = dateTime.format(
-                dateStyle = DateTimeStyle.SHORT,
-                timeStyle = DateTimeStyle.SHORT,
+                dateStyle = DateTimeStyle.Short,
+                timeStyle = DateTimeStyle.Short,
                 locale = Locale("en-CA"),
                 timeZone = testTimeZone
             ),
@@ -32,8 +32,8 @@ class DateTimeFormatExtTest {
             message = "Formatting short date time",
             expected = "1/1/2022 12:00 PM",
             actual = dateTime.format(
-                dateStyle = DateTimeStyle.SHORT,
-                timeStyle = DateTimeStyle.SHORT,
+                dateStyle = DateTimeStyle.Short,
+                timeStyle = DateTimeStyle.Short,
                 locale = Locale("en-US"),
                 timeZone = testTimeZone
             )

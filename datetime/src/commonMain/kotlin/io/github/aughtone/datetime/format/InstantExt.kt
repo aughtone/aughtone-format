@@ -12,8 +12,8 @@ import kotlin.time.Duration.Companion.days
 
 
 fun Instant.format(
-    dateStyle: DateTimeStyle = DateTimeStyle.SHORT,
-    timeStyle: DateTimeStyle = DateTimeStyle.LONG,
+    dateStyle: DateTimeStyle = DateTimeStyle.Short,
+    timeStyle: DateTimeStyle = DateTimeStyle.Long,
     locale: Locale = Locale.current,
     timeZone: TimeZone = TimeZone.currentSystemDefault(),
     is24HourFormat:Boolean = is24HourFormat(locale = locale)
@@ -29,9 +29,9 @@ fun Instant.format(
 
 fun Instant.formatRelative(
     until: Duration = 5.days,
-    dateStyle: DateTimeStyle = DateTimeStyle.SHORT,
-    timeStyle: DateTimeStyle = DateTimeStyle.SHORT,
-    relativeStyle: RelativeStyle = RelativeStyle.LONG,
+    dateStyle: DateTimeStyle = DateTimeStyle.Short,
+    timeStyle: DateTimeStyle = DateTimeStyle.Short,
+    relativeStyle: RelativeStyle = RelativeStyle.Long,
     relativeTime: RelativeTime = RelativeTime.Present,
     locale: Locale = Locale.current,
     timeZone: TimeZone = TimeZone.currentSystemDefault(),

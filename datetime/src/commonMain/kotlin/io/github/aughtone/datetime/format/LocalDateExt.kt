@@ -23,7 +23,7 @@ fun LocalDate.format(
 ): String = MultiplatformDateFormatter.formatDateTime(
     localDateTime = atStartOfDayIn(timeZone = timeZone).toLocalDateTime(timeZone = timeZone),
     dateStyle = dateStyle,
-    timeStyle = DateTimeStyle.NONE,
+    timeStyle = DateTimeStyle.None,
     languageTag = locale.toLanguageTag(),
     timeZone = timeZone,
     twentyFourHour = is24HourFormat

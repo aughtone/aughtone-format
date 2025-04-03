@@ -26,8 +26,8 @@ class PairExtTest {
         assertEquals(
             expected = "2022-01-01 12:00 p.m. - 2022-01-06 12:00 p.m.",
             actual = testPair1.format(
-                dateStyle = DateTimeStyle.SHORT,
-                timeStyle = DateTimeStyle.SHORT,
+                dateStyle = DateTimeStyle.Short,
+                timeStyle = DateTimeStyle.Short,
                 locale = Locale("en-CA"),
                 timeZone = testTimeZone
             ),
@@ -36,8 +36,8 @@ class PairExtTest {
         assertEquals(
             expected = "2022-01-01 12:00 p.m. - 2022-01-06 12:00 p.m.",
             actual = testPair2.formatAsDateTime(
-                dateStyle = DateTimeStyle.SHORT,
-                timeStyle = DateTimeStyle.SHORT,
+                dateStyle = DateTimeStyle.Short,
+                timeStyle = DateTimeStyle.Short,
                 locale = Locale("en-CA"),
                 timeZone = testTimeZone
             ),
@@ -49,8 +49,8 @@ class PairExtTest {
         assertEquals(
             expected = "2022-01-01 12:00 p.m. - ?",
             actual = testPair3.format(
-                dateStyle = DateTimeStyle.SHORT,
-                timeStyle = DateTimeStyle.SHORT,
+                dateStyle = DateTimeStyle.Short,
+                timeStyle = DateTimeStyle.Short,
                 locale = Locale("en-CA"),
                 timeZone = testTimeZone
             ),
@@ -59,8 +59,8 @@ class PairExtTest {
         assertEquals(
             expected = "? - 2022-01-06 12:00 p.m.",
             actual = testPair4.format(
-                dateStyle = DateTimeStyle.SHORT,
-                timeStyle = DateTimeStyle.SHORT,
+                dateStyle = DateTimeStyle.Short,
+                timeStyle = DateTimeStyle.Short,
                 locale = Locale("en-CA"),
                 timeZone = testTimeZone
             ),
@@ -72,8 +72,8 @@ class PairExtTest {
         assertEquals(
             expected = "? - ?",
             actual = testPair0.format(
-                dateStyle = DateTimeStyle.SHORT,
-                timeStyle = DateTimeStyle.SHORT,
+                dateStyle = DateTimeStyle.Short,
+                timeStyle = DateTimeStyle.Short,
                 locale = Locale("en-CA"),
                 timeZone = testTimeZone
             ),
@@ -85,8 +85,8 @@ class PairExtTest {
         assertEquals(
             expected = "2022-01-01 12:00 p.m. - #",
             actual = testPair3.format(
-                dateStyle = DateTimeStyle.SHORT,
-                timeStyle = DateTimeStyle.SHORT,
+                dateStyle = DateTimeStyle.Short,
+                timeStyle = DateTimeStyle.Short,
                 locale = Locale("en-CA"),
                 timeZone = testTimeZone,
                 placeholder = "#"
@@ -96,8 +96,8 @@ class PairExtTest {
         assertEquals(
             expected = "<missing> - 2022-01-06 12:00 p.m.",
             actual = testPair4.format(
-                dateStyle = DateTimeStyle.SHORT,
-                timeStyle = DateTimeStyle.SHORT,
+                dateStyle = DateTimeStyle.Short,
+                timeStyle = DateTimeStyle.Short,
                 locale = Locale("en-CA"),
                 timeZone = testTimeZone,
                 placeholder = "<missing>"
