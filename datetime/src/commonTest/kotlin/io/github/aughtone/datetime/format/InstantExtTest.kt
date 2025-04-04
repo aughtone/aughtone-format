@@ -6,6 +6,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.fail
 import kotlin.time.Duration.Companion.days
 
 class InstantExtTest {
@@ -31,12 +32,78 @@ class InstantExtTest {
 
     @Test
     fun testRelativeInstant() {
-        assertEquals("5 days", instant1.formatRelative(until = 6.days, relativeTo = instant2, timeStyle = DateTimeStyle.Long))
-        assertEquals("2022-01-01 7:00:00 a.m.", instant1.formatRelative(until = 5.days, relativeTo = instant2, timeStyle = DateTimeStyle.Long))
-        assertEquals("2022-01-01 7:00:00 a.m.", instant1.formatRelative(until = 4.days, relativeTo = instant2, timeStyle = DateTimeStyle.Long))
-        assertEquals("7:00:00 a.m.", instant1.formatRelative(until = 4.days, relativeTo = instant2, timeStyle = DateTimeStyle.Long, dateStyle = DateTimeStyle.None))
-        assertEquals("5d", instant1.formatRelative(until = 6.days, relativeTo = instant2, relativeStyle = RelativeStyle.Short))
+        assertEquals(
+            "5 days",
+            instant1.formatRelative(
+                until = 6.days,
+                relativeTo = instant2,
+                timeStyle = DateTimeStyle.Long
+            )
+        )
+        assertEquals(
+            "2022-01-01 7:00:00 a.m.",
+            instant1.formatRelative(
+                until = 5.days,
+                relativeTo = instant2,
+                timeStyle = DateTimeStyle.Long
+            )
+        )
+        assertEquals(
+            "2022-01-01 7:00:00 a.m.",
+            instant1.formatRelative(
+                until = 4.days,
+                relativeTo = instant2,
+                timeStyle = DateTimeStyle.Long
+            )
+        )
+        assertEquals(
+            "7:00:00 a.m.",
+            instant1.formatRelative(
+                until = 4.days,
+                relativeTo = instant2,
+                timeStyle = DateTimeStyle.Long,
+                dateStyle = DateTimeStyle.None
+            )
+        )
+        assertEquals(
+            "5d",
+            instant1.formatRelative(
+                until = 6.days,
+                relativeTo = instant2,
+                relativeStyle = RelativeStyle.Short
+            )
+        )
 
     }
 
+    @Test
+    fun testRelativeInstantOutOfRange() {
+        try {
+            instant1.formatRelative(relativeTo = instant2, relativeTime = RelativeTime.Future)
+            fail("Should have thrown an exception")
+        } catch (e: IllegalArgumentException) {
+            assertEquals(
+                "For a relativeTime of Future the relativeTo must be before this.",
+                e.message
+            )
+        }
+
+        try {
+            instant2.formatRelative(relativeTo = instant1, relativeTime = RelativeTime.Past)
+            fail("Should have thrown an exception")
+        } catch (e: IllegalArgumentException) {
+            assertEquals("For a relativeTime of Past the relativeTo must be after this.", e.message)
+        }
+    }
+
+    @Test
+    fun testRelativeInstantAutoSelect() {
+
+        assertEquals(
+            "2022-01-01 7:00 a.m.",
+            instant1.formatRelative(until = 6.days, relativeTo = instant2)
+        )
+        assertEquals("5d", instant2.formatRelative(until = 6.days, relativeTo = instant1))
+
+    }
 }
