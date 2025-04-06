@@ -9,6 +9,8 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.days
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
 
 fun Instant.format(
@@ -119,4 +121,28 @@ fun Instant.formatRelative(
             timeZone = timeZone
         )
     }
+}
+
+/**
+ * Formats the remaining time between a given timestamp and an [Instant], relative to a provided duration.
+ *
+ * This function calculates the difference between the [Instant]'s epoch milliseconds and a [timestamp],
+ * subtracting this difference from a given [duration]. The result is coerced to ensure it falls within the range
+ * of 0 to the total milliseconds of the [duration]. Finally, it converts this remaining time back into a
+ * [Duration] and formats it as a string in the specified [unit] with no decimal places.
+ *
+ * @param duration The total duration representing the initial time frame.
+ * @param timestamp The reference timestamp in milliseconds against which the [Instant] is compared.
+ * @param unit The unit in which the remaining time should be expressed (default: [DurationUnit.HOURS]).
+ * @return A string representing the remaining time in the specified unit, rounded down to the nearest whole number.
+ */
+fun Instant.formatRelativeRemainingIn(
+    duration: Duration,
+    timestamp: Long,
+    unit: DurationUnit = DurationUnit.HOURS
+): String {
+    return (duration.inWholeMilliseconds - (toEpochMilliseconds() - timestamp)).coerceIn(
+        minimumValue = 0L,
+        maximumValue = duration.inWholeMilliseconds
+    ).toDuration(DurationUnit.MILLISECONDS).toString(unit = unit, decimals = 0)
 }

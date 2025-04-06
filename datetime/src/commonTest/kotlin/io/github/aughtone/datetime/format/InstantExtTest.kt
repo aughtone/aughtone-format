@@ -8,6 +8,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.fail
 import kotlin.time.Duration.Companion.days
+import kotlin.time.DurationUnit
 
 class InstantExtTest {
 
@@ -105,5 +106,12 @@ class InstantExtTest {
         )
         assertEquals("5d", instant2.formatRelative(until = 6.days, relativeTo = instant1))
 
+    }
+
+
+    @Test
+    fun `test formatRelativeRemainingIn`() {
+        assertEquals("10d",instant1.formatRelativeRemainingIn(duration = 10.days, timestamp = instant2.toEpochMilliseconds(), unit = DurationUnit.DAYS))
+        assertEquals("120h",instant2.formatRelativeRemainingIn(duration = 10.days, timestamp = instant1.toEpochMilliseconds()))
     }
 }
