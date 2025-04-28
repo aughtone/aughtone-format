@@ -16,9 +16,8 @@ This library for set up for [Kotlin Multiplatform](https://www.jetbrains.com/kot
 
 Feel free to fork it and make improvements, I'll keep up as best I can.
 
-# Features
-
-* Go through it all
+_Note: this library currently uses nl.jacobras:Human-Readable for relative time, however it is not 
+all tha compatible and as time goes on, we expect to replace it._
 
 # Installation
 ![Maven Central Version](https://img.shields.io/maven-central/v/io.github.aughtone/aughtone-format?style=flat)
@@ -28,12 +27,41 @@ Feel free to fork it and make improvements, I'll keep up as best I can.
 implementation("io.github.aughtone:format-datetime:${version}")
 ```
 
-# Quick Start
+# Usage & Examples
 
-You can use a Coordinate object, or a pair of Double values to generate a geohash from.
+#### String Formatting
+
+This function is meant as a replacement for the string format function in java.
+
+_The intention is to improve string formatting so that its more robust, so you should 
+consider it unstable._
+
 ```kotlin
-val location: Coordinate = Coordinate(latitude = 20.05, longitude = -15.5)
-val geohash = location.toGeohash(4)
+"Hello %1, today is %2".format("World", "Monday") // Returns "Hello World, today is Monday"
+"Value: %1, Value2: %2".format(10, "test") // Returns "Value: 10, Value2: test"
+```
+
+#### Date & Time Formatting
+
+Date and time formatting are what this library is all about and there are several ways to do it.  
+
+```kotlin
+// 1. Basic Usage with Defaults (Short Date and Time) in the local time zone.
+val now = Clock.System.now().toLocalDateTime()
+
+val formattedNow = now.format(DateTimeStyle.SHORT, DateTimeStyle.SHORT)
+println("Now (Short Date & Time): $formattedNow")
+// example output : Now (Short Date & Time): 10/26/24, 8:56 PM
+
+// 2. Medium Date and Time
+val mediumFormatted = now.format(DateTimeStyle.MEDIUM, DateTimeStyle.MEDIUM)
+println("Now (Medium Date & Time): $mediumFormatted")
+// example output : Now (Medium Date & Time): Oct 26, 2024, 8:56:56 PM
+
+// 3. Long Date and Time
+val longFormatted = now.format(DateTimeStyle.LONG, DateTimeStyle.LONG)
+println("Now (Long Date & Time): $longFormatted")
+// example output : Now (Long Date & Time): October 26, 2024 at 8:56:56 PM GMT+1
 ```
 
 # Sources

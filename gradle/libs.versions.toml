@@ -1,20 +1,21 @@
 [versions]
 applicationId = "io.github.aughtone.format.datetime"
 groupName = "io.github.aughtone"
-versionName = "1.0.0-alpha2"
+versionName = "1.0.0"
+versionNameSiffix = "-alpha3"
 android-minSdk = "24" ### this will impact all projects that import the library.
-android-compileSdk = "35"
+android-compileSdk = "36"
 
-agp = "8.9.1"
-kotlin = "2.1.10"
+agp = "8.9.2"
+kotlin = "2.1.20"
 compose-multiplatform = "1.7.3"
 kotlinx-coroutines = "1.10.1"
-kotlinx-serialization = "1.8.0" # latest is "2.1.10", but be careful changing this, the versions are very sensitive in KMP. "1.8.0" was the last one that was known to work.
+kotlinx-serialization = "1.8.1" # latest is "2.1.10", but be careful changing this, the versions are very sensitive in KMP. "1.8.0" was the last one that was known to work.
 kotlinx-datetime = "0.6.2"
 
 rules = "1.6.1"
 runner = "1.6.2"
-vanniktech = "0.30.0"
+vanniktech = "0.31.0"
 androidx-startup = "1.2.0"
 human-readable = "1.11.0"
 
@@ -24,7 +25,7 @@ androidx-runner = { module = "androidx.test:runner", version.ref = "runner" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
-kotlin-serialization = { module = "org.jetbrains.kotlin:kotlin-serialization", version.ref = "kotlinx-serialization" }
+#kotlin-serialization = { module = "org.jetbrains.kotlin:kotlin-serialization", version.ref = "kotlinx-serialization" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
 androidx-startup-runtime  = { module = "androidx.startup:startup-runtime", version.ref = "androidx-startup" }
 

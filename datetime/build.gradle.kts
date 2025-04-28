@@ -28,11 +28,11 @@ kotlin {
     }
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs {
-        moduleName = "aughtone-format-datetime"
         browser {
             val rootDirPath = project.rootDir.path
             val projectDirPath = project.projectDir.path
             commonWebpackConfig {
+                outputModuleName = "aughtone-format-datetime"
                 outputFileName = "aughtone-format-datetime.js"
                 devServer = (devServer ?: KotlinWebpackConfig.DevServer()).apply {
                     static = (static ?: mutableListOf()).apply {
@@ -63,6 +63,14 @@ kotlin {
         iosTarget.binaries.framework {
             baseName = "FormatDatetimeKit"
             isStatic = true
+            binaryOption(
+                "bundleId",
+                libs.versions.applicationId.get().toString()
+            ) //"app.occurrence"
+            binaryOption(
+                "bundleShortVersionString",
+                libs.versions.versionName.get().toString()
+            ) //"1.0.0"
         }
     }
 //    linuxX64()
@@ -89,7 +97,7 @@ kotlin {
 //                implementation(compose.material3)
                 implementation(compose.ui)
                 implementation(compose.components.resources)
-                api(libs.kotlin.serialization)
+                api(libs.kotlinx.serialization.json)
                 // XXX This might require additional libraries if you enable WASM or JS.
                 //  See: https://klibs.io/project/Kotlin/kotlinx-datetime#using-in-your-projects
                 api(libs.kotlinx.datetime)
