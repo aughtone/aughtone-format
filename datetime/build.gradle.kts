@@ -15,7 +15,7 @@ plugins {
 }
 
 group = "io.github.aughtone"
-version = "${libs.versions.versionName.get().toString()}${libs.versions.versionNameSiffix.get().toString()}"
+version = "${libs.versions.versionName.get().toString()}" // ${libs.versions.versionNameSiffix.get().toString()}
 
 kotlin {
     jvm()
