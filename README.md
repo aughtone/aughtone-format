@@ -33,7 +33,7 @@ implementation("io.github.aughtone:format-datetime:${version}")
 
 This function is meant as a replacement for the string format function in java.
 
-_The intention is to improve string formatting so that its more robust, so you should 
+_The intention is to improve string formatting so that its more robust, and it will probably move to a different library, so you should 
 consider it unstable._
 
 ```kotlin
