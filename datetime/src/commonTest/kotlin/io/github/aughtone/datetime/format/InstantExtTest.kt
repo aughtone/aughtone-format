@@ -4,6 +4,7 @@ import androidx.compose.ui.text.intl.Locale
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
+import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.fail
@@ -31,6 +32,7 @@ class InstantExtTest {
         )
     }
 
+    @Ignore // test wont run outside of android, we are going to remove the offending library.
     @Test
     fun testRelativeInstant() {
         assertEquals(
@@ -97,6 +99,7 @@ class InstantExtTest {
         }
     }
 
+    @Ignore // test wont run outside of android, we are going to remove the offending library.
     @Test
     fun testRelativeInstantAutoSelect() {
 
