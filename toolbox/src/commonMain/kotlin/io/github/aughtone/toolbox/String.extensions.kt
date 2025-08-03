@@ -14,7 +14,7 @@ package io.github.aughtone.toolbox
  * "Value: %1, Value2: %2".format(10, "test") // Returns "Value: 10, Value2: test"
  * ```
  */
-internal fun String.format(vararg args: Any): String {
+fun String.format(vararg args: Any): String {
     var newString = this
     args.forEachIndexed { index, arg ->
         newString = newString.replace("%${index+1}", "$arg")
