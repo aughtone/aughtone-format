@@ -31,8 +31,8 @@ kotlin {
             val rootDirPath = project.rootDir.path
             val projectDirPath = project.projectDir.path
             commonWebpackConfig {
-                outputModuleName = "aughtone-format-datetime"
-                outputFileName = "aughtone-format-datetime.js"
+                outputModuleName = "aughtone-format-toolbox"
+                outputFileName = "aughtone-format-toolbox.js"
                 devServer = (devServer ?: KotlinWebpackConfig.DevServer()).apply {
                     static = (static ?: mutableListOf()).apply {
                         // Serve sources to debug inside browser
@@ -60,7 +60,7 @@ kotlin {
     //noinspection WrongGradleMethod
     ).forEach { iosTarget ->
         iosTarget.binaries.framework {
-            baseName = "FormatDatetimeKit"
+            baseName = "FormatToolboxKit"
             isStatic = true
             binaryOption(
                 "bundleId",
@@ -101,7 +101,6 @@ kotlin {
                 //  See: https://klibs.io/project/Kotlin/kotlinx-datetime#using-in-your-projects
                 api(libs.kotlinx.datetime)
                 implementation(libs.jacobras.human.readable)
-                api(project(":toolbox"))
             }
         }
         val commonTest by getting {
@@ -161,10 +160,10 @@ mavenPublishing {
         signAllPublications()
     }
 
-    coordinates(group.toString(), "format-datetime", version.toString())
+    coordinates(group.toString(), "format-toolbox", version.toString())
 
     pom {
-        name = "Aughtone Format Multiplatform - Datetime"
+        name = "Aughtone Format Multiplatform - Toolbox"
         description = "A library."
         inceptionYear = "2025"
         url = "https://github.com/aughtone/aughtone-format"

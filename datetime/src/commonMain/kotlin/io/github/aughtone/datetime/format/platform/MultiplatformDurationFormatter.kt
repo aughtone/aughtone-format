@@ -2,7 +2,7 @@ package io.github.aughtone.datetime.format.platform
 
 import io.github.aughtone.datetime.format.RelativeStyle
 import io.github.aughtone.datetime.format.RelativeTime
-import io.github.aughtone.datetime.format.format
+import io.github.aughtone.toolbox.format
 import io.github.aughtone.datetime.format.resources.Resources
 import nl.jacobras.humanreadable.HumanReadable
 import kotlin.time.Duration
