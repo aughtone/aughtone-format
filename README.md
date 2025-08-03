@@ -22,6 +22,12 @@ all tha compatible and as time goes on, we expect to replace it._
 # Installation
 ![Maven Central Version](https://img.shields.io/maven-central/v/io.github.aughtone/format-datetime?style=flat)
 
+**WARNING:** versions of this library in the _1.0.2+_ range are using the `kotlinx-datetime:0.7.1-0.6.x-compat` dependency, 
+because the switch over to using `kotlin.time.Instant` has not gone very smoothly. 
+
+When this library switches over to using `kotlin.time.Instant` in `kotlinx-datetime:0.7.*`, the major 
+version of this library will change, signaling a breaking change as per standard [semantic versioning](https://semver.org/) practices. 
+
 ## Datetime Formatting
 ```gradle
 implementation("io.github.aughtone:format-datetime:${version}")
