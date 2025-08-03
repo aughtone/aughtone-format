@@ -25,6 +25,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "datetime-format"
+rootProject.name = "AOFormat"
 include(":datetime")
+include(":toolbox")
 //include(":datetime-format-platform")

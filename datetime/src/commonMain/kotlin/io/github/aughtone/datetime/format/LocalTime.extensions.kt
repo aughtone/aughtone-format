@@ -8,8 +8,10 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atDate
+import kotlinx.datetime.toDeprecatedInstant
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.todayIn
+import kotlin.time.ExperimentalTime
 
 /**
  * @param timeStyle [DateTimeStyle] The style to use for the time.
@@ -19,6 +21,7 @@ import kotlinx.datetime.todayIn
  * @param useNative [Boolean] Whether to use the underlying platform formatting or not. Defaults to true.
  * @return [String] The formatted time.
  */
+@OptIn(ExperimentalTime::class)
 fun LocalTime.format(
     timeStyle: DateTimeStyle,
     locale: Locale = Locale.current,
@@ -27,7 +30,7 @@ fun LocalTime.format(
 ): String = MultiplatformPostFormatter.postFormatTime(
     timeStyle = timeStyle,
     timeZone = timeZone,
-    instant = atDate(Clock.System.todayIn(timeZone = timeZone)).toInstant(timeZone),
+    instant = atDate(Clock.System.todayIn(timeZone = timeZone)).toInstant(timeZone).toDeprecatedInstant(),
     formatedTime = MultiplatformDateFormatter.formatDateTime(
         localDateTime = atDate(Clock.System.todayIn(timeZone = timeZone)),
         dateStyle = DateTimeStyle.None,
