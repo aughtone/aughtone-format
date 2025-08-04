@@ -64,7 +64,7 @@ kotlin {
             isStatic = true
             binaryOption(
                 "bundleId",
-                libs.versions.applicationId.get().toString()
+                "${libs.versions.namespace.get()}.datetime"
             ) //"app.occurrence"
             binaryOption(
                 "bundleShortVersionString",
@@ -136,12 +136,12 @@ kotlin {
 
 compose.resources {
     publicResClass = true
-    packageOfResClass = "${libs.versions.applicationId.get().toString()}.resources"
+    packageOfResClass = "${libs.versions.namespace.get()}.datetime.resources"
     generateResClass = always
 }
 
 android {
-    namespace = libs.versions.applicationId.get().toString()
+    namespace = "${libs.versions.namespace.get()}.datetime"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
     defaultConfig {
         minSdk = libs.versions.android.minSdk.get().toInt()
