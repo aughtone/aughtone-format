@@ -1,9 +1,13 @@
 package io.github.aughtone.toolbox
 
+
+
 /**
  * Formats the string by replacing placeholders with the given arguments.
  *
  * Placeholders are in the format `%1`, `%2`, etc., where the number corresponds to the index of the argument in [args] (starting from 1).
+ *
+ * **Experimental**: This is intended to partly fill the role of the string format functions missing from KMP, that are available in Java/Android.
  *
  * @param args The arguments to replace the placeholders with.
  * @return The formatted string.
@@ -14,6 +18,7 @@ package io.github.aughtone.toolbox
  * "Value: %1, Value2: %2".format(10, "test") // Returns "Value: 10, Value2: test"
  * ```
  */
+@ExperimentalMultiplatform()
 fun String.format(vararg args: Any): String {
     var newString = this
     args.forEachIndexed { index, arg ->
