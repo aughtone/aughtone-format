@@ -3,6 +3,7 @@ package io.github.aughtone.toolbox
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
+@OptIn(ExperimentalMultiplatform::class)
 class StringExtTest {
     @Test
     fun testFormatOneParam() {
@@ -28,6 +29,14 @@ class StringExtTest {
     fun testFormatExtraPlaceholderNotFormatted() {
         assertEquals("hello world car %3", "hello %1 %2 %3".format("world", "car"))
     }
+
+//    Key components of format specifiers (used with String.format() and printf()):
+//    %: Introduces a format specifier.
+//    argument_index$ (optional): Specifies which argument from the list to use (e.g., 1$, 2$).
+//    flags (optional): Characters that modify the output format (e.g., - for left-justification, 0 for zero-padding, , for grouping separators).
+//    width (optional): Minimum number of characters to occupy.
+//    .precision (optional): For floating-point numbers, specifies the number of decimal places; for strings, specifies the maximum number of characters.
+//    conversion (required): A character indicating the data type and how it should be represented (e.g., s for string, d for decimal integer, f for floating-point, t for date/time).
 
     @Test
     fun testObfuscatedFormatDigitsWithOnlyDigits() {
