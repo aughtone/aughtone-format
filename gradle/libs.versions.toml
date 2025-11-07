@@ -6,9 +6,9 @@ versionName = "1.0.2"
 android-minSdk = "24" ### this will impact all projects that import the library.
 android-compileSdk = "36"
 
-agp = "8.12.0"
-kotlin = "2.2.0"
-compose-multiplatform = "1.8.2"
+agp = "8.12.3"
+kotlin = "2.2.20"
+compose-multiplatform = "1.9.0"
 kotlinx-coroutines = "1.10.1"
 kotlinx-serialization = "1.9.0" # latest is "2.1.10", but be careful changing this, the versions are very sensitive in KMP. "1.8.0" was the last one that was known to work.
 kotlinx-datetime = "0.7.1-0.6.x-compat" # "0.7.1"
