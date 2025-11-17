@@ -101,6 +101,7 @@ kotlin {
                 //  See: https://klibs.io/project/Kotlin/kotlinx-datetime#using-in-your-projects
                 api(libs.kotlinx.datetime)
                 implementation(libs.jacobras.human.readable)
+                implementation(libs.aughtone.types)
             }
         }
         val commonTest by getting {

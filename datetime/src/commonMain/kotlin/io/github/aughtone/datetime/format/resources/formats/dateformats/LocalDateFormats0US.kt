@@ -15,7 +15,7 @@ object LocalDateFormats0US : StyledDateTimeFormats<LocalDate> {
         LocalDate.Format {
             monthNumber(Padding.NONE)
             char('/')
-            dayOfMonth(Padding.NONE)
+            day(padding = Padding.NONE)
             char('/')
             year()
         }
@@ -25,7 +25,7 @@ object LocalDateFormats0US : StyledDateTimeFormats<LocalDate> {
             LocalDate.Format {
                 monthName(Resources.getMonthNames(locale = locale, abbreviated = false))
                 char(' ')
-                dayOfMonth()
+                day()
                 chars(", ")
                 year()
             }
@@ -35,7 +35,7 @@ object LocalDateFormats0US : StyledDateTimeFormats<LocalDate> {
         LocalDate.Format {
             monthName(Resources.getMonthNames(locale = locale, abbreviated = false))
             char(' ')
-            dayOfMonth()
+            day()
             chars(", ")
             year()
         }
@@ -47,7 +47,7 @@ object LocalDateFormats0US : StyledDateTimeFormats<LocalDate> {
             chars(", ")
             monthName(Resources.getMonthNames(locale = locale, abbreviated = false))
             char(' ')
-            dayOfMonth()
+            day()
             chars(", ")
             year()
 

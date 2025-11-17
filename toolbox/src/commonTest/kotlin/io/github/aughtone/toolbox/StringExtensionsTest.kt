@@ -4,7 +4,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 @OptIn(ExperimentalMultiplatform::class)
-class StringExtTest {
+class StringExtensionsTest {
     @Test
     fun testFormatOneParam() {
         assertEquals("hello world", "hello %1".format("world"))
