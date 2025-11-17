@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalMultiplatform::class)
+
 package io.github.aughtone.datetime.format.platform
 
 import io.github.aughtone.datetime.format.RelativeStyle
