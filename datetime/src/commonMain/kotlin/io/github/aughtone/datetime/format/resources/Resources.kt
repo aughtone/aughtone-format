@@ -1,107 +1,148 @@
 package io.github.aughtone.datetime.format.resources
 
-import androidx.compose.ui.text.intl.Locale
-import io.github.aughtone.datetime.format.resources.formats.StyledDateTimeFormats
-import io.github.aughtone.datetime.format.resources.formats.dateformats.LocalDateFormatResourceMap
-import io.github.aughtone.datetime.format.resources.formats.timeformats.LocalTimeFormatResourceMap
-import io.github.aughtone.datetime.format.resources.options.clock.ClockHours
-import io.github.aughtone.datetime.format.resources.options.clock.ClockHoursResourceMap
-import io.github.aughtone.datetime.format.resources.strings.dayofweeknames.DayOfWeekNamesResourceMap
-import io.github.aughtone.datetime.format.resources.strings.era.EraNames
-import io.github.aughtone.datetime.format.resources.strings.era.EraNamesResourceMap
-import io.github.aughtone.datetime.format.resources.strings.monthnames.MonthNamesResourceMap
+import io.github.aughtone.datetime.format.DynamicLocalDateFormats
+import io.github.aughtone.datetime.format.DynamicLocalTimeFormats
+import io.github.aughtone.datetime.format.resources.formats.AmPmStrings
+import io.github.aughtone.datetime.format.resources.formats.ClockHoursData
+import io.github.aughtone.datetime.format.resources.formats.localeAmPmStrings
+import io.github.aughtone.datetime.format.resources.formats.localeClockHoursSource
+import io.github.aughtone.datetime.format.resources.formats.localeDayOfWeekNamesSource
+import io.github.aughtone.datetime.format.resources.formats.localeEraNamesSource
+import io.github.aughtone.datetime.format.resources.formats.localeMonthNamesSource
+import io.github.aughtone.datetime.format.resources.options.ClockHours
+import io.github.aughtone.datetime.format.resources.options.ClockType
+import io.github.aughtone.datetime.format.resources.strings.DayOfWeekNamesResource
+import io.github.aughtone.datetime.format.resources.strings.EraNames
+import io.github.aughtone.datetime.format.resources.strings.EraNamesResource
+import io.github.aughtone.datetime.format.resources.strings.MonthNamesResource
 import io.github.aughtone.datetime.format.resources.strings.text.TextResource
 import io.github.aughtone.datetime.format.resources.strings.text.TextResourceMap
+import io.github.aughtone.types.locale.Locale
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
-import kotlinx.datetime.format.DayOfWeekNames
-import kotlinx.datetime.format.MonthNames
+import kotlinx.datetime.format.DateTimeFormat
 
+enum class FormatStyle {
+    SHORT, MEDIUM, LONG, FULL
+}
 
 object Resources {
 
-    fun getTimeFormat(locale: Locale): StyledDateTimeFormats<LocalTime> =
-        ResourceGroups.timeFormats[buildResourceLocaleKey(
-            ResourceGroups.timeFormats,
-            locale.language,
-            locale.region
-        )] ?: LocalTimeFormatResourceMap.default
+    private val defaultLocale = Locale(languageCode = "en", regionCode = "US", displayName = "en-US")
+    private const val defaultFallbackKey = "US"
+    private const val defaultLanguageFallbackKey = "en"
+    private const val defaultTextResourceKey = "en"
+    private const val defaultEraNamesResourceKey = "en"
 
-    fun getDateFormat(locale: Locale): StyledDateTimeFormats<LocalDate> {
-        val key = buildResourceLocaleKey(
-            ResourceGroups.dateFormats,
-            locale.language,
-            locale.region
-        )
-        return ResourceGroups.dateFormats[key] ?: LocalDateFormatResourceMap.default
+    private fun getLanguageRegionKey(locale: Locale): String? {
+        return locale.regionCode?.let { "${locale.languageCode}-$it" }
+    }
+
+    private fun getRegionKey(locale: Locale): String? {
+        return locale.regionCode
+    }
+
+    private fun getLanguageKey(locale: Locale): String? {
+        return locale.languageCode.takeIf { it.isNotEmpty() }
+    }
+
+    fun getDateFormat(locale: Locale, style: FormatStyle): DateTimeFormat<LocalDate> {
+        return when (style) {
+            FormatStyle.SHORT -> DynamicLocalDateFormats.short(locale)
+            FormatStyle.MEDIUM -> DynamicLocalDateFormats.medium(locale)
+            FormatStyle.LONG -> DynamicLocalDateFormats.long(locale)
+            FormatStyle.FULL -> DynamicLocalDateFormats.full(locale)
+        }
+    }
+
+    fun getTimeFormat(locale: Locale, style: FormatStyle): DateTimeFormat<LocalTime> {
+        val clockHours = getClockHours(locale)
+        val use24Hour = clockHours.is24hour
+        return when (style) {
+            FormatStyle.SHORT -> DynamicLocalTimeFormats.short(locale, use24Hour)
+            FormatStyle.MEDIUM -> DynamicLocalTimeFormats.medium(locale, use24Hour)
+            FormatStyle.LONG -> DynamicLocalTimeFormats.long(locale, use24Hour)
+            FormatStyle.FULL -> DynamicLocalTimeFormats.full(locale, use24Hour)
+        }
+    }
+
+    private fun getAmPmStrings(locale: Locale): AmPmStrings {
+        val langRegionKey = getLanguageRegionKey(locale)
+        val regionKey = getRegionKey(locale)
+        val languageKey = getLanguageKey(locale)
+
+        return localeAmPmStrings[langRegionKey]
+            ?: localeAmPmStrings[regionKey]
+            ?: localeAmPmStrings[languageKey]
+            ?: localeAmPmStrings.getValue(defaultFallbackKey)
+    }
+
+    private fun getDayOfWeekNamesResource(locale: Locale): DayOfWeekNamesResource {
+        val langRegionKey = getLanguageRegionKey(locale)
+        val regionKey = getRegionKey(locale)
+        val languageKey = getLanguageKey(locale)
+
+        return localeDayOfWeekNamesSource[langRegionKey]?.value
+            ?: localeDayOfWeekNamesSource[regionKey]?.value
+            ?: localeDayOfWeekNamesSource[languageKey]?.value
+            ?: localeDayOfWeekNamesSource.getValue(defaultLanguageFallbackKey).value
+    }
+
+    private fun getMonthNamesResource(locale: Locale): MonthNamesResource {
+        val langRegionKey = getLanguageRegionKey(locale)
+        val regionKey = getRegionKey(locale)
+        val languageKey = getLanguageKey(locale)
+
+        return localeMonthNamesSource[langRegionKey]?.value
+            ?: localeMonthNamesSource[regionKey]?.value
+            ?: localeMonthNamesSource[languageKey]?.value
+            ?: localeMonthNamesSource.getValue(defaultLanguageFallbackKey).value
+    }
+
+    private fun getTextResource(locale: Locale): TextResource {
+        val langRegionKey = getLanguageRegionKey(locale)
+        val regionKey = getRegionKey(locale)
+        val languageKey = getLanguageKey(locale)
+
+        return TextResourceMap.map[langRegionKey]
+            ?: TextResourceMap.map[regionKey]
+            ?: TextResourceMap.map[languageKey]
+            ?: TextResourceMap.map.getValue(defaultTextResourceKey)
     }
 
     fun getText(
-        locale: Locale = Locale.current,
-    ): TextResource = ResourceGroups.text[buildResourceLocaleKey(
-        ResourceGroups.text,
-        locale.language,
-        locale.region
-    )] ?: TextResourceMap.default
+        locale: Locale,
+    ): TextResource = getTextResource(locale)
 
-    fun getClockHours(locale: Locale): ClockHours =
-        ResourceGroups.clockHours[buildResourceLocaleKey(
-            ResourceGroups.clockHours,
-            locale.language,
-            locale.region
-        )] ?: ClockHoursResourceMap.default
+    private fun getClockHoursResource(locale: Locale): ClockHours {
+        val langRegionKey = getLanguageRegionKey(locale)
+        val regionKey = getRegionKey(locale)
+        val languageKey = getLanguageKey(locale)
+
+        // Try specific language-region, then region-only. Default to 24-hour if neither indicates 12-hour.
+        return localeClockHoursSource[langRegionKey]?.value
+            ?: localeClockHoursSource[regionKey]?.value
+            ?: localeClockHoursSource[languageKey]?.value
+            ?: ClockHoursData(is24hour = true, hours = ClockType.C24Hour)
+    }
+
+    fun getClockHours(locale: Locale): ClockHours = getClockHoursResource(locale)
+
+    private fun getEraNamesResource(locale: Locale): EraNamesResource {
+        val langRegionKey = getLanguageRegionKey(locale)
+        val regionKey = getRegionKey(locale)
+        val languageKey = getLanguageKey(locale)
+
+        return localeEraNamesSource[langRegionKey]?.value
+            ?: localeEraNamesSource[regionKey]?.value
+            ?: localeEraNamesSource[languageKey]?.value
+            ?: localeEraNamesSource.getValue(defaultEraNamesResourceKey).value
+    }
 
     fun getEraNames(locale: Locale, abbreviated: Boolean): EraNames =
         with(
-            ResourceGroups.eraNames[buildResourceLocaleKey(
-                ResourceGroups.eraNames,
-                locale.language,
-                locale.region
-            )] ?: EraNamesResourceMap.default
+            getEraNamesResource(locale)
         ) {
             if (abbreviated) this.abbreviated else this.full
         }
-
-    fun getDayOfWeekNames(locale: Locale, abbreviated: Boolean): DayOfWeekNames =
-        with(
-            ResourceGroups.dayOfWeekNames[buildResourceLocaleKey(
-                ResourceGroups.dayOfWeekNames,
-                locale.language,
-                locale.region
-            )] ?: DayOfWeekNamesResourceMap.default
-        ) {
-            if (abbreviated) this.abbreviated else this.full
-        }
-
-    fun getMonthNames(
-        locale: Locale,
-        abbreviated: Boolean,
-    ): MonthNames = with(
-        ResourceGroups.monthNames[buildResourceLocaleKey(
-            ResourceGroups.monthNames,
-            locale.language,
-            locale.region
-        )] ?: MonthNamesResourceMap.default
-    ) {
-        if (abbreviated) this.abbreviated else this.full
-    }
-
-    private fun buildResourceLocaleKey(
-        data: Map<String, Any>,
-        language: String,
-        region: String,
-    ): String? {
-        val localeWithRegion = language + "_" + region
-        if (data.containsKey(localeWithRegion)) {
-            return localeWithRegion
-        }
-        if (data.containsKey(language)) {
-            return language
-        }
-        if (data.containsKey(region)) {
-            return region
-        }
-        // when nothing found this is the default value.
-        return ""
-    }
 }
