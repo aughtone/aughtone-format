@@ -1,6 +1,7 @@
 package io.github.aughtone.datetime.format.resources.formats
 
-import io.github.aughtone.datetime.format.resources.strings.EraNamesResource
+import io.github.aughtone.datetime.format.resources.values.EraNames
+import io.github.aughtone.datetime.format.resources.values.EraNamesResource
 
 internal data class EraNamesData(
     override val full: EraNames,

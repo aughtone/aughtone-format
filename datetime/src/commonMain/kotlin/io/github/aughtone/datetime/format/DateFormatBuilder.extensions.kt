@@ -1,7 +1,7 @@
 package io.github.aughtone.datetime.format
 
-import io.github.aughtone.datetime.format.resources.strings.DayOfWeekNamesResource
-import io.github.aughtone.datetime.format.resources.strings.MonthNamesResource
+import io.github.aughtone.datetime.format.resources.values.DayOfWeekNamesResource
+import io.github.aughtone.datetime.format.resources.values.MonthNamesResource
 import kotlinx.datetime.format.DateTimeFormatBuilder
 import kotlinx.datetime.format.Padding
 import kotlinx.datetime.format.char
