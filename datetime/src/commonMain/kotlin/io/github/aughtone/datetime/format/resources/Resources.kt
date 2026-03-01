@@ -3,20 +3,20 @@ package io.github.aughtone.datetime.format.resources
 import io.github.aughtone.datetime.format.DynamicLocalDateFormats
 import io.github.aughtone.datetime.format.DynamicLocalTimeFormats
 import io.github.aughtone.datetime.format.resources.formats.AmPmStrings
-import io.github.aughtone.datetime.format.resources.formats.ClockHoursData
+import io.github.aughtone.datetime.format.resources.values.ClockHoursResource
 import io.github.aughtone.datetime.format.resources.formats.localeAmPmStrings
 import io.github.aughtone.datetime.format.resources.formats.localeClockHoursSource
 import io.github.aughtone.datetime.format.resources.formats.localeDayOfWeekNamesSource
 import io.github.aughtone.datetime.format.resources.formats.localeEraNamesSource
 import io.github.aughtone.datetime.format.resources.formats.localeMonthNamesSource
-import io.github.aughtone.datetime.format.resources.options.ClockHours
-import io.github.aughtone.datetime.format.resources.options.ClockType
-import io.github.aughtone.datetime.format.resources.strings.DayOfWeekNamesResource
-import io.github.aughtone.datetime.format.resources.strings.EraNames
-import io.github.aughtone.datetime.format.resources.strings.EraNamesResource
-import io.github.aughtone.datetime.format.resources.strings.MonthNamesResource
-import io.github.aughtone.datetime.format.resources.strings.text.TextResource
-import io.github.aughtone.datetime.format.resources.strings.text.TextResourceMap
+import io.github.aughtone.datetime.format.resources.values.ClockHours
+import io.github.aughtone.datetime.format.resources.values.ClockType
+import io.github.aughtone.datetime.format.resources.values.DayOfWeekNamesResource
+import io.github.aughtone.datetime.format.resources.values.EraNames
+import io.github.aughtone.datetime.format.resources.values.EraNamesResource
+import io.github.aughtone.datetime.format.resources.values.MonthNamesResource
+import io.github.aughtone.datetime.format.resources.values.text.TextResource
+import io.github.aughtone.datetime.format.resources.values.text.TextResourceMap
 import io.github.aughtone.types.locale.Locale
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
@@ -123,7 +123,7 @@ object Resources {
         return localeClockHoursSource[langRegionKey]?.value
             ?: localeClockHoursSource[regionKey]?.value
             ?: localeClockHoursSource[languageKey]?.value
-            ?: ClockHoursData(is24hour = true, hours = ClockType.C24Hour)
+            ?: ClockHoursResource(is24hour = true, hours = ClockType.C24Hour)
     }
 
     fun getClockHours(locale: Locale): ClockHours = getClockHoursResource(locale)

@@ -1,6 +1,6 @@
 package io.github.aughtone.datetime.format.resources.formats
 
-import io.github.aughtone.datetime.format.resources.strings.DayOfWeekNamesResource
+import io.github.aughtone.datetime.format.resources.values.DayOfWeekNamesResource
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.isoDayNumber
 import kotlinx.datetime.format.DayOfWeekNames

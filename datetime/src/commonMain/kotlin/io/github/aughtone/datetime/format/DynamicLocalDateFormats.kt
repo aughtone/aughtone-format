@@ -3,10 +3,9 @@ package io.github.aughtone.datetime.format
 import io.github.aughtone.datetime.format.resources.formats.DatePatterns
 import io.github.aughtone.datetime.format.resources.formats.localeDatePatterns
 import io.github.aughtone.datetime.format.resources.formats.localeDayOfWeekNamesSource
-import io.github.aughtone.datetime.format.resources.formats.localeEraNamesSource
 import io.github.aughtone.datetime.format.resources.formats.localeMonthNamesSource
-import io.github.aughtone.datetime.format.resources.strings.dayofweeknames.DayOfWeekNamesResource
-import io.github.aughtone.datetime.format.resources.strings.monthnames.MonthNamesResource
+import io.github.aughtone.datetime.format.resources.values.dayofweeknames.DayOfWeekNamesResource
+import io.github.aughtone.datetime.format.resources.values.monthnames.MonthNamesResource
 import io.github.aughtone.types.locale.Locale
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.format.DateTimeFormat
