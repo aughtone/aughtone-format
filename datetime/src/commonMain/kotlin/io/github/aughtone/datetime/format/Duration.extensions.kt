@@ -1,5 +1,8 @@
 package io.github.aughtone.datetime.format
 
+import io.github.aughtone.types.locale.Locale
+import io.github.aughtone.types.locale.getCurrent
+import androidx.compose.ui.text.intl.Locale as ComposeLocale
 import io.github.aughtone.datetime.format.platform.MultiplatformDurationFormatter
 import kotlin.time.Duration
 
@@ -8,13 +11,16 @@ import kotlin.time.Duration
  *
  * @param style The style of the relative time string. Defaults to [RelativeStyle.Long].
  * @param relativeTime The reference point for the relative time. Defaults to [RelativeTime.Present].
+ * @param locale The locale to use for formatting. Defaults to the current locale.
  * @return A human-readable string representing the relative duration.
  */
 fun Duration.formatRelative(
     style: RelativeStyle = RelativeStyle.Long,
     relativeTime: RelativeTime = RelativeTime.Present,
+    locale: Locale = Locale.getCurrent(fallbackTag = ComposeLocale.current.toLanguageTag()),
 ): String = MultiplatformDurationFormatter.formatRelative(
     duration = this,
     style = style,
     relativeTime = relativeTime,
+    locale = locale,
 )

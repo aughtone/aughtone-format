@@ -17,6 +17,15 @@ internal fun DateTimeFormatBuilder.WithTime.appendPattern(pattern: String) {
             'S' -> secondFraction(fixedLength = count)
             ' ' -> this.char(' ')
             ':' -> this.char(':')
+            'a' -> {
+                // 'a' is handled by DynamicLocalTimeFormats, not here. We simply ignore it.
+            }
+            'z' -> {
+                // Timezone 'z' and 'zzzz' are part of CLDR time patterns,
+                // but kotlinx-datetime's LocalTime.Format cannot directly format timezones.
+                // We will ignore it here as LocalTime does not contain timezone information.
+            }
+
             else -> {
                 // For now, ignore timezone 'z' and other characters
             }
