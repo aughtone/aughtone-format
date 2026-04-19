@@ -1,6 +1,8 @@
 package io.github.aughtone.datetime.format
 
-import androidx.compose.ui.text.intl.Locale
+import io.github.aughtone.types.locale.Locale
+import io.github.aughtone.types.locale.getCurrent
+import androidx.compose.ui.text.intl.Locale as ComposeLocale
 import io.github.aughtone.datetime.format.platform.MultiplatformDateFormatter
 import io.github.aughtone.datetime.format.platform.MultiplatformPostFormatter
 import io.github.aughtone.datetime.format.resources.is24HourFormat
@@ -24,7 +26,7 @@ import kotlin.time.ExperimentalTime
 @OptIn(ExperimentalTime::class)
 fun LocalTime.format(
     timeStyle: DateTimeStyle,
-    locale: Locale = Locale.current,
+    locale: Locale = Locale.getCurrent(fallbackTag = ComposeLocale.current.toLanguageTag()),
     timeZone: TimeZone = TimeZone.currentSystemDefault(),
     is24HourFormat: Boolean = is24HourFormat(locale = locale),
 ): String = MultiplatformPostFormatter.postFormatTime(
@@ -35,7 +37,7 @@ fun LocalTime.format(
         localDateTime = atDate(Clock.System.todayIn(timeZone = timeZone)),
         dateStyle = DateTimeStyle.None,
         timeStyle = timeStyle,
-        locale.toLanguageTag(),
+        locale = locale,
         timeZone = timeZone,
         twentyFourHour = is24HourFormat
     )

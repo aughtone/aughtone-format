@@ -18,6 +18,7 @@ import io.github.aughtone.datetime.format.resources.values.MonthNamesResource
 import io.github.aughtone.datetime.format.resources.values.text.TextResource
 import io.github.aughtone.datetime.format.resources.values.text.TextResourceMap
 import io.github.aughtone.types.locale.Locale
+import kotlinx.datetime.TimeZone
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.format.DateTimeFormat
@@ -46,16 +47,16 @@ object Resources {
         return locale.languageCode.takeIf { it.isNotEmpty() }
     }
 
-    fun getDateFormat(locale: Locale, style: FormatStyle): DateTimeFormat<LocalDate> {
+    fun getDateFormat(locale: Locale, timeZone: TimeZone, style: FormatStyle): DateTimeFormat<LocalDate> {
         return when (style) {
-            FormatStyle.SHORT -> DynamicLocalDateFormats.short(locale)
-            FormatStyle.MEDIUM -> DynamicLocalDateFormats.medium(locale)
-            FormatStyle.LONG -> DynamicLocalDateFormats.long(locale)
-            FormatStyle.FULL -> DynamicLocalDateFormats.full(locale)
+            FormatStyle.SHORT -> DynamicLocalDateFormats.short(locale, timeZone)
+            FormatStyle.MEDIUM -> DynamicLocalDateFormats.medium(locale, timeZone)
+            FormatStyle.LONG -> DynamicLocalDateFormats.long(locale, timeZone)
+            FormatStyle.FULL -> DynamicLocalDateFormats.full(locale, timeZone)
         }
     }
 
-    fun getTimeFormat(locale: Locale, style: FormatStyle): DateTimeFormat<LocalTime> {
+    fun getTimeFormat(locale: Locale, timeZone: TimeZone, style: FormatStyle): DateTimeFormat<LocalTime> {
         val clockHours = getClockHours(locale)
         val use24Hour = clockHours.is24hour
         return when (style) {

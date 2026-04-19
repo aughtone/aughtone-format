@@ -24,18 +24,15 @@ internal fun DateTimeFormatBuilder.WithDate.appendPattern(
                 1 -> monthNumber(Padding.NONE)
                 2 -> monthNumber(Padding.ZERO)
                 3 -> monthName(monthNames.abbreviated)
-                4 -> monthName(monthNames.full)
-                else -> throw IllegalArgumentException("Unsupported number of 'M's in pattern: $pattern")
+                else -> monthName(monthNames.full)
             }
             'd' -> when (count) {
                 1 -> day(Padding.NONE)
-                2 -> day(Padding.ZERO)
-                else -> throw IllegalArgumentException("Unsupported number of 'd's in pattern: $pattern")
+                else -> day(Padding.ZERO)
             }
             'E' -> when (count) {
                 1, 2, 3 -> dayOfWeek(dayOfWeekNames.abbreviated)
-                4 -> dayOfWeek(dayOfWeekNames.full)
-                else -> throw IllegalArgumentException("Unsupported number of 'E's in pattern: $pattern")
+                else -> dayOfWeek(dayOfWeekNames.full)
             }
             'G' -> {
                 // kotlinx-datetime does not have a built-in era formatter.

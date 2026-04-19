@@ -4,10 +4,11 @@ import io.github.aughtone.datetime.format.resources.formats.DatePatterns
 import io.github.aughtone.datetime.format.resources.formats.localeDatePatterns
 import io.github.aughtone.datetime.format.resources.formats.localeDayOfWeekNamesSource
 import io.github.aughtone.datetime.format.resources.formats.localeMonthNamesSource
-import io.github.aughtone.datetime.format.resources.values.dayofweeknames.DayOfWeekNamesResource
-import io.github.aughtone.datetime.format.resources.values.monthnames.MonthNamesResource
+import io.github.aughtone.datetime.format.resources.values.DayOfWeekNamesResource
+import io.github.aughtone.datetime.format.resources.values.MonthNamesResource
 import io.github.aughtone.types.locale.Locale
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format.DateTimeFormat
 
 internal object DynamicLocalDateFormats {
@@ -33,9 +34,9 @@ internal object DynamicLocalDateFormats {
         val langRegionKey = getLanguageRegionKey(locale)
         val regionKey = getRegionKey(locale)
 
-        return localeDatePatterns[langRegionKey]?.value
-            ?: localeDatePatterns[regionKey]?.value
-            ?: localeDatePatterns.getValue(defaultPatternKey).value
+        return localeDatePatterns[langRegionKey]
+            ?: localeDatePatterns[regionKey]
+            ?: localeDatePatterns.getValue(defaultPatternKey)
     }
 
     private fun getDayOfWeekNamesResource(locale: Locale): DayOfWeekNamesResource {
@@ -48,7 +49,7 @@ internal object DynamicLocalDateFormats {
         return localeMonthNamesSource[languageKey]?.value ?: localeMonthNamesSource.getValue(defaultMonthNamesKey).value
     }
 
-    fun short(locale: Locale): DateTimeFormat<LocalDate> {
+    fun short(locale: Locale, timeZone: TimeZone): DateTimeFormat<LocalDate> {
         val patterns = getPatterns(locale)
         val dayOfWeekNames = getDayOfWeekNamesResource(locale)
         val monthNames = getMonthNamesResource(locale)
@@ -57,7 +58,7 @@ internal object DynamicLocalDateFormats {
         }
     }
 
-    fun medium(locale: Locale): DateTimeFormat<LocalDate> {
+    fun medium(locale: Locale, timeZone: TimeZone): DateTimeFormat<LocalDate> {
         val patterns = getPatterns(locale)
         val dayOfWeekNames = getDayOfWeekNamesResource(locale)
         val monthNames = getMonthNamesResource(locale)
@@ -66,7 +67,7 @@ internal object DynamicLocalDateFormats {
         }
     }
 
-    fun long(locale: Locale): DateTimeFormat<LocalDate> {
+    fun long(locale: Locale, timeZone: TimeZone): DateTimeFormat<LocalDate> {
         val patterns = getPatterns(locale)
         val dayOfWeekNames = getDayOfWeekNamesResource(locale)
         val monthNames = getMonthNamesResource(locale)
@@ -75,7 +76,7 @@ internal object DynamicLocalDateFormats {
         }
     }
 
-    fun full(locale: Locale): DateTimeFormat<LocalDate> {
+    fun full(locale: Locale, timeZone: TimeZone): DateTimeFormat<LocalDate> {
         val patterns = getPatterns(locale)
         val dayOfWeekNames = getDayOfWeekNamesResource(locale)
         val monthNames = getMonthNamesResource(locale)
