@@ -1,37 +1,27 @@
 # Developer Guide
 
-Welcome to the Aughtone-Format project. This guide provides information on how to contribute to this repository.
+## AI Contribution Workflow
 
-## 🤖 AI Collaboration
+This project utilizes AI agents for development. To maintain architectural integrity and user control, all agents must follow this workflow:
 
-This project leverages AI agents for development. To maintain architectural integrity and ensure alignment with project goals, all AI agents must follow a **Plan-First** workflow.
+1.  **Analyze**: Understand the request and context.
+2.  **Plan**: Draft a step-by-step implementation plan.
+3.  **Wait**: Present the plan to the user and stop execution.
+4.  **Execute**: Only after receiving explicit approval ("Proceed", "Go ahead", etc.), perform the proposed changes.
+5.  **Verify**: Ensure changes meet the Acceptance Criteria (ACs).
 
-### The Plan-First Workflow
-1.  **Analyze**: The agent analyzes the task and the existing codebase/documentation.
-2.  **Propose**: The agent presents a detailed implementation plan.
-3.  **Approve**: The agent **MUST WAIT** for explicit approval from a human developer before proceeding with any file modifications.
-4.  **Execute**: Once approved, the agent performs the changes as described in the plan.
-5.  **Verify**: The agent verifies the changes (e.g., by running builds or tests).
+## 🚀 Publishing to Maven Central
 
-## 🚀 Deployment
+This project uses the `vanniktech.mavenPublish` plugin for automated deployment.
 
-### Production Deployment
-Production releases are handled automatically via **GitHub Actions**.
-- **Workflow**: `.github/workflows/publish.yml`
-- **Trigger**: Pushing to the `main` branch.
-- **Destination**: Maven Central.
-- **Requirements**: Repository secrets for Maven Central credentials and GPG signing keys.
+### Release Steps
+1.  **Version Update**: Increment the version in `gradle.properties` or wherever `libs.versions.versionName` is defined.
+2.  **Clean Build**: Run `./gradlew clean build` to ensure all targets compile.
+3.  **Publish**:
+    ```bash
+    ./gradlew publishAllPublicationsToMavenCentralRepository
+    ```
+    *Note: If you need to skip GPG signing (e.g., for local testing), use `-Pskip-signing`.*
 
-### Local Deployment
-You can publish the library to your local Maven repository for testing:
-1. Run the local publish script:
-   ```bash
-   ./publish-local.sh
-   ```
-   This script executes `./gradlew -Pskip-signing=true publishToMavenLocal`, which bypasses GPG signing for local use.
-
-## 🛠️ Environment Setup
-(Add environment setup instructions here)
-
-## 🏗️ Project Structure
-(Add project structure overview here)
+### Automation
+The `mavenPublishing` block in `types/build.gradle.kts` is configured with `automaticRelease = true`, meaning once the artifacts are uploaded and validated, they will be automatically released to Maven Central without manual staging intervention.

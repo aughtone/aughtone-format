@@ -1,5 +1,4 @@
-# New Project
-
+# Aughtone Format
 This project follows a specialized 5-sector documentation hierarchy.
 
 ## 📚 Documentation Sectors
@@ -12,3 +11,11 @@ This project follows a specialized 5-sector documentation hierarchy.
 ---
 ## 🛠️ Governance Standards
 Access the [Governance Skills](docs/standards/) for specialized development rules.
+
+---
+## 🤖 AI-Assisted Development
+This library includes embedded, machine-readable "skills" to enhance the experience of developers using AI code assistants. These skills help the AI understand our library's APIs and best practices, leading to more accurate and idiomatic code suggestions.
+
+- **AI Skill Discovery**: Look for `META-INF/ai-skills/*.ai-skill.md`
+
+To learn how to add this capability to your own library, see our [AI Skill Publishing Standard](docs/standards/ai-skill-publishing.md).

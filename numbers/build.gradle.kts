@@ -1,6 +1,4 @@
-import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompileCommon
 
@@ -14,7 +12,7 @@ plugins {
 }
 
 group = "io.github.aughtone"
-version = "${libs.versions.versionName.get()}" // ${libs.versions.versionNameSiffix.get().toString()}
+version = libs.versions.versionName.get() // ${libs.versions.versionNameSiffix.get().toString()}
 
 kotlin {
     jvmToolchain(17)
@@ -27,20 +25,34 @@ kotlin {
 //            jvmTarget.set(JvmTarget.JVM_17)
 //        }
 //    }
+
     android {
-        namespace = "${libs.versions.namespace.get()}.toolbox"
+        namespace = "${libs.versions.namespace.get()}.numbers"
         compileSdk {
             version = release(libs.versions.android.compileSdk.get().toInt())
         }
+//
+//            minSdk = libs.versions.android.minSdk.get().toInt()
+//            testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+//        compileOptions {
+//            sourceCompatibility = JavaVersion.VERSION_17
+//            targetCompatibility = JavaVersion.VERSION_17
+//        }
+//        publishing {
+//            singleVariant("release") {
+//                withSourcesJar()
+//            }
+//        }
     }
+
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs {
         browser {
             val rootDirPath = project.rootDir.path
             val projectDirPath = project.projectDir.path
             commonWebpackConfig {
-                outputModuleName = "aughtone-format-toolbox"
-                outputFileName = "aughtone-format-toolbox.js"
+                outputModuleName = "aughtone-format-numbers"
+                outputFileName = "aughtone-format-numbers.js"
                 devServer = (devServer ?: KotlinWebpackConfig.DevServer()).apply {
                     static = (static ?: mutableListOf()).apply {
                         // Serve sources to debug inside browser
@@ -68,11 +80,11 @@ kotlin {
     //noinspection WrongGradleMethod
     ).forEach { iosTarget ->
         iosTarget.binaries.framework {
-            baseName = "FormatToolboxKit"
+            baseName = "FormatNumbersKit"
             isStatic = true
             binaryOption(
                 "bundleId",
-                "${libs.versions.namespace.get()}.toolbox"
+                "${libs.versions.namespace.get()}.numbers"
             ) //"app.occurrence"
             binaryOption(
                 "bundleShortVersionString",
@@ -102,13 +114,14 @@ kotlin {
 //                implementation(compose.runtime)
 //                implementation(compose.foundation)
 //                implementation(compose.material3)
-                implementation(compose.ui)
-                implementation(compose.components.resources)
+                implementation(libs.jetbrains.compose.ui)
+                implementation(libs.jetbrains.compose.resources)
                 api(libs.kotlinx.serialization.json)
                 // XXX This might require additional libraries if you enable WASM or JS.
                 //  See: https://klibs.io/project/Kotlin/kotlinx-datetime#using-in-your-projects
                 api(libs.kotlinx.datetime)
-                implementation(libs.aughtone.types)
+                api(libs.aughtone.types)
+                api(project(":toolbox"))
             }
         }
         val commonTest by getting {
@@ -143,12 +156,12 @@ kotlin {
 
 compose.resources {
     publicResClass = true
-    packageOfResClass = "${libs.versions.namespace.get()}.toolbox.resources"
+    packageOfResClass = "${libs.versions.namespace.get()}.numbers.resources"
     generateResClass = always
 }
 
 //android {
-//    namespace = "${libs.versions.namespace.get()}.toolbox"
+//    namespace = "${libs.versions.namespace.get()}.numbers"
 //    compileSdk = libs.versions.android.compileSdk.get().toInt()
 //    defaultConfig {
 //        minSdk = libs.versions.android.minSdk.get().toInt()
@@ -168,10 +181,10 @@ mavenPublishing {
         signAllPublications()
     }
 
-    coordinates(group.toString(), "format-toolbox", version.toString())
+    coordinates(group.toString(), "format-numbers", version.toString())
 
     pom {
-        name = "Aughtone Format Multiplatform - Toolbox"
+        name = "Aughtone Format Multiplatform - Numbers"
         description = "A library."
         inceptionYear = "2025"
         url = "https://github.com/aughtone/aughtone-format"

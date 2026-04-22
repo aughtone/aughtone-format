@@ -6,7 +6,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompileCommon
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
-    alias(libs.plugins.androidLibrary)
+    alias(libs.plugins.multiplatformLibrary)
     alias(libs.plugins.vanniktech.mavenPublish)
     alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.composeMultiplatform)
@@ -17,12 +17,20 @@ group = "io.github.aughtone"
 version = "${libs.versions.versionName.get()}" // ${libs.versions.versionNameSiffix.get().toString()}
 
 kotlin {
+    jvmToolchain(17)
+
     jvm()
-    androidTarget {
-        publishLibraryVariants("release")
-        @OptIn(ExperimentalKotlinGradlePluginApi::class)
-        compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_17)
+//    androidTarget {
+//        publishLibraryVariants("release")
+//        @OptIn(ExperimentalKotlinGradlePluginApi::class)
+//        compilerOptions {
+//            jvmTarget.set(JvmTarget.JVM_17)
+//        }
+//    }
+    android {
+        namespace = "${libs.versions.namespace.get()}.datetime"
+        compileSdk {
+            version = release(libs.versions.android.compileSdk.get().toInt())
         }
     }
     @OptIn(ExperimentalWasmDsl::class)
@@ -80,28 +88,27 @@ kotlin {
                 implementation(libs.androidx.startup.runtime)
             }
         }
-        val androidInstrumentedTest by getting {
-            dependencies {
-                implementation(libs.kotlin.test)
-                implementation(libs.kotlin.test.junit)
-                implementation(libs.androidx.runner)
-                implementation(libs.androidx.rules)
-            }
-        }
+//        val androidInstrumentedTest by getting {
+//            dependencies {
+//                implementation(libs.kotlin.test)
+//                implementation(libs.kotlin.test.junit)
+//                implementation(libs.androidx.runner)
+//                implementation(libs.androidx.rules)
+//            }
+//        }
 
         val commonMain by getting {
             dependencies {
 //                implementation(compose.runtime)
 //                implementation(compose.foundation)
 //                implementation(compose.material3)
-                implementation(compose.ui)
-                implementation(compose.components.resources)
+                implementation(libs.jetbrains.compose.ui)
+                implementation(libs.jetbrains.compose.resources)
                 api(libs.kotlinx.serialization.json)
                 // XXX This might require additional libraries if you enable WASM or JS.
                 //  See: https://klibs.io/project/Kotlin/kotlinx-datetime#using-in-your-projects
                 api(libs.kotlinx.datetime)
                 api(libs.aughtone.types)
-                implementation(libs.jacobras.human.readable)
                 api(project(":toolbox"))
             }
         }
@@ -141,18 +148,18 @@ compose.resources {
     generateResClass = always
 }
 
-android {
-    namespace = "${libs.versions.namespace.get()}.datetime"
-    compileSdk = libs.versions.android.compileSdk.get().toInt()
-    defaultConfig {
-        minSdk = libs.versions.android.minSdk.get().toInt()
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-}
+//android {
+//    namespace = "${libs.versions.namespace.get()}.datetime"
+//    compileSdk = libs.versions.android.compileSdk.get().toInt()
+//    defaultConfig {
+//        minSdk = libs.versions.android.minSdk.get().toInt()
+//        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+//    }
+//    compileOptions {
+//        sourceCompatibility = JavaVersion.VERSION_17
+//        targetCompatibility = JavaVersion.VERSION_17
+//    }
+//}
 
 mavenPublishing {
 //    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
