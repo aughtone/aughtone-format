@@ -6,11 +6,11 @@ import androidx.compose.ui.text.intl.Locale as ComposeLocale
 import io.github.aughtone.datetime.format.platform.MultiplatformDateFormatter
 import io.github.aughtone.datetime.format.platform.MultiplatformPostFormatter
 import io.github.aughtone.datetime.format.resources.is24HourFormat
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atDate
-import kotlinx.datetime.toDeprecatedInstant
+
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.todayIn
 import kotlin.time.ExperimentalTime
@@ -32,7 +32,7 @@ fun LocalTime.format(
 ): String = MultiplatformPostFormatter.postFormatTime(
     timeStyle = timeStyle,
     timeZone = timeZone,
-    instant = atDate(Clock.System.todayIn(timeZone = timeZone)).toInstant(timeZone).toDeprecatedInstant(),
+    instant = atDate(Clock.System.todayIn(timeZone = timeZone)).toInstant(timeZone),
     formatedTime = MultiplatformDateFormatter.formatDateTime(
         localDateTime = atDate(Clock.System.todayIn(timeZone = timeZone)),
         dateStyle = DateTimeStyle.None,

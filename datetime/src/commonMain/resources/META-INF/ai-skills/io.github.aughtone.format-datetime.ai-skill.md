@@ -1,7 +1,10 @@
 ---
 skill-id: io.github.aughtone.format-datetime
+name: "[AughtOne Format: DateTime](https://github.com/aughtone/aughtone-format)"
+type: "AughtOne AI-Skill"
 scope: core
 compatibility: ">=1.0.0"
+author: "[Brill Pappin](https://github.com/bpappin)"
 ---
 
 # AI Skill: Aughtone Format (DateTime)

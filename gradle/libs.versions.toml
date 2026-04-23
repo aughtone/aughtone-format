@@ -1,7 +1,7 @@
 [versions]
 namespace = "io.github.aughtone.format"
 groupName = "io.github.aughtone"
-versionName = "1.1.0"
+versionName = "2.0.0"
 # versionNameSiffix = ""
 android-minSdk = "24" ### this will impact all projects that import the library.
 android-compileSdk = "37"
@@ -18,7 +18,7 @@ vanniktech = "0.36.0"
 androidx-startup = "1.2.0"
 human-readable = "1.12.3"
 
-aughtone-types = "1.0.5"
+aughtone-types = "2.0.0"
 
 [libraries]
 androidx-rules = { module = "androidx.test:rules", version.ref = "rules" }
@@ -29,6 +29,7 @@ kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.
 #kotlin-serialization = { module = "org.jetbrains.kotlin:kotlin-serialization", version.ref = "kotlinx-serialization" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
 androidx-startup-runtime  = { module = "androidx.startup:startup-runtime", version.ref = "androidx-startup" }
+human-readable = { module = "nl.jacobras:Human-Readable", version.ref = "human-readable" }
 
 jetbrains-compose-ui  = { module = "org.jetbrains.compose.ui:ui", version.ref = "compose-multiplatform" }
 jetbrains-compose-resources  = { module = "org.jetbrains.compose.components:components-resources", version.ref = "compose-multiplatform" }

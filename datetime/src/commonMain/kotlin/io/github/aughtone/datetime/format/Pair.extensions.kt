@@ -4,7 +4,7 @@ import io.github.aughtone.types.locale.Locale
 import io.github.aughtone.types.locale.getCurrent
 import androidx.compose.ui.text.intl.Locale as ComposeLocale
 import io.github.aughtone.datetime.format.resources.is24HourFormat
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import kotlinx.datetime.TimeZone
 
 
