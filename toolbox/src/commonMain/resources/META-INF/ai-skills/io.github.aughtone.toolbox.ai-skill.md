@@ -26,15 +26,7 @@ This library provides low-level primitive extensions and utility functions used 
     - **Usage**: Define functional formatters for any type `T`.
     - **Example**: `val hex: Formatter<Int> = { it.toString(16) }`
 
-### **Numeric Utilities**
-- `Long.toHumanReadableString(): String`
-    - **Usage**: `1500L.toHumanReadableString()` -> `"1.5K"`
-    - **Note**: Uses metric prefixes (K, M, G, T, P, E).
-- `Double.formatCurrency(scale: Int = 2): String`
-    - **Usage**: `12.345.formatCurrency(2)` -> `"$12.35"`
-
 ## 🤖 Agent Onboarding
 1. **Context Registration**: Add this skill file to the `AGENTS.md` of the consuming project.
 2. **Usage Rules**:
-    - **Minimalism**: Use these extensions for basic UI formatting where a full localized formatter (from `aughtone-format`) is not required.
     - **Security**: Always use `obfuscateLast` for sensitive data like partial card numbers or identifiers in logs/UI.
