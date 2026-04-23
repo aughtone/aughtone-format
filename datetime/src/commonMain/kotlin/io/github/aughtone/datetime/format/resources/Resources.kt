@@ -3,12 +3,16 @@ package io.github.aughtone.datetime.format.resources
 import io.github.aughtone.datetime.format.DynamicLocalDateFormats
 import io.github.aughtone.datetime.format.DynamicLocalTimeFormats
 import io.github.aughtone.datetime.format.resources.formats.AmPmStrings
+import io.github.aughtone.datetime.format.resources.formats.DatePatterns
+import io.github.aughtone.datetime.format.resources.formats.TimePatterns
 import io.github.aughtone.datetime.format.resources.values.ClockHoursResource
 import io.github.aughtone.datetime.format.resources.formats.localeAmPmStrings
 import io.github.aughtone.datetime.format.resources.formats.localeClockHoursSource
+import io.github.aughtone.datetime.format.resources.formats.localeDatePatterns
 import io.github.aughtone.datetime.format.resources.formats.localeDayOfWeekNamesSource
 import io.github.aughtone.datetime.format.resources.formats.localeEraNamesSource
 import io.github.aughtone.datetime.format.resources.formats.localeMonthNamesSource
+import io.github.aughtone.datetime.format.resources.formats.localeTimePatterns
 import io.github.aughtone.datetime.format.resources.values.ClockHours
 import io.github.aughtone.datetime.format.resources.values.ClockType
 import io.github.aughtone.datetime.format.resources.values.DayOfWeekNamesResource
@@ -56,9 +60,14 @@ object Resources {
         }
     }
 
-    fun getTimeFormat(locale: Locale, timeZone: TimeZone, style: FormatStyle): DateTimeFormat<LocalTime> {
+    fun getTimeFormat(
+        locale: Locale,
+        timeZone: TimeZone,
+        style: FormatStyle,
+        twentyFourHour: Boolean? = null,
+    ): DateTimeFormat<LocalTime> {
         val clockHours = getClockHours(locale)
-        val use24Hour = clockHours.is24hour
+        val use24Hour = twentyFourHour ?: clockHours.is24hour
         return when (style) {
             FormatStyle.SHORT -> DynamicLocalTimeFormats.short(locale, use24Hour)
             FormatStyle.MEDIUM -> DynamicLocalTimeFormats.medium(locale, use24Hour)
@@ -67,7 +76,7 @@ object Resources {
         }
     }
 
-    private fun getAmPmStrings(locale: Locale): AmPmStrings {
+    internal fun getAmPmStrings(locale: Locale): AmPmStrings {
         val langRegionKey = getLanguageRegionKey(locale)
         val regionKey = getRegionKey(locale)
         val languageKey = getLanguageKey(locale)
@@ -78,7 +87,29 @@ object Resources {
             ?: localeAmPmStrings.getValue(defaultFallbackKey)
     }
 
-    private fun getDayOfWeekNamesResource(locale: Locale): DayOfWeekNamesResource {
+    internal fun getTimePatterns(locale: Locale): TimePatterns {
+        val langRegionKey = getLanguageRegionKey(locale)
+        val regionKey = getRegionKey(locale)
+        val languageKey = getLanguageKey(locale)
+
+        return localeTimePatterns[langRegionKey]?.value
+            ?: localeTimePatterns[regionKey]?.value
+            ?: localeTimePatterns[languageKey]?.value
+            ?: localeTimePatterns.getValue(defaultFallbackKey).value
+    }
+
+    internal fun getDatePatterns(locale: Locale): DatePatterns {
+        val langRegionKey = getLanguageRegionKey(locale)
+        val regionKey = getRegionKey(locale)
+        val languageKey = getLanguageKey(locale)
+
+        return localeDatePatterns[langRegionKey]
+            ?: localeDatePatterns[regionKey]
+            ?: localeDatePatterns[languageKey]
+            ?: localeDatePatterns.getValue(defaultFallbackKey)
+    }
+
+    internal fun getDayOfWeekNamesResource(locale: Locale): DayOfWeekNamesResource {
         val langRegionKey = getLanguageRegionKey(locale)
         val regionKey = getRegionKey(locale)
         val languageKey = getLanguageKey(locale)
@@ -89,7 +120,7 @@ object Resources {
             ?: localeDayOfWeekNamesSource.getValue(defaultLanguageFallbackKey).value
     }
 
-    private fun getMonthNamesResource(locale: Locale): MonthNamesResource {
+    internal fun getMonthNamesResource(locale: Locale): MonthNamesResource {
         val langRegionKey = getLanguageRegionKey(locale)
         val regionKey = getRegionKey(locale)
         val languageKey = getLanguageKey(locale)

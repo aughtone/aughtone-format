@@ -1,5 +1,12 @@
 package io.github.aughtone.datetime.format.resources.formats
 
+data class TimePatterns(
+    val short: String,
+    val medium: String,
+    val long: String,
+    val full: String
+)
+
 private const val TIME_PATTERN_HH_MM = "HH:mm"
 private const val TIME_PATTERN_HH_MM_SS = "HH:mm:ss"
 private const val TIME_PATTERN_HH_MM_SS_Z = "HH:mm:ss z"

@@ -1,9 +1,7 @@
 package io.github.aughtone.datetime.format
 
+import io.github.aughtone.datetime.format.resources.Resources
 import io.github.aughtone.datetime.format.resources.formats.DatePatterns
-import io.github.aughtone.datetime.format.resources.formats.localeDatePatterns
-import io.github.aughtone.datetime.format.resources.formats.localeDayOfWeekNamesSource
-import io.github.aughtone.datetime.format.resources.formats.localeMonthNamesSource
 import io.github.aughtone.datetime.format.resources.values.DayOfWeekNamesResource
 import io.github.aughtone.datetime.format.resources.values.MonthNamesResource
 import io.github.aughtone.types.locale.Locale
@@ -13,41 +11,13 @@ import kotlinx.datetime.format.DateTimeFormat
 
 internal object DynamicLocalDateFormats {
 
-    private val defaultLocale = Locale(languageCode = "en", regionCode = "US", displayName = "en-US")
-    private const val defaultPatternKey = "US"
-    private const val defaultDayOfWeekKey = "en"
-    private const val defaultMonthNamesKey = "en"
+    private fun getPatterns(locale: Locale): DatePatterns = Resources.getDatePatterns(locale)
 
-    private fun getLanguageRegionKey(locale: Locale): String? {
-        return locale.regionCode?.let { "${locale.languageCode}-$it" }
-    }
+    private fun getDayOfWeekNamesResource(locale: Locale): DayOfWeekNamesResource =
+        Resources.getDayOfWeekNamesResource(locale)
 
-    private fun getRegionKey(locale: Locale): String? {
-        return locale.regionCode
-    }
-
-    private fun getLanguageKey(locale: Locale): String? {
-        return locale.languageCode.takeIf { it.isNotEmpty() }
-    }
-
-    private fun getPatterns(locale: Locale): DatePatterns {
-        val langRegionKey = getLanguageRegionKey(locale)
-        val regionKey = getRegionKey(locale)
-
-        return localeDatePatterns[langRegionKey]
-            ?: localeDatePatterns[regionKey]
-            ?: localeDatePatterns.getValue(defaultPatternKey)
-    }
-
-    private fun getDayOfWeekNamesResource(locale: Locale): DayOfWeekNamesResource {
-        val languageKey = getLanguageKey(locale)
-        return localeDayOfWeekNamesSource[languageKey]?.value ?: localeDayOfWeekNamesSource.getValue(defaultDayOfWeekKey).value
-    }
-
-    private fun getMonthNamesResource(locale: Locale): MonthNamesResource {
-        val languageKey = getLanguageKey(locale)
-        return localeMonthNamesSource[languageKey]?.value ?: localeMonthNamesSource.getValue(defaultMonthNamesKey).value
-    }
+    private fun getMonthNamesResource(locale: Locale): MonthNamesResource =
+        Resources.getMonthNamesResource(locale)
 
     fun short(locale: Locale, timeZone: TimeZone): DateTimeFormat<LocalDate> {
         val patterns = getPatterns(locale)

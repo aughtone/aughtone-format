@@ -6,8 +6,7 @@ import io.github.aughtone.types.locale.Locale
 import io.github.aughtone.datetime.format.RelativeStyle
 import io.github.aughtone.datetime.format.RelativeTime
 import io.github.aughtone.datetime.format.resources.Resources
-import io.github.aughtone.toolbox.format
-import nl.jacobras.humanreadable.HumanReadable
+import io.github.aughtone.readable.duration.toReadableString
 import kotlin.time.Duration
 
 object MultiplatformDurationFormatter {
@@ -47,7 +46,7 @@ private fun formatRelativeLong(
     relativeTime: RelativeTime = RelativeTime.Present,
     locale: Locale,
 ):String =when (relativeTime) {
-    RelativeTime.Past ->  Resources.getText(locale).time_in_past.text.format(HumanReadable.duration(duration))
-    RelativeTime.Future -> Resources.getText(locale).time_in_future.text.format(HumanReadable.duration(duration))
-    else -> HumanReadable.duration(duration)
+    RelativeTime.Past ->  Resources.getText(locale).time_in_past.text.format(duration.toReadableString(locale))
+    RelativeTime.Future -> Resources.getText(locale).time_in_future.text.format(duration.toReadableString(locale))
+    else -> duration.toReadableString(locale)
 }
