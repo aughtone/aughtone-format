@@ -6,8 +6,8 @@ import androidx.compose.ui.text.intl.Locale as ComposeLocale
 import io.github.aughtone.datetime.format.platform.MultiplatformDateFormatter
 import io.github.aughtone.datetime.format.resources.is24HourFormat
 import io.github.aughtone.types.locale.toLanguageTag
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
+import kotlin.time.Clock
+import kotlin.time.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Duration

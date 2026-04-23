@@ -14,7 +14,7 @@ plugins {
 }
 
 group = "io.github.aughtone"
-version = "${libs.versions.versionName.get()}" // ${libs.versions.versionNameSiffix.get().toString()}
+version = libs.versions.versionName.get() // ${libs.versions.versionNameSiffix.get().toString()}
 
 kotlin {
     jvmToolchain(17)
@@ -104,6 +104,7 @@ kotlin {
 //                implementation(compose.material3)
                 implementation(libs.jetbrains.compose.ui)
                 implementation(libs.jetbrains.compose.resources)
+                implementation(libs.human.readable)
                 api(libs.kotlinx.serialization.json)
                 // XXX This might require additional libraries if you enable WASM or JS.
                 //  See: https://klibs.io/project/Kotlin/kotlinx-datetime#using-in-your-projects

@@ -1,7 +1,7 @@
 package io.github.aughtone.datetime.format
 
-import androidx.compose.ui.text.intl.Locale
-import io.github.aughtone.toolbox.format
+import io.github.aughtone.types.locale.Locale
+import io.github.aughtone.types.locale.localeFor
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
@@ -26,7 +26,7 @@ class InstantExtTest {
             actual = instant1.format(
                 dateStyle = DateTimeStyle.Short,
                 timeStyle = DateTimeStyle.Short,
-                locale = Locale("en-CA"),
+                locale = localeFor("en-CA")!!,
                 timeZone = testTimeZone
             ),
             message = "Formatting short date time",

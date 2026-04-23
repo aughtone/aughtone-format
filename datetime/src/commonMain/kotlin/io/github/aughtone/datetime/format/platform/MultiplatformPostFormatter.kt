@@ -2,7 +2,7 @@ package io.github.aughtone.datetime.format.platform
 
 import io.github.aughtone.datetime.format.DateTimeStyle
 import io.github.aughtone.datetime.format.resources.timezone.TimeZoneAbbreviationLookup
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.UtcOffset
 import kotlinx.datetime.offsetAt

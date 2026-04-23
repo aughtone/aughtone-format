@@ -22,11 +22,12 @@ dependencyResolutionManagement {
             }
         }
         mavenCentral()
+        mavenLocal()
     }
 }
 
 rootProject.name = "AOFormat"
 include(":datetime")
-include(":numbers")
+include(":readable")
 include(":toolbox")
-//include(":datetime-format-platform")
+//include(":datetime-native")

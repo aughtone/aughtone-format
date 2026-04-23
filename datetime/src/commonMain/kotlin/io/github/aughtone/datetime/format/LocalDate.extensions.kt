@@ -10,7 +10,7 @@ import io.github.aughtone.datetime.format.resources.is24HourFormat
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
-import kotlinx.datetime.toDeprecatedInstant
+
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.ExperimentalTime
 
@@ -27,7 +27,7 @@ fun LocalDate.format(
     timeZone: TimeZone = TimeZone.currentSystemDefault(),
     is24HourFormat: Boolean = is24HourFormat(locale = locale),
 ): String = MultiplatformDateFormatter.formatDateTime(
-    localDateTime = atStartOfDayIn(timeZone = timeZone).toDeprecatedInstant().toLocalDateTime(timeZone = timeZone),
+    localDateTime = atStartOfDayIn(timeZone = timeZone).toLocalDateTime(timeZone = timeZone),
     dateStyle = dateStyle,
     timeStyle = DateTimeStyle.None,
     locale = locale,

@@ -1,4 +1,13 @@
 # Aughtone Format
+
+Aughtone Format is a suite of Kotlin Multiplatform libraries designed to provide consistent, localized formatting for Dates, Times, Numbers, and other human-readable metrics across all platforms.
+
+## 📦 Core Modules
+
+- **`:datetime`**: Advanced formatting for `kotlinx-datetime` types with multi-locale support.
+- **`:readable`**: Human-friendly formatting for metrics (abbreviations), ordinals, and data sizes.
+- **`:toolbox`**: Shared utilities and common formatting primitives.
+
 This project follows a specialized 5-sector documentation hierarchy.
 
 ## 📚 Documentation Sectors
