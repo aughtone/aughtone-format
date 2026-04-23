@@ -88,29 +88,18 @@ kotlin {
                 implementation(libs.androidx.startup.runtime)
             }
         }
-//        val androidInstrumentedTest by getting {
-//            dependencies {
-//                implementation(libs.kotlin.test)
-//                implementation(libs.kotlin.test.junit)
-//                implementation(libs.androidx.runner)
-//                implementation(libs.androidx.rules)
-//            }
-//        }
 
         val commonMain by getting {
             dependencies {
-//                implementation(compose.runtime)
-//                implementation(compose.foundation)
-//                implementation(compose.material3)
                 implementation(libs.jetbrains.compose.ui)
                 implementation(libs.jetbrains.compose.resources)
-                implementation(libs.human.readable)
                 api(libs.kotlinx.serialization.json)
                 // XXX This might require additional libraries if you enable WASM or JS.
                 //  See: https://klibs.io/project/Kotlin/kotlinx-datetime#using-in-your-projects
                 api(libs.kotlinx.datetime)
                 api(libs.aughtone.types)
                 api(project(":toolbox"))
+                api(project(":readable"))
             }
         }
         val commonTest by getting {

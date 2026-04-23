@@ -8,6 +8,7 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toInstant
 import kotlinx.datetime.format
 import kotlinx.datetime.format.DateTimeFormat
 import kotlinx.datetime.format.char
@@ -20,36 +21,48 @@ object MultiplatformDateFormatter : InternalDateFormatter {
         locale: Locale,
         timeZone: TimeZone,
         twentyFourHour: Boolean,
-    ): String? = if (dateStyle != DateTimeStyle.None && timeStyle != DateTimeStyle.None) {
-        localDateTime.format(
-            format = getLocalDateTimeFormat(
-                dateStyle = dateStyle,
-                timeStyle = timeStyle,
-                locale = locale,
-                timeZone = timeZone,
-                twentyFourHour = twentyFourHour
-            )
-        )
-    } else if (dateStyle != DateTimeStyle.None) {
-        localDateTime.date.format(
-            format = getLocalDateFormat(
-                dateStyle = dateStyle,
-                locale = locale,
-                timeZone = timeZone,
-            )
-        )
-    } else if (timeStyle != DateTimeStyle.None) {
-        localDateTime.time.format(
-            format = getLocalTimeFormat(
-                timeStyle = timeStyle,
-                locale = locale,
-                timeZone = timeZone,
-                twentyFourHour = twentyFourHour
-            )
-        )
-    } else {
-        // if both are NONE, then an empty string results
-        ""
+    ): String? {
+        val formattedDate = if (dateStyle != DateTimeStyle.None) {
+            localDateTime.date.format(
+                format = getLocalDateFormat(
+                    dateStyle = dateStyle,
+                    locale = locale,
+                    timeZone = timeZone,
+                )
+            ).let {
+                MultiplatformPostFormatter.postFormatDate(
+                    dateStyle = dateStyle,
+                    locale = locale,
+                    date = localDateTime.date,
+                    formattedDate = it
+                )
+            }
+        } else null
+
+        val formattedTime = if (timeStyle != DateTimeStyle.None) {
+            localDateTime.time.format(
+                format = getLocalTimeFormat(
+                    timeStyle = timeStyle,
+                    locale = locale,
+                    timeZone = timeZone,
+                    twentyFourHour = twentyFourHour
+                )
+            ).let {
+                MultiplatformPostFormatter.postFormatTime(
+                    timeStyle = timeStyle,
+                    timeZone = timeZone,
+                    instant = localDateTime.toInstant(timeZone),
+                    formatedTime = it
+                )
+            }
+        } else null
+
+        return when {
+            formattedDate != null && formattedTime != null -> "$formattedDate $formattedTime"
+            formattedDate != null -> formattedDate
+            formattedTime != null -> formattedTime
+            else -> ""
+        }
     }
 
     fun getLocalDateTimeFormat(
@@ -118,28 +131,32 @@ object MultiplatformDateFormatter : InternalDateFormatter {
         DateTimeStyle.Short -> Resources.getTimeFormat(
             locale = locale,
             timeZone = timeZone,
-            style = FormatStyle.SHORT
+            style = FormatStyle.SHORT,
+            twentyFourHour = twentyFourHour
         )
 
         DateTimeStyle.Medium ->
             Resources.getTimeFormat(
                 locale = locale,
                 timeZone = timeZone,
-                style = FormatStyle.MEDIUM
+                style = FormatStyle.MEDIUM,
+                twentyFourHour = twentyFourHour
             )
 
         DateTimeStyle.Long ->
             Resources.getTimeFormat(
                 locale = locale,
                 timeZone = timeZone,
-                style = FormatStyle.LONG
+                style = FormatStyle.LONG,
+                twentyFourHour = twentyFourHour
             )
 
         DateTimeStyle.Full ->
             Resources.getTimeFormat(
                 locale = locale,
                 timeZone = timeZone,
-                style = FormatStyle.FULL
+                style = FormatStyle.FULL,
+                twentyFourHour = twentyFourHour
             )
 
         DateTimeStyle.None -> LocalTime.Format { chars("") }

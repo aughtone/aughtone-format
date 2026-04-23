@@ -16,7 +16,7 @@ import androidx.compose.ui.text.intl.Locale as ComposeLocale
  */
 fun is24HourFormat(locale: Locale = Locale.getCurrent(fallbackTag = ComposeLocale.current.toLanguageTag())): Boolean {
     // XXX Not all platforms know if the users system is in 24 hour mode,
-    //  so if null is returned, we'll take a guess based on locale, adn fall back to false.
+    //  so if null is returned, we'll take a guess based on locale, and fall back to false.
     try {
         return isPlatform24HourSettingEnabled() ?: Resources.getClockHours(locale = locale).is24hour
     } catch (e: Exception) {

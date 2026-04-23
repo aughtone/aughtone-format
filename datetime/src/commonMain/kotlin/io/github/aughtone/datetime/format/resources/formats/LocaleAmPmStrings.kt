@@ -1,5 +1,10 @@
 package io.github.aughtone.datetime.format.resources.formats
 
+data class AmPmStrings(
+    val am: String,
+    val pm: String
+)
+
 internal val localeAmPmStrings by lazy {
     mapOf(
         "US" to AmPmStrings(am = "AM", pm = "PM"),

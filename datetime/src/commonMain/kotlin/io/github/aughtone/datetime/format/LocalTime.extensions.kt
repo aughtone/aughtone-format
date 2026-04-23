@@ -29,16 +29,11 @@ fun LocalTime.format(
     locale: Locale = Locale.getCurrent(fallbackTag = ComposeLocale.current.toLanguageTag()),
     timeZone: TimeZone = TimeZone.currentSystemDefault(),
     is24HourFormat: Boolean = is24HourFormat(locale = locale),
-): String = MultiplatformPostFormatter.postFormatTime(
+): String = MultiplatformDateFormatter.formatDateTime(
+    localDateTime = atDate(Clock.System.todayIn(timeZone = timeZone)),
+    dateStyle = DateTimeStyle.None,
     timeStyle = timeStyle,
+    locale = locale,
     timeZone = timeZone,
-    instant = atDate(Clock.System.todayIn(timeZone = timeZone)).toInstant(timeZone),
-    formatedTime = MultiplatformDateFormatter.formatDateTime(
-        localDateTime = atDate(Clock.System.todayIn(timeZone = timeZone)),
-        dateStyle = DateTimeStyle.None,
-        timeStyle = timeStyle,
-        locale = locale,
-        timeZone = timeZone,
-        twentyFourHour = is24HourFormat
-    )
+    twentyFourHour = is24HourFormat
 ) ?: toString()

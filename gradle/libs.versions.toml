@@ -37,7 +37,6 @@ jetbrains-compose-resources  = { module = "org.jetbrains.compose.components:comp
 aughtone-types = { module = "io.github.aughtone:types", version.ref = "aughtone-types" }
 
 [plugins]
-#androidLibrary = { id = "com.android.library", version.ref = "agp" }
 multiplatformLibrary = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }

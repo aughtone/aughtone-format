@@ -5,10 +5,11 @@ import kotlinx.datetime.format.Padding
 import kotlinx.datetime.format.char
 
 internal fun DateTimeFormatBuilder.WithTime.appendPattern(pattern: String) {
+    val cleanPattern = pattern.replace(Regex("[zZva]+"), "").trim()
     var i = 0
-    while (i < pattern.length) {
-        val char = pattern[i]
-        val count = pattern.substring(i).takeWhile { it == char }.count()
+    while (i < cleanPattern.length) {
+        val char = cleanPattern[i]
+        val count = cleanPattern.substring(i).takeWhile { it == char }.count()
         when (char) {
             'h' -> amPmHour(if (count > 1) Padding.ZERO else Padding.NONE)
             'H' -> hour(if (count > 1) Padding.ZERO else Padding.NONE)
@@ -17,17 +18,9 @@ internal fun DateTimeFormatBuilder.WithTime.appendPattern(pattern: String) {
             'S' -> secondFraction(fixedLength = count)
             ' ' -> this.char(' ')
             ':' -> this.char(':')
-            'a' -> {
-                // 'a' is handled by DynamicLocalTimeFormats, not here. We simply ignore it.
-            }
-            'z' -> {
-                // Timezone 'z' and 'zzzz' are part of CLDR time patterns,
-                // but kotlinx-datetime's LocalTime.Format cannot directly format timezones.
-                // We will ignore it here as LocalTime does not contain timezone information.
-            }
-
+            '.' -> this.char('.')
             else -> {
-                // For now, ignore timezone 'z' and other characters
+                // Ignore other characters
             }
         }
         i += count

@@ -46,4 +46,10 @@ class LocalTimeExtTest {
         assertEquals("", testTime1.format(DateTimeStyle.None, locale = testLocal))
     }
 
+    @Test
+    fun testFormatLanguageOnlyFallback() {
+        val esLocal = localeFor("es")!!
+        // Spanish short format for 16:08 should use "p. m." from language-only lookup
+        assertEquals("4:08 p. m.", testTime1.format(DateTimeStyle.Short, locale = esLocal, is24HourFormat = false))
+    }
 }

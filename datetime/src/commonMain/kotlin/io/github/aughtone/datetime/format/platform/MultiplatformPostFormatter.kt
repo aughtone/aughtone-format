@@ -21,6 +21,24 @@ import kotlinx.datetime.offsetAt
  */
 object MultiplatformPostFormatter {
 
+    fun postFormatDate(
+        dateStyle: DateTimeStyle,
+        locale: io.github.aughtone.types.locale.Locale,
+        date: kotlinx.datetime.LocalDate,
+        formattedDate: String?,
+    ): String? {
+        if (formattedDate == null) return null
+        return when (dateStyle) {
+            DateTimeStyle.Full -> {
+                val eraNames = io.github.aughtone.datetime.format.resources.Resources.getEraNames(locale, abbreviated = false)
+                val era = if (date.year < 0) eraNames.bce else eraNames.ce
+                "$formattedDate $era"
+            }
+
+            else -> formattedDate
+        }
+    }
+
     fun postFormatTime(
         timeStyle: DateTimeStyle,
         timeZone: TimeZone,
