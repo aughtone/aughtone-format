@@ -35,3 +35,17 @@ Resources (unit names, separators, ordinal suffixes) are isolated within the `:r
 
 ### 4. Locale Centricity
 All formatting logic strictly consumes `io.github.aughtone.types.locale.Locale` to ensure consistent BCP 47 compliance and avoid platform-specific locale quirks. Defaulting to `currentNativeLocale()` is handled at the extension level.
+
+### 5. BCP 47 Subtag Resolution
+All formatters use a **subtag fallback chain** for locale lookup:
+1. Try the full tag (`en-ZA`, `zh-TW`, `de-CH`).
+2. Strip the last subtag and retry (`en-ZA` → `en`).
+3. Fall back to English (`en`) as the final default.
+
+This means regional variants only need to be registered when they genuinely differ from the base language. All other region codes (e.g., `fr-CA`, `pt-BR`) automatically inherit the correct base language rules.
+
+### 6. Lazy Resource Caching
+All resource maps use an **on-demand `MutableMap` cache** pattern:
+- A `buildX(tag: String)` factory function (a `when` switch) constructs a formatter only when first requested.
+- The result is stored in `xCache` and returned directly on every subsequent call.
+- **Zero allocation** for locales that are never used at runtime.
