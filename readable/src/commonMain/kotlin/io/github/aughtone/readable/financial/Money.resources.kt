@@ -22,11 +22,14 @@ internal typealias MoneyFormatRule = (String, String) -> String
  */
 private fun buildFormatRule(code: String): MoneyFormatRule? = when (code) {
     // Suffix with space (e.g. "1 234,56 €")
-    "fr", "de", "es", "it", "ru", "sv", "fi", "nl", "pl", "ro", "bg", "hr", "sk", "cs", "hu", "et", "lt", "lv", "af", "da", "is", "nn", "no", "nb" ->
+    "af", "az", "be", "bg", "ca", "cs", "da", "de", "el", "es", "et", "eu", "fi", "fr", "gl", "hr", "hu", "hy", "is", "it", "ka", "kk", "lt", "lv", "mk", "nb", "nn", "no", "pl", "pt", "ro", "ru", "sk", "sl", "sq", "sr", "sv", "sw", "uk", "uz", "vi", "ar" ->
         { numStr, sym -> "$numStr $sym" }
     // Prefix without space (e.g. "$1,234.56")
-    "en", "ja", "zh", "ko", "th", "hi", "ar", "he", "id", "ms", "tr", "vi" ->
+    "en", "ja", "zh", "ko", "th", "hi", "he", "id", "ms", "tr", "iu" ->
         { numStr, sym -> "$sym$numStr" }
+    // Prefix with space (e.g. "€ 1.234,56")
+    "nl" ->
+        { numStr, sym -> "$sym $numStr" }
     // Null means continue fallback
     else -> null
 }

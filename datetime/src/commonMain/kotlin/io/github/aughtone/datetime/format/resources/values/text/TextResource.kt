@@ -5,9 +5,6 @@ import io.github.aughtone.datetime.format.resources.values.StringItem.Value
 interface TextResource {
     val am: Value
     val pm: Value
-    val time_in_past: Value
-    val time_in_future: Value
-    val time_now: Value
 //    val seconds: Plurals
 //    val seconds_future: Plurals
 //    val seconds_past: Plurals

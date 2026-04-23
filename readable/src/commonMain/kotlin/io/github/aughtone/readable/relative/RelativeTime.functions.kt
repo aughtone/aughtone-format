@@ -2,11 +2,11 @@ package io.github.aughtone.readable.relative
 
 import io.github.aughtone.types.locale.Locale
 import io.github.aughtone.types.locale.currentNativeLocale
+import kotlinx.datetime.*
 import kotlin.time.Clock
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
-import kotlin.time.Instant
 
 /**
  * Formats this [Instant] as a localized, human-readable relative time string.
@@ -34,3 +34,27 @@ fun Instant.toReadableRelativeTime(
         config.formatter(delta)
     }
 }
+
+/**
+ * Formats this [LocalDateTime] as a localized, human-readable relative time string.
+ * Converts to [Instant] using the provided [timeZone] before formatting.
+ */
+@OptIn(ExperimentalTime::class)
+fun LocalDateTime.toReadableRelativeTime(
+    timeZone: TimeZone = TimeZone.currentSystemDefault(),
+    locale: Locale = currentNativeLocale(),
+    now: Instant = Clock.System.now(),
+    nowThreshold: Duration = 5.seconds,
+): String = toInstant(timeZone).toReadableRelativeTime(locale, now, nowThreshold)
+
+/**
+ * Formats this [LocalDate] as a localized, human-readable relative time string.
+ * Uses the start of the day in the provided [timeZone] as the reference point.
+ */
+@OptIn(ExperimentalTime::class)
+fun LocalDate.toReadableRelativeTime(
+    timeZone: TimeZone = TimeZone.currentSystemDefault(),
+    locale: Locale = currentNativeLocale(),
+    now: Instant = Clock.System.now(),
+    nowThreshold: Duration = 5.seconds,
+): String = atStartOfDayIn(timeZone).toReadableRelativeTime(locale, now, nowThreshold)

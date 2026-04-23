@@ -1,0 +1,80 @@
+> Task :datetime:kmpPartiallyResolvedDependenciesChecker
+> Task :datetime:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :datetime:downloadKotlinNativeDistribution UP-TO-DATE
+> Task :datetime:convertXmlValueResourcesForAppleMain NO-SOURCE
+> Task :datetime:copyNonXmlValueResourcesForAppleMain NO-SOURCE
+> Task :datetime:prepareComposeResourcesTaskForAppleMain NO-SOURCE
+> Task :datetime:generateResourceAccessorsForAppleMain NO-SOURCE
+> Task :datetime:convertXmlValueResourcesForCommonMain NO-SOURCE
+> Task :datetime:copyNonXmlValueResourcesForCommonMain NO-SOURCE
+> Task :datetime:prepareComposeResourcesTaskForCommonMain NO-SOURCE
+> Task :datetime:generateResourceAccessorsForCommonMain NO-SOURCE
+> Task :datetime:convertXmlValueResourcesForIosMain NO-SOURCE
+> Task :datetime:copyNonXmlValueResourcesForIosMain NO-SOURCE
+> Task :datetime:prepareComposeResourcesTaskForIosMain NO-SOURCE
+> Task :datetime:generateResourceAccessorsForIosMain NO-SOURCE
+> Task :datetime:convertXmlValueResourcesForIosSimulatorArm64Main NO-SOURCE
+> Task :datetime:copyNonXmlValueResourcesForIosSimulatorArm64Main NO-SOURCE
+> Task :datetime:prepareComposeResourcesTaskForIosSimulatorArm64Main NO-SOURCE
+> Task :datetime:generateResourceAccessorsForIosSimulatorArm64Main NO-SOURCE
+> Task :datetime:convertXmlValueResourcesForNativeMain NO-SOURCE
+> Task :datetime:copyNonXmlValueResourcesForNativeMain NO-SOURCE
+> Task :datetime:prepareComposeResourcesTaskForNativeMain NO-SOURCE
+> Task :datetime:generateResourceAccessorsForNativeMain NO-SOURCE
+> Task :datetime:generateActualResourceCollectorsForIosSimulatorArm64Main UP-TO-DATE
+> Task :datetime:generateComposeResClass UP-TO-DATE
+> Task :datetime:generateExpectResourceCollectorsForCommonMain UP-TO-DATE
+> Task :toolbox:kmpPartiallyResolvedDependenciesChecker
+> Task :toolbox:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :toolbox:downloadKotlinNativeDistribution UP-TO-DATE
+> Task :toolbox:convertXmlValueResourcesForAppleMain NO-SOURCE
+> Task :toolbox:copyNonXmlValueResourcesForAppleMain NO-SOURCE
+> Task :toolbox:prepareComposeResourcesTaskForAppleMain NO-SOURCE
+> Task :toolbox:generateResourceAccessorsForAppleMain NO-SOURCE
+> Task :toolbox:convertXmlValueResourcesForCommonMain NO-SOURCE
+> Task :toolbox:copyNonXmlValueResourcesForCommonMain NO-SOURCE
+> Task :toolbox:prepareComposeResourcesTaskForCommonMain NO-SOURCE
+> Task :toolbox:generateResourceAccessorsForCommonMain NO-SOURCE
+> Task :toolbox:convertXmlValueResourcesForIosMain NO-SOURCE
+> Task :toolbox:copyNonXmlValueResourcesForIosMain NO-SOURCE
+> Task :toolbox:prepareComposeResourcesTaskForIosMain NO-SOURCE
+> Task :toolbox:generateResourceAccessorsForIosMain NO-SOURCE
+> Task :toolbox:convertXmlValueResourcesForIosSimulatorArm64Main NO-SOURCE
+> Task :toolbox:copyNonXmlValueResourcesForIosSimulatorArm64Main NO-SOURCE
+> Task :toolbox:prepareComposeResourcesTaskForIosSimulatorArm64Main NO-SOURCE
+> Task :toolbox:generateResourceAccessorsForIosSimulatorArm64Main NO-SOURCE
+> Task :toolbox:convertXmlValueResourcesForNativeMain NO-SOURCE
+> Task :toolbox:copyNonXmlValueResourcesForNativeMain NO-SOURCE
+> Task :toolbox:prepareComposeResourcesTaskForNativeMain NO-SOURCE
+> Task :toolbox:generateResourceAccessorsForNativeMain NO-SOURCE
+> Task :toolbox:generateActualResourceCollectorsForIosSimulatorArm64Main UP-TO-DATE
+> Task :toolbox:generateComposeResClass UP-TO-DATE
+> Task :toolbox:generateExpectResourceCollectorsForCommonMain UP-TO-DATE
+> Task :toolbox:compileKotlinIosSimulatorArm64 UP-TO-DATE
+> Task :toolbox:exportCrossCompilationMetadataForIosSimulatorArm64ApiElements UP-TO-DATE
+
+> Task :datetime:compileKotlinIosSimulatorArm64 FAILED
+e: file:///Users/bpappin/Workspace/aughtone-format/datetime/src/commonMain/kotlin/io/github/aughtone/datetime/format/resources/Resources.kt:31:8 'expect annotation class Volatile : Annotation' is deprecated. Use kotlin.concurrent.Volatile annotation in multiplatform code instead.
+e: file:///Users/bpappin/Workspace/aughtone-format/datetime/src/commonMain/kotlin/io/github/aughtone/datetime/format/resources/Resources.kt:47:6 'expect annotation class Volatile : Annotation' is deprecated. Use kotlin.concurrent.Volatile annotation in multiplatform code instead.
+e: file:///Users/bpappin/Workspace/aughtone-format/datetime/src/commonMain/kotlin/io/github/aughtone/datetime/format/resources/Resources.kt:48:6 'expect annotation class Volatile : Annotation' is deprecated. Use kotlin.concurrent.Volatile annotation in multiplatform code instead.
+e: file:///Users/bpappin/Workspace/aughtone-format/datetime/src/commonMain/kotlin/io/github/aughtone/datetime/format/resources/Resources.kt:49:6 'expect annotation class Volatile : Annotation' is deprecated. Use kotlin.concurrent.Volatile annotation in multiplatform code instead.
+e: file:///Users/bpappin/Workspace/aughtone-format/datetime/src/commonMain/kotlin/io/github/aughtone/datetime/format/resources/Resources.kt:50:6 'expect annotation class Volatile : Annotation' is deprecated. Use kotlin.concurrent.Volatile annotation in multiplatform code instead.
+e: file:///Users/bpappin/Workspace/aughtone-format/datetime/src/commonMain/kotlin/io/github/aughtone/datetime/format/resources/Resources.kt:51:6 'expect annotation class Volatile : Annotation' is deprecated. Use kotlin.concurrent.Volatile annotation in multiplatform code instead.
+e: file:///Users/bpappin/Workspace/aughtone-format/datetime/src/commonMain/kotlin/io/github/aughtone/datetime/format/resources/Resources.kt:52:6 'expect annotation class Volatile : Annotation' is deprecated. Use kotlin.concurrent.Volatile annotation in multiplatform code instead.
+e: file:///Users/bpappin/Workspace/aughtone-format/datetime/src/commonMain/kotlin/io/github/aughtone/datetime/format/resources/Resources.kt:53:6 'expect annotation class Volatile : Annotation' is deprecated. Use kotlin.concurrent.Volatile annotation in multiplatform code instead.
+e: file:///Users/bpappin/Workspace/aughtone-format/datetime/src/commonMain/kotlin/io/github/aughtone/datetime/format/resources/Resources.kt:54:6 'expect annotation class Volatile : Annotation' is deprecated. Use kotlin.concurrent.Volatile annotation in multiplatform code instead.
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':datetime:compileKotlinIosSimulatorArm64'.
+> Compilation finished with errors
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 2s
+13 actionable tasks: 3 executed, 10 up-to-date

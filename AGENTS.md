@@ -28,8 +28,8 @@ All AI agents MUST adhere to these skills from `docs/standards/`:
 - **Verification First**: Check the corresponding AcceptanceCriteria.md before implementation.
 - **Mandatory Approval**: ALWAYS present a detailed implementation plan and WAIT for explicit user approval before executing any code changes or tool calls that modify the repository state.
 - **Embedded Skills**: This library uses machine-readable skills in:
-    - `META-INF/ai-skills/io.github.aughtone.format-datetime.ai-skill.md`
-    - `META-INF/ai-skills/io.github.aughtone.format-numbers.ai-skill.md`
-    - `META-INF/ai-skills/io.github.aughtone.toolbox.ai-skill.md`
+    - `datetime/src/commonMain/resources/META-INF/ai-skills/io.github.aughtone.format-datetime.ai-skill.md`
+    - `readable/src/commonMain/resources/META-INF/ai-skills/io.github.aughtone.format-readable.ai-skill.md`
+    - `toolbox/src/commonMain/resources/META-INF/ai-skills/io.github.aughtone.toolbox.ai-skill.md`
   Always adhere to the patterns defined there.
 - **Update Docs**: Intelligently disperse context into the appropriate sector.

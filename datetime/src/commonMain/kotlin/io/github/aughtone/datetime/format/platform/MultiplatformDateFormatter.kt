@@ -12,6 +12,8 @@ import kotlinx.datetime.toInstant
 import kotlinx.datetime.format
 import kotlinx.datetime.format.DateTimeFormat
 import kotlinx.datetime.format.char
+import io.github.aughtone.datetime.format.resources.NumberingSystem
+import io.github.aughtone.datetime.format.resources.values.EraNames
 
 object MultiplatformDateFormatter : InternalDateFormatter {
     override fun formatDateTime(
@@ -21,6 +23,26 @@ object MultiplatformDateFormatter : InternalDateFormatter {
         locale: Locale,
         timeZone: TimeZone,
         twentyFourHour: Boolean,
+    ): String? = formatDateTime(
+        localDateTime = localDateTime,
+        dateStyle = dateStyle,
+        timeStyle = timeStyle,
+        locale = locale,
+        timeZone = timeZone,
+        twentyFourHour = twentyFourHour,
+        eraNames = null,
+        numberingSystem = null
+    )
+
+    fun formatDateTime(
+        localDateTime: LocalDateTime,
+        dateStyle: DateTimeStyle,
+        timeStyle: DateTimeStyle,
+        locale: Locale,
+        timeZone: TimeZone,
+        twentyFourHour: Boolean,
+        eraNames: EraNames? = null,
+        numberingSystem: NumberingSystem? = null,
     ): String? {
         val formattedDate = if (dateStyle != DateTimeStyle.None) {
             localDateTime.date.format(
@@ -34,7 +56,9 @@ object MultiplatformDateFormatter : InternalDateFormatter {
                     dateStyle = dateStyle,
                     locale = locale,
                     date = localDateTime.date,
-                    formattedDate = it
+                    formattedDate = it,
+                    eraNames = eraNames,
+                    numberingSystem = numberingSystem
                 )
             }
         } else null
@@ -52,7 +76,8 @@ object MultiplatformDateFormatter : InternalDateFormatter {
                     timeStyle = timeStyle,
                     timeZone = timeZone,
                     instant = localDateTime.toInstant(timeZone),
-                    formatedTime = it
+                    formattedTime = it,
+                    numberingSystem = numberingSystem
                 )
             }
         } else null
