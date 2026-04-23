@@ -38,4 +38,14 @@ class DurationTest {
         // 544 hours = 22.66 days = 3.23 weeks -> 3 weeks
         assertEquals("3 weeks", 544.hours.toReadableString(Locales.English))
     }
+
+    @Test
+    fun testTraditionalChineseVariant() {
+        // zh-TW uses Traditional characters (小時, 週) not Simplified (小时, 周)
+        assertEquals("1 小時", 60.minutes.toReadableString(Locales.TraditionalChinese))
+        assertEquals("1 週", 7.days.toReadableString(Locales.TraditionalChinese))
+
+        // zh (Simplified) uses different characters
+        assertEquals("1 小时", 60.minutes.toReadableString(Locales.Chinese))
+    }
 }
