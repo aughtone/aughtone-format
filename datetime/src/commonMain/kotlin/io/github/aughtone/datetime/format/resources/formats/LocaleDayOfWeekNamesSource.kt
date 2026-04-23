@@ -12,8 +12,8 @@ internal data class DayOfWeekNamesData(
 
 internal val localeDayOfWeekNamesSource = mapOf(
     "ar" to lazy { DayOfWeekNamesData(
-        full = DayOfWeekNames(listOf("الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت")),
-        abbreviated = DayOfWeekNames(listOf("الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"))
+        full = DayOfWeekNames(listOf("الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت", "الأحد")),
+        abbreviated = DayOfWeekNames(listOf("الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت", "الأحد"))
     ) },
     "cs" to lazy { DayOfWeekNamesData(
         full = DayOfWeekNames(listOf("Pondělí", "Úterý", "Středa", "Čtvrtek", "Pátek", "Sobota", "Neděle")),
@@ -95,9 +95,149 @@ internal val localeDayOfWeekNamesSource = mapOf(
         full = DayOfWeekNames(listOf("Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy", "Chủ Nhật")),
         abbreviated = DayOfWeekNames(listOf("T2", "T3", "T4", "T5", "T6", "T7", "CN"))
     ) },
+    "sr" to lazy { DayOfWeekNamesData(
+        full = DayOfWeekNames(listOf("понедељак", "уторак", "среда", "четвρтак", "петак", "субота", "недеља")),
+        abbreviated = DayOfWeekNames(listOf("пон", "ут", "ср", "чет", "пет", "суб", "нед"))
+    ) },
+    "sv" to lazy { DayOfWeekNamesData(
+        full = DayOfWeekNames(listOf("måndag", "tisdag", "onsdag", "torsdag", "fredag", "lördag", "söndag")),
+        abbreviated = DayOfWeekNames(listOf("mån", "tis", "ons", "tors", "fre", "lör", "sön"))
+    ) },
     "zh" to lazy { DayOfWeekNamesData(
         full = DayOfWeekNames(listOf("星期一", "星期二", "星期三", "星期四", "星期五", "星期六", "星期日")),
         abbreviated = DayOfWeekNames(listOf("一", "二", "三", "四", "五", "六", "日"))
+    ) },
+    "af" to lazy { DayOfWeekNamesData(
+        full = DayOfWeekNames(listOf("Maandag", "Dinsdag", "Woensdag", "Donderdag", "Vrydag", "Saterdag", "Sondag")),
+        abbreviated = DayOfWeekNames(listOf("Ma.", "Di.", "Wo.", "Do.", "Vr.", "Sa.", "So."))
+    ) },
+    "az" to lazy { DayOfWeekNamesData(
+        full = DayOfWeekNames(listOf("bazar ertəsi", "çərşənbə axşamı", "çərşənbə", "cümə axşamı", "cümə", "şənbə", "bazar")),
+        abbreviated = DayOfWeekNames(listOf("B.e.", "Ç.a.", "Ç.", "C.a.", "C.", "Ş.", "B."))
+    ) },
+    "be" to lazy { DayOfWeekNamesData(
+        full = DayOfWeekNames(listOf("панядзелак", "аўторак", "серада", "чацвер", "пятніца", "субота", "нядзеля")),
+        abbreviated = DayOfWeekNames(listOf("пн", "аў", "ср", "чц", "пт", "сб", "нд"))
+    ) },
+    "bg" to lazy { DayOfWeekNamesData(
+        full = DayOfWeekNames(listOf("понеделник", "вторник", "сряда", "четвъртък", "петък", "събота", "неделя")),
+        abbreviated = DayOfWeekNames(listOf("пн", "вт", "ср", "чт", "пт", "сб", "нд"))
+    ) },
+    "ca" to lazy { DayOfWeekNamesData(
+        full = DayOfWeekNames(listOf("dilluns", "dimarts", "dimecres", "dijous", "divendres", "dissabte", "diumenge")),
+        abbreviated = DayOfWeekNames(listOf("dl.", "dt.", "dc.", "dj.", "dv.", "ds.", "dg."))
+    ) },
+    "da" to lazy { DayOfWeekNamesData(
+        full = DayOfWeekNames(listOf("mandag", "tirsdag", "onsdag", "torsdag", "fredag", "lørdag", "søndag")),
+        abbreviated = DayOfWeekNames(listOf("man.", "tirs.", "ons.", "tors.", "fre.", "lør.", "søn."))
+    ) },
+    "el" to lazy { DayOfWeekNamesData(
+        full = DayOfWeekNames(listOf("Δευτέρα", "Τρίτη", "Τετάρτη", "Πέμπτη", "Παρασκευή", "Σάββατο", "Κυριακή")),
+        abbreviated = DayOfWeekNames(listOf("Δευ", "Τρί", "Τετ", "Πέμ", "Παρ", "Σάβ", "Κυρ"))
+    ) },
+    "et" to lazy { DayOfWeekNamesData(
+        full = DayOfWeekNames(listOf("esmaspäev", "teisipäev", "kolmapäev", "neljapäev", "reede", "laupäev", "pühapäev")),
+        abbreviated = DayOfWeekNames(listOf("E", "T", "K", "N", "R", "L", "P"))
+    ) },
+    "eu" to lazy { DayOfWeekNamesData(
+        full = DayOfWeekNames(listOf("astelehena", "asteartea", "asteazkena", "osteguna", "ostirala", "larunbata", "igandea")),
+        abbreviated = DayOfWeekNames(listOf("al.", "ar.", "az.", "og.", "or.", "lr.", "ig."))
+    ) },
+    "fa" to lazy { DayOfWeekNamesData(
+        full = DayOfWeekNames(listOf("دوشنبه", "سه‌شنبه", "چهارشنبه", "پنجشنبه", "جمعه", "شنبه", "یکشنبه")),
+        abbreviated = DayOfWeekNames(listOf("دوشنبه", "سه‌شنبه", "چهارشنبه", "پنجشنبه", "جمعه", "شنبه", "یکشنبه"))
+    ) },
+    "gl" to lazy { DayOfWeekNamesData(
+        full = DayOfWeekNames(listOf("luns", "martes", "mércores", "xoves", "venres", "sábado", "domingo")),
+        abbreviated = DayOfWeekNames(listOf("luns", "mar.", "mér.", "xov.", "ven.", "sáb.", "dom."))
+    ) },
+    "he" to lazy { DayOfWeekNamesData(
+        full = DayOfWeekNames(listOf("יום שני", "יום שלישי", "יום רביעי", "יום חמישי", "יום שישי", "יום שבת", "יום ראשון")),
+        abbreviated = DayOfWeekNames(listOf("יום ב׳", "יום ג׳", "יום ד׳", "יום ה׳", "יום ו׳", "שבת", "יום א׳"))
+    ) },
+    "hi" to lazy { DayOfWeekNamesData(
+        full = DayOfWeekNames(listOf("सोमवार", "मंगलवार", "बुधवार", "गुरुوار", "शुक्रवार", "शनिवार", "रविवार")),
+        abbreviated = DayOfWeekNames(listOf("सोम", "मंगल", "बुध", "गुरु", "शुक्र", "शनि", "रवि"))
+    ) },
+    "hr" to lazy { DayOfWeekNamesData(
+        full = DayOfWeekNames(listOf("ponedjeljak", "utorak", "srijeda", "četvrtak", "petak", "subota", "nedjelja")),
+        abbreviated = DayOfWeekNames(listOf("pon", "uto", "sri", "čet", "pet", "sub", "ned"))
+    ) },
+    "hu" to lazy { DayOfWeekNamesData(
+        full = DayOfWeekNames(listOf("hétfő", "kedd", "szerda", "csütörtök", "péntek", "szombat", "vasárnap")),
+        abbreviated = DayOfWeekNames(listOf("H", "K", "Sze", "Cs", "P", "Szo", "V"))
+    ) },
+    "hy" to lazy { DayOfWeekNamesData(
+        full = DayOfWeekNames(listOf("երկուշաբթի", "երեքշաբթի", "չորեքշաբթի", "հինգշաբթի", "ուրբաթ", "շաբաթ", "կիրակի")),
+        abbreviated = DayOfWeekNames(listOf("երկ", "երք", "չրք", "հնգ", "ուր", "շբթ", "կիր"))
+    ) },
+    "is" to lazy { DayOfWeekNamesData(
+        full = DayOfWeekNames(listOf("mánudagur", "þriðjudagur", "miðvikudagur", "fimmtudagur", "föstudagur", "laugardagur", "sunnudagur")),
+        abbreviated = DayOfWeekNames(listOf("mán.", "þri.", "mið.", "fim.", "fös.", "lau.", "sun."))
+    ) },
+    "ka" to lazy { DayOfWeekNamesData(
+        full = DayOfWeekNames(listOf("ორშაბათი", "სამშაბათი", "ოთხშაბათი", "ხუთშაბათი", "პარასკევი", "შაბათი", "კვირა")),
+        abbreviated = DayOfWeekNames(listOf("ორშ", "სამ", "ოთხ", "ხუთ", "პარ", "შაბ", "კვი"))
+    ) },
+    "lt" to lazy { DayOfWeekNamesData(
+        full = DayOfWeekNames(listOf("pirmadienis", "antradienis", "trečiadienis", "ketvirtadienis", "penktadienis", "šeštadienis", "sekmadienis")),
+        abbreviated = DayOfWeekNames(listOf("pr", "an", "tr", "kt", "pn", "št", "sk"))
+    ) },
+    "lv" to lazy { DayOfWeekNamesData(
+        full = DayOfWeekNames(listOf("pirmdiena", "otrdiena", "trešdiena", "ceturtdiena", "piektdiena", "sestdiena", "svētdiena")),
+        abbreviated = DayOfWeekNames(listOf("pirmd.", "otrd.", "trešd.", "ceturtd.", "piektd.", "sestd.", "svētd."))
+    ) },
+    "mk" to lazy { DayOfWeekNamesData(
+        full = DayOfWeekNames(listOf("понеделник", "вторник", "среда", "четврток", "петок", "сабота", "недела")),
+        abbreviated = DayOfWeekNames(listOf("пон.", "вто.", "сре.", "чет.", "пет.", "саб.", "нед."))
+    ) },
+    "ms" to lazy { DayOfWeekNamesData(
+        full = DayOfWeekNames(listOf("Isnin", "Selasa", "Rabu", "Khamis", "Jumaat", "Sabtu", "Ahad")),
+        abbreviated = DayOfWeekNames(listOf("Isn", "Sel", "Rab", "Kha", "Jum", "Sab", "Ahd"))
+    ) },
+    "nb" to lazy { DayOfWeekNamesData(
+        full = DayOfWeekNames(listOf("mandag", "tirsdag", "onsdag", "torsdag", "fredag", "lørdag", "søndag")),
+        abbreviated = DayOfWeekNames(listOf("man.", "tir.", "ons.", "tor.", "fre.", "lør.", "søn."))
+    ) },
+    "nn" to lazy { DayOfWeekNamesData(
+        full = DayOfWeekNames(listOf("måndag", "tysdag", "onsdag", "torsdag", "fredag", "laurdag", "søndag")),
+        abbreviated = DayOfWeekNames(listOf("må.", "ty.", "on.", "to.", "fr.", "la.", "sø."))
+    ) },
+    "no" to lazy { DayOfWeekNamesData(
+        full = DayOfWeekNames(listOf("mandag", "tirsdag", "onsdag", "torsdag", "fredag", "lørdag", "søndag")),
+        abbreviated = DayOfWeekNames(listOf("man.", "tir.", "ons.", "tor.", "fre.", "lør.", "søn."))
+    ) },
+    "ro" to lazy { DayOfWeekNamesData(
+        full = DayOfWeekNames(listOf("luni", "marți", "miercuri", "joi", "vineri", "sâmbătă", "duminică")),
+        abbreviated = DayOfWeekNames(listOf("lun.", "mar.", "mie.", "joi", "vin.", "sâm.", "dum."))
+    ) },
+    "sk" to lazy { DayOfWeekNamesData(
+        full = DayOfWeekNames(listOf("pondelok", "utorok", "streda", "štvrtok", "piatok", "sobota", "nedeľa")),
+        abbreviated = DayOfWeekNames(listOf("po", "ut", "st", "št", "pi", "so", "ne"))
+    ) },
+    "sl" to lazy { DayOfWeekNamesData(
+        full = DayOfWeekNames(listOf("ponedeljek", "torek", "sreda", "četrtek", "petek", "sobota", "nedelja")),
+        abbreviated = DayOfWeekNames(listOf("pon.", "tor.", "sre.", "čet.", "pet.", "sob.", "ned."))
+    ) },
+    "sq" to lazy { DayOfWeekNamesData(
+        full = DayOfWeekNames(listOf("e hënë", "e martë", "e mërkurë", "e enjte", "e premte", "e shtunë", "e diel")),
+        abbreviated = DayOfWeekNames(listOf("hën", "mar", "mër", "enj", "pre", "sht", "die"))
+    ) },
+    "sr" to lazy { DayOfWeekNamesData(
+        full = DayOfWeekNames(listOf("понедељак", "уторак", "среда", "четвртак", "петак", "субота", "недеља")),
+        abbreviated = DayOfWeekNames(listOf("пон", "уто", "сре", "чет", "пет", "суб", "нед"))
+    ) },
+    "sv" to lazy { DayOfWeekNamesData(
+        full = DayOfWeekNames(listOf("måndag", "tisdag", "onsdag", "torsdag", "fredag", "lördag", "söndag")),
+        abbreviated = DayOfWeekNames(listOf("mån", "tis", "ons", "tors", "fre", "lör", "sön"))
+    ) },
+    "sw" to lazy { DayOfWeekNamesData(
+        full = DayOfWeekNames(listOf("Jumatatu", "Jumanne", "Jumatano", "Alhamisi", "Ijumaa", "Jumamosi", "Jumapili")),
+        abbreviated = DayOfWeekNames(listOf("Jumatatu", "Jumanne", "Jumatano", "Alhamisi", "Ijumaa", "Jumamosi", "Jumapili"))
+    ) },
+    "th" to lazy { DayOfWeekNamesData(
+        full = DayOfWeekNames(listOf("วันจันทร์", "วันอังคาร", "วันพุธ", "วันพฤหัสบดี", "วันศุกร์", "วันเสาร์", "วันอาทิตย์")),
+        abbreviated = DayOfWeekNames(listOf("จันทร์", "อังคาร", "พุธ", "พฤหัส", "ศุกร์", "เสาร์", "อาทิตย์"))
     ) },
     "numbers" to lazy { DayOfWeekNamesData(
         full = DayOfWeekNames(listOf(

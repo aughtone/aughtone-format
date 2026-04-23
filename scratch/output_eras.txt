@@ -1,0 +1,220 @@
+    "af" to lazy { EraNamesData(
+        wide = listOf("voor Christus", "ná Christus"),
+        abbreviated = listOf("v.C.", "n.C.")
+    ) },
+    "ar" to lazy { EraNamesData(
+        wide = listOf("قبل الميلاد", "ميلادي"),
+        abbreviated = listOf("ق.م", "م")
+    ) },
+    "az" to lazy { EraNamesData(
+        wide = listOf("eramızdan əvvəl", "yeni era"),
+        abbreviated = listOf("e.ə.", "y.e.")
+    ) },
+    "be" to lazy { EraNamesData(
+        wide = listOf("да нараджэння Хрыстова", "ад нараджэння Хрыстова"),
+        abbreviated = listOf("да н.э.", "н.э.")
+    ) },
+    "bg" to lazy { EraNamesData(
+        wide = listOf("преди Христа", "след Христа"),
+        abbreviated = listOf("пр.Хр.", "сл.Хр.")
+    ) },
+    "ca" to lazy { EraNamesData(
+        wide = listOf("abans de Crist", "després de Crist"),
+        abbreviated = listOf("aC", "dC")
+    ) },
+    "cs" to lazy { EraNamesData(
+        wide = listOf("před naším letopočtem", "našeho letopočtu"),
+        abbreviated = listOf("př. n. l.", "n. l.")
+    ) },
+    "da" to lazy { EraNamesData(
+        wide = listOf("før Kristus", "efter Kristus"),
+        abbreviated = listOf("f.Kr.", "e.Kr.")
+    ) },
+    "de" to lazy { EraNamesData(
+        wide = listOf("v. Chr.", "n. Chr."),
+        abbreviated = listOf("v. Chr.", "n. Chr.")
+    ) },
+    "el" to lazy { EraNamesData(
+        wide = listOf("προ Χριστού", "μετά Χριστόν"),
+        abbreviated = listOf("π.Χ.", "μ.Χ.")
+    ) },
+    "en" to lazy { EraNamesData(
+        wide = listOf("Before Christ", "Anno Domini"),
+        abbreviated = listOf("BC", "AD")
+    ) },
+    "es" to lazy { EraNamesData(
+        wide = listOf("antes de Cristo", "después de Cristo"),
+        abbreviated = listOf("a. C.", "d. C.")
+    ) },
+    "et" to lazy { EraNamesData(
+        wide = listOf("enne Kristust", "pärast Kristust"),
+        abbreviated = listOf("eKr", "pKr")
+    ) },
+    "eu" to lazy { EraNamesData(
+        wide = listOf("Kristo aurretik", "Kristo ondoren"),
+        abbreviated = listOf("K.a.", "K.o.")
+    ) },
+    "fa" to lazy { EraNamesData(
+        wide = listOf("قبل از میلاد", "میلادی"),
+        abbreviated = listOf("ق.م.", "م.")
+    ) },
+    "fi" to lazy { EraNamesData(
+        wide = listOf("ennen Kristuksen syntymää", "jälkeen Kristuksen syntymän"),
+        abbreviated = listOf("eKr.", "jKr.")
+    ) },
+    "fr" to lazy { EraNamesData(
+        wide = listOf("avant Jésus-Christ", "après Jésus-Christ"),
+        abbreviated = listOf("av. J.-C.", "ap. J.-C.")
+    ) },
+    "gl" to lazy { EraNamesData(
+        wide = listOf("antes de Cristo", "despois de Cristo"),
+        abbreviated = listOf("a.C.", "d.C.")
+    ) },
+    "he" to lazy { EraNamesData(
+        wide = listOf("לפני הספירה", "לספירה"),
+        abbreviated = listOf("לפנה״ס", "לספירה")
+    ) },
+    "hi" to lazy { EraNamesData(
+        wide = listOf("ईसा-पूर्व", "ईसवी सन"),
+        abbreviated = listOf("ईसा-पूर्व", "ईस्वी")
+    ) },
+    "hr" to lazy { EraNamesData(
+        wide = listOf("prije Krista", "poslije Krista"),
+        abbreviated = listOf("pr. Kr.", "po. Kr.")
+    ) },
+    "hu" to lazy { EraNamesData(
+        wide = listOf("Krisztus előtt", "időszámításunk szerint"),
+        abbreviated = listOf("i. e.", "i. sz.")
+    ) },
+    "hy" to lazy { EraNamesData(
+        wide = listOf("Քրիստոսից առաջ", "Քրիստոսից հետո"),
+        abbreviated = listOf("մ.թ.ա.", "մ.թ.")
+    ) },
+    "id" to lazy { EraNamesData(
+        wide = listOf("Sebelum Masehi", "Masehi"),
+        abbreviated = listOf("SM", "M")
+    ) },
+    "is" to lazy { EraNamesData(
+        wide = listOf("fyrir Krist", "eftir Krist"),
+        abbreviated = listOf("f.Kr.", "e.Kr.")
+    ) },
+    "it" to lazy { EraNamesData(
+        wide = listOf("avanti Cristo", "dopo Cristo"),
+        abbreviated = listOf("a.C.", "d.C.")
+    ) },
+    "iu" to lazy { EraNamesData(
+        wide = listOf("BCE", "CE"),
+        abbreviated = listOf("BCE", "CE")
+    ) },
+    "ja" to lazy { EraNamesData(
+        wide = listOf("紀元前", "西暦"),
+        abbreviated = listOf("紀元前", "西暦")
+    ) },
+    "ka" to lazy { EraNamesData(
+        wide = listOf("ძველი წელთაღრიცხვით", "ახალი წელთაღრიცხვით"),
+        abbreviated = listOf("ძვ. წ.", "ახ. წ.")
+    ) },
+    "kk" to lazy { EraNamesData(
+        wide = listOf("Біздің заманымызға дейін", "біздің заманымыз"),
+        abbreviated = listOf("б.з.д.", "б.з.")
+    ) },
+    "ko" to lazy { EraNamesData(
+        wide = listOf("기원전", "서기"),
+        abbreviated = listOf("BC", "AD")
+    ) },
+    "lt" to lazy { EraNamesData(
+        wide = listOf("prieš Kristų", "po Kristaus"),
+        abbreviated = listOf("pr. Kr.", "po Kr.")
+    ) },
+    "lv" to lazy { EraNamesData(
+        wide = listOf("pirms mūsu ēras", "mūsu ērā"),
+        abbreviated = listOf("p.m.ē.", "m.ē.")
+    ) },
+    "mk" to lazy { EraNamesData(
+        wide = listOf("пред нашата ера", "од нашата ера"),
+        abbreviated = listOf("пр. н. е.", "н. е.")
+    ) },
+    "ms" to lazy { EraNamesData(
+        wide = listOf("S.M.", "TM"),
+        abbreviated = listOf("S.M.", "TM")
+    ) },
+    "nb" to lazy { EraNamesData(
+        wide = listOf("før Kristus", "etter Kristus"),
+        abbreviated = listOf("f.Kr.", "e.Kr.")
+    ) },
+    "nl" to lazy { EraNamesData(
+        wide = listOf("voor Christus", "na Christus"),
+        abbreviated = listOf("v.Chr.", "n.Chr.")
+    ) },
+    "nn" to lazy { EraNamesData(
+        wide = listOf("før Kristus", "etter Kristus"),
+        abbreviated = listOf("f.Kr.", "e.Kr.")
+    ) },
+    "no" to lazy { EraNamesData(
+        wide = listOf("før Kristus", "etter Kristus"),
+        abbreviated = listOf("f.Kr.", "e.Kr.")
+    ) },
+    "pl" to lazy { EraNamesData(
+        wide = listOf("przed naszą erą", "naszej ery"),
+        abbreviated = listOf("p.n.e.", "n.e.")
+    ) },
+    "pt" to lazy { EraNamesData(
+        wide = listOf("antes de Cristo", "depois de Cristo"),
+        abbreviated = listOf("a.C.", "d.C.")
+    ) },
+    "ro" to lazy { EraNamesData(
+        wide = listOf("înainte de Hristos", "după Hristos"),
+        abbreviated = listOf("î.Hr.", "d.Hr.")
+    ) },
+    "ru" to lazy { EraNamesData(
+        wide = listOf("до Рождества Христова", "от Рождества Христова"),
+        abbreviated = listOf("до н. э.", "н. э.")
+    ) },
+    "sk" to lazy { EraNamesData(
+        wide = listOf("pred Kristom", "po Kristovi"),
+        abbreviated = listOf("pred Kr.", "po Kr.")
+    ) },
+    "sl" to lazy { EraNamesData(
+        wide = listOf("pred Kristusom", "po Kristusu"),
+        abbreviated = listOf("pr. Kr.", "po Kr.")
+    ) },
+    "sq" to lazy { EraNamesData(
+        wide = listOf("para Krishtit", "mbas Krishtit"),
+        abbreviated = listOf("p.K.", "mb.K.")
+    ) },
+    "sr" to lazy { EraNamesData(
+        wide = listOf("пре нове ере", "нове ере"),
+        abbreviated = listOf("п. н. е.", "н. е.")
+    ) },
+    "sv" to lazy { EraNamesData(
+        wide = listOf("före Kristus", "efter Kristus"),
+        abbreviated = listOf("f.Kr.", "e.Kr.")
+    ) },
+    "sw" to lazy { EraNamesData(
+        wide = listOf("Kabla ya Kristo", "Baada ya Kristo"),
+        abbreviated = listOf("KK", "BK")
+    ) },
+    "th" to lazy { EraNamesData(
+        wide = listOf("ปีก่อนคริสตกาล", "คริสต์ศักราช"),
+        abbreviated = listOf("ก่อน ค.ศ.", "ค.ศ.")
+    ) },
+    "tr" to lazy { EraNamesData(
+        wide = listOf("Milattan Önce", "Milattan Sonra"),
+        abbreviated = listOf("MÖ", "MS")
+    ) },
+    "uk" to lazy { EraNamesData(
+        wide = listOf("до нашої ери", "нашої ери"),
+        abbreviated = listOf("до н. е.", "н. е.")
+    ) },
+    "uz" to lazy { EraNamesData(
+        wide = listOf("miloddan avvalgi", "milodiy"),
+        abbreviated = listOf("m.a.", "milodiy")
+    ) },
+    "vi" to lazy { EraNamesData(
+        wide = listOf("Trước Chúa Giáng Sinh", "Sau Công Nguyên"),
+        abbreviated = listOf("TCN", "SCN")
+    ) },
+    "zh" to lazy { EraNamesData(
+        wide = listOf("公元前", "公元"),
+        abbreviated = listOf("公元前", "公元")
+    ) },

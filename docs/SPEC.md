@@ -32,11 +32,11 @@ Formatting byte counts into human-readable units.
 - **Standard**: Follows IEC (binary) or SI (decimal) conventions as requested.
 
 #### 4. Relative Time
-Formatting an `Instant` relative to a reference point (default `Clock.System.now()`) into natural language.
+Formatting temporal types relative to a reference point (default `Clock.System.now()`) into natural language.
 - **API**: `Instant.toReadableRelativeTime(locale, now, nowThreshold)`
+- **Extensions**: Also supported for `LocalDateTime` (relative to an Instant) and `LocalDate` (relative to the start of the day).
 - **Direction**: Negative delta = past (`"8 minutes ago"`), positive delta = future (`"in 8 minutes"`).
 - **Threshold**: Instants within `nowThreshold` (default `5.seconds`) produce a locale-specific "just now" string.
-- **Configurable Reference**: `now` parameter is overridable for deterministic testing or custom reference times.
 
 #### 5. Durations
 Translating `kotlin.time.Duration` into natural language using smart-scaling.
@@ -49,18 +49,23 @@ Translating `kotlin.time.Duration` into natural language using smart-scaling.
 #### 6. Geospatial Data
 Human-readable representation of physical coordinates and orientations.
 - **Altitude**: Automatic scaling between meters (m) and kilometers (km) with localized separators.
-- **Azimuth**: Numeric degrees followed by localized cardinal directions in parentheses, e.g., `90° (E)`, `225° (SW)`.
+- **Azimuth**: Numeric degrees followed by localized cardinal directions in parentheses, e.g., `90° (E)`, `225° (SW)`. Directions (N, S, E, W, etc.) are localized across 55 languages.
 - **Coordinates**:
     - **Decimal Degrees (DD)**: `40.71° N, 74.01° W`
     - **Degrees-Minutes-Seconds (DMS)**: `40° 42' 46" N, 74° 0' 21" W`
 
+#### 7. Grammatical Parity & Plural Categorization
+All human-readable formatting adheres to the **Unicode CLDR-compliant Plural Category System** (Zero, One, Two, Few, Many, Other).
+- **Linguistic Coverage**: Supports up to 6 grammatical forms (Arabic) to ensure natural sounding output in all 55 languages.
+- **Ordinal Categories**: Explicit support for language-specific ordinal categorization logic (e.g., English *st/nd/rd*, French *er/e*, Swedish *a/e*).
+
 ### Localization
 - **Architecture**: Leverages the `io.github.aughtone.types.locale.Locale` system for language-specific rules.
-- **Functional Parity**: All core formatters (Ordinal, Number, Duration, Relative Time) support a common set of **51 languages**.
+- **Functional Parity**: All core formatters (Ordinal, Number, Duration, Relative Time) support a common set of **55 languages**.
 - **BCP 47 Subtag Fallback**: All formatters walk the full subtag chain before falling back to the base language code, then to English. e.g., `fr-CA` → `fr` → `en`.
 - **Patterns**:
     - **Separators**: Automatically applied based on locale (e.g., `,` vs `.` vs ` ` for grouping).
-    - **Pluralization**: Handled via localized unit resource maps (singular/plural).
+    - **Grammatical Numbers**: Handled via localized plural category factories (`u2`, `u3`, `u4`, `u6`) to ensure correct linguistic form for all counts.
 
 ### Regional Variants
 Some locales require overrides that differ from their base language. Only documented, well-established differences are implemented.
@@ -85,3 +90,30 @@ Some locales require overrides that differ from their base language. Only docume
 | Tag | Region | Difference |
 |---|---|---|
 | `en-ZA` | South African English | Uses `"now now"` as the threshold phrase instead of `"just now"`, which means "sometime later" in SA English |
+
+---
+
+## 📅 Datetime Module (`:datetime`)
+
+The goal of this module is to provide localized date and time formatting using `kotlinx-datetime` primitives, optimized for Kotlin Multiplatform.
+
+### Features
+
+#### 1. Core Formatting
+Provides standard styles for `LocalDate`, `LocalTime`, `LocalDateTime`, and `Instant`.
+- **Styles**: `Short`, `Medium`, `Long`, `Full`.
+- **24-Hour Master Strategy**: All internal resource patterns are stored in 24-hour (`HH:mm`) format. The formatting logic dynamically converts these to 12-hour format at runtime based on the locale's default or explicit user preference, ensuring consistent localization of AM/PM markers.
+
+#### 2. Era Overrides
+Allows users to inject custom labels for Eras (BCE/CE), useful for historical research or specific regional naming conventions.
+- **API**: `eraNames` parameter in `format()` extensions.
+
+#### 3. Numbering Systems
+Supports replacing Latin digits with localized digit sets (e.g., Arabic-Indic, Devanagari, Thai).
+- **API**: `numberingSystem` parameter in `format()` extensions.
+- **Scope**: Applied to all numeric components of the formatted string.
+
+### Localization
+- **Language Support**: Consistent **55-language** coverage, aligned with the `:readable` module.
+- **Resource Management**: Uses a thread-safe, bounded caching system for BCP 47 resource lookups.
+- **CLDR Compatibility**: Automatically sanitizes patterns to remove unsupported tokens while maintaining platform consistency.

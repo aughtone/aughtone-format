@@ -22,10 +22,14 @@ import io.github.aughtone.datetime.format.resources.values.MonthNamesResource
 import io.github.aughtone.datetime.format.resources.values.text.TextResource
 import io.github.aughtone.datetime.format.resources.values.text.TextResourceMap
 import io.github.aughtone.types.locale.Locale
+import io.github.aughtone.types.locale.toLanguageTag
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.format.DateTimeFormat
+
+import kotlin.concurrent.Volatile
+import io.github.aughtone.datetime.format.resources.formats.PatternSanitizer
 
 enum class FormatStyle {
     SHORT, MEDIUM, LONG, FULL
@@ -33,22 +37,89 @@ enum class FormatStyle {
 
 object Resources {
 
-    private val defaultLocale = Locale(languageCode = "en", regionCode = "US", displayName = "en-US")
     private const val defaultFallbackKey = "US"
     private const val defaultLanguageFallbackKey = "en"
     private const val defaultTextResourceKey = "en"
     private const val defaultEraNamesResourceKey = "en"
+    private const val MAX_CACHE_SIZE = 100
 
-    private fun getLanguageRegionKey(locale: Locale): String? {
-        return locale.regionCode?.let { "${locale.languageCode}-$it" }
+    // ── Cache (Thread-safe via @Volatile replacement) ─────────────────────────
+    @Volatile private var amPmCache = emptyMap<String, AmPmStrings>()
+    @Volatile private var timePatternsCache = emptyMap<String, TimePatterns>()
+    @Volatile private var datePatternsCache = emptyMap<String, DatePatterns>()
+    @Volatile private var dayOfWeekNamesCache = emptyMap<String, DayOfWeekNamesResource>()
+    @Volatile private var monthNamesCache = emptyMap<String, MonthNamesResource>()
+    @Volatile private var textResourceCache = emptyMap<String, TextResource>()
+    @Volatile private var clockHoursCache = emptyMap<String, ClockHours>()
+    @Volatile private var eraNamesCache = emptyMap<String, EraNamesResource>()
+
+    private fun <T> lookup(
+        locale: Locale,
+        getCurrentCache: () -> Map<String, T>,
+        updateCache: (Map<String, T>) -> Unit,
+        source: Map<String, T>,
+        defaultKey: String,
+        sanitizer: ((T) -> T)? = null,
+    ): T {
+        val tag = locale.toLanguageTag()
+        val currentCache = getCurrentCache()
+        currentCache[tag]?.let { return it }
+
+        val lang = locale.languageCode
+        val region = locale.regionCode
+        val langRegion = region?.let { "${lang}-$it" }
+
+        val rawResolved = source[langRegion]
+            ?: source[region]
+            ?: source[lang]
+            ?: source.getValue(defaultKey)
+
+        val resolved = sanitizer?.invoke(rawResolved) ?: rawResolved
+
+        // Atomic-ish update (last writer wins, which is fine for idempotent cache)
+        val oldCache = getCurrentCache()
+        if (!oldCache.containsKey(tag)) {
+            val newCache = if (oldCache.size >= MAX_CACHE_SIZE) {
+                mapOf(tag to resolved)
+            } else {
+                oldCache + (tag to resolved)
+            }
+            updateCache(newCache)
+        }
+
+        return resolved
     }
 
-    private fun getRegionKey(locale: Locale): String? {
-        return locale.regionCode
-    }
+    private fun <T> lookupOptional(
+        locale: Locale,
+        getCurrentCache: () -> Map<String, T>,
+        updateCache: (Map<String, T>) -> Unit,
+        source: Map<String, T?>,
+    ): T? {
+        val tag = locale.toLanguageTag()
+        val currentCache = getCurrentCache()
+        if (currentCache.containsKey(tag)) return currentCache[tag]
 
-    private fun getLanguageKey(locale: Locale): String? {
-        return locale.languageCode.takeIf { it.isNotEmpty() }
+        val lang = locale.languageCode
+        val region = locale.regionCode
+        val langRegion = region?.let { "${lang}-$it" }
+
+        val resolved = source[langRegion]
+            ?: source[region]
+            ?: source[lang]
+
+        if (resolved != null) {
+            val oldCache = getCurrentCache()
+            if (!oldCache.containsKey(tag)) {
+                val newCache = if (oldCache.size >= MAX_CACHE_SIZE) {
+                    mapOf(tag to resolved)
+                } else {
+                    oldCache + (tag to resolved)
+                }
+                updateCache(newCache)
+            }
+        }
+        return resolved
     }
 
     fun getDateFormat(locale: Locale, timeZone: TimeZone, style: FormatStyle): DateTimeFormat<LocalDate> {
@@ -76,105 +147,53 @@ object Resources {
         }
     }
 
-    internal fun getAmPmStrings(locale: Locale): AmPmStrings {
-        val langRegionKey = getLanguageRegionKey(locale)
-        val regionKey = getRegionKey(locale)
-        val languageKey = getLanguageKey(locale)
+    internal fun getAmPmStrings(locale: Locale): AmPmStrings =
+        lookup(locale, { amPmCache }, { amPmCache = it }, localeAmPmStrings, defaultFallbackKey)
 
-        return localeAmPmStrings[langRegionKey]
-            ?: localeAmPmStrings[regionKey]
-            ?: localeAmPmStrings[languageKey]
-            ?: localeAmPmStrings.getValue(defaultFallbackKey)
-    }
+    internal fun getTimePatterns(locale: Locale): TimePatterns =
+        lookup(
+            locale, 
+            { timePatternsCache }, 
+            { timePatternsCache = it },
+            localeTimePatterns.mapValues { it.value.value }, 
+            defaultFallbackKey
+        ) { patterns ->
+            TimePatterns(
+                short = PatternSanitizer.sanitize(patterns.short),
+                medium = PatternSanitizer.sanitize(patterns.medium),
+                long = PatternSanitizer.sanitize(patterns.long),
+                full = PatternSanitizer.sanitize(patterns.full)
+            )
+        }
 
-    internal fun getTimePatterns(locale: Locale): TimePatterns {
-        val langRegionKey = getLanguageRegionKey(locale)
-        val regionKey = getRegionKey(locale)
-        val languageKey = getLanguageKey(locale)
+    internal fun getDatePatterns(locale: Locale): DatePatterns =
+        lookup(locale, { datePatternsCache }, { datePatternsCache = it }, localeDatePatterns, defaultFallbackKey) { patterns ->
+            DatePatterns(
+                short = PatternSanitizer.sanitize(patterns.short),
+                medium = PatternSanitizer.sanitize(patterns.medium),
+                long = PatternSanitizer.sanitize(patterns.long),
+                full = PatternSanitizer.sanitize(patterns.full)
+            )
+        }
 
-        return localeTimePatterns[langRegionKey]?.value
-            ?: localeTimePatterns[regionKey]?.value
-            ?: localeTimePatterns[languageKey]?.value
-            ?: localeTimePatterns.getValue(defaultFallbackKey).value
-    }
+    internal fun getDayOfWeekNamesResource(locale: Locale): DayOfWeekNamesResource =
+        lookup(locale, { dayOfWeekNamesCache }, { dayOfWeekNamesCache = it }, localeDayOfWeekNamesSource.mapValues { it.value.value }, defaultLanguageFallbackKey)
 
-    internal fun getDatePatterns(locale: Locale): DatePatterns {
-        val langRegionKey = getLanguageRegionKey(locale)
-        val regionKey = getRegionKey(locale)
-        val languageKey = getLanguageKey(locale)
+    internal fun getMonthNamesResource(locale: Locale): MonthNamesResource =
+        lookup(locale, { monthNamesCache }, { monthNamesCache = it }, localeMonthNamesSource.mapValues { it.value.value }, defaultLanguageFallbackKey)
 
-        return localeDatePatterns[langRegionKey]
-            ?: localeDatePatterns[regionKey]
-            ?: localeDatePatterns[languageKey]
-            ?: localeDatePatterns.getValue(defaultFallbackKey)
-    }
+    fun getText(locale: Locale): TextResource =
+        lookup(locale, { textResourceCache }, { textResourceCache = it }, TextResourceMap.map, defaultTextResourceKey)
 
-    internal fun getDayOfWeekNamesResource(locale: Locale): DayOfWeekNamesResource {
-        val langRegionKey = getLanguageRegionKey(locale)
-        val regionKey = getRegionKey(locale)
-        val languageKey = getLanguageKey(locale)
-
-        return localeDayOfWeekNamesSource[langRegionKey]?.value
-            ?: localeDayOfWeekNamesSource[regionKey]?.value
-            ?: localeDayOfWeekNamesSource[languageKey]?.value
-            ?: localeDayOfWeekNamesSource.getValue(defaultLanguageFallbackKey).value
-    }
-
-    internal fun getMonthNamesResource(locale: Locale): MonthNamesResource {
-        val langRegionKey = getLanguageRegionKey(locale)
-        val regionKey = getRegionKey(locale)
-        val languageKey = getLanguageKey(locale)
-
-        return localeMonthNamesSource[langRegionKey]?.value
-            ?: localeMonthNamesSource[regionKey]?.value
-            ?: localeMonthNamesSource[languageKey]?.value
-            ?: localeMonthNamesSource.getValue(defaultLanguageFallbackKey).value
-    }
-
-    private fun getTextResource(locale: Locale): TextResource {
-        val langRegionKey = getLanguageRegionKey(locale)
-        val regionKey = getRegionKey(locale)
-        val languageKey = getLanguageKey(locale)
-
-        return TextResourceMap.map[langRegionKey]
-            ?: TextResourceMap.map[regionKey]
-            ?: TextResourceMap.map[languageKey]
-            ?: TextResourceMap.map.getValue(defaultTextResourceKey)
-    }
-
-    fun getText(
-        locale: Locale,
-    ): TextResource = getTextResource(locale)
-
-    private fun getClockHoursResource(locale: Locale): ClockHours {
-        val langRegionKey = getLanguageRegionKey(locale)
-        val regionKey = getRegionKey(locale)
-        val languageKey = getLanguageKey(locale)
-
-        // Try specific language-region, then region-only. Default to 24-hour if neither indicates 12-hour.
-        return localeClockHoursSource[langRegionKey]?.value
-            ?: localeClockHoursSource[regionKey]?.value
-            ?: localeClockHoursSource[languageKey]?.value
+    fun getClockHours(locale: Locale): ClockHours =
+        lookupOptional(locale, { clockHoursCache }, { clockHoursCache = it }, localeClockHoursSource.mapValues { it.value.value })
             ?: ClockHoursResource(is24hour = true, hours = ClockType.C24Hour)
-    }
 
-    fun getClockHours(locale: Locale): ClockHours = getClockHoursResource(locale)
-
-    private fun getEraNamesResource(locale: Locale): EraNamesResource {
-        val langRegionKey = getLanguageRegionKey(locale)
-        val regionKey = getRegionKey(locale)
-        val languageKey = getLanguageKey(locale)
-
-        return localeEraNamesSource[langRegionKey]?.value
-            ?: localeEraNamesSource[regionKey]?.value
-            ?: localeEraNamesSource[languageKey]?.value
-            ?: localeEraNamesSource.getValue(defaultEraNamesResourceKey).value
-    }
+    private fun getEraNamesResource(locale: Locale): EraNamesResource =
+        lookup(locale, { eraNamesCache }, { eraNamesCache = it }, localeEraNamesSource.mapValues { it.value.value }, defaultEraNamesResourceKey)
 
     fun getEraNames(locale: Locale, abbreviated: Boolean): EraNames =
-        with(
-            getEraNamesResource(locale)
-        ) {
+        with(getEraNamesResource(locale)) {
             if (abbreviated) this.abbreviated else this.full
         }
 }

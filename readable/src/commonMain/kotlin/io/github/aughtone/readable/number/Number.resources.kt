@@ -48,11 +48,11 @@ private fun separatorsFor(tag: String): Pair<String, String>? = when (tag) {
 
     // ── Language-level rules ──────────────────────────────────────────────────
     // Comma decimal, Space grouping
-    "fr", "sv", "ru", "cs", "sk", "pl", "fi", "no", "nb", "nn" -> "," to " "
+    "fr", "sv", "ru", "cs", "sk", "pl", "fi", "no", "nb", "nn", "hy" -> "," to " "
     // Comma decimal, Dot grouping
     "de", "it", "es", "pt", "nl", "tr", "el", "bg", "hu", "ro",
     "sl", "hr", "sq", "sr", "et", "lv", "lt", "mk", "uz", "az",
-    "be", "kk", "uk", "is", "gl", "ca", "da", "eu" -> "," to "."
+    "be", "kk", "uk", "is", "gl", "ca", "da", "eu", "ka" -> "," to "."
     // Dot decimal, Comma grouping (en, zh, ja, ko, th, hi, id, ms, ar, fa, sw, vi, af, …)
     else -> null  // null = use dot/comma default at call site
 }

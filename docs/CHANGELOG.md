@@ -7,14 +7,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [Unreleased]
 
 ### Added
+- **Pluralization Engine**: Integrated a Unicode CLDR-compliant **Plural Category Engine** (`pluralCategoryFor`, `ordinalCategoryFor`) for accurate grammatical parity across 55+ languages.
+- **Grammatical Factories**: Implemented multi-form factories (`u2` through `u6`) to handle varied linguistic complexity (Slavic, Arabic, Hebrew, Inuktitut).
+- **GeoResources Expansion**: Full **55-language coverage** for cardinal directions with robust, recursive BCP 47 subtag fallback.
+
+### Changed
+- **Duration & Relative Time Refactor**: Migrated all durations and relative time strings to the `PluralCategory` architecture, replacing simple singular/plural logic with grammatical classification.
+- **Ordinality System**: Enhanced ordinal suffix formatting to use grammatical categories, supporting complex rules like Swedish/Danish (`:a/:e`) and French (`er/e`).
+- **BCP 47 Fallback Fix**: Hardened the resource construction loop to ensure regional variants correctly leverage their current subtag during the fallback search.
+- **Number Formatting**: Corrected decimal and grouping separators for Armenian (`hy`) and Georgian (`ka`) to align with regional standards.
+
+### Added (Legacy)
 - **AughtOne AI-Skill**: Integrated the **AughtOne AI-Skill Publishing Standard** across all modules (`readable`, `toolbox`, `datetime`).
 - **Readable Module Expansion**:
-    - **Relative Time Formatting**: New `Instant.toReadableRelativeTime(locale, now, nowThreshold)` extension. Supports 51 languages, configurable `now` reference (default `Clock.System.now()`), and a configurable `nowThreshold` (default 5 seconds).
-    - **Duration Formatting**: Smart-scaling durations (s, m, h, d, w, mo, y) with human-centric rounding and 51-language support.
-    - **Geospatial Formatting**: Localized formatting for `Altitude`, `Azimuth` (cardinal directions), and `Coordinates` (DD/DMS).
+    - **Relative Time Formatting**: New `Instant.toReadableRelativeTime(locale, now, nowThreshold)` extension. Supports **55 languages**, configurable `now` reference (default `Clock.System.now()`), and a configurable `nowThreshold` (default 5 seconds).
+    - **Temporal Extensions**: Added `LocalDateTime.toReadableRelativeTime()` and `LocalDate.toReadableRelativeTime()` extension functions for direct relative formatting.
+    - **Duration Formatting**: Smart-scaling durations (s, m, h, d, w, mo, y) with human-centric rounding and **55-language** support.
+    - **Geospatial Formatting**: Localized formatting for `Altitude`, `Azimuth`, and `Coordinates` (DD/DMS). **Cardinal directions are now localized** across 55 languages.
     - **Numeric Standardization**: Standardized `toReadable*` and `formatReadable` naming conventions.
     - **Functional Architecture**: Refactored all formatters to use "baked" lambdas (`Formatter<T>`) for high performance and immutability.
-- **Ordinality System**: Established the functional resource map infrastructure for locale-aware formatting across 51 languages.
+- **Ordinality System**: Established the functional resource map infrastructure for locale-aware formatting across **55 languages**, including new support for **Hebrew**, **Armenian**, and **Georgian**.
 - **Project Structure**: Created the `:readable` and `:toolbox` modules.
 
 ### Changed
@@ -28,3 +40,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - **`it-CH`** (Number): Period decimal, apostrophe grouping — `1'234.56` (follows Swiss convention, not Italian).
 - **`zh-TW`** (Duration): Traditional Chinese characters — `小時` (hour), `週` (week).
 - **`en-ZA`** (RelativeTime): Uses `"now now"` as the threshold phrase — `"just now"` means "sometime later" in South African English.
+- **`he`, `hy`, `ka`, `iu`** (Resources): Added full resource parity for Hebrew, Armenian, Georgian, and Inuktitut across all readable modules.
+
+### Cleaned
+- **Datetime Module Optimization**:
+    - **Architecture**: Implemented a thread-safe, lock-free `@Volatile` map caching system in `Resources.kt` with a 100-entry bound to prevent memory leaks.
+    - **Resource Completeness**: Reconciled language support with the `:readable` module, expanding from 26 to **55 supported languages**.
+    - **BCP 47 Standard**: Normalized all internal resource keys to hyphenated BCP 47 tags for consistent cross-module lookups.
+    - **CLDR Sanitization**: Automated stripping of unsupported CLDR tokens ('B', 'v', 'V') to ensure formatter stability.
+    - **Era Overrides**: Added optional `EraNames` overrides to `format` extensions for localized or context-specific era labeling.
+    - **Numbering Systems**: Introduced `NumberingSystem` support (e.g., Arabic-Indic, Devanagari) allowing digit replacement for full localization across numeric parts of dates and times.
+    - **Legacy Removal**: Migrated relative time and duration formatting to the `:readable` module and cleaned up `TextResource` implementations.

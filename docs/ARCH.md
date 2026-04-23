@@ -45,7 +45,14 @@ All formatters use a **subtag fallback chain** for locale lookup:
 This means regional variants only need to be registered when they genuinely differ from the base language. All other region codes (e.g., `fr-CA`, `pt-BR`) automatically inherit the correct base language rules.
 
 ### 6. Lazy Resource Caching
-All resource maps use an **on-demand `MutableMap` cache** pattern:
-- A `buildX(tag: String)` factory function (a `when` switch) constructs a formatter only when first requested.
-- The result is stored in `xCache` and returned directly on every subsequent call.
+All resource maps use a **thread-safe, on-demand caching** pattern:
+- A `buildX(tag: String)` factory function constructs a formatter only when first requested.
+- The result is stored in a **`@Volatile` immutable map** which is replaced upon new entries.
+- **Boundedness**: Caches are limited to **100 entries** to prevent memory leaks in long-running processes, easily covering the **55 core locales** supported by the library.
 - **Zero allocation** for locales that are never used at runtime.
+### 7. Grammatical Parity & Plural Categorization
+The library implements a **Unicode CLDR-compliant Plural Category Engine** (`PluralCategory.kt`).
+- **Classification**: Logic to determine if a number belongs to `Zero`, `One`, `Two`, `Few`, `Many`, or `Other` is centralized.
+- **Factory Pattern**: Resource files use standard factories (`u2`, `u3`, `u4`, `u6`) to map these categories to pluralized strings based on language complexity.
+- **Ordinal Categories**: Support for language-specific ordinal classification (e.g., French "er/re" vs English "st/nd/rd").
+- **Stateless Grammars**: Plural logic is passed into formatters at construction, keeping the formatting loop extremely fast and zero-allocation.

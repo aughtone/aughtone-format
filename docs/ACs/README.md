@@ -27,4 +27,13 @@ This document tracks the verification goals for the Aughtone Format library feat
 ### 1. Core Formatting
 - [x] Supports `LocalDate`, `LocalTime`, and `LocalDateTime`.
 - [x] Migrated to `kotlin.time.Instant` (Standard Library).
-- [x] Integrated with `:readable` for relative time formatting.
+- [x] Relative time formatting migrated to `:readable` module.
+
+### 2. Localization Hardening
+- [x] Verified **51-language** resource coverage.
+- [x] Implementation of thread-safe, bounded resource caching (`@Volatile`).
+- [x] Removal of legacy compiler flags and redundant dependencies.
+
+### 3. Advanced Features
+- [x] **Era Overrides**: Custom BCE/CE labels correctly injected into patterns.
+- [x] **Numbering Systems**: Correct replacement of Latin digits with localized digit sets (e.g., Arabic-Indic).

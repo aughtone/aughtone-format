@@ -23,7 +23,7 @@ fun Altitude.formatReadable(locale: Locale = currentNativeLocale(), precision: I
  */
 fun Azimuth.formatReadable(locale: Locale = currentNativeLocale(), precision: Int = 0): String {
     val formatter = numberFormatterFor(locale, precision)
-    val cardinal = getCardinalDirection(degrees)
+    val cardinal = getCardinalDirection(degrees, locale)
     return "${formatter(degrees)}° ($cardinal)"
 }
 
@@ -42,8 +42,9 @@ fun Coordinates.formatReadable(
 
 private fun Coordinates.toDecimalDegrees(locale: Locale): String {
     val formatter = numberFormatterFor(locale, 4)
-    val latDir = if (latitude >= 0) "N" else "S"
-    val lonDir = if (longitude >= 0) "E" else "W"
+    val directions = GeoResources.cardinalDirectionsFor(locale)
+    val latDir = if (latitude >= 0) directions[0] else directions[4] // N or S
+    val lonDir = if (longitude >= 0) directions[2] else directions[6] // E or W
     
     return "${formatter(abs(latitude))}° $latDir, ${formatter(abs(longitude))}° $lonDir"
 }
@@ -61,18 +62,19 @@ private fun formatDMS(value: Double, isLatitude: Boolean, locale: Locale): Strin
     val minutes = minutesDouble.toInt()
     val seconds = ((minutesDouble - minutes) * 60.0).toInt()
     
+    val directions = GeoResources.cardinalDirectionsFor(locale)
     val direction = if (isLatitude) {
-        if (value >= 0) "N" else "S"
+        if (value >= 0) directions[0] else directions[4] // N or S
     } else {
-        if (value >= 0) "E" else "W"
+        if (value >= 0) directions[2] else directions[6] // E or W
     }
     
     val formatter = numberFormatterFor(locale, 0)
     return "${formatter(degrees.toDouble())}° ${formatter(minutes.toDouble())}' ${formatter(seconds.toDouble())}\" $direction"
 }
 
-private fun getCardinalDirection(degrees: Double): String {
-    val directions = listOf("N", "NE", "E", "SE", "S", "SW", "W", "NW")
+private fun getCardinalDirection(degrees: Double, locale: Locale): String {
+    val directions = GeoResources.cardinalDirectionsFor(locale)
     val index = ((degrees + 22.5) / 45.0).toInt() % 8
     return directions[index]
 }

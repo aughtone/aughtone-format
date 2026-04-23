@@ -31,6 +31,8 @@ internal val localeClockHoursSource by lazy {
         "PK" to lazy { ClockHoursResource(is24hour = false, hours = ClockType.C12Hour) },
         "US" to lazy { ClockHoursResource(is24hour = false, hours = ClockType.C12Hour) },
         "ZA" to lazy { ClockHoursResource(is24hour = false, hours = ClockType.C12Hour) },
-        "af-ZA" to lazy { ClockHoursResource(is24hour = true, hours = ClockType.C24Hour) }
+        "af-ZA" to lazy { ClockHoursResource(is24hour = true, hours = ClockType.C24Hour) },
+        "sv" to lazy { ClockHoursResource(is24hour = true, hours = ClockType.C24Hour) },
+        "ko" to lazy { ClockHoursResource(is24hour = false, hours = ClockType.C12Hour) }
     )
 }

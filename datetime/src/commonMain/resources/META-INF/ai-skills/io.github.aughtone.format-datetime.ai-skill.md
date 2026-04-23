@@ -15,28 +15,28 @@ This library provides multiplatform formatting for date and time types, designed
 
 ### **Date & Time Extensions**
 These extensions are available on standard `kotlinx-datetime` types:
-- `LocalDate.format(dateStyle: DateTimeStyle, locale: Locale?): String`
-    - **Usage**: `myDate.format(DateTimeStyle.Long)`
-- `LocalTime.format(timeStyle: DateTimeStyle, locale: Locale?): String`
-- `LocalDateTime.format(dateStyle: DateTimeStyle, timeStyle: DateTimeStyle, locale: Locale?): String`
-    - **Usage**: `now.format(DateTimeStyle.Medium, DateTimeStyle.Short)`
+- `LocalDate.format(dateStyle: DateTimeStyle, locale: Locale?, numberingSystem: NumberingSystem?): String`
+- `LocalTime.format(timeStyle: DateTimeStyle, locale: Locale?, numberingSystem: NumberingSystem?): String`
+- `LocalDateTime.format(dateStyle: DateTimeStyle, timeStyle: DateTimeStyle, locale: Locale?, eraNames: EraNames?, numberingSystem: NumberingSystem?): String`
+- `Instant.format(dateStyle: DateTimeStyle, timeStyle: DateTimeStyle, locale: Locale?, eraNames: EraNames?, numberingSystem: NumberingSystem?): String`
 
-### **Relative Formatting**
-- `MultiplatformDurationFormatter.formatRelative(duration, style, relativeTime, locale): String`
-    - **Usage**: `duration.formatRelative(RelativeStyle.Long, RelativeTime.Past)` -> "2 hours ago"
+### **Advanced Options**
+- **Era Overrides**: Pass `EraNames` (bce/ce strings) to override default era labels.
+- **Numbering Systems**: Pass `NumberingSystem` (e.g., `ARAB`, `DEVA`, `THAI`) to replace Latin digits with localized digits.
 
 ### **Available Styles (`DateTimeStyle`)**
 - `Short`: Numerical (e.g., 12/21/23).
 - `Medium`: Abbreviated month (e.g., Dec 21, 2023).
 - `Long`: Full month (e.g., December 21, 2023).
-- `Full`: Includes day of week (e.g., Friday, December 21, 2023).
+- `Full`: Includes day of week and Era (e.g., Friday, December 21, 2023 AD).
 - `None`: Excludes the component.
 
 ## 📜 Compliance & Standards
 
 - **Locales**: Strictly uses `io.github.aughtone.types.locale.Locale` (BCP 47).
 - **Time Types**: Operates on `kotlinx-datetime` (`LocalDate`, `LocalTime`, `LocalDateTime`).
-- **Internationalization**: Resources are internally mapped to handle pluralization and grammatical cases (e.g., for relative time in German/French).
+- **Internationalization**: Resources are internally mapped to handle 55 core locales, pluralization, and grammatical cases.
+- **24-Hour Master Strategy**: All internal resource patterns are stored in 24-hour (`HH:mm`) format. The formatting logic dynamically converts these to 12-hour format at runtime based on the locale's default or explicit user preference.
 
 ## 🤖 Agent Onboarding
 1. **Context Registration**: Add this skill file to the `AGENTS.md` of the consuming project.

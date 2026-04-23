@@ -690,6 +690,1062 @@ internal val localeMonthNamesSource = mapOf(
             )
         )
     },
+    "af" to lazy {
+        MonthNamesData(
+            full = MonthNames(
+                january = "Januarie",
+                february = "Februarie",
+                march = "Maart",
+                april = "April",
+                may = "Mei",
+                june = "Junie",
+                july = "Julie",
+                august = "Augustus",
+                september = "September",
+                october = "Oktober",
+                november = "November",
+                december = "Desember"
+            ),
+            abbreviated = MonthNames(
+                january = "Jan.",
+                february = "Feb.",
+                march = "Mrt.",
+                april = "Apr.",
+                may = "Mei",
+                june = "Jun.",
+                july = "Jul.",
+                august = "Aug.",
+                september = "Sep.",
+                october = "Okt.",
+                november = "Nov.",
+                december = "Des."
+            )
+        )
+    },
+    "az" to lazy {
+        MonthNamesData(
+            full = MonthNames(
+                january = "yanvar",
+                february = "fevral",
+                march = "mart",
+                april = "aprel",
+                may = "may",
+                june = "iyun",
+                july = "iyul",
+                august = "avqust",
+                september = "sentyabr",
+                october = "oktyabr",
+                november = "noyabr",
+                december = "dekabr"
+            ),
+            abbreviated = MonthNames(
+                january = "yan",
+                february = "fev",
+                march = "mar",
+                april = "apr",
+                may = "may",
+                june = "iyn",
+                july = "iyl",
+                august = "avq",
+                september = "sen",
+                october = "okt",
+                november = "noy",
+                december = "dek"
+            )
+        )
+    },
+    "be" to lazy {
+        MonthNamesData(
+            full = MonthNames(
+                january = "студзеня",
+                february = "лютага",
+                march = "сакавіка",
+                april = "красавіка",
+                may = "мая",
+                june = "чэрвеня",
+                july = "ліпеня",
+                august = "жніўня",
+                september = "верасня",
+                october = "кастрычніка",
+                november = "лістапада",
+                december = "снежня"
+            ),
+            abbreviated = MonthNames(
+                january = "сту",
+                february = "лют",
+                march = "сак",
+                april = "кра",
+                may = "мая",
+                june = "чэр",
+                july = "ліп",
+                august = "жні",
+                september = "вер",
+                october = "кас",
+                november = "ліс",
+                december = "сне"
+            )
+        )
+    },
+    "bg" to lazy {
+        MonthNamesData(
+            full = MonthNames(
+                january = "януари",
+                february = "февруари",
+                march = "март",
+                april = "април",
+                may = "май",
+                june = "юни",
+                july = "юли",
+                august = "август",
+                september = "септември",
+                october = "октомври",
+                november = "ноември",
+                december = "декември"
+            ),
+            abbreviated = MonthNames(
+                january = "яну",
+                february = "фев",
+                march = "март",
+                april = "апр",
+                may = "май",
+                june = "юни",
+                july = "юли",
+                august = "авг",
+                september = "сеп",
+                october = "окт",
+                november = "ное",
+                december = "дек"
+            )
+        )
+    },
+    "ca" to lazy {
+        MonthNamesData(
+            full = MonthNames(
+                january = "de gener",
+                february = "de febrer",
+                march = "de març",
+                april = "d’abril",
+                may = "de maig",
+                june = "de juny",
+                july = "de juliol",
+                august = "d’agost",
+                september = "de setembre",
+                october = "d’octubre",
+                november = "de novembre",
+                december = "de desembre"
+            ),
+            abbreviated = MonthNames(
+                january = "de gen.",
+                february = "de febr.",
+                march = "de març",
+                april = "d’abr.",
+                may = "de maig",
+                june = "de juny",
+                july = "de jul.",
+                august = "d’ag.",
+                september = "de set.",
+                october = "d’oct.",
+                november = "de nov.",
+                december = "de des."
+            )
+        )
+    },
+    "da" to lazy {
+        MonthNamesData(
+            full = MonthNames(
+                january = "januar",
+                february = "februar",
+                march = "marts",
+                april = "april",
+                may = "maj",
+                june = "juni",
+                july = "juli",
+                august = "august",
+                september = "september",
+                october = "oktober",
+                november = "november",
+                december = "december"
+            ),
+            abbreviated = MonthNames(
+                january = "jan.",
+                february = "feb.",
+                march = "mar.",
+                april = "apr.",
+                may = "maj",
+                june = "jun.",
+                july = "jul.",
+                august = "aug.",
+                september = "sep.",
+                october = "okt.",
+                november = "nov.",
+                december = "dec."
+            )
+        )
+    },
+    "el" to lazy {
+        MonthNamesData(
+            full = MonthNames(
+                january = "Ιανουαρίου",
+                february = "Φεβρουαρίου",
+                march = "Μαρτίου",
+                april = "Απριλίου",
+                may = "Μαΐου",
+                june = "Ιουνίου",
+                july = "Ιουλίου",
+                august = "Αυγούστου",
+                september = "Σεπτεμβρίου",
+                october = "Οκτωβρίου",
+                november = "Νοεμβρίου",
+                december = "Δεκεμβρίου"
+            ),
+            abbreviated = MonthNames(
+                january = "Ιαν",
+                february = "Φεβ",
+                march = "Μαρ",
+                april = "Απρ",
+                may = "Μαΐ",
+                june = "Ιουν",
+                july = "Ιουλ",
+                august = "Αυγ",
+                september = "Σεπ",
+                october = "Οκτ",
+                november = "Νοε",
+                december = "Δεκ"
+            )
+        )
+    },
+    "et" to lazy {
+        MonthNamesData(
+            full = MonthNames(
+                january = "jaanuar",
+                february = "veebruar",
+                march = "märts",
+                april = "aprill",
+                may = "mai",
+                june = "juuni",
+                july = "juuli",
+                august = "august",
+                september = "september",
+                october = "oktoober",
+                november = "november",
+                december = "detsember"
+            ),
+            abbreviated = MonthNames(
+                january = "jaan",
+                february = "veebr",
+                march = "märts",
+                april = "apr",
+                may = "mai",
+                june = "juuni",
+                july = "juuli",
+                august = "aug",
+                september = "sept",
+                october = "okt",
+                november = "nov",
+                december = "dets"
+            )
+        )
+    },
+    "eu" to lazy {
+        MonthNamesData(
+            full = MonthNames(
+                january = "urtarrila",
+                february = "otsaila",
+                march = "martxoa",
+                april = "apirila",
+                may = "maiatza",
+                june = "ekaina",
+                july = "uztaila",
+                august = "abuztua",
+                september = "iraila",
+                october = "urria",
+                november = "azaroa",
+                december = "abendua"
+            ),
+            abbreviated = MonthNames(
+                january = "urt.",
+                february = "ots.",
+                march = "mar.",
+                april = "api.",
+                may = "mai.",
+                june = "eka.",
+                july = "uzt.",
+                august = "abu.",
+                september = "ira.",
+                october = "urr.",
+                november = "aza.",
+                december = "abe."
+            )
+        )
+    },
+    "fa" to lazy {
+        MonthNamesData(
+            full = MonthNames(
+                january = "ژانویهٔ",
+                february = "فوریهٔ",
+                march = "مارس",
+                april = "آوریل",
+                may = "مهٔ",
+                june = "ژوئن",
+                july = "ژوئیهٔ",
+                august = "اوت",
+                september = "سپتامبر",
+                october = "اکتبر",
+                november = "نوامبر",
+                december = "دسامبر"
+            ),
+            abbreviated = MonthNames(
+                january = "ژانویه",
+                february = "فوریه",
+                march = "مارس",
+                april = "آوریل",
+                may = "مه",
+                june = "ژوئن",
+                july = "ژوئیه",
+                august = "اوت",
+                september = "سپتامبر",
+                october = "اکتبر",
+                november = "نوامبر",
+                december = "دسامبر"
+            )
+        )
+    },
+    "gl" to lazy {
+        MonthNamesData(
+            full = MonthNames(
+                january = "xaneiro",
+                february = "febreiro",
+                march = "marzo",
+                april = "abril",
+                may = "maio",
+                june = "xuño",
+                july = "xullo",
+                august = "agosto",
+                september = "setembro",
+                october = "outubro",
+                november = "novembro",
+                december = "decembro"
+            ),
+            abbreviated = MonthNames(
+                january = "xan.",
+                february = "feb.",
+                march = "mar.",
+                april = "abr.",
+                may = "maio",
+                june = "xuño",
+                july = "xul.",
+                august = "ago.",
+                september = "set.",
+                october = "out.",
+                november = "nov.",
+                december = "dec."
+            )
+        )
+    },
+    "he" to lazy {
+        MonthNamesData(
+            full = MonthNames(
+                january = "ינואר",
+                february = "פברואר",
+                march = "מרץ",
+                april = "אפריל",
+                may = "מאי",
+                june = "יוני",
+                july = "יולי",
+                august = "אוגוסט",
+                september = "ספטמבר",
+                october = "אוקטובר",
+                november = "נובמבר",
+                december = "דצמבר"
+            ),
+            abbreviated = MonthNames(
+                january = "ינו׳",
+                february = "פבר׳",
+                march = "מרץ",
+                april = "אפר׳",
+                may = "מאי",
+                june = "יוני",
+                july = "יולי",
+                august = "אוג׳",
+                september = "ספט׳",
+                october = "אוק׳",
+                november = "נוב׳",
+                december = "דצמ׳"
+            )
+        )
+    },
+    "hi" to lazy {
+        MonthNamesData(
+            full = MonthNames(
+                january = "जनवरी",
+                february = "फ़रवरी",
+                march = "मार्च",
+                april = "अप्रैल",
+                may = "मई",
+                june = "जून",
+                july = "जुलाई",
+                august = "अगस्त",
+                september = "सितंबर",
+                october = "अक्टूबर",
+                november = "नवंबर",
+                december = "दिसंबर"
+            ),
+            abbreviated = MonthNames(
+                january = "जन॰",
+                february = "फ़र॰",
+                march = "मार्च",
+                april = "अप्रैल",
+                may = "मई",
+                june = "जून",
+                july = "जुल॰",
+                august = "अग॰",
+                september = "सित॰",
+                october = "अक्टू॰",
+                november = "नव॰",
+                december = "दिस॰"
+            )
+        )
+    },
+    "hr" to lazy {
+        MonthNamesData(
+            full = MonthNames(
+                january = "siječnja",
+                february = "veljače",
+                march = "ožujka",
+                april = "travnja",
+                may = "svibnja",
+                june = "lipnja",
+                july = "srpnja",
+                august = "kolovoza",
+                september = "rujna",
+                october = "listopada",
+                november = "studenoga",
+                december = "prosinca"
+            ),
+            abbreviated = MonthNames(
+                january = "sij",
+                february = "velj",
+                march = "ožu",
+                april = "tra",
+                may = "svi",
+                june = "lip",
+                july = "srp",
+                august = "kol",
+                september = "ruj",
+                october = "lis",
+                november = "stu",
+                december = "pro"
+            )
+        )
+    },
+    "hu" to lazy {
+        MonthNamesData(
+            full = MonthNames(
+                january = "január",
+                february = "február",
+                march = "március",
+                april = "április",
+                may = "május",
+                june = "június",
+                july = "július",
+                august = "augusztus",
+                september = "szeptember",
+                october = "október",
+                november = "november",
+                december = "december"
+            ),
+            abbreviated = MonthNames(
+                january = "jan.",
+                february = "febr.",
+                march = "márc.",
+                april = "ápr.",
+                may = "máj.",
+                june = "jún.",
+                july = "júl.",
+                august = "aug.",
+                september = "szept.",
+                october = "okt.",
+                november = "nov.",
+                december = "dec."
+            )
+        )
+    },
+    "hy" to lazy {
+        MonthNamesData(
+            full = MonthNames(
+                january = "հունվարի",
+                february = "փետրվարի",
+                march = "մարտի",
+                april = "ապրիլի",
+                may = "մայիսի",
+                june = "հունիսի",
+                july = "հուլիսի",
+                august = "օգոստոսի",
+                september = "սեպտեմբերի",
+                october = "հոկտեմբերի",
+                november = "նոյեմբերի",
+                december = "դեկտեմբերի"
+            ),
+            abbreviated = MonthNames(
+                january = "հնվ",
+                february = "փտվ",
+                march = "մրտ",
+                april = "ապր",
+                may = "մյս",
+                june = "հնս",
+                july = "հլս",
+                august = "օգս",
+                september = "սեպ",
+                october = "հոկ",
+                november = "նոյ",
+                december = "դեկ"
+            )
+        )
+    },
+    "is" to lazy {
+        MonthNamesData(
+            full = MonthNames(
+                january = "janúar",
+                february = "febrúar",
+                march = "mars",
+                april = "apríl",
+                may = "maí",
+                june = "júní",
+                july = "júlí",
+                august = "ágúst",
+                september = "september",
+                october = "október",
+                november = "nóvember",
+                december = "desember"
+            ),
+            abbreviated = MonthNames(
+                january = "jan.",
+                february = "feb.",
+                march = "mar.",
+                april = "apr.",
+                may = "maí",
+                june = "jún.",
+                july = "júl.",
+                august = "ágú.",
+                september = "sep.",
+                october = "okt.",
+                november = "nóv.",
+                december = "des."
+            )
+        )
+    },
+    "ka" to lazy {
+        MonthNamesData(
+            full = MonthNames(
+                january = "იანვარი",
+                february = "თებერვალი",
+                march = "მარტი",
+                april = "აპრილი",
+                may = "მაისი",
+                june = "ივნისი",
+                july = "ივლისი",
+                august = "აგვისტო",
+                september = "სექტემბერი",
+                october = "ოქტომბერი",
+                november = "ნოემბერი",
+                december = "დეკემბერი"
+            ),
+            abbreviated = MonthNames(
+                january = "იან",
+                february = "თებ",
+                march = "მარ",
+                april = "აპრ",
+                may = "მაი",
+                june = "ივნ",
+                july = "ივლ",
+                august = "აგვ",
+                september = "სექ",
+                october = "ოქტ",
+                november = "ნოე",
+                december = "დეკ"
+            )
+        )
+    },
+    "lt" to lazy {
+        MonthNamesData(
+            full = MonthNames(
+                january = "sausio",
+                february = "vasario",
+                march = "kovo",
+                april = "balandžio",
+                may = "gegužės",
+                june = "birželio",
+                july = "liepos",
+                august = "rugpjūčio",
+                september = "rugsėjo",
+                october = "spalio",
+                november = "lapkričio",
+                december = "gruodžio"
+            ),
+            abbreviated = MonthNames(
+                january = "saus.",
+                february = "vas.",
+                march = "kov.",
+                april = "bal.",
+                may = "geg.",
+                june = "birž.",
+                july = "liep.",
+                august = "rugp.",
+                september = "rugs.",
+                october = "spal.",
+                november = "lapkr.",
+                december = "gruod."
+            )
+        )
+    },
+    "lv" to lazy {
+        MonthNamesData(
+            full = MonthNames(
+                january = "janvāris",
+                february = "februāris",
+                march = "marts",
+                april = "aprīlis",
+                may = "maijs",
+                june = "jūnijs",
+                july = "jūlijs",
+                august = "augusts",
+                september = "septembris",
+                october = "oktobris",
+                november = "novembris",
+                december = "decembris"
+            ),
+            abbreviated = MonthNames(
+                january = "janv.",
+                february = "febr.",
+                march = "marts",
+                april = "apr.",
+                may = "maijs",
+                june = "jūn.",
+                july = "jūl.",
+                august = "aug.",
+                september = "sept.",
+                october = "okt.",
+                november = "nov.",
+                december = "dec."
+            )
+        )
+    },
+    "mk" to lazy {
+        MonthNamesData(
+            full = MonthNames(
+                january = "јануари",
+                february = "февруари",
+                march = "март",
+                april = "април",
+                may = "мај",
+                june = "јуни",
+                july = "јули",
+                august = "август",
+                september = "септември",
+                october = "октомври",
+                november = "ноември",
+                december = "декември"
+            ),
+            abbreviated = MonthNames(
+                january = "јан.",
+                february = "фев.",
+                march = "мар.",
+                april = "апр.",
+                may = "мај",
+                june = "јун.",
+                july = "јул.",
+                august = "авг.",
+                september = "сеп.",
+                october = "окт.",
+                november = "ное.",
+                december = "дек."
+            )
+        )
+    },
+    "ms" to lazy {
+        MonthNamesData(
+            full = MonthNames(
+                january = "Januari",
+                february = "Februari",
+                march = "Mac",
+                april = "April",
+                may = "Mei",
+                june = "Jun",
+                july = "Julai",
+                august = "Ogos",
+                september = "September",
+                october = "Oktober",
+                november = "November",
+                december = "Disember"
+            ),
+            abbreviated = MonthNames(
+                january = "Jan",
+                february = "Feb",
+                march = "Mac",
+                april = "Apr",
+                may = "Mei",
+                june = "Jun",
+                july = "Jul",
+                august = "Ogo",
+                september = "Sep",
+                october = "Okt",
+                november = "Nov",
+                december = "Dis"
+            )
+        )
+    },
+    "nb" to lazy {
+        MonthNamesData(
+            full = MonthNames(
+                january = "januar",
+                february = "februar",
+                march = "mars",
+                april = "april",
+                may = "mai",
+                june = "juni",
+                july = "juli",
+                august = "august",
+                september = "september",
+                october = "oktober",
+                november = "november",
+                december = "desember"
+            ),
+            abbreviated = MonthNames(
+                january = "jan.",
+                february = "feb.",
+                march = "mars",
+                april = "apr.",
+                may = "mai",
+                june = "juni",
+                july = "juli",
+                august = "aug.",
+                september = "sep.",
+                october = "okt.",
+                november = "nov.",
+                december = "des."
+            )
+        )
+    },
+    "nn" to lazy {
+        MonthNamesData(
+            full = MonthNames(
+                january = "januar",
+                february = "februar",
+                march = "mars",
+                april = "april",
+                may = "mai",
+                june = "juni",
+                july = "juli",
+                august = "august",
+                september = "september",
+                october = "oktober",
+                november = "november",
+                december = "desember"
+            ),
+            abbreviated = MonthNames(
+                january = "jan.",
+                february = "feb.",
+                march = "mars",
+                april = "apr.",
+                may = "mai",
+                june = "juni",
+                july = "juli",
+                august = "aug.",
+                september = "sep.",
+                october = "okt.",
+                november = "nov.",
+                december = "des."
+            )
+        )
+    },
+    "no" to lazy {
+        MonthNamesData(
+            full = MonthNames(
+                january = "januar",
+                february = "februar",
+                march = "mars",
+                april = "april",
+                may = "mai",
+                june = "juni",
+                july = "juli",
+                august = "august",
+                september = "september",
+                october = "oktober",
+                november = "november",
+                december = "desember"
+            ),
+            abbreviated = MonthNames(
+                january = "jan.",
+                february = "feb.",
+                march = "mars",
+                april = "apr.",
+                may = "mai",
+                june = "juni",
+                july = "juli",
+                august = "aug.",
+                september = "sep.",
+                october = "okt.",
+                november = "nov.",
+                december = "des."
+            )
+        )
+    },
+    "ro" to lazy {
+        MonthNamesData(
+            full = MonthNames(
+                january = "ianuarie",
+                february = "februarie",
+                march = "martie",
+                april = "aprilie",
+                may = "mai",
+                june = "iunie",
+                july = "iulie",
+                august = "august",
+                september = "septembrie",
+                october = "octombrie",
+                november = "noiembrie",
+                december = "decembrie"
+            ),
+            abbreviated = MonthNames(
+                january = "ian.",
+                february = "febr.",
+                march = "mar.",
+                april = "apr.",
+                may = "mai",
+                june = "iun.",
+                july = "iul.",
+                august = "aug.",
+                september = "sept.",
+                october = "oct.",
+                november = "nov.",
+                december = "dec."
+            )
+        )
+    },
+    "sk" to lazy {
+        MonthNamesData(
+            full = MonthNames(
+                january = "januára",
+                february = "februára",
+                march = "marca",
+                april = "apríla",
+                may = "mája",
+                june = "júna",
+                july = "júla",
+                august = "augusta",
+                september = "septembra",
+                october = "októbra",
+                november = "novembra",
+                december = "decembra"
+            ),
+            abbreviated = MonthNames(
+                january = "jan",
+                february = "feb",
+                march = "mar",
+                april = "apr",
+                may = "máj",
+                june = "jún",
+                july = "júl",
+                august = "aug",
+                september = "sep",
+                october = "okt",
+                november = "nov",
+                december = "dec"
+            )
+        )
+    },
+    "sl" to lazy {
+        MonthNamesData(
+            full = MonthNames(
+                january = "januar",
+                february = "februar",
+                march = "marec",
+                april = "april",
+                may = "maj",
+                june = "junij",
+                july = "julij",
+                august = "avgust",
+                september = "september",
+                october = "oktober",
+                november = "november",
+                december = "december"
+            ),
+            abbreviated = MonthNames(
+                january = "jan.",
+                february = "feb.",
+                march = "mar.",
+                april = "apr.",
+                may = "maj",
+                june = "jun.",
+                july = "jul.",
+                august = "avg.",
+                september = "sep.",
+                october = "okt.",
+                november = "nov.",
+                december = "dec."
+            )
+        )
+    },
+    "sq" to lazy {
+        MonthNamesData(
+            full = MonthNames(
+                january = "janar",
+                february = "shkurt",
+                march = "mars",
+                april = "prill",
+                may = "maj",
+                june = "qershor",
+                july = "korrik",
+                august = "gusht",
+                september = "shtator",
+                october = "tetor",
+                november = "nëntor",
+                december = "dhjetor"
+            ),
+            abbreviated = MonthNames(
+                january = "jan",
+                february = "shk",
+                march = "mar",
+                april = "pri",
+                may = "maj",
+                june = "qer",
+                july = "kor",
+                august = "gush",
+                september = "sht",
+                october = "tet",
+                november = "nën",
+                december = "dhj"
+            )
+        )
+    },
+    "sr" to lazy {
+        MonthNamesData(
+            full = MonthNames(
+                january = "јануар",
+                february = "фебруар",
+                march = "март",
+                april = "април",
+                may = "мај",
+                june = "јун",
+                july = "јул",
+                august = "август",
+                september = "септембар",
+                october = "октобар",
+                november = "новембар",
+                december = "децембар"
+            ),
+            abbreviated = MonthNames(
+                january = "јан",
+                february = "феб",
+                march = "мар",
+                april = "апр",
+                may = "мај",
+                june = "јун",
+                july = "јул",
+                august = "авг",
+                september = "сеп",
+                october = "окт",
+                november = "нов",
+                december = "дец"
+            )
+        )
+    },
+    "sv" to lazy {
+        MonthNamesData(
+            full = MonthNames(
+                january = "januari",
+                february = "februari",
+                march = "mars",
+                april = "april",
+                may = "maj",
+                june = "juni",
+                july = "juli",
+                august = "augusti",
+                september = "september",
+                october = "oktober",
+                november = "november",
+                december = "december"
+            ),
+            abbreviated = MonthNames(
+                january = "jan.",
+                february = "feb.",
+                march = "mars",
+                april = "apr.",
+                may = "maj",
+                june = "juni",
+                july = "juli",
+                august = "aug.",
+                september = "sep.",
+                october = "okt.",
+                november = "nov.",
+                december = "dec."
+            )
+        )
+    },
+    "sw" to lazy {
+        MonthNamesData(
+            full = MonthNames(
+                january = "Januari",
+                february = "Februari",
+                march = "Machi",
+                april = "Aprili",
+                may = "Mei",
+                june = "Juni",
+                july = "Julai",
+                august = "Agosti",
+                september = "Septemba",
+                october = "Oktoba",
+                november = "Novemba",
+                december = "Desemba"
+            ),
+            abbreviated = MonthNames(
+                january = "Jan",
+                february = "Feb",
+                march = "Mac",
+                april = "Apr",
+                may = "Mei",
+                june = "Jun",
+                july = "Jul",
+                august = "Ago",
+                september = "Sep",
+                october = "Okt",
+                november = "Nov",
+                december = "Des"
+            )
+        )
+    },
+    "th" to lazy {
+        MonthNamesData(
+            full = MonthNames(
+                january = "มกราคม",
+                february = "กุมภาพันธ์",
+                march = "มีนาคม",
+                april = "เมษายน",
+                may = "พฤษภาคม",
+                june = "มิถุนายน",
+                july = "กรกฎาคม",
+                august = "สิงหาคม",
+                september = "กันยายน",
+                october = "ตุลาคม",
+                november = "พฤศจิกายน",
+                december = "ธันวาคม"
+            ),
+            abbreviated = MonthNames(
+                january = "ม.ค.",
+                february = "ก.พ.",
+                march = "มี.ค.",
+                april = "เม.ย.",
+                may = "พ.ค.",
+                june = "มิ.ย.",
+                july = "ก.ค.",
+                august = "ส.ค.",
+                september = "ก.ย.",
+                october = "ต.ค.",
+                november = "พ.ย.",
+                december = "ธ.ค."
+            )
+        )
+    },
     "numbers" to lazy {
         MonthNamesData(
             full = MonthNames(

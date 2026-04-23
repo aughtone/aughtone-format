@@ -15,12 +15,13 @@ import kotlinx.datetime.toInstant
 import kotlinx.datetime.todayIn
 import kotlin.time.ExperimentalTime
 
+import io.github.aughtone.datetime.format.resources.NumberingSystem
+
 /**
  * @param timeStyle [DateTimeStyle] The style to use for the time.
  * @param locale [Locale] The locale to use for formatting. Defaults to [Locale.current].
  * @param timeZone [TimeZone] The time zone to use for formatting. Defaults to [TimeZone.currentSystemDefault].
- * @param use24HourClock [Boolean] Whether to use 24 hour clock or not. Defaults to [is24HourFormat].
- * @param useNative [Boolean] Whether to use the underlying platform formatting or not. Defaults to true.
+ * @param numberingSystem [NumberingSystem] Optional numbering system to use for digits.
  * @return [String] The formatted time.
  */
 @OptIn(ExperimentalTime::class)
@@ -29,11 +30,13 @@ fun LocalTime.format(
     locale: Locale = Locale.getCurrent(fallbackTag = ComposeLocale.current.toLanguageTag()),
     timeZone: TimeZone = TimeZone.currentSystemDefault(),
     is24HourFormat: Boolean = is24HourFormat(locale = locale),
+    numberingSystem: NumberingSystem? = null,
 ): String = MultiplatformDateFormatter.formatDateTime(
     localDateTime = atDate(Clock.System.todayIn(timeZone = timeZone)),
     dateStyle = DateTimeStyle.None,
     timeStyle = timeStyle,
     locale = locale,
     timeZone = timeZone,
-    twentyFourHour = is24HourFormat
+    twentyFourHour = is24HourFormat,
+    numberingSystem = numberingSystem
 ) ?: toString()

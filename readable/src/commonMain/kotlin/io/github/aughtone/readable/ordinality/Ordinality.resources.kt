@@ -1,43 +1,66 @@
 package io.github.aughtone.readable.ordinality
 
+import io.github.aughtone.readable.PluralCategory
+import io.github.aughtone.readable.ordinalCategoryFor
 import io.github.aughtone.types.locale.Locale
+
+private fun buildFormatter(
+    locale: Locale,
+    forms: Map<PluralCategory, String>,
+    isPrefix: Boolean = false
+): OrdinalFormatter = { n ->
+    val category = ordinalCategoryFor(locale, n)
+    val affix = forms[category] ?: forms[PluralCategory.Other] ?: ""
+    if (isPrefix) "$affix$n" else "$n$affix"
+}
 
 // ── On-demand locale factory ──────────────────────────────────────────────────
 
-private fun buildOrdinalFormatter(code: String): OrdinalFormatter? = when (code) {
-    "en" -> { n ->
-        val r10 = n % 10; val r100 = n % 100
-        val suffix = when {
-            r10 == 1L && r100 != 11L -> "st"
-            r10 == 2L && r100 != 12L -> "nd"
-            r10 == 3L && r100 != 13L -> "rd"
-            else -> "th"
-        }
-        "$n$suffix"
+private fun buildOrdinalFormatter(tag: String, locale: Locale): OrdinalFormatter? {
+    return when (tag) {
+        "en" -> buildFormatter(locale, mapOf(
+            PluralCategory.One to "st",
+            PluralCategory.Two to "nd",
+            PluralCategory.Few to "rd",
+            PluralCategory.Other to "th"
+        ))
+        "fr" -> buildFormatter(locale, mapOf(
+            PluralCategory.One to "er",
+            PluralCategory.Other to "e"
+        ))
+        "hy" -> buildFormatter(locale, mapOf(
+            PluralCategory.One to "-ին",
+            PluralCategory.Other to "-րդ"
+        ))
+        "ka" -> buildFormatter(locale, mapOf(
+            PluralCategory.One to "-լի",
+            PluralCategory.Other to "-ե"
+        ))
+        "sv", "da" -> buildFormatter(locale, mapOf(
+            PluralCategory.One to ":a",
+            PluralCategory.Other to ":e"
+        ))
+        "af", "nl"       -> suffixFormatter("e")
+        "be", "ru", "uk" -> suffixFormatter("-й")
+        "el"             -> suffixFormatter("ος")
+        "fa"             -> suffixFormatter("ام")
+        "hi"             -> suffixFormatter("वां")
+        "kk"             -> suffixFormatter("-ші")
+        "ko"             -> suffixFormatter("번째")
+        "th"             -> prefixFormatter("ที่ ")
+        "vi"             -> prefixFormatter("thứ ")
+        "id", "ms"       -> prefixFormatter("ke-")
+        "ja", "zh"       -> prefixFormatter("第")
+        "es", "gl", "it", "pt" -> suffixFormatter(".º")
+        
+        // All remaining locales use "." suffix
+        "ar", "az", "bg", "ca", "cs", "de", "et", "eu",
+        "fi", "hr", "hu", "is", "iu", "lt", "lv", "mk", "nb", "nn",
+        "no", "pl", "ro", "sk", "sl", "sq", "sr", "sw", "tr",
+        "uz", "he" -> suffixFormatter(".")
+        
+        else -> null
     }
-    "fr" -> { n -> if (n == 1L) "${n}er" else "${n}e" }
-    "sv" -> { n ->
-        val r10 = n % 10; val r100 = n % 100
-        if ((r10 == 1L || r10 == 2L) && (r100 != 11L && r100 != 12L)) "${n}:a" else "${n}:e"
-    }
-    "af", "nl"       -> suffixFormatter("e")
-    "be", "ru", "uk" -> suffixFormatter("-й")
-    "el"             -> suffixFormatter("ος")
-    "fa"             -> suffixFormatter("ام")
-    "hi"             -> suffixFormatter("वां")
-    "kk"             -> suffixFormatter("-ші")
-    "ko"             -> suffixFormatter("번째")
-    "th"             -> prefixFormatter("ที่ ")
-    "vi"             -> prefixFormatter("thứ ")
-    "id", "ms"       -> prefixFormatter("ke-")
-    "ja", "zh"       -> prefixFormatter("第")
-    "es", "gl", "it", "pt" -> suffixFormatter(".º")
-    // All remaining locales use "." suffix
-    "ar", "az", "bg", "ca", "cs", "da", "de", "et", "eu",
-    "fi", "hr", "hu", "is", "lt", "lv", "mk", "nb", "nn",
-    "no", "pl", "ro", "sk", "sl", "sq", "sr", "sw", "tr",
-    "uz" -> suffixFormatter(".")
-    else -> null
 }
 
 // ── Lazy cache ────────────────────────────────────────────────────────────────
@@ -49,17 +72,17 @@ private val ordinalityCache = mutableMapOf<String, OrdinalFormatter>()
  * Falls back through language subtags (e.g. "fr-CA" → "fr") before defaulting to English.
  */
 fun ordinalityFor(locale: Locale): OrdinalFormatter {
-    val languageTag = if (locale.regionCode != null) "${locale.languageCode}-${locale.regionCode}" else locale.languageCode
-    var currentTag = languageTag
+    val fullTag = if (locale.regionCode != null) "${locale.languageCode}-${locale.regionCode}" else locale.languageCode
+    var currentTag = fullTag
     while (currentTag.isNotEmpty()) {
         val cached = ordinalityCache[currentTag]
         if (cached != null) return cached
-        val built = buildOrdinalFormatter(currentTag)
+        val built = buildOrdinalFormatter(currentTag, locale)
         if (built != null) {
             ordinalityCache[currentTag] = built
             return built
         }
         currentTag = currentTag.substringBeforeLast('-', "")
     }
-    return ordinalityCache.getOrPut("en") { buildOrdinalFormatter("en")!! }
+    return ordinalityCache.getOrPut("en") { buildOrdinalFormatter("en", Locale("en"))!! }
 }

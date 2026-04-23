@@ -36,16 +36,27 @@ Localized formatting for altitudes, azimuths, and coordinates.
     - `DecimalDegrees`: "40.7128° N, 74.006° W"
     - `DegreesMinutesSeconds`: "40° 42' 46\" N, 74° 0' 21\" W"
 
+### **Relative Time Formatting**
+Format instants and dates relative to a reference point (e.g., "5 minutes ago").
+- `Instant.toReadableRelativeTime(locale: Locale, now: Instant): String`
+- `LocalDateTime.toReadableRelativeTime(timeZone: TimeZone, locale: Locale): String`
+- `LocalDate.toReadableRelativeTime(timeZone: TimeZone, locale: Locale): String`
+
 ### **Duration Formatting**
 Localized, human-friendly duration scaling.
-- `kotlin.time.Duration.toReadableString(): String`
+- `kotlin.time.Duration.toReadableString(locale: Locale): String`
     - Smart scaling: 59s -> "59 seconds", 60s -> "1 minute"
     - Rounded weeks: 11d -> "2 weeks"
     - Day/Month threshold: 29d -> "29 days", 30d -> "1 month"
 
+### **Pluralization & Grammar**
+The library uses a robust **Plural Category System** (Zero, One, Two, Few, Many, Other) based on Unicode CLDR rules to ensure grammatical accuracy across all 55 supported languages.
+- Slavic (3-form), Arabic (6-form), Hebrew (4-form), and Inuktitut (4-form) are explicitly supported.
+- Centralized logic via `pluralCategoryFor(locale, n)` and `ordinalCategoryFor(locale, n)`.
+
 ## 📜 Compliance & Standards
 
-- **Locales**: Strictly uses `io.github.aughtone.types.locale.Locale`.
+- **Locales**: Strictly uses `io.github.aughtone.types.locale.Locale`. Supports 55 core locales.
 - **Scaling**: 
     - **SI Units**: Powers of 1000 (k, M, G, etc.).
     - **Digital Data**: Powers of 1024 (Ki, Mi, Gi, etc.) using IEC symbols.
