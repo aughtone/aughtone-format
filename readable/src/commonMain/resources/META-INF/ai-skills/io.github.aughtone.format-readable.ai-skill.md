@@ -1,7 +1,7 @@
 ---
 skill-id: io.github.aughtone.format-readable
-name: "[AughtOne Format: Readable](https://github.com/aughtone/aughtone-format)"
-type: "AughtOne AI-Skill"
+name: "[Aughtone Format: Readable](https://github.com/aughtone/aughtone-format)"
+type: "Aughtone AI-Skill"
 scope: core
 compatibility: ">=1.0.0"
 author: "[Brill Pappin](https://github.com/bpappin)"
