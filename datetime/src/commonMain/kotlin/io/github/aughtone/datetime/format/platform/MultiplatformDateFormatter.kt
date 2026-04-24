@@ -1,54 +1,93 @@
 package io.github.aughtone.datetime.format.platform
 
-import androidx.compose.ui.text.intl.Locale
+import io.github.aughtone.types.locale.Locale
 import io.github.aughtone.datetime.format.DateTimeStyle
+import io.github.aughtone.datetime.format.resources.FormatStyle
 import io.github.aughtone.datetime.format.resources.Resources
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toInstant
 import kotlinx.datetime.format
 import kotlinx.datetime.format.DateTimeFormat
 import kotlinx.datetime.format.char
+import io.github.aughtone.datetime.format.resources.NumberingSystem
+import io.github.aughtone.datetime.format.resources.values.EraNames
 
 object MultiplatformDateFormatter : InternalDateFormatter {
     override fun formatDateTime(
         localDateTime: LocalDateTime,
         dateStyle: DateTimeStyle,
         timeStyle: DateTimeStyle,
-        languageTag: String,
+        locale: Locale,
         timeZone: TimeZone,
         twentyFourHour: Boolean,
-    ): String? = if (dateStyle != DateTimeStyle.None && timeStyle != DateTimeStyle.None) {
-        localDateTime.format(
-            format = getLocalDateTimeFormat(
-                dateStyle = dateStyle,
-                timeStyle = timeStyle,
-                locale = Locale(languageTag),
-                timeZone = timeZone,
-                twentyFourHour = twentyFourHour
-            )
-        )
-    } else if (dateStyle != DateTimeStyle.None) {
-        localDateTime.date.format(
-            format = getLocalDateFormat(
-                dateStyle = dateStyle,
-                locale = Locale(languageTag),
-                timeZone = timeZone,
-            )
-        )
-    } else if (timeStyle != DateTimeStyle.None) {
-        localDateTime.time.format(
-            format = getLocalTimeFormat(
-                timeStyle = timeStyle,
-                locale = Locale(languageTag),
-                timeZone = timeZone,
-                twentyFourHour = twentyFourHour
-            )
-        )
-    } else {
-        // if both are NONE, then an empty string results
-        ""
+    ): String? = formatDateTime(
+        localDateTime = localDateTime,
+        dateStyle = dateStyle,
+        timeStyle = timeStyle,
+        locale = locale,
+        timeZone = timeZone,
+        twentyFourHour = twentyFourHour,
+        eraNames = null,
+        numberingSystem = null
+    )
+
+    fun formatDateTime(
+        localDateTime: LocalDateTime,
+        dateStyle: DateTimeStyle,
+        timeStyle: DateTimeStyle,
+        locale: Locale,
+        timeZone: TimeZone,
+        twentyFourHour: Boolean,
+        eraNames: EraNames? = null,
+        numberingSystem: NumberingSystem? = null,
+    ): String? {
+        val formattedDate = if (dateStyle != DateTimeStyle.None) {
+            localDateTime.date.format(
+                format = getLocalDateFormat(
+                    dateStyle = dateStyle,
+                    locale = locale,
+                    timeZone = timeZone,
+                )
+            ).let {
+                MultiplatformPostFormatter.postFormatDate(
+                    dateStyle = dateStyle,
+                    locale = locale,
+                    date = localDateTime.date,
+                    formattedDate = it,
+                    eraNames = eraNames,
+                    numberingSystem = numberingSystem
+                )
+            }
+        } else null
+
+        val formattedTime = if (timeStyle != DateTimeStyle.None) {
+            localDateTime.time.format(
+                format = getLocalTimeFormat(
+                    timeStyle = timeStyle,
+                    locale = locale,
+                    timeZone = timeZone,
+                    twentyFourHour = twentyFourHour
+                )
+            ).let {
+                MultiplatformPostFormatter.postFormatTime(
+                    timeStyle = timeStyle,
+                    timeZone = timeZone,
+                    instant = localDateTime.toInstant(timeZone),
+                    formattedTime = it,
+                    numberingSystem = numberingSystem
+                )
+            }
+        } else null
+
+        return when {
+            formattedDate != null && formattedTime != null -> "$formattedDate $formattedTime"
+            formattedDate != null -> formattedDate
+            formattedTime != null -> formattedTime
+            else -> ""
+        }
     }
 
     fun getLocalDateTimeFormat(
@@ -81,28 +120,28 @@ object MultiplatformDateFormatter : InternalDateFormatter {
         locale: Locale,
         timeZone: TimeZone,
     ): DateTimeFormat<LocalDate> = when (dateStyle) {
-        DateTimeStyle.Short -> Resources.getDateFormat(locale).short(
+        DateTimeStyle.Short -> Resources.getDateFormat(
             locale = locale,
             timeZone = timeZone,
-            twentyFourHour = false,
+            style = FormatStyle.SHORT
         )
 
-        DateTimeStyle.Medium -> Resources.getDateFormat(locale).medium(
+        DateTimeStyle.Medium -> Resources.getDateFormat(
             locale = locale,
             timeZone = timeZone,
-            twentyFourHour = false,
+            style = FormatStyle.MEDIUM
         )
 
-        DateTimeStyle.Long -> Resources.getDateFormat(locale).long(
+        DateTimeStyle.Long -> Resources.getDateFormat(
             locale = locale,
             timeZone = timeZone,
-            twentyFourHour = false,
+            style = FormatStyle.LONG
         )
 
-        DateTimeStyle.Full -> Resources.getDateFormat(locale).full(
+        DateTimeStyle.Full -> Resources.getDateFormat(
             locale = locale,
             timeZone = timeZone,
-            twentyFourHour = false,
+            style = FormatStyle.FULL
         )
 
         DateTimeStyle.None -> LocalDate.Format { chars("") }
@@ -114,31 +153,35 @@ object MultiplatformDateFormatter : InternalDateFormatter {
         timeZone: TimeZone,
         twentyFourHour: Boolean,
     ): DateTimeFormat<LocalTime> = when (timeStyle) {
-        DateTimeStyle.Short -> Resources.getTimeFormat(locale).short(
+        DateTimeStyle.Short -> Resources.getTimeFormat(
             locale = locale,
             timeZone = timeZone,
-            twentyFourHour = twentyFourHour,
+            style = FormatStyle.SHORT,
+            twentyFourHour = twentyFourHour
         )
 
         DateTimeStyle.Medium ->
-            Resources.getTimeFormat(locale).medium(
+            Resources.getTimeFormat(
                 locale = locale,
                 timeZone = timeZone,
-                twentyFourHour = twentyFourHour,
+                style = FormatStyle.MEDIUM,
+                twentyFourHour = twentyFourHour
             )
 
         DateTimeStyle.Long ->
-            Resources.getTimeFormat(locale).long(
+            Resources.getTimeFormat(
                 locale = locale,
                 timeZone = timeZone,
-                twentyFourHour = twentyFourHour,
+                style = FormatStyle.LONG,
+                twentyFourHour = twentyFourHour
             )
 
         DateTimeStyle.Full ->
-            Resources.getTimeFormat(locale).full(
+            Resources.getTimeFormat(
                 locale = locale,
                 timeZone = timeZone,
-                twentyFourHour = twentyFourHour,
+                style = FormatStyle.FULL,
+                twentyFourHour = twentyFourHour
             )
 
         DateTimeStyle.None -> LocalTime.Format { chars("") }

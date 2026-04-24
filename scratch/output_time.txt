@@ -1,0 +1,330 @@
+    "af" to TimePatterns(
+        full = "HH:mm:ss zzzz",
+        long = "HH:mm:ss z",
+        medium = "HH:mm:ss",
+        short = "HH:mm"
+    ),
+    "ar" to TimePatterns(
+        full = "h:mm:ss a zzzz",
+        long = "h:mm:ss a z",
+        medium = "h:mm:ss a",
+        short = "h:mm a"
+    ),
+    "az" to TimePatterns(
+        full = "HH:mm:ss zzzz",
+        long = "HH:mm:ss z",
+        medium = "HH:mm:ss",
+        short = "HH:mm"
+    ),
+    "be" to TimePatterns(
+        full = "HH:mm:ss, zzzz",
+        long = "HH:mm:ss z",
+        medium = "HH:mm:ss",
+        short = "HH:mm"
+    ),
+    "bg" to TimePatterns(
+        full = "H:mm:ss 'ч'. zzzz",
+        long = "H:mm:ss 'ч'. z",
+        medium = "H:mm:ss",
+        short = "H:mm"
+    ),
+    "ca" to TimePatterns(
+        full = "H:mm:ss (zzzz)",
+        long = "H:mm:ss z",
+        medium = "H:mm:ss",
+        short = "H:mm"
+    ),
+    "cs" to TimePatterns(
+        full = "H:mm:ss, zzzz",
+        long = "H:mm:ss z",
+        medium = "H:mm:ss",
+        short = "H:mm"
+    ),
+    "da" to TimePatterns(
+        full = "HH.mm.ss zzzz",
+        long = "HH.mm.ss z",
+        medium = "HH.mm.ss",
+        short = "HH.mm"
+    ),
+    "de" to TimePatterns(
+        full = "HH:mm:ss zzzz",
+        long = "HH:mm:ss z",
+        medium = "HH:mm:ss",
+        short = "HH:mm"
+    ),
+    "el" to TimePatterns(
+        full = "h:mm:ss a zzzz",
+        long = "h:mm:ss a z",
+        medium = "h:mm:ss a",
+        short = "h:mm a"
+    ),
+    "en" to TimePatterns(
+        full = "h:mm:ss a zzzz",
+        long = "h:mm:ss a z",
+        medium = "h:mm:ss a",
+        short = "h:mm a"
+    ),
+    "es" to TimePatterns(
+        full = "H:mm:ss (zzzz)",
+        long = "H:mm:ss z",
+        medium = "H:mm:ss",
+        short = "H:mm"
+    ),
+    "et" to TimePatterns(
+        full = "HH:mm:ss zzzz",
+        long = "HH:mm:ss z",
+        medium = "HH:mm:ss",
+        short = "HH:mm"
+    ),
+    "eu" to TimePatterns(
+        full = "HH:mm:ss (zzzz)",
+        long = "HH:mm:ss (z)",
+        medium = "HH:mm:ss",
+        short = "HH:mm"
+    ),
+    "fa" to TimePatterns(
+        full = "H:mm:ss (zzzz)",
+        long = "H:mm:ss (z)",
+        medium = "H:mm:ss",
+        short = "H:mm"
+    ),
+    "fi" to TimePatterns(
+        full = "H.mm.ss zzzz",
+        long = "H.mm.ss z",
+        medium = "H.mm.ss",
+        short = "H.mm"
+    ),
+    "fr" to TimePatterns(
+        full = "HH:mm:ss zzzz",
+        long = "HH:mm:ss z",
+        medium = "HH:mm:ss",
+        short = "HH:mm"
+    ),
+    "gl" to TimePatterns(
+        full = "HH:mm:ss zzzz",
+        long = "HH:mm:ss z",
+        medium = "HH:mm:ss",
+        short = "HH:mm"
+    ),
+    "he" to TimePatterns(
+        full = "H:mm:ss zzzz",
+        long = "H:mm:ss z",
+        medium = "H:mm:ss",
+        short = "H:mm"
+    ),
+    "hi" to TimePatterns(
+        full = "h:mm:ss a zzzz",
+        long = "h:mm:ss a z",
+        medium = "h:mm:ss a",
+        short = "h:mm a"
+    ),
+    "hr" to TimePatterns(
+        full = "HH:mm:ss (zzzz)",
+        long = "HH:mm:ss z",
+        medium = "HH:mm:ss",
+        short = "HH:mm"
+    ),
+    "hu" to TimePatterns(
+        full = "H:mm:ss zzzz",
+        long = "H:mm:ss z",
+        medium = "H:mm:ss",
+        short = "H:mm"
+    ),
+    "hy" to TimePatterns(
+        full = "HH:mm:ss zzzz",
+        long = "HH:mm:ss z",
+        medium = "HH:mm:ss",
+        short = "HH:mm"
+    ),
+    "id" to TimePatterns(
+        full = "HH.mm.ss zzzz",
+        long = "HH.mm.ss z",
+        medium = "HH.mm.ss",
+        short = "HH.mm"
+    ),
+    "is" to TimePatterns(
+        full = "HH:mm:ss zzzz",
+        long = "HH:mm:ss z",
+        medium = "HH:mm:ss",
+        short = "HH:mm"
+    ),
+    "it" to TimePatterns(
+        full = "HH:mm:ss zzzz",
+        long = "HH:mm:ss z",
+        medium = "HH:mm:ss",
+        short = "HH:mm"
+    ),
+    "iu" to TimePatterns(
+        full = "h:mm:ss a zzzz",
+        long = "h:mm:ss a z",
+        medium = "h:mm:ss a",
+        short = "h:mm a"
+    ),
+    "ja" to TimePatterns(
+        full = "H時mm分ss秒 zzzz",
+        long = "H:mm:ss z",
+        medium = "H:mm:ss",
+        short = "H:mm"
+    ),
+    "ka" to TimePatterns(
+        full = "HH:mm:ss zzzz",
+        long = "HH:mm:ss z",
+        medium = "HH:mm:ss",
+        short = "HH:mm"
+    ),
+    "kk" to TimePatterns(
+        full = "HH:mm:ss zzzz",
+        long = "HH:mm:ss z",
+        medium = "HH:mm:ss",
+        short = "HH:mm"
+    ),
+    "ko" to TimePatterns(
+        full = "a h시 m분 s초 zzzz",
+        long = "a h시 m분 s초 z",
+        medium = "a h:mm:ss",
+        short = "a h:mm"
+    ),
+    "lt" to TimePatterns(
+        full = "HH:mm:ss zzzz",
+        long = "HH:mm:ss z",
+        medium = "HH:mm:ss",
+        short = "HH:mm"
+    ),
+    "lv" to TimePatterns(
+        full = "HH:mm:ss zzzz",
+        long = "HH:mm:ss z",
+        medium = "HH:mm:ss",
+        short = "HH:mm"
+    ),
+    "mk" to TimePatterns(
+        full = "HH:mm:ss zzzz",
+        long = "HH:mm:ss z",
+        medium = "HH:mm:ss",
+        short = "HH:mm"
+    ),
+    "ms" to TimePatterns(
+        full = "h:mm:ss a zzzz",
+        long = "h:mm:ss a z",
+        medium = "h:mm:ss a",
+        short = "h:mm a"
+    ),
+    "nb" to TimePatterns(
+        full = "HH:mm:ss zzzz",
+        long = "HH:mm:ss z",
+        medium = "HH:mm:ss",
+        short = "HH:mm"
+    ),
+    "nl" to TimePatterns(
+        full = "HH:mm:ss zzzz",
+        long = "HH:mm:ss z",
+        medium = "HH:mm:ss",
+        short = "HH:mm"
+    ),
+    "nn" to TimePatterns(
+        full = "HH:mm:ss zzzz",
+        long = "HH:mm:ss z",
+        medium = "HH:mm:ss",
+        short = "HH:mm"
+    ),
+    "no" to TimePatterns(
+        full = "HH:mm:ss zzzz",
+        long = "HH:mm:ss z",
+        medium = "HH:mm:ss",
+        short = "HH:mm"
+    ),
+    "pl" to TimePatterns(
+        full = "HH:mm:ss zzzz",
+        long = "HH:mm:ss z",
+        medium = "HH:mm:ss",
+        short = "HH:mm"
+    ),
+    "pt" to TimePatterns(
+        full = "HH:mm:ss zzzz",
+        long = "HH:mm:ss z",
+        medium = "HH:mm:ss",
+        short = "HH:mm"
+    ),
+    "ro" to TimePatterns(
+        full = "HH:mm:ss zzzz",
+        long = "HH:mm:ss z",
+        medium = "HH:mm:ss",
+        short = "HH:mm"
+    ),
+    "ru" to TimePatterns(
+        full = "HH:mm:ss zzzz",
+        long = "HH:mm:ss z",
+        medium = "HH:mm:ss",
+        short = "HH:mm"
+    ),
+    "sk" to TimePatterns(
+        full = "H:mm:ss zzzz",
+        long = "H:mm:ss z",
+        medium = "H:mm:ss",
+        short = "H:mm"
+    ),
+    "sl" to TimePatterns(
+        full = "HH:mm:ss zzzz",
+        long = "HH:mm:ss z",
+        medium = "HH:mm:ss",
+        short = "HH:mm"
+    ),
+    "sq" to TimePatterns(
+        full = "h:mm:ss a, zzzz",
+        long = "h:mm:ss a, z",
+        medium = "h:mm:ss a",
+        short = "h:mm a"
+    ),
+    "sr" to TimePatterns(
+        full = "HH:mm:ss zzzz",
+        long = "HH:mm:ss z",
+        medium = "HH:mm:ss",
+        short = "HH:mm"
+    ),
+    "sv" to TimePatterns(
+        full = "HH:mm:ss zzzz",
+        long = "HH:mm:ss z",
+        medium = "HH:mm:ss",
+        short = "HH:mm"
+    ),
+    "sw" to TimePatterns(
+        full = "HH:mm:ss zzzz",
+        long = "HH:mm:ss z",
+        medium = "HH:mm:ss",
+        short = "HH:mm"
+    ),
+    "th" to TimePatterns(
+        full = "H นาฬิกา mm นาที ss วินาที zzzz",
+        long = "H นาฬิกา mm นาที ss วินาที z",
+        medium = "HH:mm:ss",
+        short = "HH:mm"
+    ),
+    "tr" to TimePatterns(
+        full = "HH:mm:ss zzzz",
+        long = "HH:mm:ss z",
+        medium = "HH:mm:ss",
+        short = "HH:mm"
+    ),
+    "uk" to TimePatterns(
+        full = "HH:mm:ss zzzz",
+        long = "HH:mm:ss z",
+        medium = "HH:mm:ss",
+        short = "HH:mm"
+    ),
+    "uz" to TimePatterns(
+        full = "H:mm:ss (zzzz)",
+        long = "H:mm:ss (z)",
+        medium = "HH:mm:ss",
+        short = "HH:mm"
+    ),
+    "vi" to TimePatterns(
+        full = "HH:mm:ss zzzz",
+        long = "HH:mm:ss z",
+        medium = "HH:mm:ss",
+        short = "HH:mm"
+    ),
+    "zh" to TimePatterns(
+        full = "zzzz HH:mm:ss",
+        long = "z HH:mm:ss",
+        medium = "HH:mm:ss",
+        short = "HH:mm"
+    ),

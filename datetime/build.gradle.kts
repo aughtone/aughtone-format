@@ -6,7 +6,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompileCommon
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
-    alias(libs.plugins.androidLibrary)
+    alias(libs.plugins.multiplatformLibrary)
     alias(libs.plugins.vanniktech.mavenPublish)
     alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.composeMultiplatform)
@@ -14,15 +14,16 @@ plugins {
 }
 
 group = "io.github.aughtone"
-version = "${libs.versions.versionName.get()}" // ${libs.versions.versionNameSiffix.get().toString()}
+version = libs.versions.versionName.get() // ${libs.versions.versionNameSiffix.get().toString()}
 
 kotlin {
+    jvmToolchain(17)
+
     jvm()
-    androidTarget {
-        publishLibraryVariants("release")
-        @OptIn(ExperimentalKotlinGradlePluginApi::class)
-        compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_17)
+    android {
+        namespace = "${libs.versions.namespace.get()}.datetime"
+        compileSdk {
+            version = release(libs.versions.android.compileSdk.get().toInt())
         }
     }
     @OptIn(ExperimentalWasmDsl::class)
@@ -51,7 +52,6 @@ kotlin {
             generateTypeScriptDefinitions()
         }
         useEsModules() // Enables ES2015 modules
-//        binaries.executable()
     }
     listOf(
         iosX64(),
@@ -72,7 +72,6 @@ kotlin {
             ) //"1.0.0"
         }
     }
-//    linuxX64()
 
     sourceSets {
         val androidMain by getting {
@@ -80,27 +79,16 @@ kotlin {
                 implementation(libs.androidx.startup.runtime)
             }
         }
-        val androidInstrumentedTest by getting {
-            dependencies {
-                implementation(libs.kotlin.test)
-                implementation(libs.kotlin.test.junit)
-                implementation(libs.androidx.runner)
-                implementation(libs.androidx.rules)
-            }
-        }
 
         val commonMain by getting {
             dependencies {
-//                implementation(compose.runtime)
-//                implementation(compose.foundation)
-//                implementation(compose.material3)
-                implementation(compose.ui)
-                implementation(compose.components.resources)
+                implementation(libs.jetbrains.compose.ui)
+                implementation(libs.jetbrains.compose.resources)
                 api(libs.kotlinx.serialization.json)
                 // XXX This might require additional libraries if you enable WASM or JS.
                 //  See: https://klibs.io/project/Kotlin/kotlinx-datetime#using-in-your-projects
                 api(libs.kotlinx.datetime)
-                implementation(libs.jacobras.human.readable)
+                api(libs.aughtone.types)
                 api(project(":toolbox"))
             }
         }
@@ -113,8 +101,6 @@ kotlin {
     }
 
     compilerOptions {
-        freeCompilerArgs.add("-Xmulti-dollar-interpolation")
-
         // XXX Activate when this is resolved:
         //  https://youtrack.jetbrains.com/issue/KT-57847/Move-common-for-all-the-backends-module-name-compiler-option-to-the-KotlinCommonCompilerOptions
         // moduleName = "io.github.aughtone.datetime.format"
@@ -140,21 +126,8 @@ compose.resources {
     generateResClass = always
 }
 
-android {
-    namespace = "${libs.versions.namespace.get()}.datetime"
-    compileSdk = libs.versions.android.compileSdk.get().toInt()
-    defaultConfig {
-        minSdk = libs.versions.android.minSdk.get().toInt()
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-}
 
 mavenPublishing {
-//    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
     publishToMavenCentral()
 
     if (!project.hasProperty("skip-signing")) {
@@ -165,7 +138,7 @@ mavenPublishing {
 
     pom {
         name = "Aughtone Format Multiplatform - Datetime"
-        description = "A library."
+        description = "A Multiplatform library for formatting dates and times using kotlinx-datetime."
         inceptionYear = "2025"
         url = "https://github.com/aughtone/aughtone-format"
         licenses {

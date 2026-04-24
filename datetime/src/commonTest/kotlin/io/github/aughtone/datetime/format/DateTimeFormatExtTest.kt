@@ -1,6 +1,7 @@
 package io.github.aughtone.datetime.format
 
-import androidx.compose.ui.text.intl.Locale
+import io.github.aughtone.types.locale.Locale
+import io.github.aughtone.types.locale.localeFor
 import kotlinx.datetime.LocalDateTime
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -19,7 +20,7 @@ class DateTimeFormatExtTest {
             actual = dateTime.format(
                 dateStyle = DateTimeStyle.Short,
                 timeStyle = DateTimeStyle.Short,
-                locale = Locale("en-CA"),
+                locale = localeFor("en-CA")!!,
                 timeZone = testTimeZone
             ),
             message = "Formatting short date time",
@@ -34,7 +35,7 @@ class DateTimeFormatExtTest {
             actual = dateTime.format(
                 dateStyle = DateTimeStyle.Short,
                 timeStyle = DateTimeStyle.Short,
-                locale = Locale("en-US"),
+                locale = localeFor("en-US")!!,
                 timeZone = testTimeZone
             )
         )
