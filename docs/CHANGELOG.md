@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+### Added
+- **Relative Fallback**: Introduced `relativeThreshold` to `readableRelative` functions, allowing automatic fallback to standard formatting (via `dateStyle` and `timeStyle`) when the temporal difference is too large.
+- **"Recently" Phrasing**: Added localized `"Recently"` strings to `RelativeTimeConfig` for Catalan, Galician, Romanian, Lithuanian, Latvian, Albanian, Inuktitut, and Georgian. Hardened existing translations for Azerbaijani, Uzbek, Kazakh, Basque, and Armenian to ensure accuracy.
+- **Language Registry Expansion**: Updated `isRelativeTimeTagSupported` to formally support 65+ locales, including Azerbaijan, Uzbek, Kazakh, and several Baltic/Balkan languages.
+
+### Changed
+- **Relative Time API**: Renamed `toReadableRelative` to `readableRelative` across all temporal types.
+- **Optimized Thresholds**: Standardized default `relativeThreshold` to `3.days` for dates and `3.hours` for times. Default `nowThreshold` for `LocalDate` is now `1.days`.
+
 ## [2.1.1] - 2026-04-24
 
 ### Added
