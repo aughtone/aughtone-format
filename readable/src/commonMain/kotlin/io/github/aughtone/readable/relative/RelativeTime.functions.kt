@@ -1,8 +1,16 @@
 package io.github.aughtone.readable.relative
 
 import io.github.aughtone.types.locale.Locale
-import kotlinx.datetime.*
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.LocalTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.daysUntil
+import kotlinx.datetime.toInstant
+import kotlinx.datetime.toLocalDateTime
+import kotlinx.datetime.todayIn
 import kotlin.time.Clock
+import kotlin.time.Instant
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.minutes
@@ -86,9 +94,9 @@ fun LocalDate.toReadableRelative(
     val deltaDays = now.daysUntil(this)
     val config = relativeTimeConfigFor(locale, style)
     return when (deltaDays) {
-        0 -> config.todayString ?: config.formatter(0.days, true)
-        1 -> config.tomorrowString ?: config.formatter(1.days, true)
-        -1 -> config.yesterdayString ?: config.formatter((-1).days, true)
+        0 -> config.todayString
+        1 -> config.tomorrowString
+        -1 -> config.yesterdayString
         else -> config.formatter(deltaDays.days, true)
     }
 }

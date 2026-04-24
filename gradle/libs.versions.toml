@@ -1,7 +1,7 @@
 [versions]
 namespace = "io.github.aughtone.format"
 groupName = "io.github.aughtone"
-versionName = "2.0.2"
+versionName = "2.1.0"
 # versionNameSiffix = ""
 android-minSdk = "24" ### this will impact all projects that import the library.
 android-compileSdk = "37"
