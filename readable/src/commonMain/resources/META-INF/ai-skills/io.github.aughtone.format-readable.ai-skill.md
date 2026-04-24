@@ -1,6 +1,7 @@
 ---
 skill-id: io.github.aughtone.format-readable
-name: "[Aughtone Format: Readable](https://github.com/aughtone/aughtone-format)"
+spec-version: 1.0
+name: "[Aughtone Format: Human Readable](https://github.com/aughtone/aughtone-format)"
 type: "Aughtone AI-Skill"
 scope: core
 compatibility: ">=1.0.0"
@@ -38,13 +39,18 @@ Localized formatting for altitudes, azimuths, and coordinates.
 
 ### **Relative Time Formatting**
 Format instants and dates relative to a reference point (e.g., "5 minutes ago", "Today").
-- `Instant.toReadableRelative(locale, dateStyle, timeStyle, now, nowThreshold, timeZone): String`
-- `LocalDateTime.toReadableRelative(timeZone, locale, dateStyle, timeStyle, now, nowThreshold): String`
-- `LocalDate.toReadableRelative(locale, style, now): String` (optimized for date-only comparison)
-- `LocalTime.toReadableRelative(locale, style, now): String` (optimized for time-only comparison)
+- `Instant.readableRelative(now, relativeDateStyle, relativeTimeStyle, dateStyle, timeStyle, relativeThreshold, nowThreshold, locale, timeZone): String`
+- `LocalDateTime.readableRelative(now, relativeDateStyle, relativeTimeStyle, dateStyle, timeStyle, relativeThreshold, nowThreshold, locale, timeZone): String`
+- `LocalDate.readableRelative(now, relativeStyle, dateStyle, relativeThreshold, nowThreshold, locale): String`
+- `LocalTime.readableRelative(now, relativeStyle, timeStyle, relativeThreshold, nowThreshold, locale): String`
     - **RelativeStyle**: `Long` ("5 days ago"), `Short` ("5d ago"), `None` (suppress component).
-    - **Day Strings**: Automatically handles "Today", "Tomorrow", and "Yesterday" for dates within +/- 1 day.
-    - **Defaults**: `nowThreshold` defaults to 1 minute. `locale` defaults to `Locale.current`.
+    - **Fallback Styles**: `dateStyle` and `timeStyle` (of type `DateTimeStyle`) define the format if `relativeThreshold` is exceeded.
+    - **Day Strings**: Automatically handles "Today", "Tomorrow", and "Yesterday" (+/- 1 day).
+    - **Recently**: Returns localized "Recently" if within `nowThreshold` for `LocalDate` (useful for grouping "recent" dates).
+    - **Defaults**: 
+        - `relativeThreshold`: `3.days` (Instant/Date), `3.hours` (Time).
+        - `nowThreshold`: `1.minutes` (Instant/Time), `1.days` (Date).
+        - `locale`: `Locale.current`.
 
 ### **Duration Formatting**
 Localized, human-friendly duration scaling.
@@ -55,13 +61,13 @@ Localized, human-friendly duration scaling.
     - Day/Month threshold: 29d -> "29 days", 30d -> "1 month"
 
 ### **Pluralization & Grammar**
-The library uses a robust **Plural Category System** (Zero, One, Two, Few, Many, Other) based on Unicode CLDR rules to ensure grammatical accuracy across all 55 supported languages.
+The library uses a robust **Plural Category System** (Zero, One, Two, Few, Many, Other) based on Unicode CLDR rules to ensure grammatical accuracy across all 65+ supported languages.
 - Slavic (3-form), Arabic (6-form), Hebrew (4-form), and Inuktitut (4-form) are explicitly supported.
 - Centralized logic via `pluralCategoryFor(locale, n)` and `ordinalCategoryFor(locale, n)`.
 
 ## 📜 Compliance & Standards
 
-- **Locales**: Strictly uses `io.github.aughtone.types.locale.Locale`. Supports 55 core locales.
+- **Locales**: Strictly uses `io.github.aughtone.types.locale.Locale`. Supports 65+ core locales.
     - Use **`Locale.current`** as the best way to retrieve the current system locale.
 - **Time Handling Standards**:
     - **Kotlin 2.1+ Migration**: Always use **`kotlin.time.Instant`** and **`kotlin.time.Clock`** (from the standard library) instead of the legacy `kotlinx.datetime` versions.

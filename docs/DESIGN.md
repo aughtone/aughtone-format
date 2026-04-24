@@ -11,5 +11,5 @@ The `:readable` module prioritizes human perception over mathematical precision.
 - **Immediate Precision**: We use exact thresholds (e.g., 60s -> 1m) but round fractional values to the nearest whole unit for clean UI display.
 
 ### 2. Geospatial Clarity
-- **Visual Context**: Azimuths include **localized cardinal directions** (e.g., `(NW)`, `(SO)`, `(СЗ)`) because raw degrees are difficult for non-navigators to visualize. Support is maintained across 55 core languages.
+- **Visual Context**: Azimuths include **localized cardinal directions** (e.g., `(NW)`, `(SO)`, `(СЗ)`) because raw degrees are difficult for non-navigators to visualize. Support is maintained across 65+ core languages.
 - **Coordinate Simplicity**: We provide DD and DMS formats to balance modern GPS needs with traditional navigational standards.
