@@ -14,7 +14,17 @@ This document tracks the verification goals for the Aughtone Format library feat
 - [x] Fallback mechanism works correctly (e.g., `fr-CA` -> `fr`).
 - [x] Default value for `locale` parameter uses the native system locale.
 
-### 2. Metrics & Abbreviations [PLANNED]
+### 2. Relative Time Formatting
+- [x] Supports `Instant`, `LocalDateTime`, `LocalDate`, and `LocalTime`.
+- [x] `relativeThreshold` parameter provides a fallback to absolute formatting (default 3 days for date types, 3 hours for time).
+- [x] Fallback format defined by `dateStyle` and `timeStyle` parameters (`DateTimeStyle`).
+- [x] `LocalDate.readableRelative` correctly omits `timeStyle`.
+- [x] `LocalTime.readableRelative` correctly omits `dateStyle`.
+- [x] `nowThreshold` for `LocalDate` defaults to 1 day.
+- [x] `LocalDate` returns localized "Recently" string for dates within `nowThreshold` (fuzzy matching). Hardened across all supported languages.
+- [x] Localization supported across **65+ languages** via `RelativeTimeConfig`.
+
+### 3. Metrics & Abbreviations [PLANNED]
 - [ ] Supports numbers from Thousands to Trillions.
 - [ ] Localization follows regional rules (e.g., K/M/B vs k/M/Md).
 
