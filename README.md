@@ -8,7 +8,7 @@ Version 2.1.0 introduces significant structural changes and hardening:
 
 - **Library Split**: Metric-specific formatting (Ordinals, Durations, Relative Time, Data Sizes) has been moved from the core library into the new **`:readable`** module.
 - **`kotlin.time` Hardening**: All Duration and Relative Time APIs have been refactored to use standard `kotlin.time.Duration` types instead of `Long` milliseconds for improved type safety and consistency.
-- **Version Synchronization**: This release aligns the versioning across the AughtOne ecosystem.
+- **Version Synchronization**: This release aligns the versioning across the Aughtone ecosystem.
 
 ## 📦 Core Modules
 

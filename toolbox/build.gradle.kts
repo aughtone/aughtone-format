@@ -13,15 +13,15 @@ plugins {
     alias(libs.plugins.composeCompiler)
 }
 
-group = libs.versions.namespace.get().toString()
-version = libs.versions.versionName.get() // ${libs.versions.versionNameSiffix.get().toString()}
+group = libs.versions.namespace.get()
+version = libs.versions.versionName.get()
 
 kotlin {
     jvmToolchain(17)
 
     jvm()
     android {
-        namespace = "${libs.versions.namespace.get()}.toolbox"
+        namespace = "${libs.versions.namespace.get()}.format.toolbox"
         compileSdk {
             version = release(libs.versions.android.compileSdk.get().toInt())
         }
@@ -60,11 +60,11 @@ kotlin {
     //noinspection WrongGradleMethod
     ).forEach { iosTarget ->
         iosTarget.binaries.framework {
-            baseName = "FormatToolboxKit"
+            baseName = "AughtoneFormatToolboxKit"
             isStatic = true
             binaryOption(
                 "bundleId",
-                "${libs.versions.namespace.get()}.toolbox"
+                "${libs.versions.namespace.get()}.format.toolbox"
             ) //"app.occurrence"
             binaryOption(
                 "bundleShortVersionString",
@@ -82,8 +82,8 @@ kotlin {
 
         val commonMain by getting {
             dependencies {
-                implementation(compose.ui)
-                implementation(compose.components.resources)
+//                implementation(compose.ui)
+//                implementation(compose.components.resources)
                 api(libs.kotlinx.serialization.json)
                 // XXX This might require additional libraries if you enable WASM or JS.
                 //  See: https://klibs.io/project/Kotlin/kotlinx-datetime#using-in-your-projects
@@ -122,7 +122,7 @@ kotlin {
 
 compose.resources {
     publicResClass = true
-    packageOfResClass = "${libs.versions.namespace.get()}.toolbox.resources"
+    packageOfResClass = "${libs.versions.namespace.get()}.format.toolbox.resources"
     generateResClass = always
 }
 
