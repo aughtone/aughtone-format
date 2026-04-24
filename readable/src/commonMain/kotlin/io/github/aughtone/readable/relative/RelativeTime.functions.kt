@@ -1,60 +1,106 @@
 package io.github.aughtone.readable.relative
 
 import io.github.aughtone.types.locale.Locale
-import io.github.aughtone.types.locale.currentNativeLocale
 import kotlinx.datetime.*
 import kotlin.time.Clock
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.days
+import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
-import kotlin.time.ExperimentalTime
 
 /**
- * Formats this [Instant] as a localized, human-readable relative time string.
+ * Formats this [Instant] as a localized, human-readable relative string.
  *
  * Examples:
- * - `Clock.System.now() - 134.minutes` → `"2 hours ago"`
- * - `Clock.System.now() + 8.minutes`   → `"in 8 minutes"`
- * - Within [nowThreshold] of [now]      → `"just now"` (locale-equivalent)
+ * - `now - 8.minutes` → `"8 minutes ago"`
+ * - `now + 2.hours`   → `"in 2 hours"`
+ * - Within [nowThreshold] of [now] → `"just now"`
  *
  * @param locale        The locale for the output string. Defaults to the system locale.
+ * @param dateStyle     The style for date-based units (Day, Week, Month, Year). Use [RelativeStyle.None] to suppress.
+ * @param timeStyle     The style for time-based units (Second, Minute, Hour). Use [RelativeStyle.None] to suppress.
  * @param now           The reference instant to compare against. Defaults to [Clock.System.now()].
  * @param nowThreshold  Instants within this duration of [now] produce the "just now" string.
+ * @param timeZone      The timezone used to determine "Today", "Tomorrow", and "Yesterday".
  */
-@OptIn(ExperimentalTime::class)
-fun Instant.toReadableRelativeTime(
-    locale: Locale = currentNativeLocale(),
+fun Instant.toReadableRelative(
+    locale: Locale = Locale.current,
+    dateStyle: RelativeStyle = RelativeStyle.Long,
+    timeStyle: RelativeStyle = RelativeStyle.Long,
     now: Instant = Clock.System.now(),
-    nowThreshold: Duration = 5.seconds,
+    nowThreshold: Duration = 1.minutes,
+    timeZone: TimeZone = TimeZone.currentSystemDefault(),
 ): String {
-    val delta = this - now   // negative = past, positive = future
-    val config = relativeTimeConfigFor(locale)
-    return if (delta.absoluteValue < nowThreshold) {
-        config.nowString
-    } else {
-        config.formatter(delta)
+    val delta = this - now
+    if (delta.absoluteValue < nowThreshold) {
+        return relativeTimeConfigFor(locale, if (timeStyle != RelativeStyle.None) timeStyle else dateStyle).nowString
+    }
+
+    val thisDate = this.toLocalDateTime(timeZone).date
+    val nowDate = now.toLocalDateTime(timeZone).date
+    val daysDelta = nowDate.daysUntil(thisDate)
+
+    // Determine if we should use date units or time units
+    val absSeconds = delta.absoluteValue.toDouble(kotlin.time.DurationUnit.SECONDS)
+    val useDateUnits = when {
+        dateStyle == RelativeStyle.None -> false
+        timeStyle == RelativeStyle.None -> true
+        else -> daysDelta != 0 || absSeconds >= 86400
+    }
+
+    if (useDateUnits && daysDelta in -1..1) {
+        val config = relativeTimeConfigFor(locale, dateStyle)
+        return when (daysDelta) {
+            0 -> config.todayString
+            1 -> config.tomorrowString
+            -1 -> config.yesterdayString
+            else -> config.nowString // Should not happen
+        }
+    }
+
+    val style = if (useDateUnits) dateStyle else timeStyle
+    val config = relativeTimeConfigFor(locale, style)
+    return if (useDateUnits) config.formatter(delta, true) else config.formatter(delta, false)
+}
+
+/**
+ * Formats this [LocalDateTime] as a localized, human-readable relative string.
+ */
+fun LocalDateTime.toReadableRelative(
+    timeZone: TimeZone = TimeZone.currentSystemDefault(),
+    locale: Locale = Locale.current,
+    dateStyle: RelativeStyle = RelativeStyle.Long,
+    timeStyle: RelativeStyle = RelativeStyle.Long,
+    now: Instant = Clock.System.now(),
+    nowThreshold: Duration = 1.minutes,
+): String = toInstant(timeZone).toReadableRelative(locale, dateStyle, timeStyle, now, nowThreshold, timeZone)
+
+/**
+ * Formats this [LocalDate] as a localized, human-readable relative string.
+ */
+fun LocalDate.toReadableRelative(
+    locale: Locale = Locale.current,
+    style: RelativeStyle = RelativeStyle.Long,
+    now: LocalDate = Clock.System.todayIn(TimeZone.currentSystemDefault()),
+): String {
+    val deltaDays = now.daysUntil(this)
+    val config = relativeTimeConfigFor(locale, style)
+    return when (deltaDays) {
+        0 -> config.todayString ?: config.formatter(0.days, true)
+        1 -> config.tomorrowString ?: config.formatter(1.days, true)
+        -1 -> config.yesterdayString ?: config.formatter((-1).days, true)
+        else -> config.formatter(deltaDays.days, true)
     }
 }
 
 /**
- * Formats this [LocalDateTime] as a localized, human-readable relative time string.
- * Converts to [Instant] using the provided [timeZone] before formatting.
+ * Formats this [LocalTime] as a localized, human-readable relative string.
  */
-@OptIn(ExperimentalTime::class)
-fun LocalDateTime.toReadableRelativeTime(
-    timeZone: TimeZone = TimeZone.currentSystemDefault(),
-    locale: Locale = currentNativeLocale(),
-    now: Instant = Clock.System.now(),
-    nowThreshold: Duration = 5.seconds,
-): String = toInstant(timeZone).toReadableRelativeTime(locale, now, nowThreshold)
-
-/**
- * Formats this [LocalDate] as a localized, human-readable relative time string.
- * Uses the start of the day in the provided [timeZone] as the reference point.
- */
-@OptIn(ExperimentalTime::class)
-fun LocalDate.toReadableRelativeTime(
-    timeZone: TimeZone = TimeZone.currentSystemDefault(),
-    locale: Locale = currentNativeLocale(),
-    now: Instant = Clock.System.now(),
-    nowThreshold: Duration = 5.seconds,
-): String = atStartOfDayIn(timeZone).toReadableRelativeTime(locale, now, nowThreshold)
+fun LocalTime.toReadableRelative(
+    locale: Locale = Locale.current,
+    style: RelativeStyle = RelativeStyle.Long,
+    now: LocalTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).time,
+): String {
+    val deltaSeconds = this.toSecondOfDay() - now.toSecondOfDay()
+    return relativeTimeConfigFor(locale, style).formatter(deltaSeconds.seconds, false)
+}

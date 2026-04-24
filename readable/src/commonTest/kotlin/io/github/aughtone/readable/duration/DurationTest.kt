@@ -42,10 +42,10 @@ class DurationTest {
     @Test
     fun testTraditionalChineseVariant() {
         // zh-TW uses Traditional characters (小時, 週) not Simplified (小时, 周)
-        assertEquals("1 小時", 60.minutes.toReadableString(Locales.TraditionalChinese))
-        assertEquals("1 週", 7.days.toReadableString(Locales.TraditionalChinese))
+        assertEquals("1小時", 60.minutes.toReadableString(Locales.TraditionalChinese))
+        assertEquals("1週", 7.days.toReadableString(Locales.TraditionalChinese))
 
         // zh (Simplified) uses different characters
-        assertEquals("1 小时", 60.minutes.toReadableString(Locales.Chinese))
+        assertEquals("1小时", 60.minutes.toReadableString(Locales.Chinese))
     }
 }

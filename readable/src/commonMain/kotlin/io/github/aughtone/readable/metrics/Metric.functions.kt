@@ -2,7 +2,6 @@ package io.github.aughtone.readable.metrics
 
 import io.github.aughtone.readable.number.numberFormatterFor
 import io.github.aughtone.types.locale.Locale
-import io.github.aughtone.types.locale.currentNativeLocale
 import io.github.aughtone.types.quantitative.Distance
 import io.github.aughtone.types.quantitative.Speed
 import io.github.aughtone.types.units.MetricPrefix
@@ -13,14 +12,14 @@ import kotlin.math.pow
 /**
  * Formats a [Distance] into a localized metric string with automatic scaling (e.g., 1500m -> "1.5km").
  */
-fun Distance.formatReadable(locale: Locale = currentNativeLocale(), precision: Int = 1): String {
+fun Distance.formatReadable(locale: Locale = Locale.current, precision: Int = 1): String {
     return meters.toReadableMetric(UnitOfMeasure.Meter, locale, precision)
 }
 
 /**
  * Formats a [Speed] into a localized metric string.
  */
-fun Speed.formatReadable(locale: Locale = currentNativeLocale(), precision: Int = 1): String {
+fun Speed.formatReadable(locale: Locale = Locale.current, precision: Int = 1): String {
     return mps.toReadableMetric(UnitOfMeasure.MeterPerSecond, locale, precision)
 }
 
@@ -29,7 +28,7 @@ fun Speed.formatReadable(locale: Locale = currentNativeLocale(), precision: Int 
  */
 fun Double.toReadableMetric(
     baseUnit: UnitOfMeasure,
-    locale: Locale = currentNativeLocale(),
+    locale: Locale = Locale.current,
     precision: Int = 1
 ): String {
     val absoluteValue = abs(this)

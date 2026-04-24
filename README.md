@@ -16,6 +16,32 @@ This project follows a specialized 5-sector documentation hierarchy.
 - 🎨 [Design & UI](docs/DESIGN.md): Presentation layer and user stories.
 - 📋 [Acceptance Criteria](docs/ACs/README.md): Success outcomes and verification.
 - 📖 [Developer Guide](docs/DEVELOPER.md): Environment setup and onboarding.
+## 🌍 Universal Localization
+The library provides deep grammatical parity for **55 core languages** (Slavic, Arabic, Hebrew, Inuktitut, etc.) and full BCP 47 subtag fallback (e.g., `en-ZA` → `en`).
+
+## 🚀 Quick Usage
+
+### Datetime Formatting (`:datetime`)
+```kotlin
+val now = Clock.System.now()
+// Format with styles (Short, Medium, Long, Full)
+println(now.format(FormatStyle.MEDIUM, locale = Locale("en"))) // "Apr 23, 2026, 4:15 PM"
+```
+
+### Human-Readable Metrics (`:readable`)
+```kotlin
+// Ordinals
+println(123L.toReadableOrdinal(Locale("en"))) // "123rd"
+
+// Durations
+println(1.5.hours.toReadableString(Locale("en"))) // "1.5 hours"
+
+// Relative Time
+println(instant.toReadableRelative(Locale.current)) // "3 minutes ago"
+
+// Data Sizes
+println(1048576L.toReadableDataSize()) // "1.0 MiB"
+```
 
 ---
 ## 🛠️ Governance Standards

@@ -34,7 +34,7 @@ Resources (unit names, separators, ordinal suffixes) are isolated within the `:r
 - **Frozen Types**: We strictly avoid modifying the `:types` package (which is published and frozen). All localization data is "side-loaded" via the `:readable` resource maps.
 
 ### 4. Locale Centricity
-All formatting logic strictly consumes `io.github.aughtone.types.locale.Locale` to ensure consistent BCP 47 compliance and avoid platform-specific locale quirks. Defaulting to `currentNativeLocale()` is handled at the extension level.
+All formatting logic strictly consumes `io.github.aughtone.types.locale.Locale` to ensure consistent BCP 47 compliance and avoid platform-specific locale quirks. Defaulting to `Locale.current` is handled at the extension level.
 
 ### 5. BCP 47 Subtag Resolution
 All formatters use a **subtag fallback chain** for locale lookup:

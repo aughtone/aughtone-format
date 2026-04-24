@@ -26,6 +26,13 @@ This library provides low-level primitive extensions and utility functions used 
     - **Usage**: Define functional formatters for any type `T`.
     - **Example**: `val hex: Formatter<Int> = { it.toString(16) }`
 
+## 📜 Compliance & Standards
+
+- **Time Handling Standards**:
+    - **Kotlin 2.1+ Migration**: Always use **`kotlin.time.Instant`** and **`kotlin.time.Clock`** (from the standard library) instead of the legacy `kotlinx.datetime` versions.
+    - **Ambiguity Prevention**: NEVER use wildcard imports like `import kotlinx.datetime.*`. This prevents name collisions between `kotlinx.datetime` and `kotlin.time`.
+    - **No Type Mixing**: Do not mix `kotlinx.datetime.Instant` and `kotlin.time.Instant` in the same scope or API signature.
+
 ## 🤖 Agent Onboarding
 1. **Context Registration**: Add this skill file to the `AGENTS.md` of the consuming project.
 2. **Usage Rules**:

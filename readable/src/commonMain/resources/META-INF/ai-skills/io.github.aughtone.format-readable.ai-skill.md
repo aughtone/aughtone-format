@@ -37,14 +37,19 @@ Localized formatting for altitudes, azimuths, and coordinates.
     - `DegreesMinutesSeconds`: "40° 42' 46\" N, 74° 0' 21\" W"
 
 ### **Relative Time Formatting**
-Format instants and dates relative to a reference point (e.g., "5 minutes ago").
-- `Instant.toReadableRelativeTime(locale: Locale, now: Instant): String`
-- `LocalDateTime.toReadableRelativeTime(timeZone: TimeZone, locale: Locale): String`
-- `LocalDate.toReadableRelativeTime(timeZone: TimeZone, locale: Locale): String`
+Format instants and dates relative to a reference point (e.g., "5 minutes ago", "Today").
+- `Instant.toReadableRelative(locale, dateStyle, timeStyle, now, nowThreshold, timeZone): String`
+- `LocalDateTime.toReadableRelative(timeZone, locale, dateStyle, timeStyle, now, nowThreshold): String`
+- `LocalDate.toReadableRelative(locale, style, now): String` (optimized for date-only comparison)
+- `LocalTime.toReadableRelative(locale, style, now): String` (optimized for time-only comparison)
+    - **RelativeStyle**: `Long` ("5 days ago"), `Short` ("5d ago"), `None` (suppress component).
+    - **Day Strings**: Automatically handles "Today", "Tomorrow", and "Yesterday" for dates within +/- 1 day.
+    - **Defaults**: `nowThreshold` defaults to 1 minute. `locale` defaults to `Locale.current`.
 
 ### **Duration Formatting**
 Localized, human-friendly duration scaling.
-- `kotlin.time.Duration.toReadableString(locale: Locale): String`
+- `kotlin.time.Duration.toReadableString(locale, style): String`
+    - **RelativeStyle**: `Long` ("2 minutes"), `Short` ("2m").
     - Smart scaling: 59s -> "59 seconds", 60s -> "1 minute"
     - Rounded weeks: 11d -> "2 weeks"
     - Day/Month threshold: 29d -> "29 days", 30d -> "1 month"
@@ -57,6 +62,11 @@ The library uses a robust **Plural Category System** (Zero, One, Two, Few, Many,
 ## 📜 Compliance & Standards
 
 - **Locales**: Strictly uses `io.github.aughtone.types.locale.Locale`. Supports 55 core locales.
+    - Use **`Locale.current`** as the best way to retrieve the current system locale.
+- **Time Handling Standards**:
+    - **Kotlin 2.1+ Migration**: Always use **`kotlin.time.Instant`** and **`kotlin.time.Clock`** (from the standard library) instead of the legacy `kotlinx.datetime` versions.
+    - **Ambiguity Prevention**: NEVER use wildcard imports like `import kotlinx.datetime.*`. This prevents name collisions between `kotlinx.datetime` and `kotlin.time`.
+    - **No Type Mixing**: Do not mix `kotlinx.datetime.Instant` and `kotlin.time.Instant` in the same scope or API signature.
 - **Scaling**: 
     - **SI Units**: Powers of 1000 (k, M, G, etc.).
     - **Digital Data**: Powers of 1024 (Ki, Mi, Gi, etc.) using IEC symbols.

@@ -2,7 +2,6 @@ package io.github.aughtone.readable.metrics
 
 import io.github.aughtone.readable.number.numberFormatterFor
 import io.github.aughtone.types.locale.Locale
-import io.github.aughtone.types.locale.currentNativeLocale
 import io.github.aughtone.types.units.MetricPrefix
 import io.github.aughtone.types.units.UnitOfMeasure
 import kotlin.math.abs
@@ -14,7 +13,7 @@ import kotlin.math.pow
  */
 fun Long.toReadableDataSize(
     unit: UnitOfMeasure = UnitOfMeasure.Byte,
-    locale: Locale = currentNativeLocale(),
+    locale: Locale = Locale.current,
     precision: Int = 1
 ): String {
     val absoluteValue = abs(this).toDouble()

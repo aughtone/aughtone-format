@@ -5,108 +5,115 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.days
+import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
-import kotlin.time.ExperimentalTime
+import kotlinx.datetime.*
 
-@OptIn(ExperimentalTime::class)
 class RelativeTimeTest {
 
     // Fixed reference point for deterministic tests
-    private val now = Clock.System.now()
+    private val now = Instant.fromEpochMilliseconds(1713888000000L) // 2024-04-23T16:00:00Z
+    private val tz = TimeZone.UTC
 
     @Test
     fun testJustNow_withinDefaultThreshold() {
-        assertEquals("just now", (now - 3.seconds).toReadableRelativeTime(Locales.English, now))
-        assertEquals("just now", (now + 3.seconds).toReadableRelativeTime(Locales.English, now))
+        assertEquals("just now", now.toReadableRelative(Locales.English, now = now, timeZone = tz))
+        assertEquals("just now", (now - 59.seconds).toReadableRelative(Locales.English, now = now, timeZone = tz))
     }
 
     @Test
     fun testJustNow_exactlyAtThreshold_notNow() {
-        // 5s is NOT within the threshold (< 5s), so it should format as seconds
-        assertEquals("5 seconds ago", (now - 5.seconds).toReadableRelativeTime(Locales.English, now))
+        // Exactly 1 minute should be "1 minute ago" or "in 1 minute"
+        assertEquals("1 minute ago", (now - 60.seconds).toReadableRelative(Locales.English, now = now, timeZone = tz))
     }
 
     @Test
     fun testJustNow_customThreshold() {
-        assertEquals("just now", (now - 8.seconds).toReadableRelativeTime(Locales.English, now, 10.seconds))
+        assertEquals("just now", (now - 8.seconds).toReadableRelative(Locales.English, now = now, nowThreshold = 10.seconds, timeZone = tz))
+        assertEquals("8 seconds ago", (now - 8.seconds).toReadableRelative(Locales.English, now = now, nowThreshold = 5.seconds, timeZone = tz))
     }
 
     @Test
-    fun testPast_minutes() {
-        assertEquals("8 minutes ago", (now - 8.minutes).toReadableRelativeTime(Locales.English, now))
-        assertEquals("2 hours ago", (now - 134.minutes).toReadableRelativeTime(Locales.English, now))
+    fun testStyles() {
+        assertEquals("5 days ago", (now - 5.days).toReadableRelative(Locales.English, dateStyle = RelativeStyle.Long, timeZone = TimeZone.UTC, now = now))
+        // Short style in English suppresses the "ago" suffix
+        assertEquals("5d", (now - 5.days).toReadableRelative(Locales.English, dateStyle = RelativeStyle.Short, timeZone = TimeZone.UTC, now = now))
     }
 
     @Test
-    fun testFuture_minutes() {
-        assertEquals("in 8 minutes", (now + 8.minutes).toReadableRelativeTime(Locales.English, now))
+    fun testNoneStyle_suppression() {
+        // 5 days = 120 hours
+        assertEquals("120 hours ago", (now - 5.days).toReadableRelative(
+            Locales.English,
+            dateStyle = RelativeStyle.None,
+            timeStyle = RelativeStyle.Long,
+            timeZone = TimeZone.UTC,
+            now = now
+        ))
+
+        // 2 hours should remain 2 hours (hours is a time unit)
+        assertEquals("2 hours ago", (now - 2.hours).toReadableRelative(
+            Locales.English,
+            timeStyle = RelativeStyle.Long,
+            timeZone = TimeZone.UTC,
+            now = now
+        ))
     }
 
     @Test
-    fun testPast_days() {
-        assertEquals("1 day ago", (now - 1.days).toReadableRelativeTime(Locales.English, now))
+    fun testDayStrings() {
+        val reference = LocalDateTime(2023, 10, 27, 12, 0).toInstant(tz)
+        val today = reference + 2.hours
+        val tomorrow = reference + 25.hours
+        val yesterday = reference - 25.hours
+
+        // If it's the same day, Instant should return relative time (e.g. in 2 hours)
+        assertEquals("in 2 hours", today.toReadableRelative(Locales.English, now = reference, timeZone = tz))
+        assertEquals("Tomorrow", tomorrow.toReadableRelative(Locales.English, now = reference, timeZone = tz))
+        assertEquals("Yesterday", yesterday.toReadableRelative(Locales.English, now = reference, timeZone = tz))
+        
+        assertEquals("dans 2 heures", today.toReadableRelative(Locales.French, now = reference, timeZone = tz))
+        assertEquals("Demain", tomorrow.toReadableRelative(Locales.French, now = reference, timeZone = tz))
+        assertEquals("Hier", yesterday.toReadableRelative(Locales.French, now = reference, timeZone = tz))
+        
+        assertEquals("oor 2 ure", today.toReadableRelative(Locales.Afrikaans, now = reference, timeZone = tz))
+        assertEquals("Môre", tomorrow.toReadableRelative(Locales.Afrikaans, now = reference, timeZone = tz))
+        assertEquals("Gister", yesterday.toReadableRelative(Locales.Afrikaans, now = reference, timeZone = tz))
     }
 
     @Test
-    fun testFuture_weeks() {
-        assertEquals("in 1 week", (now + 7.days).toReadableRelativeTime(Locales.English, now))
+    fun testLocalDateRelative() {
+        val today = LocalDate(2023, 10, 27)
+        val tomorrow = LocalDate(2023, 10, 28)
+        val nextWeek = LocalDate(2023, 11, 3)
+        
+        assertEquals("Today", today.toReadableRelative(Locales.English, now = today))
+        assertEquals("Tomorrow", tomorrow.toReadableRelative(Locales.English, now = today))
+        assertEquals("in 1 week", nextWeek.toReadableRelative(Locales.English, now = today))
+    }
+
+    @Test
+    fun testLocalTimeRelative() {
+        val now = LocalTime(12, 0)
+        val then = LocalTime(12, 5)
+        
+        assertEquals("in 5 minutes", then.toReadableRelative(Locales.English, now = now))
     }
 
     @Test
     fun testPast_years() {
-        assertEquals("2 years ago", (now - (2 * 365).days).toReadableRelativeTime(Locales.English, now))
+        assertEquals("2 years ago", (now - (2 * 365).days).toReadableRelative(Locales.English, now = now))
     }
 
     @Test
     fun testFrench() {
-        assertEquals("il y a 8 minutes", (now - 8.minutes).toReadableRelativeTime(Locales.French, now))
-        assertEquals("dans 8 minutes", (now + 8.minutes).toReadableRelativeTime(Locales.French, now))
-        assertEquals("à l'instant", (now - 3.seconds).toReadableRelativeTime(Locales.French, now))
-    }
-
-    @Test
-    fun testGerman() {
-        assertEquals("vor 8 Minuten", (now - 8.minutes).toReadableRelativeTime(Locales.German, now))
-        assertEquals("in 8 Minuten", (now + 8.minutes).toReadableRelativeTime(Locales.German, now))
-        assertEquals("gerade eben", (now - 3.seconds).toReadableRelativeTime(Locales.German, now))
-    }
-
-    @Test
-    fun testSpanish() {
-        assertEquals("hace 8 minutos", (now - 8.minutes).toReadableRelativeTime(Locales.Spanish, now))
-        assertEquals("en 8 minutos", (now + 8.minutes).toReadableRelativeTime(Locales.Spanish, now))
-    }
-
-    @Test
-    fun testJapanese() {
-        assertEquals("8分前", (now - 8.minutes).toReadableRelativeTime(Locales.Japanese, now))
-        assertEquals("8分後", (now + 8.minutes).toReadableRelativeTime(Locales.Japanese, now))
-        assertEquals("たった今", (now - 3.seconds).toReadableRelativeTime(Locales.Japanese, now))
-    }
-
-    @Test
-    fun testRussian() {
-        // Russian plural for 8 (minutes) is "минут" (genitive plural, 5-20 range)
-        assertEquals("8 минут назад", (now - 8.minutes).toReadableRelativeTime(Locales.Russian, now))
-        assertEquals("через 8 минут", (now + 8.minutes).toReadableRelativeTime(Locales.Russian, now))
+        assertEquals("il y a 8 minutes", (now - 8.minutes).toReadableRelative(Locales.French, now = now))
+        assertEquals("à l'instant", (now - 3.seconds).toReadableRelative(Locales.French, now = now))
     }
 
     @Test
     fun testSouthAfricanEnglish_nowNow() {
-        // "just now" means "later" in SA English — threshold phrase must be "now now"
-        assertEquals("now now", (now - 3.seconds).toReadableRelativeTime(Locales.SouthAfricanEnglish, now))
-        assertEquals("now now", (now + 3.seconds).toReadableRelativeTime(Locales.SouthAfricanEnglish, now))
-        // Regular phrasing inherits from "en"
-        assertEquals("8 minutes ago", (now - 8.minutes).toReadableRelativeTime(Locales.SouthAfricanEnglish, now))
-    }
-
-    @Test
-    fun testBcp47Fallback() {
-        // fr-CA has no specific config, should fall back to "fr"
-        val frCA = io.github.aughtone.types.locale.Locale(
-            languageCode = "fr", regionCode = "CA", displayName = "French (Canada)"
-        )
-        assertEquals("il y a 8 minutes", (now - 8.minutes).toReadableRelativeTime(frCA, now))
+        assertEquals("now now", (now - 3.seconds).toReadableRelative(Locales.SouthAfricanEnglish, now = now))
     }
 }

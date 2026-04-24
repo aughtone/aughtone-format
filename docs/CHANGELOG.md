@@ -7,6 +7,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [Unreleased]
 
 ### Added
+- **Relative Time Styles**: Introduced `RelativeStyle` (`Long`, `Short`, `None`) to control the verbosity of relative time strings (e.g., "5 days ago" vs "5d ago").
+- **Day-Based Phrasing**: Added support for "Today", "Tomorrow", and "Yesterday" special-case strings in 55+ languages.
+- **Type-Safe Relative Formatting**: Added optimized `toReadableRelative` extensions for `LocalDate` and `LocalTime` with native type-safe `now` parameters.
+
+### Changed
+- **Relative Time API Standardization**: Renamed `toReadableRelativeTime` to `toReadableRelative` across all temporal types for consistency.
+- **Threshold Optimization**: Increased the default `nowThreshold` for `Instant` and `LocalDateTime` to **1 minute** and implemented a **1-day** threshold for `LocalDate`.
+- **Locale Integration**: Standardized `Locale.current` as the default for all readable formatting functions.
+- **Duration Styles**: Updated `kotlin.time.Duration.toReadableString` to support `RelativeStyle`, enabling short-form durations (e.g., "5m").
+
+### Added
 - **Pluralization Engine**: Integrated a Unicode CLDR-compliant **Plural Category Engine** (`pluralCategoryFor`, `ordinalCategoryFor`) for accurate grammatical parity across 55+ languages.
 - **Grammatical Factories**: Implemented multi-form factories (`u2` through `u6`) to handle varied linguistic complexity (Slavic, Arabic, Hebrew, Inuktitut).
 - **GeoResources Expansion**: Full **55-language coverage** for cardinal directions with robust, recursive BCP 47 subtag fallback.

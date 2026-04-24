@@ -1,7 +1,6 @@
 package io.github.aughtone.readable.number
 
 import io.github.aughtone.types.locale.Locale
-import io.github.aughtone.types.locale.currentNativeLocale
 import io.github.aughtone.types.units.MetricPrefix
 import kotlin.math.abs
 import kotlin.math.pow
@@ -15,7 +14,7 @@ import kotlin.math.roundToLong
  * @return A localized abbreviated string.
  */
 fun Double.toReadableAbbreviated(
-    locale: Locale = currentNativeLocale(),
+    locale: Locale = Locale.current,
     precision: Int = 1
 ): String {
     val absoluteValue = abs(this)
