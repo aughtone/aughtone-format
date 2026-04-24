@@ -14,6 +14,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    outputs:
+      release_id: ${{ steps.release.outputs.id }}
     steps:
       - name: Check out code
         uses: actions/checkout@v4
@@ -23,6 +25,7 @@ jobs:
           VERSION=$(grep "versionName =" gradle/libs.versions.toml | cut -d'"' -f2)
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
       - name: Create Release
+        id: release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.get_version.outputs.VERSION }}
@@ -35,7 +38,10 @@ jobs:
 
   publish:
     name: Release build and publish
-    if: github.event_name == 'release'
+    needs: create-release
+    if: |
+      github.event_name == 'release' || 
+      (github.event_name == 'push' && needs.create-release.outputs.release_id != '')
     runs-on: macOS-latest
     steps:
       - name: Check out code
