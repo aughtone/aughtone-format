@@ -24,8 +24,17 @@ This project follows a specialized 5-sector documentation hierarchy.
 - 🎨 [Design & UI](docs/DESIGN.md): Presentation layer and user stories.
 - 📋 [Acceptance Criteria](docs/ACs/README.md): Success outcomes and verification.
 - 📖 [Developer Guide](docs/DEVELOPER.md): Environment setup and onboarding.
+## ✨ Features
+- **65+ Languages Supported**: Deep grammatical parity for Slavic, Arabic, Hebrew, Inuktitut, and more.
+- **Relative Time Formatting**: Convert instants and dates into natural language (e.g., "5 minutes ago", "Yesterday").
+- **Automatic Fallback**: Smartly switches from relative to absolute formatting based on configurable thresholds.
+- **Ordinal Numbers**: Localized ordinal suffix support (e.g., 1st, 2nd, 3.º, 第1).
+- **Duration Scaling**: Human-friendly duration strings with perceptual rounding (e.g., "2 weeks" vs "14 days").
+- **Numeric Abbreviations**: Scaling large numbers into abbreviated forms (e.g., 1.5K, 1.2M).
+- **Geospatial Formatting**: Localized altitude, azimuth (with cardinal directions), and coordinates.
+
 ## 🌍 Universal Localization
-The library provides deep grammatical parity for **55 core languages** (Slavic, Arabic, Hebrew, Inuktitut, etc.) and full BCP 47 subtag fallback (e.g., `en-ZA` → `en`).
+The library provides deep grammatical parity for **65+ core languages** and full BCP 47 subtag fallback (e.g., `en-ZA` → `en`).
 
 ## 🚀 Quick Usage
 
@@ -33,7 +42,7 @@ The library provides deep grammatical parity for **55 core languages** (Slavic, 
 ```kotlin
 val now = Clock.System.now()
 // Format with styles (Short, Medium, Long, Full)
-println(now.format(FormatStyle.MEDIUM, locale = Locale("en"))) // "Apr 23, 2026, 4:15 PM"
+println(now.format(DateTimeStyle.Medium, locale = Locale("en"))) // "Apr 23, 2026, 4:15 PM"
 ```
 
 ### Human-Readable Metrics (`:readable`)
@@ -45,7 +54,7 @@ println(123L.toReadableOrdinal(Locale("en"))) // "123rd"
 println(1.5.hours.toReadableString(Locale("en"))) // "1.5 hours"
 
 // Relative Time
-println(instant.toReadableRelative(Locale.current)) // "3 minutes ago"
+println(instant.readableRelative(locale = Locale.current)) // "3 minutes ago"
 
 // Data Sizes
 println(1048576L.toReadableDataSize()) // "1.0 MiB"

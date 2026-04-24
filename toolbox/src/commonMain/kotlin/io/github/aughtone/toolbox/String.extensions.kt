@@ -1,7 +1,5 @@
 package io.github.aughtone.toolbox
 
-
-
 /**
  * Formats the string by replacing placeholders with the given arguments.
  *

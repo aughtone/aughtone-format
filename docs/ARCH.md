@@ -48,7 +48,7 @@ This means regional variants only need to be registered when they genuinely diff
 All resource maps use a **thread-safe, on-demand caching** pattern:
 - A `buildX(tag: String)` factory function constructs a formatter only when first requested.
 - The result is stored in a **`@Volatile` immutable map** which is replaced upon new entries.
-- **Boundedness**: Caches are limited to **100 entries** to prevent memory leaks in long-running processes, easily covering the **55 core locales** supported by the library.
+- **Boundedness**: Caches are limited to **150 entries** (increased from 100) to prevent memory leaks in long-running processes, comfortably covering the **65+ core locales** supported by the library.
 - **Zero allocation** for locales that are never used at runtime.
 ### 7. Grammatical Parity & Plural Categorization
 The library implements a **Unicode CLDR-compliant Plural Category Engine** (`PluralCategory.kt`).

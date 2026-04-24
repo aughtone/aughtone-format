@@ -19,10 +19,10 @@ This document defines the goals and requirements for optimizing the resource inf
 ---
 
 ## Story: Global Language Alignment
-> **As a developer, i want to support the same 51 languages that the readable module supports.**
+> **As a developer, i want to support the same 65+ languages that the readable module supports.**
 
 ### Acceptance Criteria
-- **AC: Resource Completeness.** For all 51 supported languages, a "smoke test" must verify that every resource type (AM/PM strings, Date/Time patterns, Day/Month names, and Eras) exists or has a valid fallback. There should be no `NoSuchElementException` during a lookup for any supported language.
+- **AC: Resource Completeness.** For all 65+ supported languages, a "smoke test" must verify that every resource type (AM/PM strings, Date/Time patterns, Day/Month names, and Eras) exists or has a valid fallback. There should be no `NoSuchElementException` during a lookup for any supported language.
 - **AC: Fallback Integrity.** Every lookup chain must ultimately terminate at a hardcoded "Root" or "Default" resource (e.g., `en-CA`) to ensure the system never crashes due to a missing locale. WE can improve this by using `Locale` inputs.
 - **AC: Localized Numbering Systems.** Support for non-Western digits (e.g., Arabic-Indic) should be considered. The default for a locale should be what that locale expects, while providing an option to force Western digits if needed.
 
@@ -106,7 +106,7 @@ This document defines the goals and requirements for optimizing the resource inf
 ### Acceptance Criteria
 - **AC: Default Era.** Assume CE (Common Era) for formatting by default.
 - **AC: Era Overrides.** Provide an override for `LocalDateTime` and `Instant` that includes the era in the output.
-- **AC: Global Nomenclature.** The era should be translated into the common nomenclature for all 51 supported languages.
+- **AC: Global Nomenclature.** The era should be translated into the common nomenclature for all 65+ supported languages.
 - **AC: Optimized Era Resources.** The era resource should be optimized so that outliers are explicitly specified while defaulting to the most common nomenclature where possible.
 
 ---
@@ -123,7 +123,7 @@ This document defines the goals and requirements for optimizing the resource inf
 > **As a developer, I want the resource system to be robust, sanitized, and decoupled to ensure long-term maintainability.**
 
 ### Acceptance Criteria
-- **AC: Cache Boundedness.** Ensure the resolved resource cache does not grow indefinitely; while 51 languages are manageable, the system should be resilient to excessive locale variant lookups.
+- **AC: Cache Boundedness.** Ensure the resolved resource cache does not grow indefinitely; while 65+ languages are manageable, the system should be resilient to excessive locale variant lookups.
 - **AC: Pattern Sanitization.** CLDR patterns must be sanitized during the lookup/caching phase to strip or handle unsupported tokens (e.g., flexible day periods) before they reach the formatter.
 - **AC: Normalization Excellence.** Key normalization must handle case sensitivity and separator differences (e.g., `en_US` vs `en-US`) to ensure cache consistency across all platforms.
 - **AC: Target-Aware Thread Safety.** Use thread-safe map implementations or atomic references for caching that are compatible with the Kotlin/Native (iOS) memory model.

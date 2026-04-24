@@ -32,14 +32,16 @@ Formatting byte counts into human-readable units.
 - **Standard**: Follows IEC (binary) or SI (decimal) conventions as requested.
 
 #### 4. Relative Time
-Formatting temporal types relative to a reference point (default `Clock.System.now()`) into natural language with style control.
-- **API**: `Instant.toReadableRelative(locale, dateStyle, timeStyle, now, nowThreshold, timeZone)`
+Formatting temporal types relative to a reference point (default `Clock.System.now()`) into natural language with style control and automatic fallback.
+- **API**: `Instant.readableRelative(now, relativeDateStyle, relativeTimeStyle, dateStyle, timeStyle, relativeThreshold, nowThreshold, locale, timeZone)`
 - **Extensions**: Supported for `Instant`, `LocalDateTime`, `LocalDate`, and `LocalTime`.
 - **Direction**: Negative delta = past (`"8 minutes ago"`), positive delta = future (`"in 8 minutes"`).
 - **Styles**: Supports `Long` ("5 days ago"), `Short` ("5d ago"), and `None` (component suppression).
+- **Fallback**: If the absolute difference exceeds `relativeThreshold`, the formatter falls back to a standard date/time format using `dateStyle` and `timeStyle`.
 - **Day Strings**: Dates within +/- 1 day are formatted using special-case strings: `"Today"`, `"Tomorrow"`, and `"Yesterday"`.
-- **Threshold**: Values within `nowThreshold` (default `1.minute`) produce a locale-specific "just now" string.
-- **Optimizations**: `LocalDate` and `LocalTime` extensions use type-specific `now` parameters to avoid unnecessary `Instant` conversions.
+- **Recently**: `LocalDate` supports a localized "Recently" string for dates within its `nowThreshold` (default `1.day`), fully hardened across all 65+ supported languages.
+- **Threshold**: Values within `nowThreshold` (default `1.minute` for time-based types) produce a locale-specific "just now" string.
+- **Optimizations**: `LocalDate` and `LocalTime` extensions use type-specific `now` parameters.
 
 #### 5. Durations
 Translating `kotlin.time.Duration` into natural language using smart-scaling.
@@ -52,19 +54,19 @@ Translating `kotlin.time.Duration` into natural language using smart-scaling.
 #### 6. Geospatial Data
 Human-readable representation of physical coordinates and orientations.
 - **Altitude**: Automatic scaling between meters (m) and kilometers (km) with localized separators.
-- **Azimuth**: Numeric degrees followed by localized cardinal directions in parentheses, e.g., `90° (E)`, `225° (SW)`. Directions (N, S, E, W, etc.) are localized across 55 languages.
+- **Azimuth**: Numeric degrees followed by localized cardinal directions in parentheses, e.g., `90° (E)`, `225° (SW)`. Directions (N, S, E, W, etc.) are localized across 65+ languages.
 - **Coordinates**:
     - **Decimal Degrees (DD)**: `40.71° N, 74.01° W`
     - **Degrees-Minutes-Seconds (DMS)**: `40° 42' 46" N, 74° 0' 21" W`
 
 #### 7. Grammatical Parity & Plural Categorization
 All human-readable formatting adheres to the **Unicode CLDR-compliant Plural Category System** (Zero, One, Two, Few, Many, Other).
-- **Linguistic Coverage**: Supports up to 6 grammatical forms (Arabic) to ensure natural sounding output in all 55 languages.
+- **Linguistic Coverage**: Supports up to 6 grammatical forms (Arabic) to ensure natural sounding output in all 65+ languages.
 - **Ordinal Categories**: Explicit support for language-specific ordinal categorization logic (e.g., English *st/nd/rd*, French *er/e*, Swedish *a/e*).
 
 ### Localization
 - **Architecture**: Leverages the `io.github.aughtone.types.locale.Locale` system for language-specific rules.
-- **Functional Parity**: All core formatters (Ordinal, Number, Duration, Relative Time) support a common set of **55 languages**.
+- **Functional Parity**: All core formatters (Ordinal, Number, Duration, Relative Time) support a common set of **65+ languages**.
 - **BCP 47 Subtag Fallback**: All formatters walk the full subtag chain before falling back to the base language code, then to English. e.g., `fr-CA` → `fr` → `en`.
 - **Patterns**:
     - **Separators**: Automatically applied based on locale (e.g., `,` vs `.` vs ` ` for grouping).
@@ -117,6 +119,6 @@ Supports replacing Latin digits with localized digit sets (e.g., Arabic-Indic, D
 - **Scope**: Applied to all numeric components of the formatted string.
 
 ### Localization
-- **Language Support**: Consistent **55-language** coverage, aligned with the `:readable` module.
+- **Language Support**: Consistent **65+ language** coverage, aligned with the `:readable` module.
 - **Resource Management**: Uses a thread-safe, bounded caching system for BCP 47 resource lookups.
 - **CLDR Compatibility**: Automatically sanitizes patterns to remove unsupported tokens while maintaining platform consistency.

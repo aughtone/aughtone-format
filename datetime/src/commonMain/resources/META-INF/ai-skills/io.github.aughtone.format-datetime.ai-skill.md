@@ -1,5 +1,6 @@
 ---
 skill-id: io.github.aughtone.format-datetime
+spec-version: 1.0
 name: "[Aughtone Format: DateTime](https://github.com/aughtone/aughtone-format)"
 type: "Aughtone AI-Skill"
 scope: core
@@ -35,7 +36,7 @@ These extensions are available on standard `kotlinx-datetime` types:
 
 - **Locales**: Strictly uses `io.github.aughtone.types.locale.Locale` (BCP 47).
 - **Time Types**: Operates on `kotlinx-datetime` (`LocalDate`, `LocalTime`, `LocalDateTime`).
-- **Internationalization**: Resources are internally mapped to handle 55 core locales, pluralization, and grammatical cases.
+- **Internationalization**: Resources are internally mapped to handle 65+ core locales, pluralization, and grammatical cases.
 - **24-Hour Master Strategy**: All internal resource patterns are stored in 24-hour (`HH:mm`) format. The formatting logic dynamically converts these to 12-hour format at runtime based on the locale's default or explicit user preference.
 - **Time Handling Standards**:
     - **Kotlin 2.1+ Migration**: Always use **`kotlin.time.Instant`** and **`kotlin.time.Clock`** (from the standard library) instead of the legacy `kotlinx.datetime` versions.
