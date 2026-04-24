@@ -1,6 +1,7 @@
 ---
 skill-id: io.github.aughtone.format-readable
-name: "[Aughtone Format: Readable](https://github.com/aughtone/aughtone-format)"
+spec-version: 1.0
+name: "[Aughtone Format: Human Readable](https://github.com/aughtone/aughtone-format)"
 type: "Aughtone AI-Skill"
 scope: core
 compatibility: ">=1.0.0"
