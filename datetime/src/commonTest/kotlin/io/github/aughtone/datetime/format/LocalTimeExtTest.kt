@@ -1,6 +1,7 @@
 package io.github.aughtone.datetime.format
 
-import androidx.compose.ui.text.intl.Locale
+import io.github.aughtone.types.locale.Locale
+import io.github.aughtone.types.locale.localeFor
 import kotlinx.datetime.LocalTime
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -8,7 +9,7 @@ import kotlin.test.assertTrue
 
 class LocalTimeExtTest {
     val testTime1 = LocalTime(16,8,39)
-    val testLocal = Locale("en-CA")
+    val testLocal = localeFor("en-CA")!!
 
     @Test
     fun testFormatShort() {
@@ -45,4 +46,10 @@ class LocalTimeExtTest {
         assertEquals("", testTime1.format(DateTimeStyle.None, locale = testLocal))
     }
 
+    @Test
+    fun testFormatLanguageOnlyFallback() {
+        val esLocal = localeFor("es")!!
+        // Spanish short format for 16:08 should use "p. m." from language-only lookup
+        assertEquals("4:08 p. m.", testTime1.format(DateTimeStyle.Short, locale = esLocal, is24HourFormat = false))
+    }
 }

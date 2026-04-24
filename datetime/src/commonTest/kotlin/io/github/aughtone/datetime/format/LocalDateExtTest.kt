@@ -1,5 +1,6 @@
 package io.github.aughtone.datetime.format
 
+import io.github.aughtone.types.locale.localeFor
 import kotlinx.datetime.LocalDate
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -8,7 +9,7 @@ class LocalDateExtTest {
     val testDate1 = LocalDate(1952,1,12)
     @Test
     fun testFormatShort() {
-        assertEquals("1952-01-12", testDate1.format(DateTimeStyle.Short))
+        assertEquals("1952-01-12", testDate1.format(DateTimeStyle.Short, locale = localeFor("af")!!))
     }
 
     @Test
