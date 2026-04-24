@@ -263,7 +263,8 @@ object TimeZoneAbbreviationLookup {
         "Atlantic/Cape_Verde" to mapOf("-01:00" to "CVT"),
         "Antarctica/McMurdo" to mapOf("+12:00" to "NZST", "+13:00" to "NZDT"),
         "Antarctica/Palmer" to mapOf("-03:00" to "CLT"),
-        "Antarctica/Troll" to mapOf("+00:00" to "UTC")
+        "Antarctica/Troll" to mapOf("+00:00" to "UTC", "Z" to "UTC"),
+        "UTC" to mapOf("+00:00" to "UTC", "Z" to "UTC")
     )
 
     fun getTimeZoneVariants(timeZone: TimeZone): Map<String, String>? =

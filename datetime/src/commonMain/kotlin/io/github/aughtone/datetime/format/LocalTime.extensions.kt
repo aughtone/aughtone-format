@@ -1,39 +1,42 @@
 package io.github.aughtone.datetime.format
 
-import androidx.compose.ui.text.intl.Locale
+import io.github.aughtone.types.locale.Locale
+import io.github.aughtone.types.locale.getCurrent
+import androidx.compose.ui.text.intl.Locale as ComposeLocale
 import io.github.aughtone.datetime.format.platform.MultiplatformDateFormatter
 import io.github.aughtone.datetime.format.platform.MultiplatformPostFormatter
 import io.github.aughtone.datetime.format.resources.is24HourFormat
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atDate
+
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.todayIn
+import kotlin.time.ExperimentalTime
+
+import io.github.aughtone.datetime.format.resources.NumberingSystem
 
 /**
  * @param timeStyle [DateTimeStyle] The style to use for the time.
  * @param locale [Locale] The locale to use for formatting. Defaults to [Locale.current].
  * @param timeZone [TimeZone] The time zone to use for formatting. Defaults to [TimeZone.currentSystemDefault].
- * @param use24HourClock [Boolean] Whether to use 24 hour clock or not. Defaults to [is24HourFormat].
- * @param useNative [Boolean] Whether to use the underlying platform formatting or not. Defaults to true.
+ * @param numberingSystem [NumberingSystem] Optional numbering system to use for digits.
  * @return [String] The formatted time.
  */
+@OptIn(ExperimentalTime::class)
 fun LocalTime.format(
     timeStyle: DateTimeStyle,
-    locale: Locale = Locale.current,
+    locale: Locale = Locale.getCurrent(fallbackTag = ComposeLocale.current.toLanguageTag()),
     timeZone: TimeZone = TimeZone.currentSystemDefault(),
     is24HourFormat: Boolean = is24HourFormat(locale = locale),
-): String = MultiplatformPostFormatter.postFormatTime(
+    numberingSystem: NumberingSystem? = null,
+): String = MultiplatformDateFormatter.formatDateTime(
+    localDateTime = atDate(Clock.System.todayIn(timeZone = timeZone)),
+    dateStyle = DateTimeStyle.None,
     timeStyle = timeStyle,
+    locale = locale,
     timeZone = timeZone,
-    instant = atDate(Clock.System.todayIn(timeZone = timeZone)).toInstant(timeZone),
-    formatedTime = MultiplatformDateFormatter.formatDateTime(
-        localDateTime = atDate(Clock.System.todayIn(timeZone = timeZone)),
-        dateStyle = DateTimeStyle.None,
-        timeStyle = timeStyle,
-        locale.toLanguageTag(),
-        timeZone = timeZone,
-        twentyFourHour = is24HourFormat
-    )
+    twentyFourHour = is24HourFormat,
+    numberingSystem = numberingSystem
 ) ?: toString()

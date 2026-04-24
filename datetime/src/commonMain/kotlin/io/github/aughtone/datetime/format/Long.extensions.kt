@@ -1,6 +1,6 @@
 package io.github.aughtone.datetime.format
 
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 
