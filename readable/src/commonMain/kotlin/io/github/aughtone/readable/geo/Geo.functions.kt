@@ -3,7 +3,6 @@ package io.github.aughtone.readable.geo
 import io.github.aughtone.readable.metrics.toReadableMetric
 import io.github.aughtone.readable.number.numberFormatterFor
 import io.github.aughtone.types.locale.Locale
-import io.github.aughtone.types.locale.currentNativeLocale
 import io.github.aughtone.types.quantitative.Altitude
 import io.github.aughtone.types.quantitative.Azimuth
 import io.github.aughtone.types.quantitative.Coordinates
@@ -13,7 +12,7 @@ import kotlin.math.abs
 /**
  * Formats an [Altitude] into a localized metric string with automatic scaling.
  */
-fun Altitude.formatReadable(locale: Locale = currentNativeLocale(), precision: Int = 1): String {
+fun Altitude.formatReadable(locale: Locale = Locale.current, precision: Int = 1): String {
     return meters.toReadableMetric(UnitOfMeasure.Meter, locale, precision)
 }
 
@@ -21,7 +20,7 @@ fun Altitude.formatReadable(locale: Locale = currentNativeLocale(), precision: I
  * Formats an [Azimuth] into a localized string with degrees and cardinal direction.
  * e.g., "90° (E)"
  */
-fun Azimuth.formatReadable(locale: Locale = currentNativeLocale(), precision: Int = 0): String {
+fun Azimuth.formatReadable(locale: Locale = Locale.current, precision: Int = 0): String {
     val formatter = numberFormatterFor(locale, precision)
     val cardinal = getCardinalDirection(degrees, locale)
     return "${formatter(degrees)}° ($cardinal)"
@@ -32,7 +31,7 @@ fun Azimuth.formatReadable(locale: Locale = currentNativeLocale(), precision: In
  */
 fun Coordinates.formatReadable(
     format: CoordinateFormat = CoordinateFormat.DecimalDegrees,
-    locale: Locale = currentNativeLocale()
+    locale: Locale = Locale.current
 ): String {
     return when (format) {
         CoordinateFormat.DecimalDegrees -> toDecimalDegrees(locale)

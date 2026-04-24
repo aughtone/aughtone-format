@@ -89,6 +89,7 @@ kotlin {
                 //  See: https://klibs.io/project/Kotlin/kotlinx-datetime#using-in-your-projects
                 api(libs.kotlinx.datetime)
                 api(libs.aughtone.types)
+                api(project(":datetime"))
                 api(project(":toolbox"))
             }
         }

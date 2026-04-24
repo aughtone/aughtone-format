@@ -37,6 +37,10 @@ These extensions are available on standard `kotlinx-datetime` types:
 - **Time Types**: Operates on `kotlinx-datetime` (`LocalDate`, `LocalTime`, `LocalDateTime`).
 - **Internationalization**: Resources are internally mapped to handle 55 core locales, pluralization, and grammatical cases.
 - **24-Hour Master Strategy**: All internal resource patterns are stored in 24-hour (`HH:mm`) format. The formatting logic dynamically converts these to 12-hour format at runtime based on the locale's default or explicit user preference.
+- **Time Handling Standards**:
+    - **Kotlin 2.1+ Migration**: Always use **`kotlin.time.Instant`** and **`kotlin.time.Clock`** (from the standard library) instead of the legacy `kotlinx.datetime` versions.
+    - **Ambiguity Prevention**: NEVER use wildcard imports like `import kotlinx.datetime.*`. This prevents name collisions between `kotlinx.datetime` and `kotlin.time`.
+    - **No Type Mixing**: Do not mix `kotlinx.datetime.Instant` and `kotlin.time.Instant` in the same scope or API signature.
 
 ## 🤖 Agent Onboarding
 1. **Context Registration**: Add this skill file to the `AGENTS.md` of the consuming project.

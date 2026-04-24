@@ -1,5 +1,6 @@
 package io.github.aughtone.readable.relative
 
+import io.github.aughtone.readable.Locales
 import io.github.aughtone.readable.PluralCategory
 import io.github.aughtone.readable.pluralCategoryFor
 import io.github.aughtone.toolbox.Formatter
@@ -9,15 +10,23 @@ import kotlin.math.roundToLong
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
 
-/** Functional formatter for relative time. Takes a signed [Duration] (negative = past). */
-typealias RelativeTimeFormatter = Formatter<Duration>
+/** Functional formatter for [Duration]s relative to a point in time. */
+typealias RelativeTimeFormatter = (Duration, Boolean) -> String
 
 private class RelativeTimeUnitNames(val forms: Map<PluralCategory, String>) {
     fun get(category: PluralCategory): String = forms[category] ?: forms[PluralCategory.Other] ?: forms.values.first()
 }
 
-/** Holds both the formatter lambda and the "just now" string for a locale. */
-internal data class RelativeTimeConfig(val formatter: RelativeTimeFormatter, val nowString: String)
+/**
+ * Configuration for relative time formatting in a specific locale.
+ */
+class RelativeTimeConfig(
+    val formatter: RelativeTimeFormatter,
+    val nowString: String,
+    val todayString: String,
+    val tomorrowString: String,
+    val yesterdayString: String,
+)
 
 // ── Factories ─────────────────────────────────────────────────────────────────
 
@@ -94,18 +103,21 @@ private fun config(
     future: String,
     nowString: String,
     units: Map<String, RelativeTimeUnitNames>,
+    todayString: String = "Today",
+    tomorrowString: String = "Tomorrow",
+    yesterdayString: String = "Yesterday",
     sep: String = " ",
 ): RelativeTimeConfig {
-    val formatter: RelativeTimeFormatter = { delta ->
+    val formatter: RelativeTimeFormatter = { delta, allowDates ->
         val totalSeconds = delta.toDouble(DurationUnit.SECONDS)
         val absSeconds = abs(totalSeconds)
         val isPast = totalSeconds < 0
 
         val (value, unitKey) = when {
-            absSeconds >= 31536000 -> (absSeconds / 31536000.0) to "year"
-            absSeconds >= 2592000  -> (absSeconds / 2592000.0)  to "month"
-            absSeconds >= 604800 && (absSeconds / 604800.0).roundToLong() <= 3 -> (absSeconds / 604800.0) to "week"
-            absSeconds >= 86400   -> (absSeconds / 86400.0)   to "day"
+            allowDates && absSeconds >= 31536000 -> (absSeconds / 31536000.0) to "year"
+            allowDates && absSeconds >= 2592000  -> (absSeconds / 2592000.0)  to "month"
+            allowDates && absSeconds >= 604800 && (absSeconds / 604800.0).roundToLong() <= 3 -> (absSeconds / 604800.0) to "week"
+            allowDates && absSeconds >= 86400   -> (absSeconds / 86400.0)   to "day"
             absSeconds >= 3600    -> (absSeconds / 3600.0)    to "hour"
             absSeconds >= 60      -> (absSeconds / 60.0)      to "minute"
             else                  -> absSeconds               to "second"
@@ -118,69 +130,78 @@ private fun config(
         val unitStr = "$n$sep$label"
         if (isPast) past.replace("{0}", unitStr) else future.replace("{0}", unitStr)
     }
-    return RelativeTimeConfig(formatter, nowString)
+    return RelativeTimeConfig(formatter, nowString, todayString, tomorrowString, yesterdayString)
 }
 
-// ── On-demand locale factory ──────────────────────────────────────────────────
+// ── Constants ─────────────────────────────────────────────────────────────────
 
-private fun buildConfig(tag: String, locale: Locale): RelativeTimeConfig? {
+private val ENGLISH_UNITS_LONG = u2(
+    "second", "minute", "hour", "day", "week", "month", "year",
+    "seconds", "minutes", "hours", "days", "weeks", "months", "years"
+)
+
+private val ENGLISH_UNITS_SHORT = u2(
+    "s", "m", "h", "d", "w", "mo", "y",
+    "s", "m", "h", "d", "w", "mo", "y"
+)
+
+private fun enConfig(locale: Locale, style: RelativeStyle) = config(
+    locale = locale,
+    past = if (style == RelativeStyle.Short) "{0}" else "{0} ago",
+    future = if (style == RelativeStyle.Short) "in {0}" else "in {0}",
+    nowString = "just now",
+    units = if (style == RelativeStyle.Short) ENGLISH_UNITS_SHORT else ENGLISH_UNITS_LONG,
+    todayString = "Today",
+    tomorrowString = "Tomorrow",
+    yesterdayString = "Yesterday",
+    sep = if (style == RelativeStyle.Short) "" else " "
+)
+
+private fun isRelativeTimeTagSupported(tag: String): Boolean = when (tag) {
+    "en-ZA", "en", "af", "nl", "de", "da", "nb", "no", "nn", "sv", "is", "et", "fi",
+    "vi", "el", "hu", "ro", "tr", "ru", "uk", "be", "pl", "cs", "sk", "sl", "hr",
+    "sr", "bg", "mk", "fr", "it", "es", "pt", "ca", "gl", "hi", "bn", "gu", "kn",
+    "ml", "mr", "pa", "ta", "te", "ar", "he", "fa", "ur", "th", "ko", "ja",
+    "zh-Hans", "zh", "zh-Hant", "zh-TW", "zh-HK", "eu", "hy", "ka" -> true
+    else -> false
+}
+
+/**
+ * Public factory that guarantees a [RelativeTimeConfig], falling back to English if the tag is unknown.
+ */
+fun buildRelativeTimeConfig(tag: String, locale: Locale, style: RelativeStyle = RelativeStyle.Long): RelativeTimeConfig {
     return when (tag) {
         // ── English / Germanic ────────────────────────────────────────────────
-        "en-ZA" -> config(locale, "{0} ago", "in {0}", "now now",
-            u2("second","minute","hour","day","week","month","year",
-               "seconds","minutes","hours","days","weeks","months","years"))
-        "en" -> config(locale, "{0} ago", "in {0}", "just now",
-            u2("second","minute","hour","day","week","month","year",
-               "seconds","minutes","hours","days","weeks","months","years"))
+        "en-ZA" -> config(locale, if (style == RelativeStyle.Short) "{0}" else "{0} ago", if (style == RelativeStyle.Short) "in {0}" else "in {0}", "now now", if (style == RelativeStyle.Short) ENGLISH_UNITS_SHORT else ENGLISH_UNITS_LONG, "Today", "Tomorrow", "Yesterday", if (style == RelativeStyle.Short) "" else " ")
+        "en" -> enConfig(locale, style)
 
-        "af" -> config(locale, "{0} gelede", "oor {0}", "nou net",
-            u2("sekonde","minuut","uur","dag","week","maand","jaar",
-               "sekondes","minute","ure","dae","weke","maande","jaar"))
-
-        "nl" -> config(locale, "{0} geleden", "over {0}", "zojuist",
-            u2("seconde","minuut","uur","dag","week","maand","jaar",
-               "seconden","minuten","uren","dagen","weken","maanden","jaren"))
+        "af" -> config(locale, "{0} gelede", "oor {0}", "nou net", u2("sekonde","minuut","uur","dag","week","maand","jaar", "sekondes","minute","ure","dae","weke","maande","jaar"), "Vandag", "Môre", "Gister")
+        "nl" -> config(locale, "{0} geleden", "over {0}", "zojuist", u2("seconde","minuut","uur","dag","week","maand","jaar", "seconden","minuten","uren","dagen","weken","maanden","jaren"), "Vandaag", "Morgen", "Gisteren")
 
         "de" -> config(locale, "vor {0}", "in {0}", "gerade eben",
             u2("Sekunde","Minute","Stunde","Tag","Woche","Monat","Jahr",
-               "Sekunden","Minuten","Stunden","Tage","Wochen","Monate","Jahre"))
-
-        "da" -> config(locale, "for {0} siden", "om {0}", "lige nu",
-            u2("sekund","minut","time","dag","uge","måned","år",
-               "sekunder","minutter","timer","dage","uger","måneder","år"))
-
-        "nb", "no" -> config(locale, "for {0} siden", "om {0}", "akkurat nå",
-            u2("sekund","minutt","time","dag","uke","måned","år",
-               "sekunder","minutter","timer","dager","uker","måneder","år"))
-
-        "nn" -> config(locale, "for {0} sidan", "om {0}", "akkurat no",
-            u2("sekund","minutt","time","dag","veke","månad","år",
-               "sekunder","minutt","timar","dagar","veker","månader","år"))
-
-        "sv" -> config(locale, "för {0} sedan", "om {0}", "just nu",
-            u2("sekund","minut","timme","dag","vecka","månad","år",
-               "sekunder","minuter","timmar","dagar","veckor","månader","år"))
-
-        "is" -> config(locale, "fyrir {0}", "eftir {0}", "rétt núna",
-            u2("sekúnda","mínúta","klukkustund","dagur","vika","mánuður","ár",
-               "sekúndur","mínútur","klukkustundir","dagar","vikur","mánuðir","ár"))
-
-        // ── Romance ───────────────────────────────────────────────────────────
+               "Sekunden","Minuten","Stunden","Tage","Wochen","Monate","Jahre"),
+            todayString = "Heute", tomorrowString = "Morgen", yesterdayString = "Gestern")
+        
         "fr" -> config(locale, "il y a {0}", "dans {0}", "à l'instant",
             u2("seconde","minute","heure","jour","semaine","mois","an",
-               "secondes","minutes","heures","jours","semaines","mois","ans"))
+               "secondes","minutes","heures","jours","semaines","mois","ans"),
+            todayString = "Aujourd'hui", tomorrowString = "Demain", yesterdayString = "Hier")
 
         "es" -> config(locale, "hace {0}", "en {0}", "ahora mismo",
             u2("segundo","minuto","hora","día","semana","mes","año",
-               "segundos","minutos","horas","días","semanas","meses","años"))
+               "segundos","minutos","horas","días","semanas","meses","años"),
+            todayString = "Hoy", tomorrowString = "Mañana", yesterdayString = "Ayer")
 
         "it" -> config(locale, "{0} fa", "tra {0}", "proprio ora",
             u2("secondo","minuto","ora","giorno","settimana","mese","anno",
-               "secondi","minuti","ore","giorni","settimane","mesi","anni"))
+               "secondi","minuti","ore","giorni","settimane","mesi","anni"),
+            todayString = "Oggi", tomorrowString = "Domani", yesterdayString = "Ieri")
 
         "pt" -> config(locale, "há {0}", "em {0}", "agora mesmo",
             u2("segundo","minuto","hora","dia","semana","mês","ano",
-               "segundos","minutos","horas","dias","semanas","meses","anos"))
+               "segundos","minutos","horas","dias","semanas","meses","anos"),
+            todayString = "Hoje", tomorrowString = "Amanhã", yesterdayString = "Ontem")
 
         "ca" -> config(locale, "fa {0}", "d'aquí a {0}", "ara mateix",
             u2("segon","minut","hora","dia","setmana","mes","any",
@@ -267,7 +288,11 @@ private fun buildConfig(tag: String, locale: Locale): RelativeTimeConfig? {
             u2("秒","分","時間","日","週間","ヶ月","年",
                "秒","分","時間","日","週間","ヶ月","年"), sep = "")
 
-        "zh" -> config(locale, "{0}前", "{0}后", "刚刚",
+        "zh-TW", "zh-HK", "zh-Hant" -> config(locale, "{0}前", "{0}後", "剛剛",
+            u2("秒","分","小時","天","週","月","年",
+               "秒","分","小時","天","週","月","年"), sep = "")
+
+        "zh", "zh-Hans" -> config(locale, "{0}前", "{0}后", "刚刚",
             u2("秒","分","小时","天","周","月","年",
                "秒","分","小时","天","周","月","年"), sep = "")
 
@@ -379,28 +404,29 @@ private fun buildConfig(tag: String, locale: Locale): RelativeTimeConfig? {
             u2("წამ","წუთ","საათ","დღ","კვირ","თვ","წლ",
                "წამ","წუთ","საათ","დღ","კვირ","თვ","წල"), sep = "")
 
-        else -> null
+        else -> if (tag == "en") enConfig(locale, style) else buildRelativeTimeConfig("en", locale, style)
     }
 }
 
-private val configCache = mutableMapOf<String, RelativeTimeConfig>()
+private val configCache = mutableMapOf<Pair<String, RelativeStyle>, RelativeTimeConfig>()
 
 /**
  * Returns the [RelativeTimeConfig] for [locale], building and caching it on first use.
  * Supports full BCP 47 subtag fallback: e.g. "en-ZA" → "en" → "en" default.
  */
-fun relativeTimeConfigFor(locale: Locale): RelativeTimeConfig {
+fun relativeTimeConfigFor(locale: Locale, style: RelativeStyle = RelativeStyle.Long): RelativeTimeConfig {
     val fullTag = if (locale.regionCode != null) "${locale.languageCode}-${locale.regionCode}" else locale.languageCode
     var currentTag = fullTag
     while (currentTag.isNotEmpty()) {
-        val cached = configCache[currentTag]
+        val key = currentTag to style
+        val cached = configCache[key]
         if (cached != null) return cached
-        val built = buildConfig(currentTag, locale)
-        if (built != null) {
-            configCache[currentTag] = built
+        if (isRelativeTimeTagSupported(currentTag)) {
+            val built = buildRelativeTimeConfig(currentTag, locale, style)
+            configCache[key] = built
             return built
         }
         currentTag = currentTag.substringBeforeLast('-', "")
     }
-    return configCache.getOrPut("en") { buildConfig("en", Locale("en"))!! }
+    return configCache.getOrPut("en" to style) { buildRelativeTimeConfig("en", Locales.English, style) }
 }

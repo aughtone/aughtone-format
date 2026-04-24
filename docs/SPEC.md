@@ -32,11 +32,14 @@ Formatting byte counts into human-readable units.
 - **Standard**: Follows IEC (binary) or SI (decimal) conventions as requested.
 
 #### 4. Relative Time
-Formatting temporal types relative to a reference point (default `Clock.System.now()`) into natural language.
-- **API**: `Instant.toReadableRelativeTime(locale, now, nowThreshold)`
-- **Extensions**: Also supported for `LocalDateTime` (relative to an Instant) and `LocalDate` (relative to the start of the day).
+Formatting temporal types relative to a reference point (default `Clock.System.now()`) into natural language with style control.
+- **API**: `Instant.toReadableRelative(locale, dateStyle, timeStyle, now, nowThreshold, timeZone)`
+- **Extensions**: Supported for `Instant`, `LocalDateTime`, `LocalDate`, and `LocalTime`.
 - **Direction**: Negative delta = past (`"8 minutes ago"`), positive delta = future (`"in 8 minutes"`).
-- **Threshold**: Instants within `nowThreshold` (default `5.seconds`) produce a locale-specific "just now" string.
+- **Styles**: Supports `Long` ("5 days ago"), `Short` ("5d ago"), and `None` (component suppression).
+- **Day Strings**: Dates within +/- 1 day are formatted using special-case strings: `"Today"`, `"Tomorrow"`, and `"Yesterday"`.
+- **Threshold**: Values within `nowThreshold` (default `1.minute`) produce a locale-specific "just now" string.
+- **Optimizations**: `LocalDate` and `LocalTime` extensions use type-specific `now` parameters to avoid unnecessary `Instant` conversions.
 
 #### 5. Durations
 Translating `kotlin.time.Duration` into natural language using smart-scaling.

@@ -2,6 +2,7 @@ package io.github.aughtone.datetime.format.resources
 
 import io.github.aughtone.types.locale.Locale
 import io.github.aughtone.types.locale.getCurrent
+import kotlin.time.Clock
 
 //import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.intl.Locale as ComposeLocale
@@ -26,5 +27,7 @@ fun is24HourFormat(locale: Locale = Locale.getCurrent(fallbackTag = ComposeLocal
         return Resources.getClockHours(locale = locale).is24hour
     }
 }
+
+fun nowInMillis() = Clock.System.now().toEpochMilliseconds()
 
 internal expect fun isPlatform24HourSettingEnabled(): Boolean?

@@ -84,5 +84,5 @@ fun ordinalityFor(locale: Locale): OrdinalFormatter {
         }
         currentTag = currentTag.substringBeforeLast('-', "")
     }
-    return ordinalityCache.getOrPut("en") { buildOrdinalFormatter("en", Locale("en"))!! }
+    return ordinalityCache.getOrPut("en") { buildOrdinalFormatter("en", Locale(languageCode = "en", displayName = "Default English"))!! }
 }
