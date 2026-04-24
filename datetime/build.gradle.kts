@@ -13,7 +13,7 @@ plugins {
     alias(libs.plugins.composeCompiler)
 }
 
-group = "io.github.aughtone"
+group = libs.versions.namespace.get().toString()
 version = libs.versions.versionName.get() // ${libs.versions.versionNameSiffix.get().toString()}
 
 kotlin {
