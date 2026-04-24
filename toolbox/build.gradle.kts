@@ -82,8 +82,8 @@ kotlin {
 
         val commonMain by getting {
             dependencies {
-//                implementation(compose.ui)
-//                implementation(compose.components.resources)
+                implementation(libs.jetbrains.compose.ui)
+                implementation(libs.jetbrains.compose.resources)
                 api(libs.kotlinx.serialization.json)
                 // XXX This might require additional libraries if you enable WASM or JS.
                 //  See: https://klibs.io/project/Kotlin/kotlinx-datetime#using-in-your-projects
