@@ -1,5 +1,6 @@
 ---
 skill-id: io.github.aughtone.format-datetime
+spec-version: 1.0
 name: "[Aughtone Format: DateTime](https://github.com/aughtone/aughtone-format)"
 type: "Aughtone AI-Skill"
 scope: core
