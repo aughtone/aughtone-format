@@ -30,6 +30,6 @@ All AI agents MUST adhere to these skills from `docs/standards/`:
 - **Embedded Skills**: This library uses machine-readable skills in:
     - `datetime/src/commonMain/resources/META-INF/ai-skills/io.github.aughtone.format-datetime.ai-skill.md`
     - `readable/src/commonMain/resources/META-INF/ai-skills/io.github.aughtone.format-readable.ai-skill.md`
-    - `toolbox/src/commonMain/resources/META-INF/ai-skills/io.github.aughtone.toolbox.ai-skill.md`
+    - `toolbox/src/commonMain/resources/META-INF/ai-skills/io.github.aughtone.format-toolbox.ai-skill.md`
   Always adhere to the patterns defined there.
 - **Update Docs**: Intelligently disperse context into the appropriate sector.
