@@ -1,7 +1,7 @@
 ---
-skill-id: io.github.aughtone.toolbox
-name: "[AughtOne Format: Toolbox](https://github.com/aughtone/aughtone-format)"
-type: "AughtOne AI-Skill"
+skill-id: io.github.aughtone.format-toolbox
+name: "[Aughtone Format: Toolbox](https://github.com/aughtone/aughtone-format)"
+type: "Aughtone AI-Skill"
 scope: core
 compatibility: ">=1.0.0"
 author: "[Brill Pappin](https://github.com/bpappin)"

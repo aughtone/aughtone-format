@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
-## [2.1.0] - 2026-04-23
+## [2.1.1] - 2026-04-24
 
 ### Added
 - **Pluralization Engine**: Integrated a Unicode CLDR-compliant **Plural Category Engine** (`pluralCategoryFor`, `ordinalCategoryFor`) for accurate grammatical parity across 55+ languages.
@@ -16,6 +16,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - **Day-Based Phrasing**: Added support for "Today", "Tomorrow", and "Yesterday" special-case strings in 55+ languages.
 - **Type-Safe Relative Formatting**: Added optimized `toReadableRelative` extensions for `LocalDate` and `LocalTime` with native type-safe `now` parameters.
 - **Time Handling Standards**: Formalized project-wide standards in AI Skills for `kotlin.time` (Kotlin 2.1+) transition and restricted wildcard imports to prevent ambiguity.
+- **Branding & Standardization**:
+    - Standardized Group ID and namespace to `io.github.aughtone`.
+    - Renamed all artifacts to use the `format-` prefix consistently (`format-datetime`, `format-readable`, `format-toolbox`).
+    - Unified iOS Kit naming to `AughtoneFormat[Module]Kit`.
+    - Ecosystem rebranding from "AughtOne" to "Aughtone".
 
 ### Changed
 - **Relative Time API Standardization**: Renamed `toReadableRelativeTime` to `toReadableRelative` across all temporal types for consistency.
@@ -33,7 +38,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [2.0.2] - 2024-04-19
 
 ### Added
-- **AughtOne AI-Skill**: Integrated the **AughtOne AI-Skill Publishing Standard** across all modules (`readable`, `toolbox`, `datetime`).
+- **Aughtone AI-Skill**: Integrated the **Aughtone AI-Skill Publishing Standard** across all modules (`readable`, `toolbox`, `datetime`).
 - **Readable Module Expansion**:
     - **Relative Time Formatting**: New `Instant.toReadableRelativeTime(locale, now, nowThreshold)` extension. Supports **55 languages**.
     - **Temporal Extensions**: Added `LocalDateTime.toReadableRelativeTime()` and `LocalDate.toReadableRelativeTime()` extension functions.

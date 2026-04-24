@@ -14,14 +14,14 @@ plugins {
 }
 
 group = libs.versions.namespace.get().toString()
-version = libs.versions.versionName.get() // ${libs.versions.versionNameSiffix.get().toString()}
+version = libs.versions.versionName.get()
 
 kotlin {
     jvmToolchain(17)
 
     jvm()
     android {
-        namespace = "${libs.versions.namespace.get()}.datetime"
+        namespace = "${libs.versions.namespace.get()}.format.datetime"
         compileSdk {
             version = release(libs.versions.android.compileSdk.get().toInt())
         }
@@ -60,11 +60,11 @@ kotlin {
     //noinspection WrongGradleMethod
     ).forEach { iosTarget ->
         iosTarget.binaries.framework {
-            baseName = "FormatDatetimeKit"
+            baseName = "AughtoneFormatDatetimeKit"
             isStatic = true
             binaryOption(
                 "bundleId",
-                "${libs.versions.namespace.get()}.datetime"
+                "${libs.versions.namespace.get()}.format.datetime"
             ) //"app.occurrence"
             binaryOption(
                 "bundleShortVersionString",
@@ -122,7 +122,7 @@ kotlin {
 
 compose.resources {
     publicResClass = true
-    packageOfResClass = "${libs.versions.namespace.get()}.datetime.resources"
+    packageOfResClass = "${libs.versions.namespace.get()}.format.datetime.resources"
     generateResClass = always
 }
 
