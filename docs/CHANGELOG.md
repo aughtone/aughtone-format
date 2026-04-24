@@ -6,14 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [2.1.2] - 2026-04-24
+
 ### Added
+- **AI Skill Versioning**: Implemented mandatory `spec-version: 1.0` metadata for all embedded AI skill files and the publishing standard to enhance agent compatibility.
+- **Recently Phrasing**: Added localized `"Recently"` strings to `RelativeTimeConfig` for Catalan, Galician, Romanian, Lithuanian, Latvian, Albanian, Inuktitut, and Georgian. Hardened existing translations for Azerbaijani, Uzbek, Kazakh, Basque, and Armenian.
 - **Relative Fallback**: Introduced `relativeThreshold` to `readableRelative` functions, allowing automatic fallback to standard formatting (via `dateStyle` and `timeStyle`) when the temporal difference is too large.
-- **"Recently" Phrasing**: Added localized `"Recently"` strings to `RelativeTimeConfig` for Catalan, Galician, Romanian, Lithuanian, Latvian, Albanian, Inuktitut, and Georgian. Hardened existing translations for Azerbaijani, Uzbek, Kazakh, Basque, and Armenian to ensure accuracy.
-- **Language Registry Expansion**: Updated `isRelativeTimeTagSupported` to formally support 65+ locales, including Azerbaijan, Uzbek, Kazakh, and several Baltic/Balkan languages.
+- **Language Registry Expansion**: Updated `isRelativeTimeTagSupported` to formally support 65+ locales.
 
 ### Changed
-- **Relative Time API**: Renamed `toReadableRelative` to `readableRelative` across all temporal types.
+- **Relative Time API**: Renamed `toReadableRelative` to `readableRelative` across all temporal types for better readability.
 - **Optimized Thresholds**: Standardized default `relativeThreshold` to `3.days` for dates and `3.hours` for times. Default `nowThreshold` for `LocalDate` is now `1.days`.
+- **Dependency Synchronization**: Updated `aughtone-types` to `2.0.3` to incorporate the latest ecosystem-wide stabilization and metadata improvements.
 
 ## [2.1.1] - 2026-04-24
 
