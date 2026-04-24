@@ -11,8 +11,8 @@ plugins {
     alias(libs.plugins.composeCompiler)
 }
 
-group = libs.versions.namespace.get().toString()
-version = libs.versions.versionName.get() // ${libs.versions.versionNameSiffix.get().toString()}
+group = libs.versions.namespace.get()
+version = libs.versions.versionName.get()
 
 kotlin {
     jvmToolchain(17)
@@ -20,7 +20,7 @@ kotlin {
     jvm()
 
     android {
-        namespace = "${libs.versions.namespace.get()}.readable"
+        namespace = "${libs.versions.namespace.get()}.format.readable"
         compileSdk {
             version = release(libs.versions.android.compileSdk.get().toInt())
         }
@@ -60,15 +60,15 @@ kotlin {
     //noinspection WrongGradleMethod
     ).forEach { iosTarget ->
         iosTarget.binaries.framework {
-            baseName = "FormatReadableKit"
+            baseName = "AughtoneFormatReadableKit"
             isStatic = true
             binaryOption(
                 "bundleId",
-                "${libs.versions.namespace.get()}.readable"
+                "${libs.versions.namespace.get()}.format.readable"
             ) //"app.occurrence"
             binaryOption(
                 "bundleShortVersionString",
-                libs.versions.versionName.get().toString()
+                libs.versions.versionName.get()
             ) //"1.0.0"
         }
     }
@@ -124,7 +124,7 @@ kotlin {
 
 compose.resources {
     publicResClass = true
-    packageOfResClass = "${libs.versions.namespace.get()}.readable.resources"
+    packageOfResClass = "${libs.versions.namespace.get()}.format.readable.resources"
     generateResClass = always
 }
 
