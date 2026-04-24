@@ -59,7 +59,7 @@ class LongExtTest {
     @Test
     fun testToLocalTime() {
         assertEquals(
-            expected = testTime.atDate(LocalDate(year = 2022, monthNumber = 1, dayOfMonth = 1)).toInstant(testTimeZone).toEpochMilliseconds(),
+            expected = testTime.atDate(LocalDate(2022, kotlinx.datetime.Month.JANUARY, 1)).toInstant(testTimeZone).toEpochMilliseconds(),
             actual = testLong.toLocalTime(testTimeZone).atDate(testDate).toInstant(testTimeZone).toEpochMilliseconds(),
         )
     }

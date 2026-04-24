@@ -1,6 +1,8 @@
 package io.github.aughtone.datetime.format
 
-import androidx.compose.ui.text.intl.Locale
+import io.github.aughtone.types.locale.Locale
+import io.github.aughtone.types.locale.localeFor
+import kotlin.time.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
@@ -15,20 +17,17 @@ class PairExtTest {
     val instant1 = dateTime.toInstant(testTimeZone)
     val instant2 = instant1.plus(5.days)
 
-    val testPair0 = Pair(null, null)
-    val testPair1 = Pair(instant1, instant2)
-    val testPair2 = Pair(instant1.toEpochMilliseconds(), instant2.toEpochMilliseconds())
-    val testPair3 = Pair(instant1, null)
-    val testPair4 = Pair(null, instant2)
 
     @Test
     fun testShortFormatDateTimeRangeEnCa() {
+        val testPair1: Pair<Instant?, Instant?> = Pair(instant1, instant2)
+        val testPair2: Pair<Long?, Long?> = Pair(instant1.toEpochMilliseconds(), instant2.toEpochMilliseconds())
         assertEquals(
             expected = "2022-01-01 12:00 p.m. - 2022-01-06 12:00 p.m.",
             actual = testPair1.format(
                 dateStyle = DateTimeStyle.Short,
                 timeStyle = DateTimeStyle.Short,
-                locale = Locale("en-CA"),
+                locale = localeFor("en-CA")!!,
                 timeZone = testTimeZone
             ),
         )
@@ -38,7 +37,7 @@ class PairExtTest {
             actual = testPair2.formatAsDateTime(
                 dateStyle = DateTimeStyle.Short,
                 timeStyle = DateTimeStyle.Short,
-                locale = Locale("en-CA"),
+                locale = localeFor("en-CA")!!,
                 timeZone = testTimeZone
             ),
         )
@@ -46,12 +45,14 @@ class PairExtTest {
 
     @Test
     fun testShortFormatPartialRangeOnlyEnCa() {
+        val testPair3: Pair<Instant?, Instant?> = Pair(instant1, null)
+        val testPair4: Pair<Instant?, Instant?> = Pair(null, instant2)
         assertEquals(
             expected = "2022-01-01 12:00 p.m. - ?",
             actual = testPair3.format(
                 dateStyle = DateTimeStyle.Short,
                 timeStyle = DateTimeStyle.Short,
-                locale = Locale("en-CA"),
+                locale = localeFor("en-CA")!!,
                 timeZone = testTimeZone
             ),
         )
@@ -61,7 +62,7 @@ class PairExtTest {
             actual = testPair4.format(
                 dateStyle = DateTimeStyle.Short,
                 timeStyle = DateTimeStyle.Short,
-                locale = Locale("en-CA"),
+                locale = localeFor("en-CA")!!,
                 timeZone = testTimeZone
             ),
         )
@@ -69,12 +70,13 @@ class PairExtTest {
 
     @Test
     fun testShortFormatEmptyRangeEnCa() {
+        val testPair0: Pair<Instant?, Instant?> = Pair(null, null)
         assertEquals(
             expected = "? - ?",
             actual = testPair0.format(
                 dateStyle = DateTimeStyle.Short,
                 timeStyle = DateTimeStyle.Short,
-                locale = Locale("en-CA"),
+                locale = localeFor("en-CA")!!,
                 timeZone = testTimeZone
             ),
         )
@@ -82,12 +84,14 @@ class PairExtTest {
 
     @Test
     fun testShortFormatChangedPlaceholderEnCa() {
+        val testPair3: Pair<Instant?, Instant?> = Pair(instant1, null)
+        val testPair4: Pair<Instant?, Instant?> = Pair(null, instant2)
         assertEquals(
             expected = "2022-01-01 12:00 p.m. - #",
             actual = testPair3.format(
                 dateStyle = DateTimeStyle.Short,
                 timeStyle = DateTimeStyle.Short,
-                locale = Locale("en-CA"),
+                locale = localeFor("en-CA")!!,
                 timeZone = testTimeZone,
                 placeholder = "#"
             ),
@@ -98,7 +102,7 @@ class PairExtTest {
             actual = testPair4.format(
                 dateStyle = DateTimeStyle.Short,
                 timeStyle = DateTimeStyle.Short,
-                locale = Locale("en-CA"),
+                locale = localeFor("en-CA")!!,
                 timeZone = testTimeZone,
                 placeholder = "<missing>"
             ),

@@ -21,10 +21,13 @@ dependencyResolutionManagement {
                 includeGroupAndSubgroups("com.google")
             }
         }
+        mavenLocal()
         mavenCentral()
     }
 }
 
-rootProject.name = "datetime-format"
+rootProject.name = "AOFormat"
 include(":datetime")
-//include(":datetime-format-platform")
+include(":readable")
+include(":toolbox")
+//include(":datetime-native")

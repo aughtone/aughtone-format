@@ -1,76 +1,64 @@
-[![GitHub license](https://img.shields.io/badge/license-Apache%20License%202.0-blue.svg?style=flat)](http://www.apache.org/licenses/LICENSE-2.0)
-![Maven Central Version](https://img.shields.io/maven-central/v/io.github.aughtone/format-datetime?style=flat)
-[![Kotlin](https://img.shields.io/badge/Kotlin-2.1.10-blue.svg?logo=kotlin&style=flat)](http://kotlinlang.org)
-[![Kotlin Multiplatform](https://img.shields.io/badge/Kotlin-Multiplatform-brightgreen?logo=kotlin)](https://github.com/JetBrains/compose-multiplatform)
+# Aughtone Format
 
+Aughtone Format is a suite of Kotlin Multiplatform libraries designed to provide consistent, localized formatting for Dates, Times, Numbers, and other human-readable metrics across all platforms.
 
-![badge-android](http://img.shields.io/badge/platform-android-6EDB8D.svg?style=flat)
-![badge-ios](http://img.shields.io/badge/platform-ios-CDCDCD.svg?style=flat)
-![badge-desktop](http://img.shields.io/badge/platform-desktop-DB413D.svg?style=flat)
-![badge-js](http://img.shields.io/badge/platform-js%2Fwasm-FDD835.svg?style=flat)
+## ⚠️ Breaking Changes in 2.1.0
 
+Version 2.1.0 introduces significant structural changes and hardening:
 
-# DateTime Format
+- **Library Split**: Metric-specific formatting (Ordinals, Durations, Relative Time, Data Sizes) has been moved from the core library into the new **`:readable`** module.
+- **`kotlin.time` Hardening**: All Duration and Relative Time APIs have been refactored to use standard `kotlin.time.Duration` types instead of `Long` milliseconds for improved type safety and consistency.
+- **Version Synchronization**: This release aligns the versioning across the AughtOne ecosystem.
 
-This library for set up for [Kotlin Multiplatform](https://www.jetbrains.com/kotlin-multiplatform/) (KMP)
+## 📦 Core Modules
 
-Feel free to fork it and make improvements, I'll keep up as best I can.
+- **`:datetime`**: Advanced formatting for `kotlinx-datetime` types with multi-locale support.
+- **`:readable`**: Human-friendly formatting for metrics (abbreviations), ordinals, and data sizes.
+- **`:toolbox`**: Shared utilities and common formatting primitives.
 
-_Note: this library currently uses nl.jacobras:Human-Readable for relative time, however it is not 
-all tha compatible and as time goes on, we expect to replace it._
+This project follows a specialized 5-sector documentation hierarchy.
 
-# Installation
-![Maven Central Version](https://img.shields.io/maven-central/v/io.github.aughtone/format-datetime?style=flat)
+## 📚 Documentation Sectors
+- 📐 [Architecture](docs/ARCH.md): Engineering rules and design patterns.
+- 🧠 [Functional Specifications](docs/SPEC.md): Business logic and domain constraints.
+- 🎨 [Design & UI](docs/DESIGN.md): Presentation layer and user stories.
+- 📋 [Acceptance Criteria](docs/ACs/README.md): Success outcomes and verification.
+- 📖 [Developer Guide](docs/DEVELOPER.md): Environment setup and onboarding.
+## 🌍 Universal Localization
+The library provides deep grammatical parity for **55 core languages** (Slavic, Arabic, Hebrew, Inuktitut, etc.) and full BCP 47 subtag fallback (e.g., `en-ZA` → `en`).
 
-## Datetime Formatting
-```gradle
-implementation("io.github.aughtone:format-datetime:${version}")
-```
+## 🚀 Quick Usage
 
-# Usage & Examples
-
-#### String Formatting
-
-This function is meant as a replacement for the string format function in java.
-
-_The intention is to improve string formatting so that its more robust, and it will probably move to a different library, so you should 
-consider it unstable._
-
+### Datetime Formatting (`:datetime`)
 ```kotlin
-"Hello %1, today is %2".format("World", "Monday") // Returns "Hello World, today is Monday"
-"Value: %1, Value2: %2".format(10, "test") // Returns "Value: 10, Value2: test"
+val now = Clock.System.now()
+// Format with styles (Short, Medium, Long, Full)
+println(now.format(FormatStyle.MEDIUM, locale = Locale("en"))) // "Apr 23, 2026, 4:15 PM"
 ```
 
-#### Date & Time Formatting
-
-Date and time formatting are what this library is all about and there are several ways to do it.  
-
+### Human-Readable Metrics (`:readable`)
 ```kotlin
-// 1. Basic Usage with Defaults (Short Date and Time) in the local time zone.
-val now = Clock.System.now().toLocalDateTime()
+// Ordinals
+println(123L.toReadableOrdinal(Locale("en"))) // "123rd"
 
-val formattedNow = now.format(DateTimeStyle.SHORT, DateTimeStyle.SHORT)
-println("Now (Short Date & Time): $formattedNow")
-// example output : Now (Short Date & Time): 10/26/24, 8:56 PM
+// Durations
+println(1.5.hours.toReadableString(Locale("en"))) // "1.5 hours"
 
-// 2. Medium Date and Time
-val mediumFormatted = now.format(DateTimeStyle.MEDIUM, DateTimeStyle.MEDIUM)
-println("Now (Medium Date & Time): $mediumFormatted")
-// example output : Now (Medium Date & Time): Oct 26, 2024, 8:56:56 PM
+// Relative Time
+println(instant.toReadableRelative(Locale.current)) // "3 minutes ago"
 
-// 3. Long Date and Time
-val longFormatted = now.format(DateTimeStyle.LONG, DateTimeStyle.LONG)
-println("Now (Long Date & Time): $longFormatted")
-// example output : Now (Long Date & Time): October 26, 2024 at 8:56:56 PM GMT+1
+// Data Sizes
+println(1048576L.toReadableDataSize()) // "1.0 MiB"
 ```
 
-# Sources
+---
+## 🛠️ Governance Standards
+Access the [Governance Skills](docs/standards/) for specialized development rules.
 
-https://en.wikipedia.org/wiki/Date_and_time_representation_by_country
-https://en.wikipedia.org/wiki/Thai_six-hour_clock
-https://en.wikipedia.org/wiki/Italian_six-hour_clock
-https://en.wikipedia.org/wiki/Common_Locale_Data_Repository
+---
+## 🤖 AI-Assisted Development
+This library includes embedded, machine-readable "skills" to enhance the experience of developers using AI code assistants. These skills help the AI understand our library's APIs and best practices, leading to more accurate and idiomatic code suggestions.
 
-# Feedback
+- **AI Skill Discovery**: Look for `META-INF/ai-skills/*.ai-skill.md`
 
-Bugs can go into the issue tracker, but you are probably going to get faster support by creating a PR.   
+To learn how to add this capability to your own library, see our [AI Skill Publishing Standard](docs/standards/ai-skill-publishing.md).
