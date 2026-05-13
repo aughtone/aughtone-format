@@ -67,6 +67,7 @@ object Locales {
     val Hebrew: Locale = Locale(languageCode = "he", regionCode = "IL", displayName = "Hebrew")
     val Persian: Locale = Locale(languageCode = "fa", regionCode = "IR", displayName = "Persian")
     val Turkish: Locale = Locale(languageCode = "tr", regionCode = "TR", displayName = "Turkish")
+    val Azerbaijani: Locale = Locale(languageCode = "az", regionCode = "AZ", displayName = "Azerbaijani")
     val Swahili: Locale = Locale(languageCode = "sw", regionCode = "KE", displayName = "Swahili")
 
     // ── Finno-Ugric & Other ───────────────────────────────────────────────────

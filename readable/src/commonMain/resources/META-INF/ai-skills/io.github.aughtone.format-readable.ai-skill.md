@@ -1,88 +1,80 @@
 ---
 skill-id: io.github.aughtone.format-readable
 spec-version: 1.0
-name: "[Aughtone Format: Human Readable](https://github.com/aughtone/aughtone-format)"
+name: "Aughtone Format - Readable"
 type: "Aughtone AI-Skill"
-scope: core
-compatibility: ">=1.0.0"
-author: "[Brill Pappin](https://github.com/bpappin)"
+scope: "Human-readable string formatting for numeric, metric, temporal, and geospatial types."
+compatibility: "Kotlin Multiplatform (KMP)"
+author: "Aughtone"
 ---
 
-# AI Skill: Aughtone Format (Readable)
+# 📖 Aughtone Format - Readable AI-Skill
 
-This library provides localized human-readable formatting for Kotlin Multiplatform.
+This skill provides a standardized API for converting quantitative and numeric data into localized, human-readable strings. It follows a "presentation-first" philosophy, prioritizing UX consistency across platforms.
 
-## 🧰 The AI Toolbox
+## 🎨 The AI Toolbox
 
-### **Ordinality Formatting**
-Convert numbers to their ordinal forms (e.g., 1 to "1st").
-- `Int.toReadableOrdinal(locale: Locale): String`
-- `Long.toReadableOrdinal(locale: Locale): String`
+### 1. Numeric Formatting (`toReadable`)
+Comprehensive extensions for all Kotlin numeric types (`Double`, `Long`, `Int`, `Short`, `Byte`, `Float` + Unsigned variants).
 
-### **Numeric Abbreviation**
-Format large numbers into abbreviated strings (e.g., 1500 to "1.5k").
-- `Double.toReadableAbbreviated(locale: Locale, precision: Int): String`
+- **Primary APIs**:
+    - `T.toReadable(locale: Locale, precision: Int): String`
+    - `T.toReadableAbbreviated(locale: Locale, precision: Int): String` (e.g., `1.5k`, `2M`)
+- **Preference**: Use `toReadable()` instead of `toString()` for any value displayed in a UI. Use `toReadableAbbreviated()` for dashboards or space-constrained labels.
+- **Contract**:
+    - Default `precision` is `0` for integers and `1` for floating-point types.
+    - Abbreviation uses SI metric prefixes (`k`, `M`, `G`, `T`, `P`, `E`, `Z`, `Y`).
+    - Values under 1000 in `toReadableAbbreviated` fall back to standard `toReadable`.
 
-### **Metric & Data Scaling**
-Format quantities and data sizes with automatic unit scaling.
-- `Distance.formatReadable(locale: Locale): String` (e.g., "1.5 km")
-- `Speed.formatReadable(locale: Locale): String`
-*   `Long.toReadableDataSize(unit: UnitOfMeasure): String` (e.g., "1.0 MiB")
+### 2. Metric & Data Size (`toReadableMetric`, `toReadableDataSize`)
+Handles SI scaling and IEC binary scaling for storage and physical measurements.
 
-### **Geo Formatting**
-Localized formatting for altitudes, azimuths, and coordinates.
-- `Altitude.formatReadable(): String` (scales to km if needed)
-- `Azimuth.formatReadable(): String` (e.g., "90° (E)")
-- `Coordinates.formatReadable(format: CoordinateFormat): String`
-    - `DecimalDegrees`: "40.7128° N, 74.006° W"
-    - `DegreesMinutesSeconds`: "40° 42' 46\" N, 74° 0' 21\" W"
+- **Primary APIs**:
+    - `T.toReadableMetric(unit: UnitOfMeasure, locale: Locale, precision: Int): String`
+    - `T.toReadableDataSize(unit: UnitOfMeasure, locale: Locale, precision: Int): String`
+- **Preference**: Use `toReadableDataSize()` specifically for byte counts. Use `toReadableMetric()` for distance, mass, or power.
+- **Contract**:
+    - `toReadableMetric` uses base-1000 scaling (e.g., `1500m` -> `"1.5 km"`).
+    - `toReadableDataSize` uses base-1024 scaling and IEC symbols (e.g., `1024` -> `"1.0 KiB"`).
 
-### **Relative Time Formatting**
-Format instants and dates relative to a reference point (e.g., "5 minutes ago", "Today").
-- `Instant.readableRelative(now, relativeDateStyle, relativeTimeStyle, dateStyle, timeStyle, relativeThreshold, nowThreshold, locale, timeZone): String`
-- `LocalDateTime.readableRelative(now, relativeDateStyle, relativeTimeStyle, dateStyle, timeStyle, relativeThreshold, nowThreshold, locale, timeZone): String`
-- `LocalDate.readableRelative(now, relativeStyle, dateStyle, relativeThreshold, nowThreshold, locale): String`
-- `LocalTime.readableRelative(now, relativeStyle, timeStyle, relativeThreshold, nowThreshold, locale): String`
-    - **RelativeStyle**: `Long` ("5 days ago"), `Short` ("5d ago"), `None` (suppress component).
-    - **Fallback Styles**: `dateStyle` and `timeStyle` (of type `DateTimeStyle`) define the format if `relativeThreshold` is exceeded.
-    - **Day Strings**: Automatically handles "Today", "Tomorrow", and "Yesterday" (+/- 1 day).
-    - **Recently**: Returns localized "Recently" if within `nowThreshold` for `LocalDate` (useful for grouping "recent" dates).
-    - **Defaults**: 
-        - `relativeThreshold`: `3.days` (Instant/Date), `3.hours` (Time).
-        - `nowThreshold`: `1.minutes` (Instant/Time), `1.days` (Date).
-        - `locale`: `Locale.current`.
+### 3. Geospatial Formatting (`geo`)
+Formatting for Coordinates, Altitude, and Azimuth.
 
-### **Duration Formatting**
-Localized, human-friendly duration scaling.
-- `kotlin.time.Duration.toReadableString(locale, style): String`
-    - **RelativeStyle**: `Long` ("2 minutes"), `Short` ("2m").
-    - Smart scaling: 59s -> "59 seconds", 60s -> "1 minute"
-    - Rounded weeks: 11d -> "2 weeks"
-    - Day/Month threshold: 29d -> "29 days", 30d -> "1 month"
+- **Primary APIs**:
+    - `Coordinates.formatReadable(format: CoordinateFormat, locale: Locale): String`
+    - `Azimuth.formatReadable(locale: Locale, precision: Int): String`
+- **Preference**: Prefer `CoordinateFormat.DecimalDegrees` for technical UIs and `DegreesMinutesSeconds` for traditional navigation UIs.
+- **Contract**:
+    - `Azimuth` output includes cardinal direction indicators (e.g., `"90° (E)"`).
+    - Coordinates are automatically suffixed with localized hemisphere indicators (N, S, E, W).
 
-### **Pluralization & Grammar**
-The library uses a robust **Plural Category System** (Zero, One, Two, Few, Many, Other) based on Unicode CLDR rules to ensure grammatical accuracy across all 65+ supported languages.
-- Slavic (3-form), Arabic (6-form), Hebrew (4-form), and Inuktitut (4-form) are explicitly supported.
-- Centralized logic via `pluralCategoryFor(locale, n)` and `ordinalCategoryFor(locale, n)`.
+### 4. Temporal & Ordinality (`relative`, `ordinality`)
+Natural language time and numeric order.
 
-## 📜 Compliance & Standards
+- **Primary APIs**:
+    - `Instant.toReadableRelative(locale, now, style): String`
+    - `T.toReadableOrdinal(locale): String` (e.g., `"1st"`, `"2nd"`, `"1er"`)
+- **Preference**: Use `toReadableRelative()` for social feeds or "Last Updated" timestamps.
+- **Contract**:
+    - Ordinality rules are locale-aware (handles English suffixes, French gendered suffixes, etc.).
 
-- **Locales**: Strictly uses `io.github.aughtone.types.locale.Locale`. Supports 65+ core locales.
-    - Use **`Locale.current`** as the best way to retrieve the current system locale.
-- **Time Handling Standards**:
-    - **Kotlin 2.1+ Migration**: Always use **`kotlin.time.Instant`** and **`kotlin.time.Clock`** (from the standard library) instead of the legacy `kotlinx.datetime` versions.
-    - **Ambiguity Prevention**: NEVER use wildcard imports like `import kotlinx.datetime.*`. This prevents name collisions between `kotlinx.datetime` and `kotlin.time`.
-    - **No Type Mixing**: Do not mix `kotlinx.datetime.Instant` and `kotlin.time.Instant` in the same scope or API signature.
-- **Scaling**: 
-    - **SI Units**: Powers of 1000 (k, M, G, etc.).
-    - **Digital Data**: Powers of 1024 (Ki, Mi, Gi, etc.) using IEC symbols.
-- **Packages**:
-    - `io.github.aughtone.readable.ordinality`
-    - `io.github.aughtone.readable.number`
-    - `io.github.aughtone.readable.metrics`
+## ⚖️ Compliance & Standards
 
-## 🔗 References
+- **ISO 31-0**: Adheres to international standards for numeric separators (e.g., space grouping for French, comma for US).
+- **IEC 80000-13**: Uses binary prefixes (Ki, Mi, Gi) for data size as per International Electrotechnical Commission.
+- **BCP 47**: Locale resolution follows standard subtag fallback (e.g., `en-ZA` -> `en` -> `default`).
+- **WGS84**: Geospatial calculations and formatting assume the WGS84 ellipsoid.
 
-- [Wiktionary: Ordinal numbers by language](https://en.wiktionary.org/wiki/Category:Ordinal_numbers_by_language)
-- [Wikipedia: Metric prefix](https://en.wikipedia.org/wiki/Metric_prefix)
-- [IEC 80000-13: Prefixes for binary multiples](https://en.wikipedia.org/wiki/Binary_prefix)
+## 🔒 Serialization & Immutability
+
+- **Immutability**: All formatting outputs are `String`. The library operates on immutable types from `io.github.aughtone.types`.
+- **Statelessness**: Formatters are stateless and side-effect free.
+- **Cache**: `numberFormatterFor` uses an internal on-demand cache keyed by `(Locale, Precision)`.
+
+## 🤖 Agent Onboarding (Usage Rules)
+
+1.  **Strict Locale Import**: ALWAYS import `io.github.aughtone.types.locale.Locale`. **NEVER** use `java.util.Locale` or `android.icu.util.Locale` with these APIs; they are not compatible.
+2.  **Contextual Precision**: For financial or high-precision metrics, always specify `precision = 2` or higher. The default `1` is intended for general UI use.
+3.  **UI Consistency**: When formatting a list of numbers, ensure all calls use the same `Locale` instance (ideally passed from the View layer) to avoid mixing separator styles.
+4.  **Metric Scaling**: Be aware that `toReadableMetric` only scales units defined in the SI base set (Meter, Gram, Watt, etc.). Custom or non-SI units will be formatted with the unit symbol but without prefix scaling.
+5.  **Enum usage**: Use the `Locales` object for common constants (e.g., `Locales.English`, `Locales.German`) in tests or static configurations.
