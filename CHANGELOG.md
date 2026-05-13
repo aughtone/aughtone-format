@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [2.2.0] - 2026-05-13
+
+### Added
+- **Expanded Numeric Support**: Added `toReadable`, `toReadableAbbreviated`, `toReadableDataSize`, and `toReadableMetric` support for all Kotlin numeric types (Byte, Short, Int, Long, Float, Double, and Unsigned variants).
+- **Improved KDocs**: Comprehensive documentation and usage examples added to all core formatting functions in the `:readable` module.
+- **Geospatial Localization**: Added support for 65+ languages in cardinal directions and coordinate formatting.
+- **AI Skill Enhancements**: Synchronized and updated `.ai-skill.md` files for all modules with latest patterns and standards.
+- **Magic Prompt for AI Assistants**: Added a standardized prompt to the README to help AI agents discover and use embedded library skills from dependencies.
+
 ## [2.1.2] - 2026-04-24
 
 ### Added

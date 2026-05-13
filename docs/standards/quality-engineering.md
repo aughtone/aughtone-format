@@ -15,5 +15,5 @@ description: Enforces the RAVL 8-pillar quality methodology.
 8. Security Audits
 
 ## Pillar 1: Living ACs
-Every change must have corresponding ACs indocs/ACs/ before implementation.
+Every change must have corresponding ACs in docs/ACs/ before implementation.
 Use Given/When/Then format with unique IDs (AC-PREFIX-NUMBER).

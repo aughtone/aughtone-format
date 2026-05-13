@@ -1,6 +1,6 @@
 # Design & UI Rules
 
-- [Ordinality Formatting](file:///Users/bpappin/Workspace/aughtone-format/docs/DESIGN_ORDINALITY.md)
+- [Ordinality Formatting](DESIGN_ORDINALITY.md)
 
 ## Human-Readable Philosophy
 The `:readable` module prioritizes human perception over mathematical precision.
