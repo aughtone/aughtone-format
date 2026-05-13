@@ -5,13 +5,13 @@ This document defines the goals and requirements for optimizing the resource inf
 ---
 
 ## Story: Resource Efficiency
-> **I want my resources to be as efficent as possible so that I dont use a lot of memory or take a lot of time during lookups.**
+> **I want my resources to be as efficient as possible so that I don't use a lot of memory or take a lot of time during lookups.**
 
 ### Acceptance Criteria
-- **AC: Single-Locale Optimization.** Normally, only one resource will be uised at a time since the system is generally goign to be formating date for a specific locale, so we should optimimze for that.
-- **AC: Lazy Loading & Caching.** We want tpo be as lazy loading as posssible, but once loaded the result should be cached for quick lookups. so that we can reuse the most likely data we have.
+- **AC: Single-Locale Optimization.** Normally, only one resource will be used at a time since the system is generally going to be formatting date for a specific locale, so we should optimize for that.
+- **AC: Lazy Loading & Caching.** We want to be as lazy loading as possible, but once loaded the result should be cached for quick lookups so that we can reuse the most likely data we have.
 - **AC: Lookup Result Caching.** The result of a multi-step fallback lookup (e.g., `en-CA` -> `CA` -> `en`) must be cached at the requested key level. Subsequent requests for `en-CA` should return the cached resource immediately without re-calculating the fallback chain.
-- **AC: Locale Key Normalization.** All locale lookups must normalize the requested tag (e.g., converting `en_US` or `EN-us` to a standard format) before accessing the cache to ensure consistent hits. The system should accept a `Locale` object with can format this properly, so we may not need extra code for this.
+- **AC: Locale Key Normalization.** All locale lookups must normalize the requested tag (e.g., converting `en_US` or `EN-us` to a standard format) before accessing the cache to ensure consistent hits. The system should accept a `Locale` object which can format this properly, so we may not need extra code for this.
 - **AC: Zero Reflection.** Resource loading must not use reflection, ensuring high performance and compatibility with code-shrinking tools (R8/ProGuard) and GraalVM.
 - **AC: Thread Safety.** The caching mechanism must be thread-safe across all Kotlin Multiplatform targets (Android, iOS, JVM, etc.), preventing race conditions during lazy initialization of resources.
 - **AC: Granular Lazy Loading.** Instead of using `lazy` for the entire map of strings, individual locale resources should be loaded only when requested. This ensures that memory usage is strictly limited to the locales actually used by the app.
@@ -19,17 +19,17 @@ This document defines the goals and requirements for optimizing the resource inf
 ---
 
 ## Story: Global Language Alignment
-> **As a developer, i want to support the same 65+ languages that the readable module supports.**
+> **As a developer, I want to support the same 65+ languages that the readable module supports.**
 
 ### Acceptance Criteria
 - **AC: Resource Completeness.** For all 65+ supported languages, a "smoke test" must verify that every resource type (AM/PM strings, Date/Time patterns, Day/Month names, and Eras) exists or has a valid fallback. There should be no `NoSuchElementException` during a lookup for any supported language.
-- **AC: Fallback Integrity.** Every lookup chain must ultimately terminate at a hardcoded "Root" or "Default" resource (e.g., `en-CA`) to ensure the system never crashes due to a missing locale. WE can improve this by using `Locale` inputs.
+- **AC: Fallback Integrity.** Every lookup chain must ultimately terminate at a hardcoded "Root" or "Default" resource (e.g., `en-CA`) to ensure the system never crashes due to a missing locale. We can improve this by using `Locale` inputs.
 - **AC: Localized Numbering Systems.** Support for non-Western digits (e.g., Arabic-Indic) should be considered. The default for a locale should be what that locale expects, while providing an option to force Western digits if needed.
 
 ---
 
 ## Story: AI & Developer Experience
-> **As a developer, I want my AI to understand the how this library works automatically, so it makes fewer mistakes.**
+> **As a developer, I want my AI to understand how this library works automatically, so it makes fewer mistakes.**
 
 ### Acceptance Criteria
 - **AC: Machine-Readable Skills.** Update the `META-INF/ai-skills` documentation for the module to reflect the new caching and lookup patterns so that future agent interactions remain consistent with these optimizations.
@@ -37,7 +37,7 @@ This document defines the goals and requirements for optimizing the resource inf
 ---
 
 ## Story: LocalDate Formatting Styles
-> **As a developer, I want to be format an LocalDate as a string in Short, Medium, Long, Full, or None format, so that I can display the date for the user.**
+> **As a developer, I want to be able to format a LocalDate as a string in Short, Medium, Long, Full, or None format, so that I can display the date for the user.**
 
 ### Acceptance Criteria
 - **AC: Formatting Styles.** The format styles are defined in `io.github.aughtone.datetime.format.DateTimeStyle`.
@@ -47,7 +47,7 @@ This document defines the goals and requirements for optimizing the resource inf
 ---
 
 ## Story: LocalTime Formatting Styles
-> **As a developer, I want to be format an LocalTime as a string in Short, Medium, Long, Full, or None format, so that I can display the time for the user.**
+> **As a developer, I want to be able to format a LocalTime as a string in Short, Medium, Long, Full, or None format, so that I can display the time for the user.**
 
 ### Acceptance Criteria
 - **AC: Formatting Styles.** The format styles are defined in `io.github.aughtone.datetime.format.DateTimeStyle`.
@@ -58,7 +58,7 @@ This document defines the goals and requirements for optimizing the resource inf
 ---
 
 ## Story: LocalDateTime Formatting Styles
-> **As a developer, I want to be format an LocalDateTime as a string in Short, Medium, Long, Full, or None format, so that I can display the date and time for the user.**
+> **As a developer, I want to be able to format a LocalDateTime as a string in Short, Medium, Long, Full, or None format, so that I can display the date and time for the user.**
 
 ### Acceptance Criteria
 - **AC: Formatting Styles.** The format styles are defined in `io.github.aughtone.datetime.format.DateTimeStyle`.
@@ -70,7 +70,7 @@ This document defines the goals and requirements for optimizing the resource inf
 ---
 
 ## Story: Resource Lookup Specificity
-> **As a developer, when i look up a resource, I want to do it in the most efficient way possible, so that I am not spending extra cycles finding resources.**
+> **As a developer, when I look up a resource, I want to do it in the most efficient way possible, so that I am not spending extra cycles finding resources.**
 
 ### Acceptance Criteria
 - **AC: Specific-to-Least-Specific.** Resource lookup should proceed from most specific to least specific.
@@ -89,7 +89,7 @@ This document defines the goals and requirements for optimizing the resource inf
 ---
 
 ## Story: Instant Formatting Styles
-> **As a developer, I want to be able format an Instant as a string in Short, Medium, Long, Full, or None format, so that I can display the date and time for the user.**
+> **As a developer, I want to be able to format an Instant as a string in Short, Medium, Long, Full, or None format, so that I can display the date and time for the user.**
 
 ### Acceptance Criteria
 - **AC: Formatting Styles.** The format styles are defined in `io.github.aughtone.datetime.format.DateTimeStyle`.
@@ -112,7 +112,7 @@ This document defines the goals and requirements for optimizing the resource inf
 ---
 
 ## Story: Relative Time Migration
-> **All relative time formatting in the datetime module should be removed, or moved to the readable module, if it doesnt already exist there.**
+> **All relative time formatting in the datetime module should be removed, or moved to the readable module, if it doesn't already exist there.**
 
 ### Acceptance Criteria
 - **AC: External Scope.** We will define the stories and AC for relative datetime in the `readable` module.

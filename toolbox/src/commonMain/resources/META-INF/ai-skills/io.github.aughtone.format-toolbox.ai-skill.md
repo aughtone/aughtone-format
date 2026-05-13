@@ -1,40 +1,58 @@
 ---
 skill-id: io.github.aughtone.format-toolbox
 spec-version: 1.0
-name: "[Aughtone Format: Toolbox](https://github.com/aughtone/aughtone-format)"
+name: "Aughtone Format - Toolbox"
 type: "Aughtone AI-Skill"
-scope: core
-compatibility: ">=1.0.0"
-author: "[Brill Pappin](https://github.com/bpappin)"
+scope: "Foundational utilities, type aliases, and string manipulation for the Aughtone Format library."
+compatibility: "Kotlin Multiplatform (KMP)"
+author: "Aughtone"
 ---
 
-# AI Skill: Aughtone Toolbox
+# 📖 Aughtone Format - Toolbox AI-Skill
 
-This library provides low-level primitive extensions and utility functions used across the Aughtone ecosystem.
+The Toolbox provides the core abstractions and foundational extensions used by other modules in the Aughtone Format ecosystem. It focuses on filling gaps in the Kotlin Multiplatform standard library.
 
-## 🧰 The AI Toolbox (Key Functions)
+## 🎨 The AI Toolbox
 
-### **String Utilities**
-- `String.format(vararg args: Any): String`
-    - **Usage**: `"Hello %1".format("World")`
-    - **Note**: Replaces `%1`, `%2`, etc. with arguments. Useful for basic template substitution in KMP.
-- `String.obfuscateLast(count: Int = 4, ...): String`
-    - **Usage**: `"12345678".obfuscateLast(4)` -> `••••5678`
-    - **Note**: Supports `digitsOnly = true` for credit cards or phone numbers.
+### 1. Functional Formatting (`Formatter`)
+A standard type alias for formatting functions used throughout the ecosystem.
 
-### **Formatting Primitives**
-- `typealias Formatter<T> = (T) -> String`
-    - **Usage**: Define functional formatters for any type `T`.
-    - **Example**: `val hex: Formatter<Int> = { it.toString(16) }`
+- **Primary APIs**:
+    - `typealias Formatter<T> = (value: T) -> String`
+- **Preference**: Use this alias when defining or passing formatting logic to ensure consistency across the codebase.
 
-## 📜 Compliance & Standards
+### 2. String Interpolation (`String.format`)
+A KMP-compatible alternative to `String.format` from Java/Android.
 
-- **Time Handling Standards**:
-    - **Kotlin 2.1+ Migration**: Always use **`kotlin.time.Instant`** and **`kotlin.time.Clock`** (from the standard library) instead of the legacy `kotlinx.datetime` versions.
-    - **Ambiguity Prevention**: NEVER use wildcard imports like `import kotlinx.datetime.*`. This prevents name collisions between `kotlinx.datetime` and `kotlin.time`.
-    - **No Type Mixing**: Do not mix `kotlinx.datetime.Instant` and `kotlin.time.Instant` in the same scope or API signature.
+- **Primary APIs**:
+    - `String.format(vararg args: Any): String`
+- **Preference**: Use this for simple string templates where standard Kotlin string templates (`$var`) are not sufficient (e.g., when the template is externalized or dynamic).
+- **Example**: `"Hello %1".format("World")` -> `"Hello World"`
+- **Contract**:
+    - Placeholders use `%1`, `%2`, etc. (1-based index).
+    - It does **not** support advanced printf-style flags (like `%.2f`). Use `toReadable()` from the `readable` module for numeric precision.
 
-## 🤖 Agent Onboarding
-1. **Context Registration**: Add this skill file to the `AGENTS.md` of the consuming project.
-2. **Usage Rules**:
-    - **Security**: Always use `obfuscateLast` for sensitive data like partial card numbers or identifiers in logs/UI.
+### 3. Obfuscation (`obfuscateLast`)
+Utilities for hiding sensitive information in strings.
+
+- **Primary APIs**:
+    - `String.obfuscateLast(count: Int, obfuscationChar: Char, digitsOnly: Boolean): String`
+- **Preference**: Use this for displaying masked phone numbers, credit cards, or IDs in the UI.
+- **Contract**:
+    - `digitsOnly = true` will filter out non-digits before obfuscating, useful for formatting raw input.
+    - If the input is shorter than `count`, the original string is returned (no obfuscation).
+
+## ⚖️ Compliance & Standards
+
+- **ExperimentalMultiplatform**: `String.format` is marked as experimental as it is a partial polyfill for missing platform APIs.
+
+## 🔒 Serialization & Immutability
+
+- **Statelessness**: All extensions are pure functions returning new `String` instances.
+- **Immutability**: Does not modify the receiver string.
+
+## 🤖 Agent Onboarding (Usage Rules)
+
+1.  **Placeholder Syntax**: Remember that `String.format` uses 1-based indices (`%1`, `%2`) unlike Java's 0-based or positional syntax.
+2.  **Avoid Complex Formatting**: Do not attempt to use `String.format` for complex numeric or date formatting. Delegate to the `readable` or `datetime` modules instead.
+3.  **Privacy First**: When displaying identifiers (emails, phone numbers), prefer `obfuscateLast()` to maintain security standards.

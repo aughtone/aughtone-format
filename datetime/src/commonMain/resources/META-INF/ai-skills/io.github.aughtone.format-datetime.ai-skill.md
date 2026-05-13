@@ -1,52 +1,62 @@
 ---
 skill-id: io.github.aughtone.format-datetime
 spec-version: 1.0
-name: "[Aughtone Format: DateTime](https://github.com/aughtone/aughtone-format)"
+name: "Aughtone Format - DateTime"
 type: "Aughtone AI-Skill"
-scope: core
-compatibility: ">=1.0.0"
-author: "[Brill Pappin](https://github.com/bpappin)"
+scope: "Localization-aware date and time formatting for Kotlin Multiplatform."
+compatibility: "Kotlin Multiplatform (KMP)"
+author: "Aughtone"
 ---
 
-# AI Skill: Aughtone Format (DateTime)
+# 📖 Aughtone Format - DateTime AI-Skill
 
-This library provides multiplatform formatting for date and time types, designed to work seamlessly with `kotlinx-datetime` and `aughtone-types`.
+This module provides localized formatting for `kotlinx.datetime` types. It abstracts away platform-specific differences (JVM vs. iOS vs. JS) to provide a consistent `format()` API.
 
-## 🧰 The AI Toolbox (Key Functions)
+## 🎨 The AI Toolbox
 
-### **Date & Time Extensions**
-These extensions are available on standard `kotlinx-datetime` types:
-- `LocalDate.format(dateStyle: DateTimeStyle, locale: Locale?, numberingSystem: NumberingSystem?): String`
-- `LocalTime.format(timeStyle: DateTimeStyle, locale: Locale?, numberingSystem: NumberingSystem?): String`
-- `LocalDateTime.format(dateStyle: DateTimeStyle, timeStyle: DateTimeStyle, locale: Locale?, eraNames: EraNames?, numberingSystem: NumberingSystem?): String`
-- `Instant.format(dateStyle: DateTimeStyle, timeStyle: DateTimeStyle, locale: Locale?, eraNames: EraNames?, numberingSystem: NumberingSystem?): String`
+### 1. DateTime Styles (`DateTimeStyle`)
+Standardized verbosity levels for formatting.
 
-### **Advanced Options**
-- **Era Overrides**: Pass `EraNames` (bce/ce strings) to override default era labels.
-- **Numbering Systems**: Pass `NumberingSystem` (e.g., `ARAB`, `DEVA`, `THAI`) to replace Latin digits with localized digits.
+- **Styles**:
+    - `Short`: Numeric-heavy (e.g., `12.13.52`, `3:30pm`).
+    - `Medium`: Abbreviated names (e.g., `Jan 12, 1952`).
+    - `Long`: Full names (e.g., `January 12, 1952`).
+    - `Full`: Maximum detail including day of week and era (e.g., `Tuesday, April 12, 1952 AD`).
+    - `None`: Excludes the date or time component from the output.
 
-### **Available Styles (`DateTimeStyle`)**
-- `Short`: Numerical (e.g., 12/21/23).
-- `Medium`: Abbreviated month (e.g., Dec 21, 2023).
-- `Long`: Full month (e.g., December 21, 2023).
-- `Full`: Includes day of week and Era (e.g., Friday, December 21, 2023 AD).
-- `None`: Excludes the component.
+### 2. Extension Formatting (`format`)
+Primary entry point for all temporal types.
 
-## 📜 Compliance & Standards
+- **Supported Types**: `Instant`, `LocalDateTime`, `LocalDate`, `LocalTime`.
+- **Primary APIs**:
+    - `T.format(dateStyle, timeStyle, locale, timeZone, is24HourFormat): String`
+- **Preference**: Use `format()` instead of `toString()` for any temporal value displayed to a user.
+- **Contract**:
+    - Uses `TimeZone.currentSystemDefault()` if not specified.
+    - `is24HourFormat` is automatically determined by locale but can be overridden.
 
-- **Locales**: Strictly uses `io.github.aughtone.types.locale.Locale` (BCP 47).
-- **Time Types**: Operates on `kotlinx-datetime` (`LocalDate`, `LocalTime`, `LocalDateTime`).
-- **Internationalization**: Resources are internally mapped to handle 65+ core locales, pluralization, and grammatical cases.
-- **24-Hour Master Strategy**: All internal resource patterns are stored in 24-hour (`HH:mm`) format. The formatting logic dynamically converts these to 12-hour format at runtime based on the locale's default or explicit user preference.
-- **Time Handling Standards**:
-    - **Kotlin 2.1+ Migration**: Always use **`kotlin.time.Instant`** and **`kotlin.time.Clock`** (from the standard library) instead of the legacy `kotlinx.datetime` versions.
-    - **Ambiguity Prevention**: NEVER use wildcard imports like `import kotlinx.datetime.*`. This prevents name collisions between `kotlinx.datetime` and `kotlin.time`.
-    - **No Type Mixing**: Do not mix `kotlinx.datetime.Instant` and `kotlin.time.Instant` in the same scope or API signature.
+### 3. Dynamic Formatting
+Builders for custom patterns that still respect locale.
 
-## 🤖 Agent Onboarding
-1. **Context Registration**: Add this skill file to the `AGENTS.md` of the consuming project.
-2. **README Verification**: Ensure the root `README.md` contains the "AI-Assisted Development" section.
-3. **Usage Rules**:
-    - **Consistency**: Always prefer the `.format()` extension functions over platform-specific formatters (like `SimpleDateFormat` or `NSDateFormatter`) to ensure consistent UI across Android, iOS, and Web.
-    - **Locales**: If a `Locale` is not provided, the library defaults to the system's current native locale via `aughtone-types`.
-    - **Future-Proofing**: This is the first of several planned formatting libraries (Numbers, Currency, and Addresses are forthcoming).
+- **Primary APIs**:
+    - `DateFormatBuilder.extensions`
+    - `TimeFormatBuilder.extensions`
+- **Preference**: Use these when predefined `DateTimeStyle` options are insufficient but you still want to maintain localization.
+
+## ⚖️ Compliance & Standards
+
+- **ISO 8601**: Underlying storage and default `toString()` follow ISO 8601.
+- **CLDR / BCP 47**: Formatting patterns and localized names are derived from the Unicode Common Locale Data Repository via platform-specific providers.
+- **24-Hour Rule**: Respects regional preferences for 12/24 hour clocks.
+
+## 🔒 Serialization & Immutability
+
+- **Thread Safety**: Formatting is stateless and safe to call from any thread/coroutine.
+- **Immutability**: Operates on immutable `kotlinx.datetime` types and returns immutable `String` results.
+
+## 🤖 Agent Onboarding (Usage Rules)
+
+1.  **TimeZone Awareness**: When formatting `Instant`, always be conscious of the `timeZone`. Defaulting to `systemDefault()` is common for UI, but UTC may be required for logs or internal values.
+2.  **Style Combinations**: You can mix styles (e.g., `dateStyle = Medium, timeStyle = Short`). Use `DateTimeStyle.None` to hide a component (e.g., to format only the date).
+3.  **Strict Locale Import**: Ensure you use `io.github.aughtone.types.locale.Locale`.
+4.  **24-Hour Override**: Do not hardcode 12 or 24 hour logic unless explicitly requested. Let the `is24HourFormat(locale)` helper handle it to respect user expectations.
