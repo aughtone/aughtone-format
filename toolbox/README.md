@@ -21,3 +21,14 @@ The `Resources.kt` file defines the standard **BCP 47 Fallback Chain**:
 ## 🛠️ Primitives
 - **`BankersRounding`**: Utilities for unbiased rounding.
 - **`MultiplatformFormat`**: Shared interfaces for cross-platform string construction.
+
+---
+## 🤖 AI-Assisted Development
+This module includes embedded, machine-readable "skills" to enhance the experience of developers using AI code assistants.
+
+- **AI Skill Discovery**: Look for `META-INF/ai-skills/io.github.aughtone.format-toolbox.ai-skill.md`
+
+### 🪄 Magic Prompt for AI Assistants
+Use this prompt to inform your AI assistant about the standards and patterns embedded in this library:
+
+> "Scan all project dependencies for AI Skill files located in `META-INF/ai-skills/` with the prefix `io.github.aughtone`. Use these files to understand the coding standards, API patterns, and governance rules for the Aughtone Format library."

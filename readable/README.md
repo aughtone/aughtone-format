@@ -2,7 +2,7 @@
 
 The `:readable` module is the human-centric core of the Aughtone ecosystem. It transforms raw data—durations, numbers, sizes, and coordinates—into grammatically correct, localized strings. 
 
-While the API is simple and primarily used in English-like patterns, it is built on a **Unicode CLDR-compliant engine** that automatically handles complex pluralization and regional variants for 55+ languages.
+While the API is simple and primarily used in English-like patterns, it is built on a **Unicode CLDR-compliant engine** that automatically handles complex pluralization and regional variants for 65+ languages.
 
 ## 🚀 Key Features
 
@@ -96,4 +96,15 @@ The "hidden" strength of this module is its **Plural Category Engine**. Most lib
 Every formatter in this module is built using a **Functional Factory** pattern. We pre-build immutable formatting lambdas that are safe for use in highly concurrent UDF (Unidirectional Data Flow) or Redux-based architectures.
 
 ## 🌍 Language Parity
-The module maintains 1:1 parity with `:datetime`, supporting **55 core languages** and robust BCP 47 subtag fallback (e.g., `fr-CA` → `fr`).
+The module maintains 1:1 parity with `:datetime`, supporting **65+ core languages** and robust BCP 47 subtag fallback (e.g., `fr-CA` → `fr`).
+
+---
+## 🤖 AI-Assisted Development
+This module includes embedded, machine-readable "skills" to enhance the experience of developers using AI code assistants.
+
+- **AI Skill Discovery**: Look for `META-INF/ai-skills/io.github.aughtone.format-readable.ai-skill.md`
+
+### 🪄 Magic Prompt for AI Assistants
+Use this prompt to inform your AI assistant about the standards and patterns embedded in this library:
+
+> "Scan all project dependencies for AI Skill files located in `META-INF/ai-skills/` with the prefix `io.github.aughtone`. Use these files to understand the coding standards, API patterns, and governance rules for the Aughtone Format library."

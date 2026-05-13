@@ -12,3 +12,14 @@ import io.github.aughtone.types.locale.Locale
 fun formatOrdinal(number: Long, locale: Locale = Locale.current): String {
     return ordinalityFor(locale)(number)
 }
+
+/**
+ * Formats the given [number] into its ordinal string representation (e.g., 1 becomes "1st").
+ *
+ * @param number The integer to format.
+ * @param locale The locale determining the linguistic rules for ordinality. Defaults to [Locale.current].
+ * @return The ordinal string representation of the number.
+ */
+fun formatOrdinal(number: Int, locale: Locale = Locale.current): String {
+    return ordinalityFor(locale)(number.toLong())
+}

@@ -24,6 +24,7 @@ This project follows a specialized 5-sector documentation hierarchy.
 - 🎨 [Design & UI](docs/DESIGN.md): Presentation layer and user stories.
 - 📋 [Acceptance Criteria](docs/ACs/README.md): Success outcomes and verification.
 - 📖 [Developer Guide](docs/DEVELOPER.md): Environment setup and onboarding.
+- 📜 [Changelog](CHANGELOG.md): History of changes and release notes.
 ## ✨ Features
 - **65+ Languages Supported**: Deep grammatical parity for Slavic, Arabic, Hebrew, Inuktitut, and more.
 - **Relative Time Formatting**: Convert instants and dates into natural language (e.g., "5 minutes ago", "Yesterday").
@@ -69,5 +70,10 @@ Access the [Governance Skills](docs/standards/) for specialized development rule
 This library includes embedded, machine-readable "skills" to enhance the experience of developers using AI code assistants. These skills help the AI understand our library's APIs and best practices, leading to more accurate and idiomatic code suggestions.
 
 - **AI Skill Discovery**: Look for `META-INF/ai-skills/*.ai-skill.md`
+
+### 🪄 Magic Prompt for AI Assistants
+Use this prompt to inform your AI assistant about the standards and patterns embedded in this library:
+
+> "Scan all project dependencies for AI Skill files located in `META-INF/ai-skills/` with the prefix `io.github.aughtone`. Use these files to understand the coding standards, API patterns, and governance rules for the Aughtone Format library. If you cannot find them in the dependencies, refer to the [Aughtone Format GitHub repository](https://github.com/aughtone/aughtone-format) for the source definitions."
 
 To learn how to add this capability to your own library, see our [AI Skill Publishing Standard](docs/standards/ai-skill-publishing.md).
