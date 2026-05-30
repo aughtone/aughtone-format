@@ -1,8 +1,8 @@
 ---
 skill-id: io.github.aughtone.format-toolbox
-spec-version: 1.0
-name: "Aughtone Format - Toolbox"
+spec-version: "1.0"
 type: "Aughtone AI-Skill"
+name: "Aughtone Format - Toolbox"
 scope: "Foundational utilities, type aliases, and string manipulation for the Aughtone Format library."
 compatibility: "Kotlin Multiplatform (KMP)"
 author: "Aughtone"

@@ -19,7 +19,31 @@ import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.Instant
 
-fun Instant.readableRelative(
+/**
+ * Formats this [Instant] as a localized, human-readable relative string with automatic fallback.
+ *
+ * For example: "5 minutes ago", "Yesterday", or a full date if the difference exceeds [relativeThreshold].
+ *
+ * Examples:
+ * ```kotlin
+ * val now = Clock.System.now()
+ * (now - 5.minutes).toReadableRelative() // "5 minutes ago"
+ * (now + 1.days).toReadableRelative()    // "Tomorrow"
+ * (now - 10.days).toReadableRelative()   // "May 3, 2026" (fallback to absolute)
+ * ```
+ *
+ * @param now The reference instant to compare against (defaults to current system time).
+ * @param relativeDateStyle The style for date-based units (defaults to [RelativeStyle.Long]).
+ * @param relativeTimeStyle The style for time-based units (defaults to [RelativeStyle.Long]).
+ * @param dateStyle The fallback style for the date if [relativeThreshold] is exceeded.
+ * @param timeStyle The fallback style for the time if [relativeThreshold] is exceeded.
+ * @param relativeThreshold The duration beyond which to use absolute formatting (defaults to 3 days).
+ * @param nowThreshold Values within this duration produce the "just now" string (defaults to 1 minute).
+ * @param locale The locale for localization rules (defaults to [Locale.current]).
+ * @param timeZone The timezone used for day boundary calculations (defaults to system default).
+ * @return A localized relative or absolute time string.
+ */
+fun Instant.formatReadableRelative(
     now: Instant = Clock.System.now(),
     relativeDateStyle: RelativeStyle = RelativeStyle.Long,
     relativeTimeStyle: RelativeStyle = RelativeStyle.Long,
@@ -69,7 +93,11 @@ fun Instant.readableRelative(
     return if (useDateUnits) config.formatter(delta, true) else config.formatter(delta, false)
 }
 
-fun LocalDateTime.readableRelative(
+@Deprecated(
+    message = "Use formatReadableRelative instead",
+    replaceWith = ReplaceWith("formatReadableRelative(now, relativeDateStyle, relativeTimeStyle, dateStyle, timeStyle, relativeThreshold, nowThreshold, locale, timeZone)")
+)
+fun Instant.toReadableRelative(
     now: Instant = Clock.System.now(),
     relativeDateStyle: RelativeStyle = RelativeStyle.Long,
     relativeTimeStyle: RelativeStyle = RelativeStyle.Long,
@@ -79,7 +107,77 @@ fun LocalDateTime.readableRelative(
     nowThreshold: Duration = 1.minutes,
     locale: Locale = Locale.current,
     timeZone: TimeZone = TimeZone.currentSystemDefault(),
-): String = toInstant(timeZone).readableRelative(
+): String = formatReadableRelative(
+    now = now,
+    relativeDateStyle = relativeDateStyle,
+    relativeTimeStyle = relativeTimeStyle,
+    dateStyle = dateStyle,
+    timeStyle = timeStyle,
+    relativeThreshold = relativeThreshold,
+    nowThreshold = nowThreshold,
+    locale = locale,
+    timeZone = timeZone
+)
+
+/**
+ * Formats this [LocalDateTime] as a localized, human-readable relative string.
+ *
+ * This is a convenience wrapper around [Instant.formatReadableRelative].
+ *
+ * Examples:
+ * ```kotlin
+ * val now = Clock.System.now()
+ * localDateTime.formatReadableRelative(now = now) // "2 hours ago"
+ * ```
+ *
+ * @param now The reference instant to compare against (defaults to current system time).
+ * @param relativeDateStyle The style for date-based units (defaults to [RelativeStyle.Long]).
+ * @param relativeTimeStyle The style for time-based units (defaults to [RelativeStyle.Long]).
+ * @param dateStyle The fallback style for the date if [relativeThreshold] is exceeded.
+ * @param timeStyle The fallback style for the time if [relativeThreshold] is exceeded.
+ * @param relativeThreshold The duration beyond which to use absolute formatting (defaults to 3 days).
+ * @param nowThreshold Values within this duration produce the "just now" string (defaults to 1 minute).
+ * @param locale The locale for localization rules (defaults to [Locale.current]).
+ * @param timeZone The timezone used to convert this [LocalDateTime] to an [Instant].
+ * @return A localized relative or absolute time string.
+ */
+fun LocalDateTime.formatReadableRelative(
+    now: Instant = Clock.System.now(),
+    relativeDateStyle: RelativeStyle = RelativeStyle.Long,
+    relativeTimeStyle: RelativeStyle = RelativeStyle.Long,
+    dateStyle: DateTimeStyle = DateTimeStyle.Medium,
+    timeStyle: DateTimeStyle = DateTimeStyle.Medium,
+    relativeThreshold: Duration = 3.days,
+    nowThreshold: Duration = 1.minutes,
+    locale: Locale = Locale.current,
+    timeZone: TimeZone = TimeZone.currentSystemDefault(),
+): String = toInstant(timeZone).formatReadableRelative(
+    now = now,
+    relativeDateStyle = relativeDateStyle,
+    relativeTimeStyle = relativeTimeStyle,
+    dateStyle = dateStyle,
+    timeStyle = timeStyle,
+    relativeThreshold = relativeThreshold,
+    nowThreshold = nowThreshold,
+    locale = locale,
+    timeZone = timeZone
+)
+
+@Deprecated(
+    message = "Use formatReadableRelative instead",
+    replaceWith = ReplaceWith("formatReadableRelative(now, relativeDateStyle, relativeTimeStyle, dateStyle, timeStyle, relativeThreshold, nowThreshold, locale, timeZone)")
+)
+fun LocalDateTime.toReadableRelative(
+    now: Instant = Clock.System.now(),
+    relativeDateStyle: RelativeStyle = RelativeStyle.Long,
+    relativeTimeStyle: RelativeStyle = RelativeStyle.Long,
+    dateStyle: DateTimeStyle = DateTimeStyle.Medium,
+    timeStyle: DateTimeStyle = DateTimeStyle.Medium,
+    relativeThreshold: Duration = 3.days,
+    nowThreshold: Duration = 1.minutes,
+    locale: Locale = Locale.current,
+    timeZone: TimeZone = TimeZone.currentSystemDefault(),
+): String = formatReadableRelative(
     now = now,
     relativeDateStyle = relativeDateStyle,
     relativeTimeStyle = relativeTimeStyle,
@@ -93,8 +191,23 @@ fun LocalDateTime.readableRelative(
 
 /**
  * Formats this [LocalDate] as a localized, human-readable relative string.
+ *
+ * Examples:
+ * ```kotlin
+ * val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+ * (today + 1.days).formatReadableRelative() // "Tomorrow"
+ * (today - 5.days).formatReadableRelative() // "May 8, 2026" (fallback to absolute)
+ * ```
+ *
+ * @param now The reference date to compare against (defaults to today in system default timezone).
+ * @param relativeStyle The style for the relative output (defaults to [RelativeStyle.Long]).
+ * @param dateStyle The fallback style for the date if [relativeThreshold] is exceeded.
+ * @param relativeThreshold The duration beyond which to use absolute formatting (defaults to 3 days).
+ * @param nowThreshold Days within this duration produce the "Today" or "Recently" string (defaults to 1 day).
+ * @param locale The locale for localization rules (defaults to [Locale.current]).
+ * @return A localized relative or absolute date string.
  */
-fun LocalDate.readableRelative(
+fun LocalDate.formatReadableRelative(
     now: LocalDate = Clock.System.todayIn(TimeZone.currentSystemDefault()),
     relativeStyle: RelativeStyle = RelativeStyle.Long,
     dateStyle: DateTimeStyle = DateTimeStyle.Medium,
@@ -121,10 +234,45 @@ fun LocalDate.readableRelative(
     }
 }
 
+@Deprecated(
+    message = "Use formatReadableRelative instead",
+    replaceWith = ReplaceWith("formatReadableRelative(now, relativeStyle, dateStyle, relativeThreshold, nowThreshold, locale)")
+)
+fun LocalDate.toReadableRelative(
+    now: LocalDate = Clock.System.todayIn(TimeZone.currentSystemDefault()),
+    relativeStyle: RelativeStyle = RelativeStyle.Long,
+    dateStyle: DateTimeStyle = DateTimeStyle.Medium,
+    relativeThreshold: Duration = 3.days,
+    nowThreshold: Duration = 1.days,
+    locale: Locale = Locale.current,
+): String = formatReadableRelative(
+    now = now,
+    relativeStyle = relativeStyle,
+    dateStyle = dateStyle,
+    relativeThreshold = relativeThreshold,
+    nowThreshold = nowThreshold,
+    locale = locale
+)
+
 /**
  * Formats this [LocalTime] as a localized, human-readable relative string.
+ *
+ * Examples:
+ * ```kotlin
+ * val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).time
+ * (now - 15.minutes).formatReadableRelative() // "15 minutes ago"
+ * (now + 5.hours).formatReadableRelative()    // "5:30 PM" (fallback to absolute)
+ * ```
+ *
+ * @param now The reference time to compare against (defaults to current system time).
+ * @param relativeStyle The style for the relative output (defaults to [RelativeStyle.Long]).
+ * @param timeStyle The fallback style for the time if [relativeThreshold] is exceeded.
+ * @param relativeThreshold The duration beyond which to use absolute formatting (defaults to 3 hours).
+ * @param nowThreshold Times within this duration produce the "just now" string (defaults to 1 minute).
+ * @param locale The locale for localization rules (defaults to [Locale.current]).
+ * @return A localized relative or absolute time string.
  */
-fun LocalTime.readableRelative(
+fun LocalTime.formatReadableRelative(
     now: LocalTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).time,
     relativeStyle: RelativeStyle = RelativeStyle.Long,
     timeStyle: DateTimeStyle = DateTimeStyle.Medium,
@@ -151,22 +299,27 @@ fun LocalTime.readableRelative(
     ).formatter(deltaDuration, false)
 }
 
-/**
- * Formats this [Instant] as a localized, human-readable relative string.
- *
- * Examples:
- * - `now - 8.minutes` → `"8 minutes ago"`
- * - `now + 2.hours`   → `"in 2 hours"`
- * - Within [nowThreshold] of [now] → `"just now"`
- *
- * @param locale        The locale for the output string. Defaults to the system locale.
- * @param dateStyle     The style for date-based units (Day, Week, Month, Year). Use [RelativeStyle.None] to suppress.
- * @param timeStyle     The style for time-based units (Second, Minute, Hour). Use [RelativeStyle.None] to suppress.
- * @param now           The reference instant to compare against. Defaults to [Clock.System.now()].
- * @param nowThreshold  Instants within this duration of [now] produce the "just now" string.
- * @param timeZone      The timezone used to determine "Today", "Tomorrow", and "Yesterday".
- */
-@Deprecated("THis version doesnt allow the readable to fall back to using a full date/time.")
+@Deprecated(
+    message = "Use formatReadableRelative instead",
+    replaceWith = ReplaceWith("formatReadableRelative(now, relativeStyle, timeStyle, relativeThreshold, nowThreshold, locale)")
+)
+fun LocalTime.toReadableRelative(
+    now: LocalTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).time,
+    relativeStyle: RelativeStyle = RelativeStyle.Long,
+    timeStyle: DateTimeStyle = DateTimeStyle.Medium,
+    relativeThreshold: Duration = 3.hours,
+    nowThreshold: Duration = 1.minutes,
+    locale: Locale = Locale.current,
+): String = formatReadableRelative(
+    now = now,
+    relativeStyle = relativeStyle,
+    timeStyle = timeStyle,
+    relativeThreshold = relativeThreshold,
+    nowThreshold = nowThreshold,
+    locale = locale
+)
+
+@Deprecated("This version doesn't allow the readable to fall back to using a full date/time. Use formatReadableRelative instead.")
 fun Instant.toReadableRelative(
     locale: Locale = Locale.current,
     dateStyle: RelativeStyle = RelativeStyle.Long,
@@ -210,10 +363,8 @@ fun Instant.toReadableRelative(
     return if (useDateUnits) config.formatter(delta, true) else config.formatter(delta, false)
 }
 
-/**
- * Formats this [LocalDateTime] as a localized, human-readable relative string.
- */
-@Deprecated("This version doesnt allow the readable to fall back to using a full date/time.")
+@Suppress("DEPRECATION")
+@Deprecated("This version doesn't allow the readable to fall back to using a full date/time. Use formatReadableRelative instead.")
 fun LocalDateTime.toReadableRelative(
     timeZone: TimeZone = TimeZone.currentSystemDefault(),
     locale: Locale = Locale.current,
@@ -222,18 +373,15 @@ fun LocalDateTime.toReadableRelative(
     now: Instant = Clock.System.now(),
     nowThreshold: Duration = 1.minutes,
 ): String = toInstant(timeZone).toReadableRelative(
-    locale,
-    dateStyle,
-    timeStyle,
-    now,
-    nowThreshold,
-    timeZone
+    locale = locale,
+    dateStyle = dateStyle,
+    timeStyle = timeStyle,
+    now = now,
+    nowThreshold = nowThreshold,
+    timeZone = timeZone
 )
 
-/**
- * Formats this [LocalDate] as a localized, human-readable relative string.
- */
-@Deprecated("This version doesnt allow the readable to fall back to using a full date.")
+@Deprecated("This version doesn't allow the readable to fall back to using a full date. Use formatReadableRelative instead.")
 fun LocalDate.toReadableRelative(
     locale: Locale = Locale.current,
     style: RelativeStyle = RelativeStyle.Long,
@@ -249,10 +397,7 @@ fun LocalDate.toReadableRelative(
     }
 }
 
-/**
- * Formats this [LocalTime] as a localized, human-readable relative string.
- */
-@Deprecated("THis version doesnt allow the readable to fall back to using a full time.")
+@Deprecated("This version doesn't allow the readable to fall back to using a full time. Use formatReadableRelative instead.")
 fun LocalTime.toReadableRelative(
     locale: Locale = Locale.current,
     style: RelativeStyle = RelativeStyle.Long,

@@ -25,6 +25,9 @@ kotlin {
         compileSdk {
             version = release(libs.versions.android.compileSdk.get().toInt())
         }
+        minSdk {
+            version = release(libs.versions.android.minSdk.get().toInt())
+        }
     }
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs {
@@ -54,7 +57,6 @@ kotlin {
         useEsModules() // Enables ES2015 modules
     }
     listOf(
-        iosX64(),
         iosArm64(),
         iosSimulatorArm64()
     //noinspection WrongGradleMethod

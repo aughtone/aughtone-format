@@ -18,6 +18,13 @@ private class RelativeTimeUnitNames(val forms: Map<PluralCategory, String>) {
 
 /**
  * Configuration for relative time formatting in a specific locale.
+ *
+ * @property formatter The core logic that scales and pluralizes the time difference.
+ * @property nowString The localized string for "just now".
+ * @property todayString The localized string for "Today".
+ * @property tomorrowString The localized string for "Tomorrow".
+ * @property yesterdayString The localized string for "Yesterday".
+ * @property recentlyString The localized string for "Recently".
  */
 class RelativeTimeConfig(
     val formatter: RelativeTimeFormatter,
@@ -30,7 +37,9 @@ class RelativeTimeConfig(
 
 // ── Factories ─────────────────────────────────────────────────────────────────
 
-/** Simple 2-form factory for languages with only Singular/Plural. */
+/**
+ * Creates a unit map for languages with 2 grammatical forms (Singular/Plural).
+ */
 private fun u2(
     s1: String, m1: String, h1: String, d1: String, w1: String, mo1: String, y1: String,
     s2: String, m2: String, h2: String, d2: String, w2: String, mo2: String, y2: String
@@ -44,7 +53,9 @@ private fun u2(
     "year"   to RelativeTimeUnitNames(mapOf(PluralCategory.One to y1, PluralCategory.Other to y2)),
 )
 
-/** 3-form factory for Slavic languages (One, Few, Many). */
+/**
+ * Creates a unit map for languages with 3 grammatical forms (e.g., Slavic languages).
+ */
 private fun u3(
     s1: String, m1: String, h1: String, d1: String, w1: String, mo1: String, y1: String,
     sF: String, mF: String, hF: String, dF: String, wF: String, moF: String, yF: String,
@@ -59,7 +70,9 @@ private fun u3(
     "year"   to RelativeTimeUnitNames(mapOf(PluralCategory.One to y1, PluralCategory.Few to yF, PluralCategory.Many to yM)),
 )
 
-/** 4-form factory for Hebrew / Inuktitut (One, Two, Many, Other). */
+/**
+ * Creates a unit map for languages with 4 grammatical forms (e.g., Hebrew, Inuktitut).
+ */
 private fun u4(
     s1: String, s2: String, sM: String, sO: String,
     m1: String, m2: String, mM: String, mO: String,
@@ -78,7 +91,9 @@ private fun u4(
     "year"   to RelativeTimeUnitNames(mapOf(PluralCategory.One to y1, PluralCategory.Two to y2, PluralCategory.Many to yM, PluralCategory.Other to yO)),
 )
 
-/** 6-form factory for Arabic (Zero, One, Two, Few, Many, Other). */
+/**
+ * Creates a unit map for languages with 6 grammatical forms (e.g., Arabic).
+ */
 private fun u6(
     sZ: String, s1: String, s2: String, sF: String, sM: String, sO: String,
     mZ: String, m1: String, m2: String, mF: String, mM: String, mO: String,
@@ -97,6 +112,9 @@ private fun u6(
     "year"   to RelativeTimeUnitNames(mapOf(PluralCategory.Zero to yZ, PluralCategory.One to y1, PluralCategory.Two to y2, PluralCategory.Few to yF, PluralCategory.Many to yM, PluralCategory.Other to yO)),
 )
 
+/**
+ * Internal helper to construct a [RelativeTimeConfig].
+ */
 private fun config(
     locale: Locale,
     past: String,
@@ -146,6 +164,7 @@ private val ENGLISH_UNITS_SHORT = u2(
     "s", "m", "h", "d", "w", "mo", "y"
 )
 
+/** Default English configuration. */
 private fun enConfig(locale: Locale, style: RelativeStyle) = config(
     locale = locale,
     past = if (style == RelativeStyle.Short) "{0}" else "{0} ago",
@@ -159,6 +178,7 @@ private fun enConfig(locale: Locale, style: RelativeStyle) = config(
     sep = if (style == RelativeStyle.Short) "" else " "
 )
 
+/** Helper to check if a specific BCP 47 tag is explicitly defined in this file. */
 private fun isRelativeTimeTagSupported(tag: String): Boolean = when (tag) {
     "en-ZA", "en", "af", "nl", "de", "da", "nb", "no", "nn", "sv", "is", "et", "fi",
     "vi", "el", "hu", "ro", "tr", "ru", "uk", "be", "pl", "cs", "sk", "sl", "hr",
@@ -171,6 +191,17 @@ private fun isRelativeTimeTagSupported(tag: String): Boolean = when (tag) {
 
 /**
  * Public factory that guarantees a [RelativeTimeConfig], falling back to English if the tag is unknown.
+ *
+ * Example:
+ * ```kotlin
+ * val config = buildRelativeTimeConfig("fr", Locale("fr"), RelativeStyle.Long)
+ * println(config.nowString) // "à l'instant"
+ * ```
+ *
+ * @param tag The BCP 47 language tag to build the configuration for.
+ * @param locale The [Locale] used for pluralization logic.
+ * @param style The [RelativeStyle] for the output strings.
+ * @return a [RelativeTimeConfig] for the specified parameters.
  */
 fun buildRelativeTimeConfig(tag: String, locale: Locale, style: RelativeStyle = RelativeStyle.Long): RelativeTimeConfig {
     return when (tag) {
@@ -264,7 +295,7 @@ fun buildRelativeTimeConfig(tag: String, locale: Locale, style: RelativeStyle = 
                "секунди","минута","сати","дана","недеља","месеци","година"), recentlyString = "недавно")
 
         "mk" -> config(locale, "пред {0}", "за {0}", "токму сега",
-            u2("секунда","минута","час","ден","недела","месец","година",
+            u2("секунда","минуτα","час","ден","недела","месец","година",
                "секунди","минути","часови","дена","недели","месеци","години"), recentlyString = "неодамна")
 
         "sl" -> config(locale, "pred {0}", "čez {0}", "ravno zdaj",
@@ -308,7 +339,7 @@ fun buildRelativeTimeConfig(tag: String, locale: Locale, style: RelativeStyle = 
                "วินาที","นาที","ชั่วโมง","วัน","สัปดาห์","เดือน","ปี"), recentlyString = "เมื่อเร็วๆ นี้", sep = "")
 
         "vi" -> config(locale, "{0} trước", "{0} nữa", "vừa xong",
-            u2("giây","phút","giờ","ngày","tuần","tháng","năm",
+            u2("giây","phút","giờ","ngày","tuần","tháng","نăm",
                "giây","phút","giờ","ngày","tuần","tháng","năm"), recentlyString = "gần đây")
 
         "iu" -> config(locale, "{0} ᖄᖏᖅᑐᖅ", "{0} ᐊᓂᒍᖅᐸᑦ", "ᒫᓐᓇᑲᐅᑎᒋ",
@@ -348,8 +379,8 @@ fun buildRelativeTimeConfig(tag: String, locale: Locale, style: RelativeStyle = 
                "سنة","سنة","سنتان","سنوات","سنة","سنة"), recentlyString = "مؤخرا")
 
         "fa" -> config(locale, "{0} پیش", "{0} دیگر", "همین الان",
-            u2("ثانیه","دقیقه","ساعت","روز","هفته","ماه","سال",
-               "ثانیه","دقیقه","ساعت","روز","هفته","ماه","سال"), recentlyString = "به تازگی")
+            u2("ثانية","دقيقة","ساعة","روز","هفته","ماه","سال",
+               "ثانية","دقيقة","ساعت","روز","هفته","ماه","سال"), recentlyString = "به تازگی")
 
         "he" -> config(locale, "לפני {0}", "בעוד {0}", "ממש עכשיו",
             u4("שנייה","שנייה","שניות","שניות",
@@ -357,7 +388,7 @@ fun buildRelativeTimeConfig(tag: String, locale: Locale, style: RelativeStyle = 
                "שעה","שעה","שעות","שעות",
                "יום","יום","ימים","ימים",
                "שבוע","שבוע","שבועות","שבועות",
-               "חودש","חودש","חודשים","חודשים",
+               "חודש","חודש","חודשים","חודשים",
                "שנה","שנה","שנים","שנים"), recentlyString = "לאחרונה")
 
         // ── Turkic ────────────────────────────────────────────────────────────
@@ -405,7 +436,7 @@ fun buildRelativeTimeConfig(tag: String, locale: Locale, style: RelativeStyle = 
 
         "ka" -> config(locale, "{0}ის წინ", "{0}ში", "ახლავე",
             u2("წამ","წუთ","საათ","დღ","კვირ","თვ","წლ",
-               "წამ","წუთ","საათ","დღ","კვირ","თვ","წල"), recentlyString = "ახლახან", sep = "")
+               "წამ","წუთ","საათ","დღ","კვირ","თვ","წლ"), recentlyString = "ახლახან", sep = "")
 
         else -> if (tag == "en") enConfig(locale, style) else buildRelativeTimeConfig("en", locale, style)
     }
@@ -416,6 +447,16 @@ private val configCache = mutableMapOf<Pair<String, RelativeStyle>, RelativeTime
 /**
  * Returns the [RelativeTimeConfig] for [locale], building and caching it on first use.
  * Supports full BCP 47 subtag fallback: e.g. "en-ZA" → "en" → "en" default.
+ *
+ * Example:
+ * ```kotlin
+ * val config = relativeTimeConfigFor(Locale("fr"), RelativeStyle.Short)
+ * println(config.todayString) // "Aujourd'hui"
+ * ```
+ *
+ * @param locale The locale defining the localization rules.
+ * @param relativeStyle The style (Long, Short, None) to use for the configuration.
+ * @return a [RelativeTimeConfig] for the specified [locale] and [relativeStyle].
  */
 fun relativeTimeConfigFor(locale: Locale, relativeStyle: RelativeStyle = RelativeStyle.Long): RelativeTimeConfig {
     val fullTag = if (locale.regionCode != null) "${locale.languageCode}-${locale.regionCode}" else locale.languageCode

@@ -24,11 +24,11 @@ The `Resources.kt` file defines the standard **BCP 47 Fallback Chain**:
 
 ---
 ## 🤖 AI-Assisted Development
-This module includes embedded, machine-readable "skills" to enhance the experience of developers using AI code assistants.
+This library includes embedded, machine-readable "skills" to help AI assistants understand its APIs and best practices.
 
-- **AI Skill Discovery**: Look for `META-INF/ai-skills/io.github.aughtone.format-toolbox.ai-skill.md`
+- **Discovery**: Look for `META-INF/ai-skills/io.github.aughtone.format-toolbox.ai-skill.md`
 
 ### 🪄 Magic Prompt for AI Assistants
-Use this prompt to inform your AI assistant about the standards and patterns embedded in this library:
+If you are using an AI assistant (like Claude, Gemini, or ChatGPT) to write code with this library, paste this prompt first:
 
-> "Scan all project dependencies for AI Skill files located in `META-INF/ai-skills/` with the prefix `io.github.aughtone`. Use these files to understand the coding standards, API patterns, and governance rules for the Aughtone Format library."
+> "Scan all project dependencies for AI Skill files in `META-INF/ai-skills/` with the prefix `io.github.aughtone`. Use these to understand the API patterns, types, and governance for this library. If they are not found in the local classpath, refer to the [Aughtone Format GitHub repository](https://github.com/aughtone/aughtone-format) for the source definitions."

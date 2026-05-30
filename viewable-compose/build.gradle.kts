@@ -1,0 +1,123 @@
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompileCommon
+
+plugins {
+    alias(libs.plugins.kotlinMultiplatform)
+    alias(libs.plugins.multiplatformLibrary)
+    alias(libs.plugins.vanniktech.mavenPublish)
+    alias(libs.plugins.composeMultiplatform)
+    alias(libs.plugins.composeCompiler)
+}
+
+group = libs.versions.namespace.get()
+version = libs.versions.versionName.get()
+
+kotlin {
+    jvmToolchain(17)
+
+    jvm()
+    android {
+        namespace = "${libs.versions.namespace.get()}.format.viewable.compose"
+        compileSdk {
+            version = release(libs.versions.android.compileSdk.get().toInt())
+        }
+    }
+    @OptIn(ExperimentalWasmDsl::class)
+    wasmJs {
+        browser {
+            val rootDirPath = project.rootDir.path
+            val projectDirPath = project.projectDir.path
+            commonWebpackConfig {
+                outputModuleName = "aughtone-format-viewable-compose"
+                outputFileName = "aughtone-format-viewable-compose.js"
+            }
+        }
+        binaries.executable()
+    }
+
+    js(IR) {
+        browser {
+            generateTypeScriptDefinitions()
+        }
+        useEsModules()
+    }
+    listOf(
+        iosArm64(),
+        iosSimulatorArm64()
+    ).forEach { iosTarget ->
+        iosTarget.binaries.framework {
+            baseName = "AughtoneFormatViewableComposeKit"
+            isStatic = true
+            binaryOption(
+                "bundleId",
+                "${libs.versions.namespace.get()}.format.viewable.compose"
+            )
+            binaryOption(
+                "bundleShortVersionString",
+                libs.versions.versionName.get()
+            )
+        }
+    }
+
+    sourceSets {
+        val commonMain by getting {
+            dependencies {
+                api( project(":viewable"))
+                implementation(libs.jetbrains.compose.ui)
+            }
+        }
+        val commonTest by getting {
+            dependencies {
+                implementation(libs.kotlin.test)
+            }
+        }
+    }
+
+    metadata {
+        compilations.all {
+            val compilationName = rootProject.name
+            compileTaskProvider.configure {
+                if (this is KotlinCompileCommon) {
+                    moduleName = "${project.group}:${project.name}_$compilationName"
+                }
+            }
+        }
+    }
+}
+
+mavenPublishing {
+    publishToMavenCentral(automaticRelease = true)
+
+    if (!project.hasProperty("skip-signing")) {
+        signAllPublications()
+    }
+
+    coordinates(group.toString(), "format-viewable-compose", version.toString())
+
+    pom {
+        name = "Aughtone Format Multiplatform - Viewable Compose"
+        description = "Compose Multiplatform components for rendering Aughtone visual models."
+        inceptionYear = "2025"
+        url = "https://github.com/aughtone/aughtone-format"
+        licenses {
+            license {
+                name = "The Apache License, Version 2.0"
+                url = "https://www.apache.org/licenses/LICENSE-2.0"
+                distribution = "https://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+        }
+        developers {
+            developer {
+                id = "bpappin"
+                name = "Brill pappin"
+                url = "https://github.com/bpappin"
+            }
+        }
+        scm {
+            url = "https://github.com/aughtone/aughtone-format"
+            connection = "https://github.com/aughtone/aughtone-format.git"
+            developerConnection = "git@github.com:aughtone/aughtone-format.git"
+        }
+    }
+}

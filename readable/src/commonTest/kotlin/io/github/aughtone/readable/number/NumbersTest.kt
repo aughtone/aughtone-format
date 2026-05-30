@@ -8,36 +8,36 @@ class NumbersTest {
 
     @Test
     fun testAbbreviation() {
-        assertEquals("1k", 1000.0.toReadableAbbreviated(Locales.English))
-        assertEquals("1.5k", 1500.0.toReadableAbbreviated(Locales.English))
-        assertEquals("1M", 1000000.0.toReadableAbbreviated(Locales.English))
-        assertEquals("2.5G", 2500000000.0.toReadableAbbreviated(Locales.English))
+        assertEquals("1k", 1000.0.formatReadableAbbreviated(Locales.English))
+        assertEquals("1.5k", 1500.0.formatReadableAbbreviated(Locales.English))
+        assertEquals("1M", 1000000.0.formatReadableAbbreviated(Locales.English))
+        assertEquals("2.5G", 2500000000.0.formatReadableAbbreviated(Locales.English))
 
-        assertEquals("1k", 1000L.toReadableAbbreviated(Locales.English))
-        assertEquals("1.5k", 1500.0f.toReadableAbbreviated(Locales.English))
-        assertEquals("2M", 2000000.toReadableAbbreviated(Locales.English))
-        assertEquals("1.2k", 1234.toShort().toReadableAbbreviated(Locales.English))
-        assertEquals("1k", 1000u.toReadableAbbreviated(Locales.English))
+        assertEquals("1k", 1000L.formatReadableAbbreviated(Locales.English))
+        assertEquals("1.5k", 1500.0f.formatReadableAbbreviated(Locales.English))
+        assertEquals("2M", 2000000.formatReadableAbbreviated(Locales.English))
+        assertEquals("1.2k", 1234.toShort().formatReadableAbbreviated(Locales.English))
+        assertEquals("1k", 1000u.formatReadableAbbreviated(Locales.English))
     }
 
     @Test
-    fun testToReadable() {
-        assertEquals("1,234.6", 1234.56.toReadable(Locales.English, precision = 1))
-        assertEquals("1,235", 1234.56.toReadable(Locales.English, precision = 0))
-        assertEquals("1,234.56", 1234.56f.toReadable(Locales.English, precision = 2))
-        assertEquals("1,234,567", 1234567L.toReadable(Locales.English))
-        assertEquals("1,234", 1234.toReadable(Locales.English))
+    fun testFormatReadable() {
+        assertEquals("1,234.6", 1234.56.formatReadable(Locales.English, precision = 1))
+        assertEquals("1,235", 1234.56.formatReadable(Locales.English, precision = 0))
+        assertEquals("1,234.56", 1234.56f.formatReadable(Locales.English, precision = 2))
+        assertEquals("1,234,567", 1234567L.formatReadable(Locales.English))
+        assertEquals("1,234", 1234.formatReadable(Locales.English))
         // 127 is the max value for a signed Byte
-        assertEquals("127", 127.toByte().toReadable(Locales.English))
+        assertEquals("127", 127.toByte().formatReadable(Locales.English))
         // 255 requires UByte as it overflows a signed Byte
-        assertEquals("255", 255u.toUByte().toReadable(Locales.English))
-        assertEquals("1,000", 1000u.toReadable(Locales.English))
+        assertEquals("255", 255u.toUByte().formatReadable(Locales.English))
+        assertEquals("1,000", 1000u.formatReadable(Locales.English))
     }
 
     @Test
     fun testLocaleFormatting() {
         // German uses comma as decimal separator
-        assertEquals("1,5k", 1500.0.toReadableAbbreviated(Locales.German))
+        assertEquals("1,5k", 1500.0.formatReadableAbbreviated(Locales.German))
         
         // French uses space as grouping separator
         val frenchFormatter = numberFormatterFor(Locales.French, 0)
@@ -77,5 +77,12 @@ class NumbersTest {
             2
         )
         assertEquals("1 234,56", frCaFormatter(1234.56))
+    }
+
+    @Suppress("DEPRECATION")
+    @Test
+    fun testDeprecatedCompatibility() {
+        assertEquals("1,234.6", 1234.56.toReadable(Locales.English, precision = 1))
+        assertEquals("1.5k", 1500.0.toReadableAbbreviated(Locales.English))
     }
 }

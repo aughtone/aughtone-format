@@ -67,13 +67,13 @@ Access the [Governance Skills](docs/standards/) for specialized development rule
 
 ---
 ## 🤖 AI-Assisted Development
-This library includes embedded, machine-readable "skills" to enhance the experience of developers using AI code assistants. These skills help the AI understand our library's APIs and best practices, leading to more accurate and idiomatic code suggestions.
+This library includes embedded, machine-readable "skills" to help AI assistants understand its APIs and best practices.
 
-- **AI Skill Discovery**: Look for `META-INF/ai-skills/*.ai-skill.md`
+- **Discovery**: Look for `META-INF/ai-skills/*.ai-skill.md`
 
 ### 🪄 Magic Prompt for AI Assistants
-Use this prompt to inform your AI assistant about the standards and patterns embedded in this library:
+If you are using an AI assistant (like Claude, Gemini, or ChatGPT) to write code with this library, paste this prompt first:
 
-> "Scan all project dependencies for AI Skill files located in `META-INF/ai-skills/` with the prefix `io.github.aughtone`. Use these files to understand the coding standards, API patterns, and governance rules for the Aughtone Format library. If you cannot find them in the dependencies, refer to the [Aughtone Format GitHub repository](https://github.com/aughtone/aughtone-format) for the source definitions."
+> "Scan all project dependencies for AI Skill files in `META-INF/ai-skills/` with the prefix `io.github.aughtone`. Use these to understand the API patterns, types, and governance for this library. If they are not found in the local classpath, refer to the [Aughtone Format GitHub repository](https://github.com/aughtone/aughtone-format) for the source definitions."
 
 To learn how to add this capability to your own library, see our [AI Skill Publishing Standard](docs/standards/ai-skill-publishing.md).

@@ -9,6 +9,8 @@ Aughtone Format is a suite of Kotlin Multiplatform libraries published to **Mave
 - **Artifacts**: 
     - `format-datetime` (Core datetime formatting)
     - `format-readable` (Human-readable metrics & ordinals)
+    - `format-viewable` (Abstract visual models)
+    - `format-viewable-compose` (Compose rendering)
     - `format-datetime-native` (Native platform formatting - optional)
 - **Version**: Managed via `libs.versions.versionName`
 
