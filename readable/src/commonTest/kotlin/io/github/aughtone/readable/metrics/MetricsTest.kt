@@ -19,8 +19,15 @@ class MetricsTest {
 
     @Test
     fun testDataSizeScaling() {
+        assertEquals("1 KiB", 1024L.formatReadableDataSize(UnitOfMeasure.Byte, Locales.English))
+        assertEquals("1 MiB", 1048576L.formatReadableDataSize(UnitOfMeasure.Byte, Locales.English))
+        assertEquals("1.5 GiB", (1024L * 1024L * 1024L * 1.5).toLong().formatReadableDataSize(UnitOfMeasure.Byte, Locales.English))
+    }
+
+    @Suppress("DEPRECATION")
+    @Test
+    fun testDeprecatedCompatibility() {
         assertEquals("1 KiB", 1024L.toReadableDataSize(UnitOfMeasure.Byte, Locales.English))
-        assertEquals("1 MiB", 1048576L.toReadableDataSize(UnitOfMeasure.Byte, Locales.English))
-        assertEquals("1.5 GiB", (1024L * 1024L * 1024L * 1.5).toLong().toReadableDataSize(UnitOfMeasure.Byte, Locales.English))
+        assertEquals("1.5 km", 1500.0.toReadableMetric(UnitOfMeasure.Meter, Locales.English))
     }
 }

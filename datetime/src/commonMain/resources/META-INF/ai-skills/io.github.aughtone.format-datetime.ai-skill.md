@@ -1,8 +1,8 @@
 ---
 skill-id: io.github.aughtone.format-datetime
-spec-version: 1.0
-name: "Aughtone Format - DateTime"
+spec-version: "1.0"
 type: "Aughtone AI-Skill"
+name: "Aughtone Format - DateTime"
 scope: "Localization-aware date and time formatting for Kotlin Multiplatform."
 compatibility: "Kotlin Multiplatform (KMP)"
 author: "Aughtone"

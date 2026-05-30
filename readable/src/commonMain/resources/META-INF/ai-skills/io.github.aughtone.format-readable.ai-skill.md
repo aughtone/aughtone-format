@@ -1,8 +1,8 @@
 ---
 skill-id: io.github.aughtone.format-readable
-spec-version: 1.0
-name: "Aughtone Format - Readable"
+spec-version: "1.0"
 type: "Aughtone AI-Skill"
+name: "Aughtone Format - Readable"
 scope: "Human-readable string formatting for numeric, metric, temporal, and geospatial types."
 compatibility: "Kotlin Multiplatform (KMP)"
 author: "Aughtone"
@@ -14,28 +14,28 @@ This skill provides a standardized API for converting quantitative and numeric d
 
 ## 🎨 The AI Toolbox
 
-### 1. Numeric Formatting (`toReadable`)
+### 1. Numeric Formatting (`formatReadable`)
 Comprehensive extensions for all Kotlin numeric types (`Double`, `Long`, `Int`, `Short`, `Byte`, `Float` + Unsigned variants).
 
 - **Primary APIs**:
-    - `T.toReadable(locale: Locale, precision: Int): String`
-    - `T.toReadableAbbreviated(locale: Locale, precision: Int): String` (e.g., `1.5k`, `2M`)
-- **Preference**: Use `toReadable()` instead of `toString()` for any value displayed in a UI. Use `toReadableAbbreviated()` for dashboards or space-constrained labels.
+    - `T.formatReadable(locale: Locale, precision: Int): String`
+    - `T.formatReadableAbbreviated(locale: Locale, precision: Int): String` (e.g., `1.5k`, `2M`)
+- **Preference**: Use `formatReadable()` instead of `toString()` for any value displayed in a UI. Use `formatReadableAbbreviated()` for dashboards or space-constrained labels.
 - **Contract**:
     - Default `precision` is `0` for integers and `1` for floating-point types.
     - Abbreviation uses SI metric prefixes (`k`, `M`, `G`, `T`, `P`, `E`, `Z`, `Y`).
-    - Values under 1000 in `toReadableAbbreviated` fall back to standard `toReadable`.
+    - Values under 1000 in `formatReadableAbbreviated` fall back to standard `formatReadable`.
 
-### 2. Metric & Data Size (`toReadableMetric`, `toReadableDataSize`)
+### 2. Metric & Data Size (`formatReadableMetric`, `formatReadableDataSize`)
 Handles SI scaling and IEC binary scaling for storage and physical measurements.
 
 - **Primary APIs**:
-    - `T.toReadableMetric(unit: UnitOfMeasure, locale: Locale, precision: Int): String`
-    - `T.toReadableDataSize(unit: UnitOfMeasure, locale: Locale, precision: Int): String`
-- **Preference**: Use `toReadableDataSize()` specifically for byte counts. Use `toReadableMetric()` for distance, mass, or power.
+    - `T.formatReadableMetric(unit: UnitOfMeasure, locale: Locale, precision: Int): String`
+    - `T.formatReadableDataSize(unit: UnitOfMeasure, locale: Locale, precision: Int): String`
+- **Preference**: Use `formatReadableDataSize()` specifically for byte counts. Use `formatReadableMetric()` for distance, mass, or power.
 - **Contract**:
-    - `toReadableMetric` uses base-1000 scaling (e.g., `1500m` -> `"1.5 km"`).
-    - `toReadableDataSize` uses base-1024 scaling and IEC symbols (e.g., `1024` -> `"1.0 KiB"`).
+    - `formatReadableMetric` uses base-1000 scaling (e.g., `1500m` -> `"1.5 km"`).
+    - `formatReadableDataSize` uses base-1024 scaling and IEC symbols (e.g., `1024` -> `"1.0 KiB"`).
 
 ### 3. Geospatial Formatting (`geo`)
 Formatting for Coordinates, Altitude, and Azimuth.
@@ -52,11 +52,24 @@ Formatting for Coordinates, Altitude, and Azimuth.
 Natural language time and numeric order.
 
 - **Primary APIs**:
-    - `Instant.toReadableRelative(locale, now, style): String`
-    - `T.toReadableOrdinal(locale): String` (e.g., `"1st"`, `"2nd"`, `"1er"`)
-- **Preference**: Use `toReadableRelative()` for social feeds or "Last Updated" timestamps.
+    - `Instant.formatReadableRelative(locale, now, style): String`
+    - `T.formatReadableOrdinal(locale): String` (e.g., `"1st"`, `"2nd"`, `"1er"`)
+- **Preference**: Use `formatReadableRelative()` for social feeds or "Last Updated" timestamps.
 - **Contract**:
     - Ordinality rules are locale-aware (handles English suffixes, French gendered suffixes, etc.).
+
+## ⚠️ Deprecated Naming Conventions (Backwards Compatibility)
+
+> [!WARNING]
+> The older `toReadable*` formatting functions are deprecated and should not be used in new development. They will be removed in a future major release:
+> - `T.toReadable(...)` is deprecated in favor of `T.formatReadable(...)`
+> - `T.toReadableAbbreviated(...)` is deprecated in favor of `T.formatReadableAbbreviated(...)`
+> - `T.toReadableMetric(...)` is deprecated in favor of `T.formatReadableMetric(...)`
+> - `T.toReadableDataSize(...)` is deprecated in favor of `T.formatReadableDataSize(...)`
+> - `T.toReadableOrdinal(...)` is deprecated in favor of `T.formatReadableOrdinal(...)`
+> - `T.toReadableRelative(...)` is deprecated in favor of `T.formatReadableRelative(...)`
+> - `Long.toReadableDuration(...)` is deprecated in favor of `Long.formatReadableDuration(...)`
+> - `Duration.toReadableString(...)` is deprecated in favor of `Duration.formatReadable(...)`
 
 ## ⚖️ Compliance & Standards
 

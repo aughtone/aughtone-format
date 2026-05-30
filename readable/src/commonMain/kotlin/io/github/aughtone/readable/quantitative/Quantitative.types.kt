@@ -1,4 +1,4 @@
-package io.github.aughtone.readable.geo
+package io.github.aughtone.readable.quantitative
 
 /**
  * Supported formats for human-readable coordinates.

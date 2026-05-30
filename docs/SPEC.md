@@ -122,3 +122,47 @@ Supports replacing Latin digits with localized digit sets (e.g., Arabic-Indic, D
 - **Language Support**: Consistent **65+ language** coverage, aligned with the `:readable` module.
 - **Resource Management**: Uses a thread-safe, bounded caching system for BCP 47 resource lookups.
 - **CLDR Compatibility**: Automatically sanitizes patterns to remove unsupported tokens while maintaining platform consistency.
+
+---
+
+## 🛠️ Toolbox Module (`:toolbox`)
+
+The goal of this module is to provide core utilities and mathematical primitives that support high-level formatting and transformation.
+
+### Features
+
+#### 1. Geospatial Projections
+Converting geographic coordinates (WGS84) to 2D Cartesian planes.
+- **Projections**:
+    - `WebMercatorProjection`: Standard for web maps (EPSG:3857).
+    - `EquirectangularProjection`: Simple linear mapping.
+- **Math**: Bounding box calculation and merging for all GeoJSON types.
+
+#### 2. Vector Generation
+Generating standard path data from complex types.
+- **SVG Path Data**: Extension functions to generate the `d` attribute for `GeoJson` objects.
+- **Precision**: Configurable decimal precision to manage string size vs. fidelity.
+
+---
+
+## 🎨 Viewable Modules (`:viewable` & `:viewable-compose`)
+
+The goal of these modules is to bridge the gap between abstract data types and visual rendering engines.
+
+### Features
+
+#### 1. Viewable Model (`:viewable`)
+A platform-agnostic representation of visual intent.
+- **`ViewablePath`**: A collection of `PathCommand` (MoveTo, LineTo, Close) and a `WindingRule` (EvenOdd, NonZero).
+- **Coordinate System**: Uses projected Cartesian coordinates.
+- **Geo Integration**: Direct conversion from `GeoJson` to `ViewablePath` using a specified `GeoProjection`.
+- **Headless Exports**: 
+    - `toImage()`: Generates platform-native bitmaps (Android `Bitmap`, JVM `BufferedImage`, iOS `UIImage`).
+    - `toSvgDocument()`: Generates a complete XML SVG document string with correct `viewBox` and `fill-rule`.
+
+#### 2. Compose Rendering (`:viewable-compose`)
+Integration with the Jetpack/Compose Multiplatform ecosystem.
+- **`ViewablePathPainter`**: A `Painter` that renders `ViewablePath` objects.
+- **Auto-Scaling**: Automatically calculates scaling and translation to fit the path into the target viewport while maintaining aspect ratio.
+- **`toComposePath()`**: Extension to convert abstract commands directly into `androidx.compose.ui.graphics.Path`.
+- **`toImageVector()`**: Extension to convert `ViewablePath` into a Compose `ImageVector`, supporting viewport-aware normalization.

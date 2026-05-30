@@ -1,6 +1,8 @@
 package io.github.aughtone.readable.geo
 
 import io.github.aughtone.readable.Locales
+import io.github.aughtone.readable.quantitative.CoordinateFormat
+import io.github.aughtone.readable.quantitative.formatReadable
 import io.github.aughtone.types.quantitative.Altitude
 import io.github.aughtone.types.quantitative.Azimuth
 import io.github.aughtone.types.quantitative.Coordinates

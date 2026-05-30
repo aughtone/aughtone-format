@@ -30,4 +30,6 @@ rootProject.name = "AOFormat"
 include(":datetime")
 include(":readable")
 include(":toolbox")
+include(":viewable")
+include(":viewable-compose")
 //include(":datetime-native")

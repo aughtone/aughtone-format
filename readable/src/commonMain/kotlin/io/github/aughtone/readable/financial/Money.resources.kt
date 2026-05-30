@@ -74,12 +74,12 @@ fun moneyFormatterFor(locale: Locale, showSymbol: Boolean = true): MoneyFormatte
 
         val formatter: MoneyFormatter = { money ->
             val currency = money.currency
-            val digits = currency?.digits ?: 2
+            val digits = currency.digits
             val value = money.cents.toDouble() / 10.0.pow(digits)
             val numFormatter = numFormatterCache.getOrPut(digits) { numberFormatterFor(locale, digits) }
             val numberStr = numFormatter(value)
 
-            if (showSymbol && currency != null) {
+            if (showSymbol) {
                 rule(numberStr, currency.symbol)
             } else {
                 numberStr

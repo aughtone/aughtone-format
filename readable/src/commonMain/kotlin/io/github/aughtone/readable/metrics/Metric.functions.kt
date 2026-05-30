@@ -17,7 +17,7 @@ import kotlin.math.pow
  * @return A localized human-readable distance string.
  */
 fun Distance.formatReadable(locale: Locale = Locale.current, precision: Int = 1): String {
-    return meters.toReadableMetric(UnitOfMeasure.Meter, locale, precision)
+    return meters.formatReadableMetric(UnitOfMeasure.Meter, locale, precision)
 }
 
 /**
@@ -28,22 +28,27 @@ fun Distance.formatReadable(locale: Locale = Locale.current, precision: Int = 1)
  * @return A localized human-readable speed string.
  */
 fun Speed.formatReadable(locale: Locale = Locale.current, precision: Int = 1): String {
-    return mps.toReadableMetric(UnitOfMeasure.MeterPerSecond, locale, precision)
+    return mps.formatReadableMetric(UnitOfMeasure.MeterPerSecond, locale, precision)
 }
 
 /**
  * Generic extension to format a [Double] value with a unit and automatic metric scaling.
  *
  * Only scales standard SI-compatible units (Meter, Gram, Watt, etc.) by default.
- * For example, `1500.0.toReadableMetric(UnitOfMeasure.Meter)` returns `"1.5 km"`.
  *
- * @param baseUnit The base unit of measure (e.g., [UnitOfMeasure.Meter]).
+ * Example:
+ * ```kotlin
+ * 1500.0.toReadableMetric(UnitOfMeasure.Meter) // "1.5 km"
+ * 500.0.toReadableMetric(UnitOfMeasure.Watt)   // "500 W"
+ * ```
+ *
+ * @param unit The base unit of measure (e.g., [UnitOfMeasure.Meter]).
  * @param locale The locale for numeric formatting (defaults to [Locale.current]).
  * @param precision The number of decimal places to include (default is 1).
  * @return A localized human-readable metric string.
  */
-fun Double.toReadableMetric(
-    baseUnit: UnitOfMeasure,
+fun Double.formatReadableMetric(
+    unit: UnitOfMeasure,
     locale: Locale = Locale.current,
     precision: Int = 1
 ): String {
@@ -61,13 +66,13 @@ fun Double.toReadableMetric(
         UnitOfMeasure.Joule
     )
 
-    if (baseUnit !in siBaseUnits || absoluteValue == 0.0) {
-        return "${formatter(this)} ${baseUnit.symbol}"
+    if (unit !in siBaseUnits || absoluteValue == 0.0) {
+        return "${formatter(this)} ${unit.symbol}"
     }
 
     // Only scale if we are outside the [1, 1000) range
     if (absoluteValue >= 1.0 && absoluteValue < 1000.0) {
-        return "${formatter(this)} ${baseUnit.symbol}"
+        return "${formatter(this)} ${unit.symbol}"
     }
 
     // Find the largest prefix that is <= absoluteValue
@@ -78,125 +83,225 @@ fun Double.toReadableMetric(
 
     return if (prefix != null && prefix.exponent != 0) {
         val scaledValue = this / 10.0.pow(prefix.exponent)
-        "${formatter(scaledValue)} ${prefix.symbol}${baseUnit.symbol}"
+        "${formatter(scaledValue)} ${prefix.symbol}${unit.symbol}"
     } else {
-        "${formatter(this)} ${baseUnit.symbol}"
+        "${formatter(this)} ${unit.symbol}"
     }
 }
+
+@Deprecated(
+    message = "Use formatReadableMetric instead",
+    replaceWith = ReplaceWith("formatReadableMetric(unit, locale, precision)")
+)
+fun Double.toReadableMetric(
+    unit: UnitOfMeasure,
+    locale: Locale = Locale.current,
+    precision: Int = 1
+): String = formatReadableMetric(unit, locale, precision)
 
 /**
  * Formats this [Float] value with a unit and automatic metric scaling.
  *
- * @param baseUnit The base unit of measure.
+ * @param unit The base unit of measure.
  * @param locale The locale for numeric formatting (defaults to [Locale.current]).
  * @param precision The number of decimal places to include (default is 1).
  */
-fun Float.toReadableMetric(
-    baseUnit: UnitOfMeasure,
+fun Float.formatReadableMetric(
+    unit: UnitOfMeasure,
     locale: Locale = Locale.current,
     precision: Int = 1
-): String = toDouble().toReadableMetric(baseUnit, locale, precision)
+): String = toDouble().formatReadableMetric(unit, locale, precision)
+
+@Deprecated(
+    message = "Use formatReadableMetric instead",
+    replaceWith = ReplaceWith("formatReadableMetric(unit, locale, precision)")
+)
+fun Float.toReadableMetric(
+    unit: UnitOfMeasure,
+    locale: Locale = Locale.current,
+    precision: Int = 1
+): String = formatReadableMetric(unit, locale, precision)
 
 /**
  * Formats this [Long] value with a unit and automatic metric scaling.
  *
- * @param baseUnit The base unit of measure.
+ * @param unit The base unit of measure.
  * @param locale The locale for numeric formatting (defaults to [Locale.current]).
  * @param precision The number of decimal places to include (default is 1).
  */
-fun Long.toReadableMetric(
-    baseUnit: UnitOfMeasure,
+fun Long.formatReadableMetric(
+    unit: UnitOfMeasure,
     locale: Locale = Locale.current,
     precision: Int = 1
-): String = toDouble().toReadableMetric(baseUnit, locale, precision)
+): String = toDouble().formatReadableMetric(unit, locale, precision)
+
+@Deprecated(
+    message = "Use formatReadableMetric instead",
+    replaceWith = ReplaceWith("formatReadableMetric(unit, locale, precision)")
+)
+fun Long.toReadableMetric(
+    unit: UnitOfMeasure,
+    locale: Locale = Locale.current,
+    precision: Int = 1
+): String = formatReadableMetric(unit, locale, precision)
 
 /**
  * Formats this [Int] value with a unit and automatic metric scaling.
  *
- * @param baseUnit The base unit of measure.
+ * @param unit The base unit of measure.
  * @param locale The locale for numeric formatting (defaults to [Locale.current]).
  * @param precision The number of decimal places to include (default is 1).
  */
-fun Int.toReadableMetric(
-    baseUnit: UnitOfMeasure,
+fun Int.formatReadableMetric(
+    unit: UnitOfMeasure,
     locale: Locale = Locale.current,
     precision: Int = 1
-): String = toDouble().toReadableMetric(baseUnit, locale, precision)
+): String = toDouble().formatReadableMetric(unit, locale, precision)
+
+@Deprecated(
+    message = "Use formatReadableMetric instead",
+    replaceWith = ReplaceWith("formatReadableMetric(unit, locale, precision)")
+)
+fun Int.toReadableMetric(
+    unit: UnitOfMeasure,
+    locale: Locale = Locale.current,
+    precision: Int = 1
+): String = formatReadableMetric(unit, locale, precision)
 
 /**
  * Formats this [Short] value with a unit and automatic metric scaling.
  *
- * @param baseUnit The base unit of measure.
+ * @param unit The base unit of measure.
  * @param locale The locale for numeric formatting (defaults to [Locale.current]).
  * @param precision The number of decimal places to include (default is 1).
  */
-fun Short.toReadableMetric(
-    baseUnit: UnitOfMeasure,
+fun Short.formatReadableMetric(
+    unit: UnitOfMeasure,
     locale: Locale = Locale.current,
     precision: Int = 1
-): String = toDouble().toReadableMetric(baseUnit, locale, precision)
+): String = toDouble().formatReadableMetric(unit, locale, precision)
+
+@Deprecated(
+    message = "Use formatReadableMetric instead",
+    replaceWith = ReplaceWith("formatReadableMetric(unit, locale, precision)")
+)
+fun Short.toReadableMetric(
+    unit: UnitOfMeasure,
+    locale: Locale = Locale.current,
+    precision: Int = 1
+): String = formatReadableMetric(unit, locale, precision)
 
 /**
  * Formats this [Byte] value with a unit and automatic metric scaling.
  *
- * @param baseUnit The base unit of measure.
+ * @param unit The base unit of measure.
  * @param locale The locale for numeric formatting (defaults to [Locale.current]).
  * @param precision The number of decimal places to include (default is 1).
  */
-fun Byte.toReadableMetric(
-    baseUnit: UnitOfMeasure,
+fun Byte.formatReadableMetric(
+    unit: UnitOfMeasure,
     locale: Locale = Locale.current,
     precision: Int = 1
-): String = toDouble().toReadableMetric(baseUnit, locale, precision)
+): String = toDouble().formatReadableMetric(unit, locale, precision)
+
+@Deprecated(
+    message = "Use formatReadableMetric instead",
+    replaceWith = ReplaceWith("formatReadableMetric(unit, locale, precision)")
+)
+fun Byte.toReadableMetric(
+    unit: UnitOfMeasure,
+    locale: Locale = Locale.current,
+    precision: Int = 1
+): String = formatReadableMetric(unit, locale, precision)
 
 /**
  * Formats this [ULong] value with a unit and automatic metric scaling.
  *
- * @param baseUnit The base unit of measure.
+ * @param unit The base unit of measure.
  * @param locale The locale for numeric formatting (defaults to [Locale.current]).
  * @param precision The number of decimal places to include (default is 1).
  */
-fun ULong.toReadableMetric(
-    baseUnit: UnitOfMeasure,
+fun ULong.formatReadableMetric(
+    unit: UnitOfMeasure,
     locale: Locale = Locale.current,
     precision: Int = 1
-): String = toDouble().toReadableMetric(baseUnit, locale, precision)
+): String = toDouble().formatReadableMetric(unit, locale, precision)
+
+@Deprecated(
+    message = "Use formatReadableMetric instead",
+    replaceWith = ReplaceWith("formatReadableMetric(unit, locale, precision)")
+)
+fun ULong.toReadableMetric(
+    unit: UnitOfMeasure,
+    locale: Locale = Locale.current,
+    precision: Int = 1
+): String = formatReadableMetric(unit, locale, precision)
 
 /**
  * Formats this [UInt] value with a unit and automatic metric scaling.
  *
- * @param baseUnit The base unit of measure.
+ * @param unit The base unit of measure.
  * @param locale The locale for numeric formatting (defaults to [Locale.current]).
  * @param precision The number of decimal places to include (default is 1).
  */
-fun UInt.toReadableMetric(
-    baseUnit: UnitOfMeasure,
+fun UInt.formatReadableMetric(
+    unit: UnitOfMeasure,
     locale: Locale = Locale.current,
     precision: Int = 1
-): String = toDouble().toReadableMetric(baseUnit, locale, precision)
+): String = toDouble().formatReadableMetric(unit, locale, precision)
+
+@Deprecated(
+    message = "Use formatReadableMetric instead",
+    replaceWith = ReplaceWith("formatReadableMetric(unit, locale, precision)")
+)
+fun UInt.toReadableMetric(
+    unit: UnitOfMeasure,
+    locale: Locale = Locale.current,
+    precision: Int = 1
+): String = formatReadableMetric(unit, locale, precision)
 
 /**
  * Formats this [UShort] value with a unit and automatic metric scaling.
  *
- * @param baseUnit The base unit of measure.
+ * @param unit The base unit of measure.
  * @param locale The locale for numeric formatting (defaults to [Locale.current]).
  * @param precision The number of decimal places to include (default is 1).
  */
-fun UShort.toReadableMetric(
-    baseUnit: UnitOfMeasure,
+fun UShort.formatReadableMetric(
+    unit: UnitOfMeasure,
     locale: Locale = Locale.current,
     precision: Int = 1
-): String = toDouble().toReadableMetric(baseUnit, locale, precision)
+): String = toDouble().formatReadableMetric(unit, locale, precision)
+
+@Deprecated(
+    message = "Use formatReadableMetric instead",
+    replaceWith = ReplaceWith("formatReadableMetric(unit, locale, precision)")
+)
+fun UShort.toReadableMetric(
+    unit: UnitOfMeasure,
+    locale: Locale = Locale.current,
+    precision: Int = 1
+): String = formatReadableMetric(unit, locale, precision)
 
 /**
  * Formats this [UByte] value with a unit and automatic metric scaling.
  *
- * @param baseUnit The base unit of measure.
+ * @param unit The base unit of measure.
  * @param locale The locale for numeric formatting (defaults to [Locale.current]).
  * @param precision The number of decimal places to include (default is 1).
  */
-fun UByte.toReadableMetric(
-    baseUnit: UnitOfMeasure,
+fun UByte.formatReadableMetric(
+    unit: UnitOfMeasure,
     locale: Locale = Locale.current,
     precision: Int = 1
-): String = toDouble().toReadableMetric(baseUnit, locale, precision)
+): String = toDouble().formatReadableMetric(unit, locale, precision)
+
+@Deprecated(
+    message = "Use formatReadableMetric instead",
+    replaceWith = ReplaceWith("formatReadableMetric(unit, locale, precision)")
+)
+fun UByte.toReadableMetric(
+    unit: UnitOfMeasure,
+    locale: Locale = Locale.current,
+    precision: Int = 1
+): String = formatReadableMetric(unit, locale, precision)
