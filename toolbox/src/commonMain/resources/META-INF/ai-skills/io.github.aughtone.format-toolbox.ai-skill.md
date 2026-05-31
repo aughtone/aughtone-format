@@ -30,7 +30,7 @@ A KMP-compatible alternative to `String.format` from Java/Android.
 - **Example**: `"Hello %1".format("World")` -> `"Hello World"`
 - **Contract**:
     - Placeholders use `%1`, `%2`, etc. (1-based index).
-    - It does **not** support advanced printf-style flags (like `%.2f`). Use `toReadable()` from the `readable` module for numeric precision.
+    - It does **not** support advanced printf-style flags (like `%.2f`). Use `formatReadable()` from the `readable` module for numeric precision.
 
 ### 3. Obfuscation (`obfuscateLast`)
 Utilities for hiding sensitive information in strings.

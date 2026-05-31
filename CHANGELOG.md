@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [3.0.1] - 2026-05-31
+
+### Added
+- **TimeZone Formatting**: Implemented `TimeZone.formatReadable` extension overloads in `:readable` module supporting reference `Instant` or direct `UtcOffset` parameters.
+- **Optimized TimeZone Lookup**: Added `TimeZoneNamesLookup` generated static lookup logic supporting zero object allocations and language-specific helper methods to bypass JVM method limits.
+- **Resource Management**: Removed redundant runtime caching from `Resources.kt` in favor of fast, garbage-free direct static lookups.
+- **Locale Pass-Through**: Updated `MultiplatformPostFormatter` and date/time formatters to pass user `Locale` down to timezone formatting lookups.
+- **Governance & Specs**: Updated `SPEC.md` and Acceptance Criteria to track formatting specs and verify correctness on BCP-47 fallbacks.
+
 ## [3.0.0] - 2026-05-30
 
 ### Added
