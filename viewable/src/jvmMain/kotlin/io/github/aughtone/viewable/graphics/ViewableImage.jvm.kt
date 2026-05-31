@@ -12,6 +12,8 @@ import javax.imageio.ImageIO
 
 actual typealias ViewableImage = BufferedImage
 
+actual val isImageSupported: Boolean = true
+
 /**
  * Draws a [ViewablePath] to a JVM [Graphics2D] context.
  * Useful for PDF, EPS, or Printer support.

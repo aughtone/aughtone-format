@@ -7,6 +7,8 @@ plugins {
     alias(libs.plugins.multiplatformLibrary)
     alias(libs.plugins.vanniktech.mavenPublish)
     alias(libs.plugins.kotlinSerialization)
+    alias(libs.plugins.composeMultiplatform)
+    alias(libs.plugins.composeCompiler)
 }
 
 group = libs.versions.namespace.get()
@@ -35,7 +37,6 @@ kotlin {
                 outputFileName = "aughtone-format-viewable.js"
             }
         }
-        binaries.executable()
     }
 
     js(IR) {
@@ -66,6 +67,8 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 api(project(":toolbox"))
+                implementation(libs.jetbrains.compose.ui)
+                implementation(libs.jetbrains.compose.resources)
             }
         }
         val commonTest by getting {

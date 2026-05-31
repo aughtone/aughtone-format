@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [3.0.0] - 2026-05-30
+
+### Added
+- **New Vector Modules**: Introduced `:viewable` for platform-agnostic vector graphic representations, styling, and path conversion (SVG, WKT, GeoJSON), and `:viewable-compose` for Jetpack / Compose Multiplatform integration.
+- **AI-Skills Integration**: Added machine-readable AI skills documentation for both `:viewable` and `:viewable-compose` to assist coding agents.
+- **API Naming Modernization**: Deprecated `toReadable*` prefix on formatting extensions in favor of unified `formatReadable*` APIs for better readability and alignment with standard style guide.
+- **KMP Compilation Fixes**: Resolved UIKit and CoreGraphics experimental API opt-in requirements for iOS targets.
+- **SVG Test Re-alignment**: Re-aligned misplaced SVG tests from `:toolbox` to `:viewable` module where they belong.
+- **Documentation Refinement**: Updated README code examples with non-deprecated functions.
+
 ## [2.2.0] - 2026-05-13
 
 ### Added

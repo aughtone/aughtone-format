@@ -1,3 +1,4 @@
+@file:OptIn(kotlinx.cinterop.ExperimentalForeignApi::class)
 package io.github.aughtone.viewable.graphics
 
 import io.github.aughtone.viewable.*
@@ -9,6 +10,8 @@ import platform.UIKit.*
 import platform.posix.memcpy
 
 actual typealias ViewableImage = UIImage
+
+actual val isImageSupported: Boolean = true
 
 actual fun ViewablePath.toImage(
     width: Int,

@@ -33,7 +33,6 @@ kotlin {
                 outputFileName = "aughtone-format-viewable-compose.js"
             }
         }
-        binaries.executable()
     }
 
     js(IR) {

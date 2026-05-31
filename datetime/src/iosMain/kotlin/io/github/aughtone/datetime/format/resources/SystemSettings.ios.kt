@@ -8,5 +8,5 @@ import platform.Foundation.currentLocale
 internal actual fun isPlatform24HourSettingEnabled(): Boolean? {
     val locale = NSLocale.currentLocale()
     val dateFormat = NSDateFormatter.dateFormatFromTemplate("j", options = 0.toULong(), locale)
-    return dateFormat?.contains("a")
+    return dateFormat?.contains("a")?.not()
 }

@@ -9,6 +9,8 @@ import java.io.ByteArrayOutputStream
 
 actual typealias ViewableImage = Bitmap
 
+actual val isImageSupported: Boolean = true
+
 actual fun ViewablePath.toImage(
     width: Int,
     height: Int,
