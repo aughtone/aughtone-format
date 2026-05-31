@@ -32,6 +32,14 @@ This document tracks the verification goals for the Aughtone Format library feat
 - [ ] Supports IEC (binary) units (KiB, MiB).
 - [ ] Supports SI (decimal) units (KB, MB).
 
+### 4. TimeZone Formatting
+- [x] Supports `TimeZone` type.
+- [x] Correctly looks up abbreviations (e.g. `EST`, `EDT`) using `TimeZoneAbbreviationLookup`.
+- [x] Correctly looks up full names (e.g. `Eastern Standard Time`) using `TimeZoneAbbreviationLookup`.
+- [x] Provides overload for specifying an `Instant` (defaulting to current system time).
+- [x] Provides overload for specifying a `UtcOffset` directly.
+- [x] Accepts `Locale` parameter for library consistency.
+
 ## 📅 Datetime Module (`:datetime`)
 
 ### 1. Core Formatting

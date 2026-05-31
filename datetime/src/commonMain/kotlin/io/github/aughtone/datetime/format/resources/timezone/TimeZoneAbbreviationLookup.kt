@@ -2,6 +2,8 @@ package io.github.aughtone.datetime.format.resources.timezone
 
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.UtcOffset
+import io.github.aughtone.types.locale.Locale
+import io.github.aughtone.datetime.format.resources.formats.TimeZoneNamesLookup
 
 // Lookup table for time zone IDs to three-letter abbreviations.
 
@@ -270,10 +272,23 @@ object TimeZoneAbbreviationLookup {
     fun getTimeZoneVariants(timeZone: TimeZone): Map<String, String>? =
         timeZoneAbbreviatedMap[timeZone.id]
 
-    fun getTimeZoneAbbreviation(timeZone: TimeZone, offset: UtcOffset): String =
-        getTimeZoneVariants(timeZone = timeZone)?.get(offset.toString()) ?: offset.toString()
+    fun getTimeZoneAbbreviation(
+        timeZone: TimeZone,
+        offset: UtcOffset,
+        locale: Locale = Locale(languageCode = "en", displayName = "English")
+    ): String {
+        val englishAbbr = getTimeZoneVariants(timeZone = timeZone)?.get(offset.toString()) ?: offset.toString()
+        return TimeZoneNamesLookup.getAbbreviation(englishAbbr, locale) ?: englishAbbr
+    }
 
-    fun getTimeZoneFullName(timeZone: TimeZone, offset: UtcOffset): String =
-        timeZoneFullNameMap[getTimeZoneAbbreviation(timeZone = timeZone, offset = offset)]
-            ?: offset.toString()
+    fun getTimeZoneFullName(
+        timeZone: TimeZone,
+        offset: UtcOffset,
+        locale: Locale = Locale(languageCode = "en", displayName = "English")
+    ): String {
+        val englishAbbr = getTimeZoneVariants(timeZone = timeZone)?.get(offset.toString()) ?: offset.toString()
+        val localizedFullName = TimeZoneNamesLookup.getFullName(englishAbbr, locale)
+        if (localizedFullName != null) return localizedFullName
+        return timeZoneFullNameMap[englishAbbr] ?: offset.toString()
+    }
 }

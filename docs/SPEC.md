@@ -64,6 +64,11 @@ All human-readable formatting adheres to the **Unicode CLDR-compliant Plural Cat
 - **Linguistic Coverage**: Supports up to 6 grammatical forms (Arabic) to ensure natural sounding output in all 65+ languages.
 - **Ordinal Categories**: Explicit support for language-specific ordinal categorization logic (e.g., English *st/nd/rd*, French *er/e*, Swedish *a/e*).
 
+#### 8. Time Zones
+Formatting time zones into human-readable abbreviations or full names using `TimeZoneAbbreviationLookup`.
+- **API**: `TimeZone.formatReadable(instant, useFullName, locale)` and `TimeZone.formatReadable(offset, useFullName, locale)`
+- **DST Resolution**: Time zones require an `Instant` or `UtcOffset` to resolve DST-specific variations (e.g., `EST` vs `EDT` for Eastern Time).
+
 ### Localization
 - **Architecture**: Leverages the `io.github.aughtone.types.locale.Locale` system for language-specific rules.
 - **Functional Parity**: All core formatters (Ordinal, Number, Duration, Relative Time) support a common set of **65+ languages**.

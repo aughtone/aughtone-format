@@ -77,6 +77,7 @@ object MultiplatformDateFormatter : InternalDateFormatter {
                     timeZone = timeZone,
                     instant = localDateTime.toInstant(timeZone),
                     formattedTime = it,
+                    locale = locale,
                     numberingSystem = numberingSystem
                 )
             }
