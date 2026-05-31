@@ -188,6 +188,8 @@ object Resources {
         lookupOptional(locale, { clockHoursCache }, { clockHoursCache = it }, localeClockHoursSource.mapValues { it.value.value })
             ?: ClockHoursResource(is24hour = true, hours = ClockType.C24Hour)
 
+
+
     private fun getEraNamesResource(locale: Locale): EraNamesResource =
         lookup(locale, { eraNamesCache }, { eraNamesCache = it }, localeEraNamesSource.mapValues { it.value.value }, defaultEraNamesResourceKey)
 
