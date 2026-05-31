@@ -48,15 +48,18 @@ Formatting for Coordinates, Altitude, and Azimuth.
     - `Azimuth` output includes cardinal direction indicators (e.g., `"90° (E)"`).
     - Coordinates are automatically suffixed with localized hemisphere indicators (N, S, E, W).
 
-### 4. Temporal & Ordinality (`relative`, `ordinality`)
-Natural language time and numeric order.
+### 4. Temporal, TimeZone & Ordinality (`relative`, `ordinality`, `time`)
+Natural language time, timezone naming, and numeric order.
 
 - **Primary APIs**:
     - `Instant.formatReadableRelative(locale, now, style): String`
+    - `TimeZone.formatReadable(instant, useFullName, locale): String`
+    - `TimeZone.formatReadable(offset, useFullName, locale): String`
     - `T.formatReadableOrdinal(locale): String` (e.g., `"1st"`, `"2nd"`, `"1er"`)
-- **Preference**: Use `formatReadableRelative()` for social feeds or "Last Updated" timestamps.
+- **Preference**: Use `formatReadableRelative()` for social feeds or "Last Updated" timestamps. Use `TimeZone.formatReadable()` for displaying localized timezone abbreviations (e.g., `"EST"`, `"EDT"`) or full names (e.g., `"Eastern Standard Time"`).
 - **Contract**:
     - Ordinality rules are locale-aware (handles English suffixes, French gendered suffixes, etc.).
+    - TimeZone formatting requires a reference `Instant` or `UtcOffset` to determine daylight saving time status correctly.
 
 ## ⚠️ Deprecated Naming Conventions (Backwards Compatibility)
 
@@ -89,5 +92,5 @@ Natural language time and numeric order.
 1.  **Strict Locale Import**: ALWAYS import `io.github.aughtone.types.locale.Locale`. **NEVER** use `java.util.Locale` or `android.icu.util.Locale` with these APIs; they are not compatible.
 2.  **Contextual Precision**: For financial or high-precision metrics, always specify `precision = 2` or higher. The default `1` is intended for general UI use.
 3.  **UI Consistency**: When formatting a list of numbers, ensure all calls use the same `Locale` instance (ideally passed from the View layer) to avoid mixing separator styles.
-4.  **Metric Scaling**: Be aware that `toReadableMetric` only scales units defined in the SI base set (Meter, Gram, Watt, etc.). Custom or non-SI units will be formatted with the unit symbol but without prefix scaling.
+4.  **Metric Scaling**: Be aware that `formatReadableMetric` only scales units defined in the SI base set (Meter, Gram, Watt, etc.). Custom or non-SI units will be formatted with the unit symbol but without prefix scaling.
 5.  **Enum usage**: Use the `Locales` object for common constants (e.g., `Locales.English`, `Locales.German`) in tests or static configurations.
