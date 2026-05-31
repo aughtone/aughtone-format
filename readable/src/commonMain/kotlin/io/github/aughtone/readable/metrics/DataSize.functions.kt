@@ -8,17 +8,22 @@ import kotlin.math.abs
 import kotlin.math.pow
 
 /**
- * Formats this [Double] value into a human-readable data size string using binary scaling (IEC).
+ * Formats this [Double] value into a localized human-readable data size string using binary scaling (IEC).
  *
- * Binary prefixes (KiB, MiB, GiB, etc.) use base-1024 scaling.
- * For example, `1024.0` becomes `"1.0 KiB"`.
+ * For example: 1024 -> "1.0 KiB", 1048576 -> "1.0 MiB".
+ *
+ * Examples:
+ * ```kotlin
+ * 1024.0.toReadableDataSize() // "1.0 KiB"
+ * 1048576.0.toReadableDataSize(UnitOfMeasure.Byte) // "1.0 MiB"
+ * ```
  *
  * @param unit The unit of measure (defaults to [UnitOfMeasure.Byte]).
  * @param locale The locale for numeric formatting (defaults to [Locale.current]).
  * @param precision The number of decimal places to include (default is 1).
  * @return A localized human-readable data size string.
  */
-fun Double.toReadableDataSize(
+fun Double.formatReadableDataSize(
     unit: UnitOfMeasure = UnitOfMeasure.Byte,
     locale: Locale = Locale.current,
     precision: Int = 1
@@ -56,6 +61,16 @@ fun Double.toReadableDataSize(
     return "${formatter(scaledValue)} $binarySymbol${unit.symbol}"
 }
 
+@Deprecated(
+    message = "Use formatReadableDataSize instead",
+    replaceWith = ReplaceWith("formatReadableDataSize(unit, locale, precision)")
+)
+fun Double.toReadableDataSize(
+    unit: UnitOfMeasure = UnitOfMeasure.Byte,
+    locale: Locale = Locale.current,
+    precision: Int = 1
+): String = formatReadableDataSize(unit, locale, precision)
+
 /**
  * Formats this [Float] value into a human-readable data size string (e.g., 1024.0f -> "1.0 KiB").
  *
@@ -63,11 +78,21 @@ fun Double.toReadableDataSize(
  * @param locale The locale for numeric formatting (defaults to [Locale.current]).
  * @param precision The number of decimal places to include (default is 1).
  */
+fun Float.formatReadableDataSize(
+    unit: UnitOfMeasure = UnitOfMeasure.Byte,
+    locale: Locale = Locale.current,
+    precision: Int = 1
+): String = toDouble().formatReadableDataSize(unit, locale, precision)
+
+@Deprecated(
+    message = "Use formatReadableDataSize instead",
+    replaceWith = ReplaceWith("formatReadableDataSize(unit, locale, precision)")
+)
 fun Float.toReadableDataSize(
     unit: UnitOfMeasure = UnitOfMeasure.Byte,
     locale: Locale = Locale.current,
     precision: Int = 1
-): String = toDouble().toReadableDataSize(unit, locale, precision)
+): String = formatReadableDataSize(unit, locale, precision)
 
 /**
  * Formats this [Long] value into a human-readable data size string (e.g., 1048576L -> "1.0 MiB").
@@ -76,11 +101,21 @@ fun Float.toReadableDataSize(
  * @param locale The locale for numeric formatting (defaults to [Locale.current]).
  * @param precision The number of decimal places to include (default is 1).
  */
+fun Long.formatReadableDataSize(
+    unit: UnitOfMeasure = UnitOfMeasure.Byte,
+    locale: Locale = Locale.current,
+    precision: Int = 1
+): String = toDouble().formatReadableDataSize(unit, locale, precision)
+
+@Deprecated(
+    message = "Use formatReadableDataSize instead",
+    replaceWith = ReplaceWith("formatReadableDataSize(unit, locale, precision)")
+)
 fun Long.toReadableDataSize(
     unit: UnitOfMeasure = UnitOfMeasure.Byte,
     locale: Locale = Locale.current,
     precision: Int = 1
-): String = toDouble().toReadableDataSize(unit, locale, precision)
+): String = formatReadableDataSize(unit, locale, precision)
 
 /**
  * Formats this [Int] value into a human-readable data size string.
@@ -89,11 +124,21 @@ fun Long.toReadableDataSize(
  * @param locale The locale for numeric formatting (defaults to [Locale.current]).
  * @param precision The number of decimal places to include (default is 1).
  */
+fun Int.formatReadableDataSize(
+    unit: UnitOfMeasure = UnitOfMeasure.Byte,
+    locale: Locale = Locale.current,
+    precision: Int = 1
+): String = toDouble().formatReadableDataSize(unit, locale, precision)
+
+@Deprecated(
+    message = "Use formatReadableDataSize instead",
+    replaceWith = ReplaceWith("formatReadableDataSize(unit, locale, precision)")
+)
 fun Int.toReadableDataSize(
     unit: UnitOfMeasure = UnitOfMeasure.Byte,
     locale: Locale = Locale.current,
     precision: Int = 1
-): String = toDouble().toReadableDataSize(unit, locale, precision)
+): String = formatReadableDataSize(unit, locale, precision)
 
 /**
  * Formats this [Short] value into a human-readable data size string.
@@ -102,11 +147,21 @@ fun Int.toReadableDataSize(
  * @param locale The locale for numeric formatting (defaults to [Locale.current]).
  * @param precision The number of decimal places to include (default is 1).
  */
+fun Short.formatReadableDataSize(
+    unit: UnitOfMeasure = UnitOfMeasure.Byte,
+    locale: Locale = Locale.current,
+    precision: Int = 1
+): String = toDouble().formatReadableDataSize(unit, locale, precision)
+
+@Deprecated(
+    message = "Use formatReadableDataSize instead",
+    replaceWith = ReplaceWith("formatReadableDataSize(unit, locale, precision)")
+)
 fun Short.toReadableDataSize(
     unit: UnitOfMeasure = UnitOfMeasure.Byte,
     locale: Locale = Locale.current,
     precision: Int = 1
-): String = toDouble().toReadableDataSize(unit, locale, precision)
+): String = formatReadableDataSize(unit, locale, precision)
 
 /**
  * Formats this [Byte] value into a human-readable data size string.
@@ -115,11 +170,21 @@ fun Short.toReadableDataSize(
  * @param locale The locale for numeric formatting (defaults to [Locale.current]).
  * @param precision The number of decimal places to include (default is 1).
  */
+fun Byte.formatReadableDataSize(
+    unit: UnitOfMeasure = UnitOfMeasure.Byte,
+    locale: Locale = Locale.current,
+    precision: Int = 1
+): String = toDouble().formatReadableDataSize(unit, locale, precision)
+
+@Deprecated(
+    message = "Use formatReadableDataSize instead",
+    replaceWith = ReplaceWith("formatReadableDataSize(unit, locale, precision)")
+)
 fun Byte.toReadableDataSize(
     unit: UnitOfMeasure = UnitOfMeasure.Byte,
     locale: Locale = Locale.current,
     precision: Int = 1
-): String = toDouble().toReadableDataSize(unit, locale, precision)
+): String = formatReadableDataSize(unit, locale, precision)
 
 /**
  * Formats this [ULong] value into a human-readable data size string.
@@ -128,11 +193,21 @@ fun Byte.toReadableDataSize(
  * @param locale The locale for numeric formatting (defaults to [Locale.current]).
  * @param precision The number of decimal places to include (default is 1).
  */
+fun ULong.formatReadableDataSize(
+    unit: UnitOfMeasure = UnitOfMeasure.Byte,
+    locale: Locale = Locale.current,
+    precision: Int = 1
+): String = toDouble().formatReadableDataSize(unit, locale, precision)
+
+@Deprecated(
+    message = "Use formatReadableDataSize instead",
+    replaceWith = ReplaceWith("formatReadableDataSize(unit, locale, precision)")
+)
 fun ULong.toReadableDataSize(
     unit: UnitOfMeasure = UnitOfMeasure.Byte,
     locale: Locale = Locale.current,
     precision: Int = 1
-): String = toDouble().toReadableDataSize(unit, locale, precision)
+): String = formatReadableDataSize(unit, locale, precision)
 
 /**
  * Formats this [UInt] value into a human-readable data size string.
@@ -141,11 +216,21 @@ fun ULong.toReadableDataSize(
  * @param locale The locale for numeric formatting (defaults to [Locale.current]).
  * @param precision The number of decimal places to include (default is 1).
  */
+fun UInt.formatReadableDataSize(
+    unit: UnitOfMeasure = UnitOfMeasure.Byte,
+    locale: Locale = Locale.current,
+    precision: Int = 1
+): String = toDouble().formatReadableDataSize(unit, locale, precision)
+
+@Deprecated(
+    message = "Use formatReadableDataSize instead",
+    replaceWith = ReplaceWith("formatReadableDataSize(unit, locale, precision)")
+)
 fun UInt.toReadableDataSize(
     unit: UnitOfMeasure = UnitOfMeasure.Byte,
     locale: Locale = Locale.current,
     precision: Int = 1
-): String = toDouble().toReadableDataSize(unit, locale, precision)
+): String = formatReadableDataSize(unit, locale, precision)
 
 /**
  * Formats this [UShort] value into a human-readable data size string.
@@ -154,11 +239,21 @@ fun UInt.toReadableDataSize(
  * @param locale The locale for numeric formatting (defaults to [Locale.current]).
  * @param precision The number of decimal places to include (default is 1).
  */
+fun UShort.formatReadableDataSize(
+    unit: UnitOfMeasure = UnitOfMeasure.Byte,
+    locale: Locale = Locale.current,
+    precision: Int = 1
+): String = toDouble().formatReadableDataSize(unit, locale, precision)
+
+@Deprecated(
+    message = "Use formatReadableDataSize instead",
+    replaceWith = ReplaceWith("formatReadableDataSize(unit, locale, precision)")
+)
 fun UShort.toReadableDataSize(
     unit: UnitOfMeasure = UnitOfMeasure.Byte,
     locale: Locale = Locale.current,
     precision: Int = 1
-): String = toDouble().toReadableDataSize(unit, locale, precision)
+): String = formatReadableDataSize(unit, locale, precision)
 
 /**
  * Formats this [UByte] value into a human-readable data size string.
@@ -167,8 +262,18 @@ fun UShort.toReadableDataSize(
  * @param locale The locale for numeric formatting (defaults to [Locale.current]).
  * @param precision The number of decimal places to include (default is 1).
  */
+fun UByte.formatReadableDataSize(
+    unit: UnitOfMeasure = UnitOfMeasure.Byte,
+    locale: Locale = Locale.current,
+    precision: Int = 1
+): String = toDouble().formatReadableDataSize(unit, locale, precision)
+
+@Deprecated(
+    message = "Use formatReadableDataSize instead",
+    replaceWith = ReplaceWith("formatReadableDataSize(unit, locale, precision)")
+)
 fun UByte.toReadableDataSize(
     unit: UnitOfMeasure = UnitOfMeasure.Byte,
     locale: Locale = Locale.current,
     precision: Int = 1
-): String = toDouble().toReadableDataSize(unit, locale, precision)
+): String = formatReadableDataSize(unit, locale, precision)

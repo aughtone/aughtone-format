@@ -5,19 +5,29 @@ import io.github.aughtone.types.units.MetricPrefix
 import kotlin.math.abs
 import kotlin.math.pow
 
-// ── Standard Localized Formatting (toReadable) ───────────────────────────────
-
 /**
  * Formats this [Double] into a localized string representation.
  *
  * Uses the specified [locale] to determine decimal and grouping separators.
- * For example, in `en-US`, `1234.56` becomes `"1,234.6"` (with precision 1).
+ *
+ * Example:
+ * ```kotlin
+ * 1234.56.toReadable(Locale("en"), precision = 1) // "1,234.6"
+ * 1234.56.toReadable(Locale("de"), precision = 1) // "1.234,6"
+ * ```
  *
  * @param locale The locale defining the formatting rules (defaults to [Locale.current]).
  * @param precision The number of decimal places to include (default is 1).
  */
-fun Double.toReadable(locale: Locale = Locale.current, precision: Int = 1): String =
+fun Double.formatReadable(locale: Locale = Locale.current, precision: Int = 1): String =
     numberFormatterFor(locale, precision)(this)
+
+@Deprecated(
+    message = "Use formatReadable instead",
+    replaceWith = ReplaceWith("formatReadable(locale, precision)")
+)
+fun Double.toReadable(locale: Locale = Locale.current, precision: Int = 1): String =
+    formatReadable(locale, precision)
 
 /**
  * Formats this [Float] into a localized string representation.
@@ -25,8 +35,15 @@ fun Double.toReadable(locale: Locale = Locale.current, precision: Int = 1): Stri
  * @param locale The locale defining the formatting rules (defaults to [Locale.current]).
  * @param precision The number of decimal places to include (default is 1).
  */
+fun Float.formatReadable(locale: Locale = Locale.current, precision: Int = 1): String =
+    toDouble().formatReadable(locale, precision)
+
+@Deprecated(
+    message = "Use formatReadable instead",
+    replaceWith = ReplaceWith("formatReadable(locale, precision)")
+)
 fun Float.toReadable(locale: Locale = Locale.current, precision: Int = 1): String =
-    toDouble().toReadable(locale, precision)
+    formatReadable(locale, precision)
 
 /**
  * Formats this [Long] into a localized string representation.
@@ -34,8 +51,15 @@ fun Float.toReadable(locale: Locale = Locale.current, precision: Int = 1): Strin
  * @param locale The locale defining the formatting rules (defaults to [Locale.current]).
  * @param precision The number of decimal places to include (default is 0).
  */
+fun Long.formatReadable(locale: Locale = Locale.current, precision: Int = 0): String =
+    toDouble().formatReadable(locale, precision)
+
+@Deprecated(
+    message = "Use formatReadable instead",
+    replaceWith = ReplaceWith("formatReadable(locale, precision)")
+)
 fun Long.toReadable(locale: Locale = Locale.current, precision: Int = 0): String =
-    toDouble().toReadable(locale, precision)
+    formatReadable(locale, precision)
 
 /**
  * Formats this [Int] into a localized string representation.
@@ -43,8 +67,15 @@ fun Long.toReadable(locale: Locale = Locale.current, precision: Int = 0): String
  * @param locale The locale defining the formatting rules (defaults to [Locale.current]).
  * @param precision The number of decimal places to include (default is 0).
  */
+fun Int.formatReadable(locale: Locale = Locale.current, precision: Int = 0): String =
+    toLong().formatReadable(locale, precision)
+
+@Deprecated(
+    message = "Use formatReadable instead",
+    replaceWith = ReplaceWith("formatReadable(locale, precision)")
+)
 fun Int.toReadable(locale: Locale = Locale.current, precision: Int = 0): String =
-    toLong().toReadable(locale, precision)
+    formatReadable(locale, precision)
 
 /**
  * Formats this [Short] into a localized string representation.
@@ -52,8 +83,15 @@ fun Int.toReadable(locale: Locale = Locale.current, precision: Int = 0): String 
  * @param locale The locale defining the formatting rules (defaults to [Locale.current]).
  * @param precision The number of decimal places to include (default is 0).
  */
+fun Short.formatReadable(locale: Locale = Locale.current, precision: Int = 0): String =
+    toLong().formatReadable(locale, precision)
+
+@Deprecated(
+    message = "Use formatReadable instead",
+    replaceWith = ReplaceWith("formatReadable(locale, precision)")
+)
 fun Short.toReadable(locale: Locale = Locale.current, precision: Int = 0): String =
-    toLong().toReadable(locale, precision)
+    formatReadable(locale, precision)
 
 /**
  * Formats this [Byte] into a localized string representation.
@@ -61,8 +99,15 @@ fun Short.toReadable(locale: Locale = Locale.current, precision: Int = 0): Strin
  * @param locale The locale defining the formatting rules (defaults to [Locale.current]).
  * @param precision The number of decimal places to include (default is 0).
  */
+fun Byte.formatReadable(locale: Locale = Locale.current, precision: Int = 0): String =
+    toLong().formatReadable(locale, precision)
+
+@Deprecated(
+    message = "Use formatReadable instead",
+    replaceWith = ReplaceWith("formatReadable(locale, precision)")
+)
 fun Byte.toReadable(locale: Locale = Locale.current, precision: Int = 0): String =
-    toLong().toReadable(locale, precision)
+    formatReadable(locale, precision)
 
 /**
  * Formats this [ULong] into a localized string representation.
@@ -70,8 +115,15 @@ fun Byte.toReadable(locale: Locale = Locale.current, precision: Int = 0): String
  * @param locale The locale defining the formatting rules (defaults to [Locale.current]).
  * @param precision The number of decimal places to include (default is 0).
  */
+fun ULong.formatReadable(locale: Locale = Locale.current, precision: Int = 0): String =
+    toDouble().formatReadable(locale, precision)
+
+@Deprecated(
+    message = "Use formatReadable instead",
+    replaceWith = ReplaceWith("formatReadable(locale, precision)")
+)
 fun ULong.toReadable(locale: Locale = Locale.current, precision: Int = 0): String =
-    toDouble().toReadable(locale, precision)
+    formatReadable(locale, precision)
 
 /**
  * Formats this [UInt] into a localized string representation.
@@ -79,8 +131,15 @@ fun ULong.toReadable(locale: Locale = Locale.current, precision: Int = 0): Strin
  * @param locale The locale defining the formatting rules (defaults to [Locale.current]).
  * @param precision The number of decimal places to include (default is 0).
  */
+fun UInt.formatReadable(locale: Locale = Locale.current, precision: Int = 0): String =
+    toLong().formatReadable(locale, precision)
+
+@Deprecated(
+    message = "Use formatReadable instead",
+    replaceWith = ReplaceWith("formatReadable(locale, precision)")
+)
 fun UInt.toReadable(locale: Locale = Locale.current, precision: Int = 0): String =
-    toLong().toReadable(locale, precision)
+    formatReadable(locale, precision)
 
 /**
  * Formats this [UShort] into a localized string representation.
@@ -88,8 +147,15 @@ fun UInt.toReadable(locale: Locale = Locale.current, precision: Int = 0): String
  * @param locale The locale defining the formatting rules (defaults to [Locale.current]).
  * @param precision The number of decimal places to include (default is 0).
  */
+fun UShort.formatReadable(locale: Locale = Locale.current, precision: Int = 0): String =
+    toLong().formatReadable(locale, precision)
+
+@Deprecated(
+    message = "Use formatReadable instead",
+    replaceWith = ReplaceWith("formatReadable(locale, precision)")
+)
 fun UShort.toReadable(locale: Locale = Locale.current, precision: Int = 0): String =
-    toLong().toReadable(locale, precision)
+    formatReadable(locale, precision)
 
 /**
  * Formats this [UByte] into a localized string representation.
@@ -97,29 +163,41 @@ fun UShort.toReadable(locale: Locale = Locale.current, precision: Int = 0): Stri
  * @param locale The locale defining the formatting rules (defaults to [Locale.current]).
  * @param precision The number of decimal places to include (default is 0).
  */
-fun UByte.toReadable(locale: Locale = Locale.current, precision: Int = 0): String =
-    toLong().toReadable(locale, precision)
+fun UByte.formatReadable(locale: Locale = Locale.current, precision: Int = 0): String =
+    toLong().formatReadable(locale, precision)
 
-// ── Abbreviated Formatting (toReadableAbbreviated) ────────────────────────────
+@Deprecated(
+    message = "Use formatReadable instead",
+    replaceWith = ReplaceWith("formatReadable(locale, precision)")
+)
+fun UByte.toReadable(locale: Locale = Locale.current, precision: Int = 0): String =
+    formatReadable(locale, precision)
 
 /**
- * Formats this [Double] into a human-readable abbreviated string (e.g., 1500 -> "1.5k").
+ * Formats this [Double] into a localized human-readable abbreviated string.
  *
  * This function uses standard SI metric prefixes (k, M, G, T, etc.) for values 1000 or greater.
- * Small values (under 1000) are formatted using [toReadable].
+ * Small values (under 1000) are formatted using [formatReadable].
+ *
+ * Examples:
+ * ```kotlin
+ * 1500.0.formatReadableAbbreviated(Locale("en")) // "1.5k"
+ * 1000000.0.formatReadableAbbreviated(Locale("en")) // "1M"
+ * 500.0.formatReadableAbbreviated(Locale("en")) // "500"
+ * ```
  *
  * @param locale The locale to use for numeric formatting (defaults to [Locale.current]).
  * @param precision The number of decimal places for the scaled value (default is 1).
  * @return A localized abbreviated string.
  */
-fun Double.toReadableAbbreviated(
+fun Double.formatReadableAbbreviated(
     locale: Locale = Locale.current,
     precision: Int = 1
 ): String {
     val absoluteValue = abs(this)
 
     if (absoluteValue < 1000.0) {
-        return toReadable(locale, precision)
+        return formatReadable(locale, precision)
     }
 
     // Find the largest prefix that is <= absoluteValue
@@ -130,11 +208,20 @@ fun Double.toReadableAbbreviated(
 
     return if (prefix != null) {
         val scaledValue = this / 10.0.pow(prefix.exponent)
-        "${scaledValue.toReadable(locale, precision)}${prefix.symbol}"
+        "${scaledValue.formatReadable(locale, precision)}${prefix.symbol}"
     } else {
-        toReadable(locale, precision)
+        formatReadable(locale, precision)
     }
 }
+
+@Deprecated(
+    message = "Use formatReadableAbbreviated instead",
+    replaceWith = ReplaceWith("formatReadableAbbreviated(locale, precision)")
+)
+fun Double.toReadableAbbreviated(
+    locale: Locale = Locale.current,
+    precision: Int = 1
+): String = formatReadableAbbreviated(locale, precision)
 
 /**
  * Formats this [Float] into a localized abbreviated string (e.g., 1500.0f -> "1.5k").
@@ -142,8 +229,15 @@ fun Double.toReadableAbbreviated(
  * @param locale The locale to use for numeric formatting (defaults to [Locale.current]).
  * @param precision The number of decimal places for the scaled value (default is 1).
  */
+fun Float.formatReadableAbbreviated(locale: Locale = Locale.current, precision: Int = 1): String =
+    toDouble().formatReadableAbbreviated(locale, precision)
+
+@Deprecated(
+    message = "Use formatReadableAbbreviated instead",
+    replaceWith = ReplaceWith("formatReadableAbbreviated(locale, precision)")
+)
 fun Float.toReadableAbbreviated(locale: Locale = Locale.current, precision: Int = 1): String =
-    toDouble().toReadableAbbreviated(locale, precision)
+    formatReadableAbbreviated(locale, precision)
 
 /**
  * Formats this [Long] into a localized abbreviated string (e.g., 1000000L -> "1M").
@@ -151,8 +245,15 @@ fun Float.toReadableAbbreviated(locale: Locale = Locale.current, precision: Int 
  * @param locale The locale to use for numeric formatting (defaults to [Locale.current]).
  * @param precision The number of decimal places for the scaled value (default is 1).
  */
+fun Long.formatReadableAbbreviated(locale: Locale = Locale.current, precision: Int = 1): String =
+    toDouble().formatReadableAbbreviated(locale, precision)
+
+@Deprecated(
+    message = "Use formatReadableAbbreviated instead",
+    replaceWith = ReplaceWith("formatReadableAbbreviated(locale, precision)")
+)
 fun Long.toReadableAbbreviated(locale: Locale = Locale.current, precision: Int = 1): String =
-    toDouble().toReadableAbbreviated(locale, precision)
+    formatReadableAbbreviated(locale, precision)
 
 /**
  * Formats this [Int] into a localized abbreviated string (e.g., 2500 -> "2.5k").
@@ -160,8 +261,15 @@ fun Long.toReadableAbbreviated(locale: Locale = Locale.current, precision: Int =
  * @param locale The locale to use for numeric formatting (defaults to [Locale.current]).
  * @param precision The number of decimal places for the scaled value (default is 1).
  */
+fun Int.formatReadableAbbreviated(locale: Locale = Locale.current, precision: Int = 1): String =
+    toDouble().formatReadableAbbreviated(locale, precision)
+
+@Deprecated(
+    message = "Use formatReadableAbbreviated instead",
+    replaceWith = ReplaceWith("formatReadableAbbreviated(locale, precision)")
+)
 fun Int.toReadableAbbreviated(locale: Locale = Locale.current, precision: Int = 1): String =
-    toDouble().toReadableAbbreviated(locale, precision)
+    formatReadableAbbreviated(locale, precision)
 
 /**
  * Formats this [Short] into a localized abbreviated string.
@@ -169,8 +277,15 @@ fun Int.toReadableAbbreviated(locale: Locale = Locale.current, precision: Int = 
  * @param locale The locale to use for numeric formatting (defaults to [Locale.current]).
  * @param precision The number of decimal places for the scaled value (default is 1).
  */
+fun Short.formatReadableAbbreviated(locale: Locale = Locale.current, precision: Int = 1): String =
+    toDouble().formatReadableAbbreviated(locale, precision)
+
+@Deprecated(
+    message = "Use formatReadableAbbreviated instead",
+    replaceWith = ReplaceWith("formatReadableAbbreviated(locale, precision)")
+)
 fun Short.toReadableAbbreviated(locale: Locale = Locale.current, precision: Int = 1): String =
-    toDouble().toReadableAbbreviated(locale, precision)
+    formatReadableAbbreviated(locale, precision)
 
 /**
  * Formats this [Byte] into a localized abbreviated string.
@@ -178,8 +293,15 @@ fun Short.toReadableAbbreviated(locale: Locale = Locale.current, precision: Int 
  * @param locale The locale to use for numeric formatting (defaults to [Locale.current]).
  * @param precision The number of decimal places for the scaled value (default is 1).
  */
+fun Byte.formatReadableAbbreviated(locale: Locale = Locale.current, precision: Int = 1): String =
+    toDouble().formatReadableAbbreviated(locale, precision)
+
+@Deprecated(
+    message = "Use formatReadableAbbreviated instead",
+    replaceWith = ReplaceWith("formatReadableAbbreviated(locale, precision)")
+)
 fun Byte.toReadableAbbreviated(locale: Locale = Locale.current, precision: Int = 1): String =
-    toDouble().toReadableAbbreviated(locale, precision)
+    formatReadableAbbreviated(locale, precision)
 
 /**
  * Formats this [ULong] into a localized abbreviated string.
@@ -187,8 +309,15 @@ fun Byte.toReadableAbbreviated(locale: Locale = Locale.current, precision: Int =
  * @param locale The locale to use for numeric formatting (defaults to [Locale.current]).
  * @param precision The number of decimal places for the scaled value (default is 1).
  */
+fun ULong.formatReadableAbbreviated(locale: Locale = Locale.current, precision: Int = 1): String =
+    toDouble().formatReadableAbbreviated(locale, precision)
+
+@Deprecated(
+    message = "Use formatReadableAbbreviated instead",
+    replaceWith = ReplaceWith("formatReadableAbbreviated(locale, precision)")
+)
 fun ULong.toReadableAbbreviated(locale: Locale = Locale.current, precision: Int = 1): String =
-    toDouble().toReadableAbbreviated(locale, precision)
+    formatReadableAbbreviated(locale, precision)
 
 /**
  * Formats this [UInt] into a localized abbreviated string.
@@ -196,8 +325,15 @@ fun ULong.toReadableAbbreviated(locale: Locale = Locale.current, precision: Int 
  * @param locale The locale to use for numeric formatting (defaults to [Locale.current]).
  * @param precision The number of decimal places for the scaled value (default is 1).
  */
+fun UInt.formatReadableAbbreviated(locale: Locale = Locale.current, precision: Int = 1): String =
+    toDouble().formatReadableAbbreviated(locale, precision)
+
+@Deprecated(
+    message = "Use formatReadableAbbreviated instead",
+    replaceWith = ReplaceWith("formatReadableAbbreviated(locale, precision)")
+)
 fun UInt.toReadableAbbreviated(locale: Locale = Locale.current, precision: Int = 1): String =
-    toDouble().toReadableAbbreviated(locale, precision)
+    formatReadableAbbreviated(locale, precision)
 
 /**
  * Formats this [UShort] into a localized abbreviated string.
@@ -205,8 +341,15 @@ fun UInt.toReadableAbbreviated(locale: Locale = Locale.current, precision: Int =
  * @param locale The locale to use for numeric formatting (defaults to [Locale.current]).
  * @param precision The number of decimal places for the scaled value (default is 1).
  */
+fun UShort.formatReadableAbbreviated(locale: Locale = Locale.current, precision: Int = 1): String =
+    toDouble().formatReadableAbbreviated(locale, precision)
+
+@Deprecated(
+    message = "Use formatReadableAbbreviated instead",
+    replaceWith = ReplaceWith("formatReadableAbbreviated(locale, precision)")
+)
 fun UShort.toReadableAbbreviated(locale: Locale = Locale.current, precision: Int = 1): String =
-    toDouble().toReadableAbbreviated(locale, precision)
+    formatReadableAbbreviated(locale, precision)
 
 /**
  * Formats this [UByte] into a localized abbreviated string.
@@ -214,5 +357,12 @@ fun UShort.toReadableAbbreviated(locale: Locale = Locale.current, precision: Int
  * @param locale The locale to use for numeric formatting (defaults to [Locale.current]).
  * @param precision The number of decimal places for the scaled value (default is 1).
  */
+fun UByte.formatReadableAbbreviated(locale: Locale = Locale.current, precision: Int = 1): String =
+    toDouble().formatReadableAbbreviated(locale, precision)
+
+@Deprecated(
+    message = "Use formatReadableAbbreviated instead",
+    replaceWith = ReplaceWith("formatReadableAbbreviated(locale, precision)")
+)
 fun UByte.toReadableAbbreviated(locale: Locale = Locale.current, precision: Int = 1): String =
-    toDouble().toReadableAbbreviated(locale, precision)
+    formatReadableAbbreviated(locale, precision)

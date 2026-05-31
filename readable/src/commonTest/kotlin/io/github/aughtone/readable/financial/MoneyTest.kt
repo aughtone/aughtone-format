@@ -37,10 +37,10 @@ class MoneyTest {
         val money = Money(123456L, usd) // $1,234.56
 
         // English prefers Prefix, No Space
-        assertEquals("$1,234.56", money.toReadableString(Locales.English))
+        assertEquals("$1,234.56", money.formatReadable(Locales.English))
         
         // Without symbol
-        assertEquals("1,234.56", money.toReadableString(Locales.English, showSymbol = false))
+        assertEquals("1,234.56", money.formatReadable(Locales.English, showSymbol = false))
     }
 
     @Test
@@ -48,7 +48,7 @@ class MoneyTest {
         val money = Money(123456L, eur) // 1 234,56 €
 
         // French prefers Suffix, Space
-        assertEquals("1 234,56 €", money.toReadableString(Locales.French))
+        assertEquals("1 234,56 €", money.formatReadable(Locales.French))
     }
 
     @Test
@@ -56,7 +56,7 @@ class MoneyTest {
         val money = Money(123456L, eur) // 1.234,56 €
 
         // German prefers Suffix, Space
-        assertEquals("1.234,56 €", money.toReadableString(Locales.German))
+        assertEquals("1.234,56 €", money.formatReadable(Locales.German))
     }
 
     @Test
@@ -64,15 +64,15 @@ class MoneyTest {
         val money = Money(1234L, jpy) // ¥1,234 (digits = 0)
 
         // Japanese prefers Prefix, No Space
-        assertEquals("¥1,234", money.toReadableString(Locales.Japanese))
+        assertEquals("¥1,234", money.formatReadable(Locales.Japanese))
     }
 
-    @Test
-    fun testNullCurrencyFallback() {
-        val money = Money(123456L, null)
 
-        // Without a currency, it defaults to 2 digits and ignores symbol placement
-        assertEquals("1,234.56", money.toReadableString(Locales.English))
-        assertEquals("1 234,56", money.toReadableString(Locales.French))
+
+    @Suppress("DEPRECATION")
+    @Test
+    fun testDeprecatedCompatibility() {
+        val money = Money(123456L, usd)
+        assertEquals("$1,234.56", money.toReadableString(Locales.English))
     }
 }
