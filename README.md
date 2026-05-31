@@ -2,13 +2,15 @@
 
 Aughtone Format is a suite of Kotlin Multiplatform libraries designed to provide consistent, localized formatting for Dates, Times, Numbers, and other human-readable metrics across all platforms.
 
-## ⚠️ Breaking Changes in 2.1.0
+## 🚀 Major Updates in 3.0.1
 
-Version 2.1.0 introduces significant structural changes and hardening:
+Aughtone Format 3.0.1 introduces new modules, API modernizations, performance optimizations, and timezone support:
 
-- **Library Split**: Metric-specific formatting (Ordinals, Durations, Relative Time, Data Sizes) has been moved from the core library into the new **`:readable`** module.
-- **`kotlin.time` Hardening**: All Duration and Relative Time APIs have been refactored to use standard `kotlin.time.Duration` types instead of `Long` milliseconds for improved type safety and consistency.
-- **Version Synchronization**: This release aligns the versioning across the Aughtone ecosystem.
+- **TimeZone Formatting**: Implemented `TimeZone.formatReadable` extension functions in `:readable` to format timezone names with zero allocations.
+- **New Vector Modules**: Introduced `:viewable` for platform-agnostic vector graphic representations, styling, and path conversion (SVG, WKT, GeoJSON), and `:viewable-compose` for Jetpack / Compose Multiplatform integration.
+- **API Naming Modernization**: Deprecated old `toReadable*` prefix extension functions in favor of unified `formatReadable*` APIs for better readability and style guide alignment.
+- **AI-Skills Integration**: Added machine-readable AI skills documentation for all modules to assist coding agents.
+
 
 ## 📦 Core Modules
 
