@@ -14,6 +14,8 @@ Version 2.1.0 introduces significant structural changes and hardening:
 
 - **`:datetime`**: Advanced formatting for `kotlinx-datetime` types with multi-locale support.
 - **`:readable`**: Human-friendly formatting for metrics (abbreviations), ordinals, and data sizes.
+- **`:viewable`**: Platform-agnostic vector graphics representation, styling, and path conversion (GeoJSON, SVG, WKT).
+- **`:viewable-compose`**: Jetpack / Compose Multiplatform integration for rendering viewable vector graphics (Painters, ImageVectors).
 - **`:toolbox`**: Shared utilities and common formatting primitives.
 
 This project follows a specialized 5-sector documentation hierarchy.
@@ -49,16 +51,16 @@ println(now.format(DateTimeStyle.Medium, locale = Locale("en"))) // "Apr 23, 202
 ### Human-Readable Metrics (`:readable`)
 ```kotlin
 // Ordinals
-println(123L.toReadableOrdinal(Locale("en"))) // "123rd"
+println(123L.formatReadableOrdinal(Locale("en"))) // "123rd"
 
 // Durations
-println(1.5.hours.toReadableString(Locale("en"))) // "1.5 hours"
+println(1.5.hours.formatReadable(Locale("en"))) // "1.5 hours"
 
 // Relative Time
-println(instant.readableRelative(locale = Locale.current)) // "3 minutes ago"
+println(instant.formatReadableRelative(locale = Locale.current)) // "3 minutes ago"
 
 // Data Sizes
-println(1048576L.toReadableDataSize()) // "1.0 MiB"
+println(1048576L.formatReadableDataSize()) // "1.0 MiB"
 ```
 
 ---
@@ -67,13 +69,13 @@ Access the [Governance Skills](docs/standards/) for specialized development rule
 
 ---
 ## 🤖 AI-Assisted Development
-This library includes embedded, machine-readable "skills" to enhance the experience of developers using AI code assistants. These skills help the AI understand our library's APIs and best practices, leading to more accurate and idiomatic code suggestions.
+This library includes embedded, machine-readable "skills" to help AI assistants understand its APIs and best practices.
 
-- **AI Skill Discovery**: Look for `META-INF/ai-skills/*.ai-skill.md`
+- **Discovery**: Look for `META-INF/ai-skills/*.ai-skill.md`
 
 ### 🪄 Magic Prompt for AI Assistants
-Use this prompt to inform your AI assistant about the standards and patterns embedded in this library:
+If you are using an AI assistant (like Claude, Gemini, or ChatGPT) to write code with this library, paste this prompt first:
 
-> "Scan all project dependencies for AI Skill files located in `META-INF/ai-skills/` with the prefix `io.github.aughtone`. Use these files to understand the coding standards, API patterns, and governance rules for the Aughtone Format library. If you cannot find them in the dependencies, refer to the [Aughtone Format GitHub repository](https://github.com/aughtone/aughtone-format) for the source definitions."
+> "Scan all project dependencies for AI Skill files in `META-INF/ai-skills/` with the prefix `io.github.aughtone`. Use these to understand the API patterns, types, and governance for this library. If they are not found in the local classpath, refer to the [Aughtone Format GitHub repository](https://github.com/aughtone/aughtone-format) for the source definitions."
 
 To learn how to add this capability to your own library, see our [AI Skill Publishing Standard](docs/standards/ai-skill-publishing.md).

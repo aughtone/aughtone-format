@@ -12,40 +12,47 @@ class DurationTest {
 
     @Test
     fun testScaling() {
-        assertEquals("5 seconds", 5.seconds.toReadableString(Locales.English))
-        assertEquals("59 seconds", 59.seconds.toReadableString(Locales.English))
-        assertEquals("1 minute", 60.seconds.toReadableString(Locales.English))
-        assertEquals("1 hour", 60.minutes.toReadableString(Locales.English))
-        assertEquals("1 day", 24.hours.toReadableString(Locales.English))
-        assertEquals("6 days", 6.days.toReadableString(Locales.English))
-        assertEquals("1 week", 7.days.toReadableString(Locales.English))
-        assertEquals("29 days", 29.days.toReadableString(Locales.English))
-        assertEquals("1 month", 30.days.toReadableString(Locales.English))
+        assertEquals("5 seconds", 5.seconds.formatReadable(locale = Locales.English))
+        assertEquals("59 seconds", 59.seconds.formatReadable(locale = Locales.English))
+        assertEquals("1 minute", 60.seconds.formatReadable(locale = Locales.English))
+        assertEquals("1 hour", 60.minutes.formatReadable(locale = Locales.English))
+        assertEquals("1 day", 24.hours.formatReadable(locale = Locales.English))
+        assertEquals("6 days", 6.days.formatReadable(locale = Locales.English))
+        assertEquals("1 week", 7.days.formatReadable(locale = Locales.English))
+        assertEquals("29 days", 29.days.formatReadable(locale = Locales.English))
+        assertEquals("1 month", 30.days.formatReadable(locale = Locales.English))
     }
 
     @Test
     fun testRounding() {
         // 8 days / 7 = 1.14 -> 1 week
-        assertEquals("1 week", 8.days.toReadableString(Locales.English))
+        assertEquals("1 week", 8.days.formatReadable(locale = Locales.English))
         // 10 days / 7 = 1.42 -> 1 week
-        assertEquals("1 week", 10.days.toReadableString(Locales.English))
+        assertEquals("1 week", 10.days.formatReadable(locale = Locales.English))
         // 11 days / 7 = 1.57 -> 2 weeks
-        assertEquals("2 weeks", 11.days.toReadableString(Locales.English))
+        assertEquals("2 weeks", 11.days.formatReadable(locale = Locales.English))
     }
 
     @Test
     fun testLargeDurations() {
         // 544 hours = 22.66 days = 3.23 weeks -> 3 weeks
-        assertEquals("3 weeks", 544.hours.toReadableString(Locales.English))
+        assertEquals("3 weeks", 544.hours.formatReadable(locale = Locales.English))
     }
 
     @Test
     fun testTraditionalChineseVariant() {
         // zh-TW uses Traditional characters (小時, 週) not Simplified (小时, 周)
-        assertEquals("1小時", 60.minutes.toReadableString(Locales.TraditionalChinese))
-        assertEquals("1週", 7.days.toReadableString(Locales.TraditionalChinese))
+        assertEquals("1小時", 60.minutes.formatReadable(locale = Locales.TraditionalChinese))
+        assertEquals("1週", 7.days.formatReadable(locale = Locales.TraditionalChinese))
 
         // zh (Simplified) uses different characters
-        assertEquals("1小时", 60.minutes.toReadableString(Locales.Chinese))
+        assertEquals("1小时", 60.minutes.formatReadable(locale = Locales.Chinese))
+    }
+
+    @Suppress("DEPRECATION")
+    @Test
+    fun testDeprecatedCompatibility() {
+        assertEquals("5 seconds", 5.seconds.toReadableString(Locales.English))
+        assertEquals("1 week", 7.days.toReadableString(Locales.English))
     }
 }

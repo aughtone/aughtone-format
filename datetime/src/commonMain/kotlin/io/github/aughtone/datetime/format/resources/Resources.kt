@@ -22,7 +22,6 @@ import io.github.aughtone.datetime.format.resources.values.MonthNamesResource
 import io.github.aughtone.datetime.format.resources.values.text.TextResource
 import io.github.aughtone.datetime.format.resources.values.text.TextResourceMap
 import io.github.aughtone.types.locale.Locale
-import io.github.aughtone.types.locale.toLanguageTag
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
@@ -61,7 +60,7 @@ object Resources {
         defaultKey: String,
         sanitizer: ((T) -> T)? = null,
     ): T {
-        val tag = locale.toLanguageTag()
+        val tag = locale.languageTag
         val currentCache = getCurrentCache()
         currentCache[tag]?.let { return it }
 
@@ -96,7 +95,7 @@ object Resources {
         updateCache: (Map<String, T>) -> Unit,
         source: Map<String, T?>,
     ): T? {
-        val tag = locale.toLanguageTag()
+        val tag = locale.languageTag
         val currentCache = getCurrentCache()
         if (currentCache.containsKey(tag)) return currentCache[tag]
 

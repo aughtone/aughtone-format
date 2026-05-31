@@ -1,4 +1,4 @@
-package io.github.aughtone.readable.geo
+package io.github.aughtone.readable.quantitative
 
 import io.github.aughtone.types.locale.Locale
 
