@@ -5,6 +5,8 @@ import io.github.aughtone.viewable.ViewablePath
 
 actual class ViewableImage
 
+actual val isImageSupported: Boolean = false
+
 actual fun ViewablePath.toImage(
     width: Int,
     height: Int,

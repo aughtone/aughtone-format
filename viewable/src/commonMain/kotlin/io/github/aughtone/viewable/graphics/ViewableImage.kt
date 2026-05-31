@@ -11,6 +11,11 @@ import kotlin.io.encoding.ExperimentalEncodingApi
 expect class ViewableImage
 
 /**
+ * Indicates if the current platform supports bitmap/image rendering.
+ */
+expect val isImageSupported: Boolean
+
+/**
  * Renders a [ViewablePath] to a [ViewableImage].
  */
 expect fun ViewablePath.toImage(

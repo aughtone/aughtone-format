@@ -46,7 +46,6 @@ kotlin {
                 }
             }
         }
-        binaries.executable()
     }
 
     // See: https://kotlinlang.org/docs/js-project-setup.html

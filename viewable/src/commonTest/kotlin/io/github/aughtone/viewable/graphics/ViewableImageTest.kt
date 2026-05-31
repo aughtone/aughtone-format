@@ -11,6 +11,7 @@ class ViewableImageTest {
 
     @Test
     fun testToImageAndToByteArray() {
+        if (!isImageSupported) return
         val path = ViewablePath(
             commands = listOf(
                 PathCommand.MoveTo(0.0, 0.0),

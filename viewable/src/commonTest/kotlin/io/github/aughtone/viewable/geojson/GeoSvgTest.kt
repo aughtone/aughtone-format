@@ -1,5 +1,6 @@
-package io.github.aughtone.toolbox.geo
+package io.github.aughtone.viewable.geojson
 
+import io.github.aughtone.toolbox.geo.EquirectangularProjection
 import io.github.aughtone.types.geo.GeoLineString
 import io.github.aughtone.types.geo.GeoPoint
 import kotlin.test.Test

@@ -14,6 +14,8 @@ Version 2.1.0 introduces significant structural changes and hardening:
 
 - **`:datetime`**: Advanced formatting for `kotlinx-datetime` types with multi-locale support.
 - **`:readable`**: Human-friendly formatting for metrics (abbreviations), ordinals, and data sizes.
+- **`:viewable`**: Platform-agnostic vector graphics representation, styling, and path conversion (GeoJSON, SVG, WKT).
+- **`:viewable-compose`**: Jetpack / Compose Multiplatform integration for rendering viewable vector graphics (Painters, ImageVectors).
 - **`:toolbox`**: Shared utilities and common formatting primitives.
 
 This project follows a specialized 5-sector documentation hierarchy.
@@ -49,16 +51,16 @@ println(now.format(DateTimeStyle.Medium, locale = Locale("en"))) // "Apr 23, 202
 ### Human-Readable Metrics (`:readable`)
 ```kotlin
 // Ordinals
-println(123L.toReadableOrdinal(Locale("en"))) // "123rd"
+println(123L.formatReadableOrdinal(Locale("en"))) // "123rd"
 
 // Durations
-println(1.5.hours.toReadableString(Locale("en"))) // "1.5 hours"
+println(1.5.hours.formatReadable(Locale("en"))) // "1.5 hours"
 
 // Relative Time
-println(instant.readableRelative(locale = Locale.current)) // "3 minutes ago"
+println(instant.formatReadableRelative(locale = Locale.current)) // "3 minutes ago"
 
 // Data Sizes
-println(1048576L.toReadableDataSize()) // "1.0 MiB"
+println(1048576L.formatReadableDataSize()) // "1.0 MiB"
 ```
 
 ---
