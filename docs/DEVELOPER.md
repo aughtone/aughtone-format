@@ -35,6 +35,7 @@ The `:readable` module uses a custom pluralization system to ensure grammatical 
 - **24-Hour Master Patterns**: All time patterns in `LocaleTimePatterns.kt` MUST be specified in 24-hour format (`HH:mm` or `HH:mm:ss`). The runtime formatting logic handles conversion to 12-hour format automatically. NEVER add 12-hour patterns to the master map.
 - **Clock Hours Exceptions**: If a locale uses a 12-hour clock by default, add its region code or language code to `LocaleClockHoursSource.kt`. If omitted, it defaults to 24-hour.
 - **AM/PM Markers**: Ensure `LocaleAmPmStrings.kt` contains markers for all **55 supported languages**, even if they primarily use 24-hour time, to support user-forced 12-hour formatting.
+- **TimeZone Localized Lookup**: Localized timezone abbreviations and full names bypass `Resources.kt` caching and map lookups. Instead, they are compiled statically into `TimeZoneNamesLookup.kt` using nested `when` statements to ensure zero-allocation performance at runtime. To update timezone names, re-run the extraction script from CLDR.
 
 ## 🚀 Publishing to Maven Central
 

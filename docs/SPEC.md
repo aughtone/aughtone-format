@@ -33,7 +33,7 @@ Formatting byte counts into human-readable units.
 
 #### 4. Relative Time
 Formatting temporal types relative to a reference point (default `Clock.System.now()`) into natural language with style control and automatic fallback.
-- **API**: `Instant.readableRelative(now, relativeDateStyle, relativeTimeStyle, dateStyle, timeStyle, relativeThreshold, nowThreshold, locale, timeZone)`
+- **API**: `Instant.formatReadableRelative(now, relativeDateStyle, relativeTimeStyle, dateStyle, timeStyle, relativeThreshold, nowThreshold, locale, timeZone)`
 - **Extensions**: Supported for `Instant`, `LocalDateTime`, `LocalDate`, and `LocalTime`.
 - **Direction**: Negative delta = past (`"8 minutes ago"`), positive delta = future (`"in 8 minutes"`).
 - **Styles**: Supports `Long` ("5 days ago"), `Short` ("5d ago"), and `None` (component suppression).
