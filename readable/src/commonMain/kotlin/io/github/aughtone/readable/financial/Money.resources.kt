@@ -1,9 +1,12 @@
+@file:Suppress("DEPRECATION")
+
 package io.github.aughtone.readable.financial
 
 import io.github.aughtone.readable.number.numberFormatterFor
 import io.github.aughtone.types.financial.Money
 import io.github.aughtone.types.locale.Locale
 import kotlin.math.pow
+import kotlin.concurrent.Volatile
 
 /**
  * A formatter specifically for rendering a [Money] value into a human-readable string.
@@ -34,27 +37,36 @@ private fun buildFormatRule(code: String): MoneyFormatRule? = when (code) {
     else -> null
 }
 
-// ── Lazy caches ────────────────────────────────────────────────────────────────
-
-private val moneyRuleCache = mutableMapOf<String, MoneyFormatRule>()
-private val moneyFormatterCache = mutableMapOf<Pair<String, Boolean>, MoneyFormatter>()
+@Volatile private var moneyRuleCache = emptyMap<String, MoneyFormatRule>()
+@Volatile private var moneyFormatterCache = emptyMap<Pair<String, Boolean>, MoneyFormatter>()
 
 /**
  * Looks up the correct symbol placement rule for a given locale using a BCP 47 subtag fallback chain.
  */
 private fun moneyRuleFor(locale: Locale): MoneyFormatRule {
     val fullTag = if (locale.regionCode != null) "${locale.languageCode}-${locale.regionCode}" else locale.languageCode
-    return moneyRuleCache.getOrPut(fullTag) {
-        var currentTag = fullTag
-        var rule: MoneyFormatRule? = null
-        while (currentTag.isNotEmpty()) {
-            rule = buildFormatRule(currentTag)
-            if (rule != null) break
-            currentTag = currentTag.substringBeforeLast('-', "")
-        }
-        // Default to prefix no-space if completely unknown
-        rule ?: { numStr, sym -> "$sym$numStr" }
+    moneyRuleCache[fullTag]?.let { return it }
+
+    var currentTag = fullTag
+    var rule: MoneyFormatRule? = null
+    while (currentTag.isNotEmpty()) {
+        rule = buildFormatRule(currentTag)
+        if (rule != null) break
+        currentTag = currentTag.substringBeforeLast('-', "")
     }
+    // Default to prefix no-space if completely unknown
+    val resolved = rule ?: { numStr, sym -> "$sym$numStr" }
+
+    val oldCache = moneyRuleCache
+    if (!oldCache.containsKey(fullTag)) {
+        val newCache = if (oldCache.size >= 150) {
+            mapOf(fullTag to resolved)
+        } else {
+            oldCache + (fullTag to resolved)
+        }
+        moneyRuleCache = newCache
+    }
+    return resolved
 }
 
 /**
@@ -67,24 +79,32 @@ fun moneyFormatterFor(locale: Locale, showSymbol: Boolean = true): MoneyFormatte
     val fullTag = if (locale.regionCode != null) "${locale.languageCode}-${locale.regionCode}" else locale.languageCode
     val cacheKey = fullTag to showSymbol
 
-    return moneyFormatterCache.getOrPut(cacheKey) {
-        val rule = moneyRuleFor(locale)
-        // Internal cache for number formatters by precision, so we don't look them up on every money format call
-        val numFormatterCache = mutableMapOf<Int, (Double) -> String>()
+    moneyFormatterCache[cacheKey]?.let { return it }
 
-        val formatter: MoneyFormatter = { money ->
-            val currency = money.currency
-            val digits = currency.digits
-            val value = money.cents.toDouble() / 10.0.pow(digits)
-            val numFormatter = numFormatterCache.getOrPut(digits) { numberFormatterFor(locale, digits) }
-            val numberStr = numFormatter(value)
+    val rule = moneyRuleFor(locale)
 
-            if (showSymbol) {
-                rule(numberStr, currency.symbol)
-            } else {
-                numberStr
-            }
+    val formatter: MoneyFormatter = { money ->
+        val currency = money.currency
+        val digits = currency.digits
+        val value = money.cents.toDouble() / 10.0.pow(digits)
+        val numFormatter = numberFormatterFor(locale, digits)
+        val numberStr = numFormatter(value)
+
+        if (showSymbol) {
+            rule(numberStr, currency.symbol)
+        } else {
+            numberStr
         }
-        formatter
     }
+
+    val oldCache = moneyFormatterCache
+    if (!oldCache.containsKey(cacheKey)) {
+        val newCache = if (oldCache.size >= 150) {
+            mapOf(cacheKey to formatter)
+        } else {
+            oldCache + (cacheKey to formatter)
+        }
+        moneyFormatterCache = newCache
+    }
+    return formatter
 }

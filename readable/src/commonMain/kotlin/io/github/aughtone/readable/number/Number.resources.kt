@@ -1,8 +1,11 @@
+@file:Suppress("DEPRECATION")
+
 package io.github.aughtone.readable.number
 
 import io.github.aughtone.types.locale.Locale
 import kotlin.math.pow
 import kotlin.math.roundToLong
+import kotlin.concurrent.Volatile
 
 /**
  * Helper to create a [NumberFormatter] with specific separators and precision.
@@ -57,7 +60,7 @@ private fun separatorsFor(tag: String): Pair<String, String>? = when (tag) {
     else -> null  // null = use dot/comma default at call site
 }
 
-private val numberFormatterCache = mutableMapOf<Pair<String, Int>, NumberFormatter>()
+@Volatile private var numberFormatterCache = emptyMap<Pair<String, Int>, NumberFormatter>()
 
 /**
  * Retrieves the [NumberFormatter] for a given [Locale], building and caching it on first use.
@@ -67,16 +70,27 @@ private val numberFormatterCache = mutableMapOf<Pair<String, Int>, NumberFormatt
 fun numberFormatterFor(locale: Locale, precision: Int = 1): NumberFormatter {
     val fullTag = if (locale.regionCode != null) "${locale.languageCode}-${locale.regionCode}" else locale.languageCode
     val cacheKey = fullTag to precision
-    return numberFormatterCache.getOrPut(cacheKey) {
-        // Walk the subtag chain: "en-ZA" → "en" → default
-        var currentTag: String = fullTag
-        var separators: Pair<String, String>? = null
-        while (currentTag.isNotEmpty()) {
-            separators = separatorsFor(currentTag)
-            if (separators != null) break
-            currentTag = currentTag.substringBeforeLast('-', "")
-        }
-        val (dec, grp) = separators ?: ("." to ",")
-        createSimpleFormatter(dec, grp, precision)
+    numberFormatterCache[cacheKey]?.let { return it }
+
+    // Walk the subtag chain: "en-ZA" → "en" → default
+    var currentTag: String = fullTag
+    var separators: Pair<String, String>? = null
+    while (currentTag.isNotEmpty()) {
+        separators = separatorsFor(currentTag)
+        if (separators != null) break
+        currentTag = currentTag.substringBeforeLast('-', "")
     }
+    val (dec, grp) = separators ?: ("." to ",")
+    val built = createSimpleFormatter(dec, grp, precision)
+
+    val oldCache = numberFormatterCache
+    if (!oldCache.containsKey(cacheKey)) {
+        val newCache = if (oldCache.size >= 150) {
+            mapOf(cacheKey to built)
+        } else {
+            oldCache + (cacheKey to built)
+        }
+        numberFormatterCache = newCache
+    }
+    return built
 }
