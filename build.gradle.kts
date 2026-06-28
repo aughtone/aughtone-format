@@ -20,3 +20,16 @@ rootProject.plugins.withType<YarnPlugin> {
         yarnLockAutoReplace = true
     }
 }
+
+subprojects {
+    plugins.withId("org.jetbrains.kotlin.multiplatform") {
+        configure<org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension> {
+            targets.withType<org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget>().configureEach {
+                binaries.all {
+                    freeCompilerArgs += "-Xoverride-konan-properties=minVersion.ios=16.0"
+                }
+            }
+        }
+    }
+}
+
