@@ -2,10 +2,13 @@
 
 Aughtone Format is a suite of Kotlin Multiplatform libraries designed to provide consistent, localized formatting for Dates, Times, Numbers, and other human-readable metrics across all platforms.
 
-## 🚀 Major Updates in 3.0.1
+## 🚀 Major Updates in 3.0.2
 
-Aughtone Format 3.0.1 introduces new modules, API modernizations, performance optimizations, and timezone support:
+Aughtone Format 3.0.2 introduces new modules, API modernizations, performance optimizations, and timezone support:
 
+- **Thread-Safety & Cache Optimizations**: Migrated all resource caches in `:readable` to thread-safe copy-on-write volatile maps capped at 150 entries, and removed nested formatting allocations.
+- **Auto-Numbering Fallback**: Added automatic selection of native numbering systems (Arabic, Devanagari, Bengali, Thai, Arabic-Indic) for non-Western locales when formatting dates.
+- **iOS Compatibility Target**: Natively compatible with Compose Multiplatform 1.11.1 / Skiko's UIKit requirements by setting iOS deployment target to 16.0.
 - **TimeZone Formatting**: Implemented `TimeZone.formatReadable` extension functions in `:readable` to format timezone names with zero allocations.
 - **New Vector Modules**: Introduced `:viewable` for platform-agnostic vector graphic representations, styling, and path conversion (SVG, WKT, GeoJSON), and `:viewable-compose` for Jetpack / Compose Multiplatform integration.
 - **API Naming Modernization**: Deprecated old `toReadable*` prefix extension functions in favor of unified `formatReadable*` APIs for better readability and style guide alignment.
@@ -30,7 +33,7 @@ This project follows a specialized 5-sector documentation hierarchy.
 - 📖 [Developer Guide](docs/DEVELOPER.md): Environment setup and onboarding.
 - 📜 [Changelog](CHANGELOG.md): History of changes and release notes.
 ## ✨ Features
-- **65+ Languages Supported**: Deep grammatical parity for Slavic, Arabic, Hebrew, Inuktitut, and more.
+- **55+ Languages and Regions Supported**: Deep grammatical parity for Slavic, Arabic, Hebrew, Inuktitut, and more.
 - **Relative Time Formatting**: Convert instants and dates into natural language (e.g., "5 minutes ago", "Yesterday").
 - **Automatic Fallback**: Smartly switches from relative to absolute formatting based on configurable thresholds.
 - **Ordinal Numbers**: Localized ordinal suffix support (e.g., 1st, 2nd, 3.º, 第1).
@@ -39,7 +42,17 @@ This project follows a specialized 5-sector documentation hierarchy.
 - **Geospatial Formatting**: Localized altitude, azimuth (with cardinal directions), and coordinates.
 
 ## 🌍 Universal Localization
-The library provides deep grammatical parity for **65+ core languages** and full BCP 47 subtag fallback (e.g., `en-ZA` → `en`).
+The library provides deep grammatical parity and full BCP 47 subtag fallback (e.g., `en-ZA` → `en`) for 59 supported language and region combinations:
+
+| Family | Languages & Regions |
+| :--- | :--- |
+| **Germanic** | Afrikaans (`af-ZA`), Dutch (`nl-NL`), English (`en-US`), South African English (`en-ZA`), German (`de-DE`), Swiss German (`de-CH`), Danish (`da-DK`), Norwegian Bokmål (`nb-NO`), Norwegian Nynorsk (`nn-NO`), Swedish (`sv-SE`), Icelandic (`is-IS`) |
+| **Romance** | French (`fr-FR`), Swiss French (`fr-CH`), Spanish (`es-ES`), Italian (`it-IT`), Swiss Italian (`it-CH`), Portuguese (`pt-PT`), Catalan (`ca-ES`), Galician (`gl-ES`), Romanian (`ro-RO`) |
+| **Slavic & Baltic** | Russian (`ru-RU`), Ukrainian (`uk-UA`), Belarusian (`be-BY`), Polish (`pl-PL`), Czech (`cs-CZ`), Slovak (`sk-SK`), Bulgarian (`bg-BG`), Croatian (`hr-HR`), Serbian (`sr-RS`), Macedonian (`mk-MK`), Slovenian (`sl-SI`), Lithuanian (`lt-LT`), Latvian (`lv-LV`) |
+| **East & SE Asian** | Japanese (`ja-JP`), Chinese (`zh-CN`), Traditional Chinese (`zh-TW`), Korean (`ko-KR`), Thai (`th-TH`), Vietnamese (`vi-VN`), Indonesian (`id-ID`), Malay (`ms-MY`) |
+| **South & Central Asian** | Hindi (`hi-IN`), Armenian (`hy-AM`), Georgian (`ka-GE`), Kazakh (`kk-KZ`), Uzbek (`uz-UZ`) |
+| **Middle Eastern & African** | Arabic (`ar-EG`), Hebrew (`he-IL`), Persian (`fa-IR`), Turkish (`tr-TR`), Azerbaijani (`az-AZ`), Swahili (`sw-KE`) |
+| **Other & Finno-Ugric** | Finnish (`fi-FI`), Estonian (`et-EE`), Hungarian (`hu-HU`), Greek (`el-GR`), Basque (`eu-ES`), Albanian (`sq-AL`), Inuktitut (`iu-CA`) |
 
 ## 🚀 Quick Usage
 

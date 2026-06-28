@@ -43,6 +43,10 @@ Builders for custom patterns that still respect locale.
     - `TimeFormatBuilder.extensions`
 - **Preference**: Use these when predefined `DateTimeStyle` options are insufficient but you still want to maintain localization.
 
+### 4. Numbering Systems & Localization Defaults
+- Automatically resolves non-Western numbering systems based on locale (e.g. Arabic `ar` -> `ARAB` [٠-٩], Hindi `hi` -> `DEVA` [०-९], Thai `th` -> `THAI` [०-๙], Bengali `bn` -> `BENG` [০-৯], Farsi/Urdu `fa`/`ur` -> `ARABEXT` [۰-۹]) when `numberingSystem` parameter is `null`.
+- Force-override back to Western digits using `NumberingSystem.LATN` [0-9].
+
 ## ⚖️ Compliance & Standards
 
 - **ISO 8601**: Underlying storage and default `toString()` follow ISO 8601.

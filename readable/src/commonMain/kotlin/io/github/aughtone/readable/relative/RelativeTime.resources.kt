@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package io.github.aughtone.readable.relative
 
 import io.github.aughtone.readable.Locales
@@ -5,6 +7,7 @@ import io.github.aughtone.readable.PluralCategory
 import io.github.aughtone.readable.pluralCategoryFor
 import io.github.aughtone.types.locale.Locale
 import kotlin.math.abs
+import kotlin.concurrent.Volatile
 import kotlin.math.roundToLong
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
@@ -442,7 +445,7 @@ fun buildRelativeTimeConfig(tag: String, locale: Locale, style: RelativeStyle = 
     }
 }
 
-private val configCache = mutableMapOf<Pair<String, RelativeStyle>, RelativeTimeConfig>()
+@Volatile private var configCache = emptyMap<Pair<String, RelativeStyle>, RelativeTimeConfig>()
 
 /**
  * Returns the [RelativeTimeConfig] for [locale], building and caching it on first use.
@@ -467,10 +470,30 @@ fun relativeTimeConfigFor(locale: Locale, relativeStyle: RelativeStyle = Relativ
         if (cached != null) return cached
         if (isRelativeTimeTagSupported(currentTag)) {
             val built = buildRelativeTimeConfig(currentTag, locale, relativeStyle)
-            configCache[key] = built
+            val oldCache = configCache
+            if (!oldCache.containsKey(key)) {
+                val newCache = if (oldCache.size >= 150) {
+                    mapOf(key to built)
+                } else {
+                    oldCache + (key to built)
+                }
+                configCache = newCache
+            }
             return built
         }
         currentTag = currentTag.substringBeforeLast('-', "")
     }
-    return configCache.getOrPut("en" to relativeStyle) { buildRelativeTimeConfig("en", Locales.English, relativeStyle) }
+    val defaultKey = "en" to relativeStyle
+    configCache[defaultKey]?.let { return it }
+    val built = buildRelativeTimeConfig("en", Locales.English, relativeStyle)
+    val oldCache = configCache
+    if (!oldCache.containsKey(defaultKey)) {
+        val newCache = if (oldCache.size >= 150) {
+            mapOf(defaultKey to built)
+        } else {
+            oldCache + (defaultKey to built)
+        }
+        configCache = newCache
+    }
+    return built
 }

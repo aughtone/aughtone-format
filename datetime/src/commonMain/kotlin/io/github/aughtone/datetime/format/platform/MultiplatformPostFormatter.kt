@@ -28,7 +28,7 @@ object MultiplatformPostFormatter {
 
     fun postFormatDate(
         dateStyle: DateTimeStyle,
-        locale: io.github.aughtone.types.locale.Locale,
+        locale: Locale,
         date: kotlinx.datetime.LocalDate,
         formattedDate: String?,
         eraNames: EraNames? = null,
@@ -45,8 +45,9 @@ object MultiplatformPostFormatter {
             else -> formattedDate
         }
 
-        if (numberingSystem != null) {
-            result = result.applyNumberingSystem(numberingSystem)
+        val resolvedNumberingSystem = resolveNumberingSystem(numberingSystem, locale)
+        if (resolvedNumberingSystem != null) {
+            result = result.applyNumberingSystem(resolvedNumberingSystem)
         }
 
         return result
@@ -89,10 +90,24 @@ object MultiplatformPostFormatter {
             }
         }
 
-        if (numberingSystem != null) {
-            result = result.applyNumberingSystem(numberingSystem)
+        val resolvedNumberingSystem = resolveNumberingSystem(numberingSystem, locale)
+        if (resolvedNumberingSystem != null) {
+            result = result.applyNumberingSystem(resolvedNumberingSystem)
         }
 
         return result
     }
+
+    private fun resolveNumberingSystem(numberingSystem: NumberingSystem?, locale: Locale): NumberingSystem? {
+        if (numberingSystem != null) return numberingSystem
+        return when (locale.languageCode) {
+            "ar" -> NumberingSystem.ARAB
+            "fa", "ur" -> NumberingSystem.ARABEXT
+            "hi" -> NumberingSystem.DEVA
+            "bn" -> NumberingSystem.BENG
+            "th" -> NumberingSystem.THAI
+            else -> null
+        }
+    }
 }
+
