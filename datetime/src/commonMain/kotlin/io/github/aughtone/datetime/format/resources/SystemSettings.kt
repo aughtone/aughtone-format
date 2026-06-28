@@ -1,11 +1,8 @@
 package io.github.aughtone.datetime.format.resources
 
 import io.github.aughtone.types.locale.Locale
-import io.github.aughtone.types.locale.getCurrent
 import kotlin.time.Clock
 
-//import androidx.compose.ui.text.intl.Locale
-import androidx.compose.ui.text.intl.Locale as ComposeLocale
 /**
  * Returns true if user preference is set to 24-hour format.
  *
@@ -15,7 +12,7 @@ import androidx.compose.ui.text.intl.Locale as ComposeLocale
  *
  * @return true if 24 hour time format is selected, false otherwise.
  */
-fun is24HourFormat(locale: Locale = Locale.getCurrent(fallbackTag = ComposeLocale.current.toLanguageTag())): Boolean {
+fun is24HourFormat(locale: Locale = Locale.current): Boolean {
     // XXX Not all platforms know if the users system is in 24 hour mode,
     //  so if null is returned, we'll take a guess based on locale, and fall back to false.
     try {
