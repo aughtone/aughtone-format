@@ -6,6 +6,9 @@ Aughtone Format is a suite of Kotlin Multiplatform libraries designed to provide
 
 Aughtone Format 3.0.2 introduces new modules, API modernizations, performance optimizations, and timezone support:
 
+- **Thread-Safety & Cache Optimizations**: Migrated all resource caches in `:readable` to thread-safe copy-on-write volatile maps capped at 150 entries, and removed nested formatting allocations.
+- **Auto-Numbering Fallback**: Added automatic selection of native numbering systems (Arabic, Devanagari, Bengali, Thai, Arabic-Indic) for non-Western locales when formatting dates.
+- **iOS Compatibility Target**: Natively compatible with Compose Multiplatform 1.11.1 / Skiko's UIKit requirements by setting iOS deployment target to 16.0.
 - **TimeZone Formatting**: Implemented `TimeZone.formatReadable` extension functions in `:readable` to format timezone names with zero allocations.
 - **New Vector Modules**: Introduced `:viewable` for platform-agnostic vector graphic representations, styling, and path conversion (SVG, WKT, GeoJSON), and `:viewable-compose` for Jetpack / Compose Multiplatform integration.
 - **API Naming Modernization**: Deprecated old `toReadable*` prefix extension functions in favor of unified `formatReadable*` APIs for better readability and style guide alignment.
