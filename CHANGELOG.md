@@ -6,6 +6,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [3.0.2] - 2026-06-28
+
+### Added
+- **Non-Western Numbering Systems**: Automatically fall back to local native digit numbering systems for non-Western locales (ar, hi, th, bn, fa, ur).
+
+### Changed
+- **Migration to Types 3.1.0**: Migrated all extension functions in `:datetime` module and `SystemSettings` to use the new `Locale.current` property, resolving `IrLinkageError` runtime crashes on Kotlin/JS.
+- **Thread-Safety Improvements**: Converted all 6 internal resource caches in the `:readable` module to thread-safe copy-on-write volatile maps with a 150-entry max size limit.
+- **Formatter Optimization**: Removed nested non-thread-safe cache allocations from money formatter closures, resolving number formatters directly.
+- **Yarn Lock Workaround**: Configured Yarn lock mismatch reporting to `WARNING` and `yarnLockAutoReplace = true` to prevent CI failures.
+- **Gradle Config Cache**: Disabled Gradle configuration cache to bypass Kotlin JS/WasmJS browser test serialization bugs.
+
+### Fixed
+- **Documentation**: Documented all 59 supported locales in a detailed markdown table in the main README.md.
+
 ## [3.0.1] - 2026-05-31
 
 ### Added

@@ -129,7 +129,6 @@ compose.resources {
     generateResClass = always
 }
 
-
 mavenPublishing {
     publishToMavenCentral(automaticRelease = true)
 

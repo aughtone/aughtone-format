@@ -2,9 +2,9 @@
 
 Aughtone Format is a suite of Kotlin Multiplatform libraries designed to provide consistent, localized formatting for Dates, Times, Numbers, and other human-readable metrics across all platforms.
 
-## 🚀 Major Updates in 3.0.1
+## 🚀 Major Updates in 3.0.2
 
-Aughtone Format 3.0.1 introduces new modules, API modernizations, performance optimizations, and timezone support:
+Aughtone Format 3.0.2 introduces new modules, API modernizations, performance optimizations, and timezone support:
 
 - **TimeZone Formatting**: Implemented `TimeZone.formatReadable` extension functions in `:readable` to format timezone names with zero allocations.
 - **New Vector Modules**: Introduced `:viewable` for platform-agnostic vector graphic representations, styling, and path conversion (SVG, WKT, GeoJSON), and `:viewable-compose` for Jetpack / Compose Multiplatform integration.
