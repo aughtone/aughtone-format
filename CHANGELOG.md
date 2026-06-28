@@ -20,6 +20,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Fixed
 - **Documentation**: Documented all 59 supported locales in a detailed markdown table in the main README.md.
+- **iOS Linker Compatibility**: Set `minVersion.ios=16.0` globally in root build.gradle.kts to resolve UIKit layout region linkage errors on Xcode 16+ for iOS Simulator targets.
 
 ## [3.0.1] - 2026-05-31
 

@@ -85,7 +85,9 @@ Natural language time, timezone naming, and numeric order.
 
 - **Immutability**: All formatting outputs are `String`. The library operates on immutable types from `io.github.aughtone.types`.
 - **Statelessness**: Formatters are stateless and side-effect free.
-- **Cache**: `numberFormatterFor` uses an internal on-demand cache keyed by `(Locale, Precision)`.
+- **Thread-Safe Caches**: All caches (`numberFormatterCache`, `durationCache`, `configCache`, `ordinalityCache`, `moneyRuleCache`, `moneyFormatterCache`) are thread-safe copy-on-write volatile maps.
+- **Cache Size Limit**: All internal caches are capped at a maximum of 150 entries to prevent memory leaks and resource bloat.
+- **No-Allocation moneyFormatter**: Money formatter closure uses globally cached number formatters directly with zero local caching allocations.
 
 ## 🤖 Agent Onboarding (Usage Rules)
 
