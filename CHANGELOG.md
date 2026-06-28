@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
-## [3.0.2] - 2026-06-28
+## [3.0.3] - 2026-06-28
 
 ### Added
 - **Non-Western Numbering Systems**: Automatically fall back to local native digit numbering systems for non-Western locales (ar, hi, th, bn, fa, ur).
@@ -21,6 +21,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Fixed
 - **Documentation**: Documented all 59 supported locales in a detailed markdown table in the main README.md.
 - **iOS Linker Compatibility**: Set `minVersion.ios=16.0` globally in root build.gradle.kts to resolve UIKit layout region linkage errors on Xcode 16+ for iOS Simulator targets.
+- **JS Linker Compatibility**: Version 3.0.2 was deployed with a stale link to an old types version, causing a linker error.
 
 ## [3.0.1] - 2026-05-31
 
