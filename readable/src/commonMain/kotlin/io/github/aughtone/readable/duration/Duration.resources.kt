@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package io.github.aughtone.readable.duration
 
 import io.github.aughtone.readable.PluralCategory
@@ -11,6 +13,7 @@ import kotlin.time.Duration
 import kotlin.time.DurationUnit
 
 import io.github.aughtone.readable.relative.RelativeStyle
+import kotlin.concurrent.Volatile
 
 /** Functional formatter for Durations. */
 typealias DurationFormatter = (Duration, RelativeStyle) -> String
@@ -276,7 +279,7 @@ fun buildDurationFormatter(tag: String, locale: Locale, style: RelativeStyle = R
 
 // ── Lazy cache ────────────────────────────────────────────────────────────────
 
-private val durationCache = mutableMapOf<Pair<String, RelativeStyle>, DurationFormatter>()
+@Volatile private var durationCache = emptyMap<Pair<String, RelativeStyle>, DurationFormatter>()
 
 /**
  * Retrieves the [DurationFormatter] for a given [Locale], building and caching it on first use.
@@ -291,10 +294,30 @@ fun durationFormatterFor(locale: Locale, style: RelativeStyle = RelativeStyle.Lo
         if (cached != null) return cached
         if (isDurationTagSupported(currentTag)) {
             val built = buildDurationFormatter(currentTag, locale, style)
-            durationCache[key] = built
+            val oldCache = durationCache
+            if (!oldCache.containsKey(key)) {
+                val newCache = if (oldCache.size >= 150) {
+                    mapOf(key to built)
+                } else {
+                    oldCache + (key to built)
+                }
+                durationCache = newCache
+            }
             return built
         }
         currentTag = currentTag.substringBeforeLast('-', "")
     }
-    return durationCache.getOrPut("en" to style) { buildDurationFormatter("en", Locales.English, style) }
+    val defaultKey = "en" to style
+    durationCache[defaultKey]?.let { return it }
+    val built = buildDurationFormatter("en", Locales.English, style)
+    val oldCache = durationCache
+    if (!oldCache.containsKey(defaultKey)) {
+        val newCache = if (oldCache.size >= 150) {
+            mapOf(defaultKey to built)
+        } else {
+            oldCache + (defaultKey to built)
+        }
+        durationCache = newCache
+    }
+    return built
 }

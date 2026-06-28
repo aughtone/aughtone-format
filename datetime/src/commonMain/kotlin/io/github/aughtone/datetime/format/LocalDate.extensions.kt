@@ -3,8 +3,6 @@
 package io.github.aughtone.datetime.format
 
 import io.github.aughtone.types.locale.Locale
-import io.github.aughtone.types.locale.getCurrent
-import androidx.compose.ui.text.intl.Locale as ComposeLocale
 import io.github.aughtone.datetime.format.platform.MultiplatformDateFormatter
 import io.github.aughtone.datetime.format.resources.is24HourFormat
 import kotlinx.datetime.LocalDate
@@ -25,7 +23,7 @@ import io.github.aughtone.datetime.format.resources.NumberingSystem
  */
 fun LocalDate.format(
     dateStyle: DateTimeStyle,
-    locale: Locale = Locale.getCurrent(fallbackTag = ComposeLocale.current.toLanguageTag()),
+    locale: Locale = Locale.current,
     timeZone: TimeZone = TimeZone.currentSystemDefault(),
     is24HourFormat: Boolean = is24HourFormat(locale = locale),
     numberingSystem: NumberingSystem? = null,

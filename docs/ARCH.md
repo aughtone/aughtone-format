@@ -58,3 +58,37 @@ The library implements a **Unicode CLDR-compliant Plural Category Engine** (`Plu
 - **Factory Pattern**: Resource files use standard factories (`u2`, `u3`, `u4`, `u6`) to map these categories to pluralized strings based on language complexity.
 - **Ordinal Categories**: Support for language-specific ordinal classification (e.g., French "er/re" vs English "st/nd/rd").
 - **Stateless Grammars**: Plural logic is passed into formatters at construction, keeping the formatting loop extremely fast and zero-allocation.
+
+---
+
+## 🏛️ Architectural Decision Records (ADRs)
+
+### ADR-001: Formatting API Naming Standardization
+* **Date**: 2026-05-30
+* **Status**: Accepted
+* **Context**: Previously, formatting extension functions used a mix of `toReadable*`, `readable*`, and other naming patterns. The `to*` prefix conventionally implies cast-like conversions in Kotlin (e.g., `toInt()`, `toInstant()`), which is semantically different from formatting a data type for visual/human representation.
+* **Decision**: 
+  - Standardized all formatting APIs in the `:readable` module to use the `formatReadable*` naming convention (e.g., `formatReadable`, `formatReadableOrdinal`, `formatReadableRelative`, `formatReadableDataSize`, `formatReadableDuration`).
+  - Deprecated all older `toReadable*` functions.
+  - Retained the old functions as stubs annotated with `@Deprecated(message, replaceWith)` for automated IDE-assisted migration, ensuring full backwards compatibility.
+
+### ADR-002: Currency Nullability Enforcement in Money Formatting
+* **Date**: 2026-05-30
+* **Status**: Accepted
+* **Context**: With the upgrade of the core `aughtone-types` library dependency to version `3.0.0`, the `Currency` parameter inside `Money` is strictly non-nullable.
+* **Decision**: 
+  - Updated the `:readable` module's monetary formatting implementation to assume `currency` is always present and non-null on `Money` instances.
+  - Removed redundant null-checks (e.g., `currency?.digits`, `currency != null`) from the formatting engine.
+  - Removed the obsolete `testNullCurrencyFallback` test case because it is no longer expressible or compilable under the type system.
+
+### ADR-003: Zero-Allocation Localized TimeZone Formatting
+* **Date**: 2026-06-02
+* **Status**: Accepted
+* **Context**: Implementing localized timezone formatting (names and abbreviations) for all 55+ supported languages requires resolving dozens of timezone keys under each locale. Storing these inside dynamic, lazy-loaded Map structures or utilizing the existing runtime cache system in `Resources.kt` would introduce substantial memory allocation and synchronization overhead. Furthermore, large inline maps of strings in a single class can exceed the JVM 64KB method size limit.
+* **Decision**:
+  - Implemented `TimeZoneNamesLookup` using a compile-time static nested `when` expression pattern, completely eliminating dynamic Map creation and ensuring zero runtime object allocations.
+  - Divided lookups into language-specific private helper methods (e.g., `getFullNameFr`, `getAbbreviationEn`) to keep each individual method under the JVM 64KB bytecode size limit.
+  - Removed timezone caching entirely from `Resources.kt` since the static lookup functions execute with zero garbage collection overhead and excellent performance.
+  - Integrated lookup with `TimeZoneAbbreviationLookup` and the core post-formatting pipeline, enabling locale-specific short/long timezone rendering in dates.
+
+

@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package io.github.aughtone.datetime.format.resources
 
 import io.github.aughtone.datetime.format.DynamicLocalDateFormats

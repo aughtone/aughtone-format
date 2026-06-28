@@ -1,8 +1,11 @@
+@file:Suppress("DEPRECATION")
+
 package io.github.aughtone.readable.ordinality
 
 import io.github.aughtone.readable.PluralCategory
 import io.github.aughtone.readable.ordinalCategoryFor
 import io.github.aughtone.types.locale.Locale
+import kotlin.concurrent.Volatile
 
 private fun buildFormatter(
     locale: Locale,
@@ -63,9 +66,7 @@ private fun buildOrdinalFormatter(tag: String, locale: Locale): OrdinalFormatter
     }
 }
 
-// ── Lazy cache ────────────────────────────────────────────────────────────────
-
-private val ordinalityCache = mutableMapOf<String, OrdinalFormatter>()
+@Volatile private var ordinalityCache = emptyMap<String, OrdinalFormatter>()
 
 /**
  * Retrieves the [OrdinalFormatter] for a given [Locale], building and caching it on first use.
@@ -79,10 +80,30 @@ fun ordinalityFor(locale: Locale): OrdinalFormatter {
         if (cached != null) return cached
         val built = buildOrdinalFormatter(currentTag, locale)
         if (built != null) {
-            ordinalityCache[currentTag] = built
+            val oldCache = ordinalityCache
+            if (!oldCache.containsKey(currentTag)) {
+                val newCache = if (oldCache.size >= 150) {
+                    mapOf(currentTag to built)
+                } else {
+                    oldCache + (currentTag to built)
+                }
+                ordinalityCache = newCache
+            }
             return built
         }
         currentTag = currentTag.substringBeforeLast('-', "")
     }
-    return ordinalityCache.getOrPut("en") { buildOrdinalFormatter("en", Locale(languageCode = "en", displayName = "Default English"))!! }
+    val defaultKey = "en"
+    ordinalityCache[defaultKey]?.let { return it }
+    val built = buildOrdinalFormatter("en", Locale(languageCode = "en", displayName = "Default English"))!!
+    val oldCache = ordinalityCache
+    if (!oldCache.containsKey(defaultKey)) {
+        val newCache = if (oldCache.size >= 150) {
+            mapOf(defaultKey to built)
+        } else {
+            oldCache + (defaultKey to built)
+        }
+        ordinalityCache = newCache
+    }
+    return built
 }
