@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
-## [3.0.2] - 2026-06-28
+## [3.0.3] - 2026-06-28
 
 ### Added
 - **Non-Western Numbering Systems**: Automatically fall back to local native digit numbering systems for non-Western locales (ar, hi, th, bn, fa, ur).
