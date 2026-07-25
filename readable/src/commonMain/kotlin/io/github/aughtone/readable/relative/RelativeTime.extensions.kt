@@ -3,11 +3,14 @@ package io.github.aughtone.readable.relative
 import io.github.aughtone.datetime.format.DateTimeStyle
 import io.github.aughtone.datetime.format.format
 import io.github.aughtone.types.locale.Locale
+import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.daysUntil
+import kotlinx.datetime.minus
+import kotlinx.datetime.plus
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.datetime.todayIn
@@ -33,6 +36,8 @@ import kotlin.time.Instant
  * ```
  *
  * @param now The reference instant to compare against (defaults to current system time).
+ *   Intended for pinning a reference time (e.g. in tests). Do not pass the receiver itself —
+ *   the delta becomes zero and every value renders as the "just now" string.
  * @param relativeDateStyle The style for date-based units (defaults to [RelativeStyle.Long]).
  * @param relativeTimeStyle The style for time-based units (defaults to [RelativeStyle.Long]).
  * @param dateStyle The fallback style for the date if [relativeThreshold] is exceeded.
@@ -79,7 +84,10 @@ fun Instant.formatReadableRelative(
     }
 
     if (useDateUnits && daysDelta in -1..1) {
-        val config = relativeTimeConfigFor(locale, relativeStyle = relativeTimeStyle)
+        // Date-units branch: resolve from the date style, matching the general
+        // date-units path below. relativeDateStyle can't be None here — that
+        // forces useDateUnits = false above.
+        val config = relativeTimeConfigFor(locale, relativeStyle = relativeDateStyle)
         return when (daysDelta) {
             0 -> config.todayString
             1 -> config.tomorrowString
@@ -131,6 +139,8 @@ fun Instant.toReadableRelative(
  * ```
  *
  * @param now The reference instant to compare against (defaults to current system time).
+ *   Intended for pinning a reference time (e.g. in tests). Do not pass the receiver itself —
+ *   the delta becomes zero and every value renders as the "just now" string.
  * @param relativeDateStyle The style for date-based units (defaults to [RelativeStyle.Long]).
  * @param relativeTimeStyle The style for time-based units (defaults to [RelativeStyle.Long]).
  * @param dateStyle The fallback style for the date if [relativeThreshold] is exceeded.
@@ -264,7 +274,15 @@ fun LocalDate.toReadableRelative(
  * (now + 5.hours).formatReadableRelative()    // "5:30 PM" (fallback to absolute)
  * ```
  *
+ * A [LocalTime] has no date, so the delta between two clock readings is ambiguous once it crosses
+ * midnight. [direction] resolves that ambiguity; see [RelativeDirection]. Because this overload emits
+ * only time units (hours/minutes/seconds), a [Past]/[Future][RelativeDirection] delta can approach 24
+ * hours — pair it with a larger [relativeThreshold] or it will fall back to an absolute time. When the
+ * reference date matters, use the [Instant]-anchored overload instead.
+ *
  * @param now The reference time to compare against (defaults to current system time).
+ * @param direction How to resolve the delta across midnight (defaults to [RelativeDirection.Nearest]).
+ *   Changed in 3.1.0: the previous behaviour is [RelativeDirection.Present].
  * @param relativeStyle The style for the relative output (defaults to [RelativeStyle.Long]).
  * @param timeStyle The fallback style for the time if [relativeThreshold] is exceeded.
  * @param relativeThreshold The duration beyond which to use absolute formatting (defaults to 3 hours).
@@ -274,14 +292,14 @@ fun LocalDate.toReadableRelative(
  */
 fun LocalTime.formatReadableRelative(
     now: LocalTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).time,
+    direction: RelativeDirection = RelativeDirection.Nearest,
     relativeStyle: RelativeStyle = RelativeStyle.Long,
     timeStyle: DateTimeStyle = DateTimeStyle.Medium,
     relativeThreshold: Duration = 3.hours,
     nowThreshold: Duration = 1.minutes,
     locale: Locale = Locale.current,
 ): String {
-    val deltaSeconds = this.toSecondOfDay() - now.toSecondOfDay()
-    val deltaDuration = deltaSeconds.seconds
+    val deltaDuration = clockDelta(this, now, direction)
     if (deltaDuration.absoluteValue > relativeThreshold) {
         return this.format(timeStyle = timeStyle, locale = locale)
     }
@@ -299,9 +317,85 @@ fun LocalTime.formatReadableRelative(
     ).formatter(deltaDuration, false)
 }
 
+/**
+ * Signed delta between two clock times, resolved across midnight per [direction].
+ *
+ * `fwd` is the forward distance from [now] to [target] on a 24-hour clock, in `[0, 86400)`.
+ */
+private fun clockDelta(target: LocalTime, now: LocalTime, direction: RelativeDirection): Duration {
+    val fwd = ((target.toSecondOfDay() - now.toSecondOfDay()) % 86400 + 86400) % 86400
+    val seconds = when (direction) {
+        RelativeDirection.Present -> target.toSecondOfDay() - now.toSecondOfDay() // linear same-day
+        RelativeDirection.Past -> if (fwd == 0) 0 else fwd - 86400
+        RelativeDirection.Future -> fwd
+        RelativeDirection.Nearest -> if (fwd <= 43200) fwd else fwd - 86400
+    }
+    return seconds.seconds
+}
+
+/**
+ * Formats this [LocalTime] relative to a date-carrying [Instant] anchor.
+ *
+ * Unlike the bare [LocalTime] overload, this knows the reference date, so it resolves the receiver to a
+ * concrete occurrence ([direction]) and defers to [Instant.formatReadableRelative]. That means it can
+ * produce true durations *and* day labels — e.g. a 01:00 time one day past a 23:00 anchor renders as
+ * "Tomorrow".
+ *
+ * @param now The reference instant to compare against (carries the date used to anchor this time).
+ * @param timeZone The timezone used to resolve this [LocalTime] to an occurrence and for day boundaries.
+ * @param direction Which occurrence of this time to resolve relative to [now] (defaults to [RelativeDirection.Nearest]).
+ * @param relativeDateStyle The style for date-based units (defaults to [RelativeStyle.Long]).
+ * @param relativeTimeStyle The style for time-based units (defaults to [RelativeStyle.Long]).
+ * @param dateStyle The fallback style for the date if [relativeThreshold] is exceeded.
+ * @param timeStyle The fallback style for the time if [relativeThreshold] is exceeded.
+ * @param relativeThreshold The duration beyond which to use absolute formatting (defaults to 3 days).
+ * @param nowThreshold Values within this duration produce the "just now" string (defaults to 1 minute).
+ * @param locale The locale for localization rules (defaults to [Locale.current]).
+ * @return A localized relative or absolute time string.
+ */
+fun LocalTime.formatReadableRelative(
+    now: Instant,
+    timeZone: TimeZone = TimeZone.currentSystemDefault(),
+    direction: RelativeDirection = RelativeDirection.Nearest,
+    relativeDateStyle: RelativeStyle = RelativeStyle.Long,
+    relativeTimeStyle: RelativeStyle = RelativeStyle.Long,
+    dateStyle: DateTimeStyle = DateTimeStyle.Medium,
+    timeStyle: DateTimeStyle = DateTimeStyle.Medium,
+    relativeThreshold: Duration = 3.days,
+    nowThreshold: Duration = 1.minutes,
+    locale: Locale = Locale.current,
+): String = resolveOccurrence(now, timeZone, direction).formatReadableRelative(
+    now = now,
+    relativeDateStyle = relativeDateStyle,
+    relativeTimeStyle = relativeTimeStyle,
+    dateStyle = dateStyle,
+    timeStyle = timeStyle,
+    relativeThreshold = relativeThreshold,
+    nowThreshold = nowThreshold,
+    locale = locale,
+    timeZone = timeZone,
+)
+
+/**
+ * Resolves this floating [LocalTime] to a concrete [Instant] occurrence around [anchor], choosing the
+ * previous / same-day / next day per [direction].
+ */
+private fun LocalTime.resolveOccurrence(anchor: Instant, tz: TimeZone, direction: RelativeDirection): Instant {
+    val date = anchor.toLocalDateTime(tz).date
+    val sameDay = LocalDateTime(date, this).toInstant(tz)
+    val prev = LocalDateTime(date.minus(1, DateTimeUnit.DAY), this).toInstant(tz)
+    val next = LocalDateTime(date.plus(1, DateTimeUnit.DAY), this).toInstant(tz)
+    return when (direction) {
+        RelativeDirection.Present -> sameDay
+        RelativeDirection.Future -> if (sameDay >= anchor) sameDay else next
+        RelativeDirection.Past -> if (sameDay <= anchor) sameDay else prev
+        RelativeDirection.Nearest -> listOf(prev, sameDay, next).minByOrNull { (it - anchor).absoluteValue }!!
+    }
+}
+
 @Deprecated(
     message = "Use formatReadableRelative instead",
-    replaceWith = ReplaceWith("formatReadableRelative(now, relativeStyle, timeStyle, relativeThreshold, nowThreshold, locale)")
+    replaceWith = ReplaceWith("formatReadableRelative(now = now, relativeStyle = relativeStyle, timeStyle = timeStyle, relativeThreshold = relativeThreshold, nowThreshold = nowThreshold, locale = locale)")
 )
 fun LocalTime.toReadableRelative(
     now: LocalTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).time,
