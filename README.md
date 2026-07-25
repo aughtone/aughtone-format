@@ -60,19 +60,23 @@ The library provides deep grammatical parity and full BCP 47 subtag fallback (e.
 ```kotlin
 val now = Clock.System.now()
 // Format with styles (Short, Medium, Long, Full)
-println(now.format(DateTimeStyle.Medium, locale = Locale("en"))) // "Apr 23, 2026, 4:15 PM"
+println(now.format(DateTimeStyle.Short, locale = Locale("en-US"))) // "4/23/26, 4:15 PM"
+println(now.format(DateTimeStyle.Short, locale = Locale("en-CA"))) // "2026-04-23, 4:15 p.m."
 ```
 
 ### Human-Readable Metrics (`:readable`)
 ```kotlin
 // Ordinals
-println(123L.formatReadableOrdinal(Locale("en"))) // "123rd"
+println(123L.formatReadableOrdinal(Locale("en-US"))) // "123rd"
+println(123L.formatReadableOrdinal(Locale("fr-FR"))) // "123e"
 
 // Durations
-println(1.5.hours.formatReadable(Locale("en"))) // "1.5 hours"
+println(1.5.hours.formatReadable(Locale("en-US"))) // "1.5 hours"
+println(1.5.hours.formatReadable(Locale("es-ES"))) // "1,5 horas"
 
 // Relative Time
-println(instant.formatReadableRelative(locale = Locale.current)) // "3 minutes ago"
+println(instant.formatReadableRelative(locale = Locale("en-US"))) // "3 minutes ago"
+println(instant.formatReadableRelative(locale = Locale("de-DE"))) // "vor 3 Minuten"
 
 // Data Sizes
 println(1048576L.formatReadableDataSize()) // "1.0 MiB"

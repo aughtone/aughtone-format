@@ -9,16 +9,17 @@ The `:datetime` module provides advanced, locale-aware formatting for `kotlinx-d
 val instant = Clock.System.now()
 
 // Standard styles
-instant.format(FormatStyle.SHORT, locale = Locale.current)  // 4/23/26, 4:15 PM
-instant.format(FormatStyle.MEDIUM, locale = Locale("en")) // Apr 23, 2026, 4:15 PM
-instant.format(FormatStyle.LONG, locale = Locale("en"))   // April 23, 2026 at 4:15:37 PM
+instant.format(FormatStyle.SHORT, locale = Locale("en-US")) // 4/23/26, 4:15 PM
+instant.format(FormatStyle.SHORT, locale = Locale("en-CA")) // 2026-04-23, 4:15 p.m.
+instant.format(FormatStyle.MEDIUM, locale = Locale.current) // Apr 23, 2026, 4:15 PM
+instant.format(FormatStyle.LONG, locale = Locale.current)   // April 23, 2026 at 4:15:37 PM
 ```
 
 ### Advanced Patterns
 This module supports 24-hour master strategies, localized AM/PM markers, and era naming overrides.
 
 > [!NOTE]
-> For natural language "time ago" formatting, use the `toReadableRelativeTime()` extensions from the [**:readable**](../readable) module.
+> For natural language "time ago" formatting, use the `formatReadableRelative()` extensions from the [**:readable**](../readable) module.
 
 ## 🌍 Language Support
 Supports 65+ core languages with regional variant fallback.

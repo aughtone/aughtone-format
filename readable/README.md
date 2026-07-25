@@ -16,21 +16,21 @@ Formats `Instant`, `LocalDateTime`, `LocalDate`, or `LocalTime` into natural lan
 val now = Clock.System.now()
 
 // Standard (Long Style)
-(now - 8.minutes).toReadableRelative() // "8 minutes ago"
+(now - 8.minutes).formatReadableRelative() // "8 minutes ago"
 
 // Short Style
-(now - 5.days).toReadableRelative(style = RelativeStyle.Short) // "5d ago"
+(now - 5.days).formatReadableRelative(style = RelativeStyle.Short) // "5d ago"
 
 // Special Day Phrasing
-(now + 1.days).toReadableRelative() // "Tomorrow"
-(now - 1.days).toReadableRelative() // "Yesterday"
+(now + 1.days).formatReadableRelative() // "Tomorrow"
+(now - 1.days).formatReadableRelative() // "Yesterday"
 
 // Optimized Types
 val today = LocalDate(2023, 10, 27)
-today.toReadableRelative(now = today) // "Today"
+today.formatReadableRelative(now = today) // "Today"
 
 // Custom Threshold
-(now - 45.seconds).toReadableRelative(nowThreshold = 1.minutes) // "just now"
+(now - 45.seconds).formatReadableRelative(nowThreshold = 1.minutes) // "just now"
 ```
 
 #### Durations
@@ -38,29 +38,29 @@ Translates `kotlin.time.Duration` into scannable natural language.
 
 ```kotlin
 // Intelligent scaling
-1.5.hours.toReadableString(Locale.current)   // "1.5 hours"
-45.seconds.toReadableString(Locale.current)  // "45 seconds"
+1.5.hours.formatReadable(Locale.current)   // "1.5 hours"
+45.seconds.formatReadable(Locale.current)  // "45 seconds"
 
 // Grammatical correctness
-1.minutes.toReadableString(Locale.current)   // "1 minute"
-2.minutes.toReadableString(Locale.current)   // "2 minutes"
+1.minutes.formatReadable(Locale.current)   // "1 minute"
+2.minutes.formatReadable(Locale.current)   // "2 minutes"
 ```
 
 ### 🔢 Ordinality
 Converts integers into ordinal forms (1st, 2nd, etc.) with support for complex linguistic suffixes.
 
 ```kotlin
-1L.toReadableOrdinal(Locale("en")) // "1st"
-2L.toReadableOrdinal(Locale("en")) // "2nd"
-3L.toReadableOrdinal(Locale("en")) // "3rd"
+1L.formatReadableOrdinal(Locale("en-US")) // "1st"
+2L.formatReadableOrdinal(Locale("en-US")) // "2nd"
+3L.formatReadableOrdinal(Locale("en-US")) // "3rd"
 ```
 
 ### 💾 Data Sizes
 Formatted using either **IEC (binary, base-1024)** or **SI (decimal, base-1000)** standards.
 
 ```kotlin
-1024L.toReadableDataSize() // "1.0 KiB" (Default binary)
-1000L.toReadableDataSize(base = 1000) // "1.0 KB" (Decimal)
+1024L.formatReadableDataSize() // "1.0 KiB" (Default binary)
+1000L.formatReadableDataSize(base = 1000) // "1.0 KB" (Decimal)
 ```
 
 ### 📍 Geospatial Formatting
@@ -72,10 +72,10 @@ Comprehensive support for mapping and navigation metrics.
 
 ```kotlin
 val coords = Coordinates(45.523, -122.676)
-coords.toReadableString(CoordinatesFormat.DMS) // 45° 31' 22" N, 122° 40' 33" W
+coords.formatReadable(CoordinateFormat.DegreesMinutesSeconds) // 45° 31' 22" N, 122° 40' 33" W
 
-Cardinal.North.toReadable(Locale("en")) // "North"
-Cardinal.SouthWest.toReadable(Locale("en")) // "South-west"
+Cardinal.North.formatReadable(Locale("en-US")) // "North"
+Cardinal.SouthWest.formatReadable(Locale("en-US")) // "South-west"
 ```
 
 ---

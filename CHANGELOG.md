@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+### Added
+- **`LocalTime` Relative Direction**: New `RelativeDirection { Past, Present, Future, Nearest }` enum and a `direction` parameter on `LocalTime.formatReadableRelative` to resolve the ambiguity of a date-less clock time across midnight (modelled on ICU's `RelativeDateTimeFormatter.Direction`).
+- **Calendar-anchored `LocalTime` overload**: `LocalTime.formatReadableRelative(now: Instant, timeZone, …)` resolves the time to a concrete occurrence relative to a dated anchor and can therefore render day labels such as "Yesterday"/"Today"/"Tomorrow".
+
+### Changed
+- **`LocalTime` relative default is now `RelativeDirection.Nearest`**: `LocalTime.formatReadableRelative` previously used a linear same-day subtraction; it now defaults to the nearest occurrence on a 24-hour clock. Output is unchanged for times within 12 hours on the same side of `now`, but differs for pairs more than 12 hours apart or crossing midnight (e.g. `now = 23:00, this = 01:00` is now "in 2 hours" instead of "22 hours ago"). Pass `RelativeDirection.Present` for the previous behaviour.
+
+### Fixed
+- **Relative Style Selection**: `Instant.formatReadableRelative` resolved the Today/Tomorrow/Yesterday config from `relativeTimeStyle` inside the date-units branch; it now uses `relativeDateStyle`, consistent with the general date-units path and the pre-3.0.0 `toReadableRelative` behavior. Output is unchanged for current locales (these labels are style-invariant today); regression tests added for mixed styles, date-only (`relativeTimeStyle = None`), time-only (`relativeDateStyle = None`), threshold boundaries, and day-boundary/timezone disagreement cases.
+- **Documentation**: Documented on `formatReadableRelative` that passing the receiver as `now` collapses the delta to zero and renders everything as "just now".
+
 ## [3.0.3] - 2026-06-28
 
 ### Added
