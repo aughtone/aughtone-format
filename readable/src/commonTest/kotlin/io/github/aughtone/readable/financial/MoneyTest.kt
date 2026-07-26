@@ -5,6 +5,7 @@ import io.github.aughtone.types.financial.Currency
 import io.github.aughtone.types.financial.Money
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class MoneyTest {
 
@@ -68,6 +69,14 @@ class MoneyTest {
     }
 
 
+
+    @Test
+    fun testPersianSuffixPlacement() {
+        // fa previously had no rule and fell to the prefix default; it should now place the
+        // currency symbol as a suffix with a space.
+        val result = Money(123456L, usd).formatReadable(Locales.Persian)
+        assertTrue(result.endsWith(" \$"), "expected suffix symbol with space, got: $result")
+    }
 
     @Suppress("DEPRECATION")
     @Test

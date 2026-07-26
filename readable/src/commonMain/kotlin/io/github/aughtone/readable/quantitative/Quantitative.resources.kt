@@ -55,7 +55,9 @@ private val directionsMap = mapOf(
     "is" to listOf("N", "NA", "A", "SA", "S", "SV", "V", "NV"),
     "sw" to listOf("K", "K Mash", "Mash", "K Kus", "Kus", "K Mag", "Mag", "K Kas"),
     "af" to listOf("N", "NO", "O", "SO", "S", "SW", "W", "NW"),
-    "nl" to listOf("N", "NO", "O", "ZO", "Z", "ZW", "W", "NW")
+    "nl" to listOf("N", "NO", "O", "ZO", "Z", "ZW", "W", "NW"),
+    "iu" to listOf("ᑳ", "ᑳᓂ", "ᓂ", "ᓂᑭ", "ᑭ", "ᑭᖃ", "ᖃ", "ᖃᑳ"),
+    "zh-TW" to listOf("北", "東北", "東", "東南", "南", "西南", "西", "西北")
 )
 
 fun cardinalDirectionsFor(locale: Locale): List<String> {
