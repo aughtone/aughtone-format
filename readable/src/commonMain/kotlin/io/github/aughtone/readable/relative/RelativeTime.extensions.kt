@@ -213,7 +213,9 @@ fun LocalDateTime.toReadableRelative(
  * @param relativeStyle The style for the relative output (defaults to [RelativeStyle.Long]).
  * @param dateStyle The fallback style for the date if [relativeThreshold] is exceeded.
  * @param relativeThreshold The duration beyond which to use absolute formatting (defaults to 3 days).
- * @param nowThreshold Days within this duration produce the "Today" or "Recently" string (defaults to 1 day).
+ * @param nowThreshold Dates within this window, but beyond "Yesterday"/"Tomorrow", render as the fuzzy
+ *   "Recently" (past) or "Shortly" (future) string instead of an exact count like "3 days ago". The
+ *   default of 1 day effectively disables it, since Today/Yesterday/Tomorrow already cover that range.
  * @param locale The locale for localization rules (defaults to [Locale.current]).
  * @return A localized relative or absolute date string.
  */
@@ -232,15 +234,17 @@ fun LocalDate.formatReadableRelative(
     }
 
     val config = relativeTimeConfigFor(locale = locale, relativeStyle = relativeStyle)
-    if (absDeltaDays < nowThreshold) {
-        return if (deltaDays == 0) config.todayString else config.recentlyString
-    }
-
     return when (deltaDays) {
         0 -> config.todayString
         1 -> config.tomorrowString
         -1 -> config.yesterdayString
-        else -> config.formatter(deltaDays.days, true)
+        // Fuzzy labels for dates within nowThreshold but beyond Yesterday/Tomorrow: "Recently" for the
+        // recent past, "Shortly" for the near future. The specific day labels above always win.
+        else -> when {
+            absDeltaDays >= nowThreshold -> config.formatter(deltaDays.days, true)
+            deltaDays < 0 -> config.recentlyString
+            else -> config.shortlyString
+        }
     }
 }
 

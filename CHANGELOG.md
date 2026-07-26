@@ -7,6 +7,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [Unreleased]
 
 ### Added
+- **New / completed localizations (from the library-wide locale audit)**:
+  - Relative time now localized for Danish (`da`), Norwegian Bokmål (`nb`, also `no`), Norwegian Nynorsk (`nn`), Swedish (`sv`), and Icelandic (`is`) — previously allow-listed but unimplemented, so they rendered in English.
+  - Compass-point abbreviations added for Inuktitut (`iu`) and Traditional Chinese (`zh-TW`, was inheriting Simplified forms).
+  - Traditional Chinese (`zh-TW`) era names (西元前/西元) added (was inheriting Simplified 公元前/公元).
+  - Localized AM/PM markers for 11 locales that previously held English `AM`/`PM` placeholders (de, nl, ru, uk, be, sr, he, hy, kk, uz, sw).
+  - Inuktitut (`iu`) time-zone full names (`getFullNameIu`, 139 zones) — `iu` previously had abbreviations only and fell back to English for full time-zone names.
+- **`LocalDate` "Shortly" (near-future label)**: `RelativeTimeConfig` gains a `shortlyString`, the future mirror of `recentlyString`. `LocalDate.formatReadableRelative` now renders near-future dates within `nowThreshold` (beyond "Tomorrow") as the fuzzy "Shortly" string, symmetric with "Recently" for the recent past.
 - **`LocalTime` Relative Direction**: New `RelativeDirection { Past, Present, Future, Nearest }` enum and a `direction` parameter on `LocalTime.formatReadableRelative` to resolve the ambiguity of a date-less clock time across midnight (modelled on ICU's `RelativeDateTimeFormatter.Direction`).
 - **Calendar-anchored `LocalTime` overload**: `LocalTime.formatReadableRelative(now: Instant, timeZone, …)` resolves the time to a concrete occurrence relative to a dated anchor and can therefore render day labels such as "Yesterday"/"Today"/"Tomorrow".
 
@@ -14,6 +21,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - **`LocalTime` relative default is now `RelativeDirection.Nearest`**: `LocalTime.formatReadableRelative` previously used a linear same-day subtraction; it now defaults to the nearest occurrence on a 24-hour clock. Output is unchanged for times within 12 hours on the same side of `now`, but differs for pairs more than 12 hours apart or crossing midnight (e.g. `now = 23:00, this = 01:00` is now "in 2 hours" instead of "22 hours ago"). Pass `RelativeDirection.Present` for the previous behaviour.
 
 ### Fixed
+- **Persian (`fa`) money symbol placement**: `fa` had no placement rule and fell to the prefix-no-space default; the currency symbol is now placed after the amount with a space (`"1٬234 ﷼"`), matching Persian convention.
+- **Duration formatting fell back to English for 10 locales**: `az`, `eu`, `hy`, `ka`, `kk`, `lt`, `lv`, `sq`, `uz`, and `iu` had complete localized duration unit data but were missing from the internal `isDurationTagSupported` list, so `durationFormatterFor` never selected them and these locales rendered durations in English. Added to the list; they now use their own translations.
+- **Indonesian / Malay / Swahili fell back to English**: `id`, `ms`, and `sw` had full localized relative-time configs but were missing from the internal supported-tag list, so `relativeTimeConfigFor` never selected them and these locales rendered in English. Added to the allow-list; they now use their own translations.
+- **`LocalDate` "Recently" / `nowThreshold`**: `LocalDate.formatReadableRelative` evaluated its `nowThreshold` window before the Today/Yesterday/Tomorrow labels, so a custom `nowThreshold >= 2` days replaced "Yesterday"/"Tomorrow" with "Recently", and "Recently" could describe future dates. The specific day labels now always take precedence, and "Recently" applies only to past dates within `nowThreshold` beyond yesterday. Default behaviour is unchanged. Regression tests added.
 - **Relative Style Selection**: `Instant.formatReadableRelative` resolved the Today/Tomorrow/Yesterday config from `relativeTimeStyle` inside the date-units branch; it now uses `relativeDateStyle`, consistent with the general date-units path and the pre-3.0.0 `toReadableRelative` behavior. Output is unchanged for current locales (these labels are style-invariant today); regression tests added for mixed styles, date-only (`relativeTimeStyle = None`), time-only (`relativeDateStyle = None`), threshold boundaries, and day-boundary/timezone disagreement cases.
 - **Documentation**: Documented on `formatReadableRelative` that passing the receiver as `now` collapses the delta to zero and renders everything as "just now".
 

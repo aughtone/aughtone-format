@@ -304,12 +304,6 @@ internal val localeTimePatterns = mapOf(
         medium = "HH:mm:ss",
         short = "HH:mm"
     ) },
-    "sv" to lazy { TimePatterns(
-        full = "HH:mm:ss zzzz",
-        long = "HH:mm:ss z",
-        medium = "HH:mm:ss",
-        short = "HH:mm"
-    ) },
     "th" to lazy { TimePatterns(
         full = "H นาฬิกา mm นาที ss วินาที zzzz",
         long = "H นาฬิกา mm นาที ss วินาที z",

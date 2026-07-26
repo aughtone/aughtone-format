@@ -101,6 +101,39 @@ class RelativeTimeTest {
         assertEquals("in 1 week", nextWeek.formatReadableRelative(now = today, locale = Locales.English, relativeThreshold = 10.days))
     }
 
+    // ── LocalDate "Recently" / nowThreshold (GAP-2 regression) ─────────────────
+
+    @Test
+    fun testLocalDate_yesterdayTomorrowSurviveLargeNowThreshold() {
+        // A large nowThreshold must NOT swallow Yesterday/Tomorrow into "Recently".
+        val today = LocalDate(2023, 10, 27)
+        val yesterday = LocalDate(2023, 10, 26)
+        val tomorrow = LocalDate(2023, 10, 28)
+        assertEquals("Yesterday", yesterday.formatReadableRelative(now = today, nowThreshold = 5.days, relativeThreshold = 10.days, locale = Locales.English))
+        assertEquals("Tomorrow", tomorrow.formatReadableRelative(now = today, nowThreshold = 5.days, relativeThreshold = 10.days, locale = Locales.English))
+    }
+
+    @Test
+    fun testLocalDate_recentlyAndShortlyWithinNowThreshold() {
+        val today = LocalDate(2023, 10, 27)
+        val twoDaysAgo = LocalDate(2023, 10, 25)
+        val inTwoDays = LocalDate(2023, 10, 29)
+        // Past within nowThreshold (beyond yesterday) -> fuzzy "Recently"
+        assertEquals("Recently", twoDaysAgo.formatReadableRelative(now = today, nowThreshold = 5.days, relativeThreshold = 10.days, locale = Locales.English))
+        // Future within nowThreshold (beyond tomorrow) -> fuzzy "Shortly"
+        assertEquals("Shortly", inTwoDays.formatReadableRelative(now = today, nowThreshold = 5.days, relativeThreshold = 10.days, locale = Locales.English))
+    }
+
+    @Test
+    fun testLocalDate_defaultNowThresholdGivesExactCounts() {
+        // With the default 1-day nowThreshold, "Recently"/"Shortly" are never used -> exact counts.
+        val today = LocalDate(2023, 10, 27)
+        val twoDaysAgo = LocalDate(2023, 10, 25)
+        val inTwoDays = LocalDate(2023, 10, 29)
+        assertEquals("2 days ago", twoDaysAgo.formatReadableRelative(now = today, relativeThreshold = 10.days, locale = Locales.English))
+        assertEquals("in 2 days", inTwoDays.formatReadableRelative(now = today, relativeThreshold = 10.days, locale = Locales.English))
+    }
+
     @Test
     fun testLocalTimeRelative() {
         val now = LocalTime(12, 0)
@@ -254,6 +287,57 @@ class RelativeTimeTest {
         // 23:30 Past resolves to the previous day -> "Yesterday" (the payoff of anchoring)
         val elevenThirty = LocalTime(23, 30)
         assertEquals("Yesterday", elevenThirty.formatReadableRelative(now = anchor, timeZone = tz, direction = RelativeDirection.Past, locale = Locales.English))
+    }
+
+    @Test
+    fun testLocale_id_ms_sw_reachTheirOwnTranslations() {
+        // Regression: id/ms/sw had full config entries but were missing from the supported-tag
+        // allow-list, so relativeTimeConfigFor fell through to English.
+        assertEquals("baru saja", (now - 3.seconds).formatReadableRelative(now = now, locale = Locales.Indonesian, timeZone = tz))
+        assertEquals("baru sahaja", (now - 3.seconds).formatReadableRelative(now = now, locale = Locales.Malay, timeZone = tz))
+        assertEquals("sasa hivi", (now - 3.seconds).formatReadableRelative(now = now, locale = Locales.Swahili, timeZone = tz))
+        // and a non-"now" value exercises the past template + units
+        assertEquals("8 menit yang lalu", (now - 8.minutes).formatReadableRelative(now = now, locale = Locales.Indonesian, timeZone = tz))
+    }
+
+    @Test
+    fun testNordicRelative_nowReachTheirOwnTranslations() {
+        // da/nb/nn/sv/is were allow-listed but had no config() -> rendered English. Now translated.
+        assertEquals("for 8 minutter siden", (now - 8.minutes).formatReadableRelative(now = now, locale = Locales.Danish, timeZone = tz))
+        assertEquals("för 8 minuter sedan", (now - 8.minutes).formatReadableRelative(now = now, locale = Locales.Swedish, timeZone = tz))
+        assertEquals("fyrir 8 mínútum síðan", (now - 8.minutes).formatReadableRelative(now = now, locale = Locales.Icelandic, timeZone = tz))
+
+        val reference = LocalDateTime(2023, 10, 27, 12, 0).toInstant(tz)
+        assertEquals("I morgen", (reference + 25.hours).formatReadableRelative(now = reference, locale = Locales.NorwegianBokmal, timeZone = tz))
+        assertEquals("I går", (reference - 25.hours).formatReadableRelative(now = reference, locale = Locales.Danish, timeZone = tz))
+        assertEquals("I morgon", (reference + 25.hours).formatReadableRelative(now = reference, locale = Locales.Swedish, timeZone = tz))
+    }
+
+    // ── Absolute-fallback + future multi-day coverage (GAP-3) ──────────────────
+
+    @Test
+    fun testLocalDate_absoluteFallbackBeyondThreshold() {
+        // 5 days > default 3-day relativeThreshold -> absolute date via this.format(dateStyle)
+        val today = LocalDate(2023, 10, 27)
+        val longAgo = LocalDate(2023, 10, 22)
+        val result = longAgo.formatReadableRelative(now = today, locale = Locales.English)
+        assertTrue(result.contains("2023"), "expected an absolute date, got: $result")
+    }
+
+    @Test
+    fun testLocalTime_absoluteFallbackBeyondThreshold() {
+        // 5h apart > default 3h relativeThreshold -> absolute time (has a ':' separator), not "in 5 hours"
+        val nowT = LocalTime(12, 0)
+        val laterT = LocalTime(17, 0)
+        val result = laterT.formatReadableRelative(now = nowT, locale = Locales.English)
+        assertTrue(result.contains(":"), "expected an absolute time fallback, got: $result")
+    }
+
+    @Test
+    fun testInstant_futureMultiDayDateUnits() {
+        // Future multi-day via the formatter (not the +1 "Tomorrow" shortcut)
+        assertEquals("in 2 days", (now + 2.days).formatReadableRelative(now = now, locale = Locales.English, timeZone = tz, relativeThreshold = 10.days))
+        assertEquals("in 5 days", (now + 5.days).formatReadableRelative(now = now, locale = Locales.English, timeZone = tz, relativeThreshold = 10.days))
     }
 
     @Suppress("DEPRECATION")

@@ -95,14 +95,6 @@ internal val localeDayOfWeekNamesSource = mapOf(
         full = DayOfWeekNames(listOf("Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy", "Chủ Nhật")),
         abbreviated = DayOfWeekNames(listOf("T2", "T3", "T4", "T5", "T6", "T7", "CN"))
     ) },
-    "sr" to lazy { DayOfWeekNamesData(
-        full = DayOfWeekNames(listOf("понедељак", "уторак", "среда", "четвρтак", "петак", "субота", "недеља")),
-        abbreviated = DayOfWeekNames(listOf("пон", "ут", "ср", "чет", "пет", "суб", "нед"))
-    ) },
-    "sv" to lazy { DayOfWeekNamesData(
-        full = DayOfWeekNames(listOf("måndag", "tisdag", "onsdag", "torsdag", "fredag", "lördag", "söndag")),
-        abbreviated = DayOfWeekNames(listOf("mån", "tis", "ons", "tors", "fre", "lör", "sön"))
-    ) },
     "zh" to lazy { DayOfWeekNamesData(
         full = DayOfWeekNames(listOf("星期一", "星期二", "星期三", "星期四", "星期五", "星期六", "星期日")),
         abbreviated = DayOfWeekNames(listOf("一", "二", "三", "四", "五", "六", "日"))

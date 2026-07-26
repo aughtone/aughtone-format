@@ -27,7 +27,8 @@ private class RelativeTimeUnitNames(val forms: Map<PluralCategory, String>) {
  * @property todayString The localized string for "Today".
  * @property tomorrowString The localized string for "Tomorrow".
  * @property yesterdayString The localized string for "Yesterday".
- * @property recentlyString The localized string for "Recently".
+ * @property recentlyString The localized string for "Recently" (the recent past).
+ * @property shortlyString The localized string for "Shortly" (the near future).
  */
 class RelativeTimeConfig(
     val formatter: RelativeTimeFormatter,
@@ -36,6 +37,7 @@ class RelativeTimeConfig(
     val tomorrowString: String,
     val yesterdayString: String,
     val recentlyString: String,
+    val shortlyString: String,
 )
 
 // ── Factories ─────────────────────────────────────────────────────────────────
@@ -129,6 +131,7 @@ private fun config(
     yesterdayString: String = "Yesterday",
     recentlyString: String = "Recently",
     sep: String = " ",
+    shortlyString: String = "Shortly",
 ): RelativeTimeConfig {
     val formatter: RelativeTimeFormatter = { delta, allowDates ->
         val totalSeconds = delta.toDouble(DurationUnit.SECONDS)
@@ -152,7 +155,7 @@ private fun config(
         val unitStr = "$n$sep$label"
         if (isPast) past.replace("{0}", unitStr) else future.replace("{0}", unitStr)
     }
-    return RelativeTimeConfig(formatter, nowString, todayString, tomorrowString, yesterdayString, recentlyString)
+    return RelativeTimeConfig(formatter, nowString, todayString, tomorrowString, yesterdayString, recentlyString, shortlyString)
 }
 
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -188,7 +191,7 @@ private fun isRelativeTimeTagSupported(tag: String): Boolean = when (tag) {
     "sr", "bg", "mk", "fr", "it", "es", "pt", "ca", "gl", "hi", "bn", "gu", "kn",
     "ml", "mr", "pa", "ta", "te", "ar", "he", "fa", "ur", "th", "ko", "ja",
     "zh-Hans", "zh", "zh-Hant", "zh-TW", "zh-HK", "eu", "hy", "ka",
-    "az", "uz", "kk", "lt", "lv", "sq", "iu" -> true
+    "az", "uz", "kk", "lt", "lv", "sq", "iu", "id", "ms", "sw" -> true
     else -> false
 }
 
@@ -209,141 +212,166 @@ private fun isRelativeTimeTagSupported(tag: String): Boolean = when (tag) {
 fun buildRelativeTimeConfig(tag: String, locale: Locale, style: RelativeStyle = RelativeStyle.Long): RelativeTimeConfig {
     return when (tag) {
         // ── English / Germanic ────────────────────────────────────────────────
-        "en-ZA" -> config(locale, if (style == RelativeStyle.Short) "{0}" else "{0} ago", if (style == RelativeStyle.Short) "in {0}" else "in {0}", "now now", if (style == RelativeStyle.Short) ENGLISH_UNITS_SHORT else ENGLISH_UNITS_LONG, "Today", "Tomorrow", "Yesterday", "Recently", if (style == RelativeStyle.Short) "" else " ")
+        "en-ZA" -> config(locale, if (style == RelativeStyle.Short) "{0}" else "{0} ago", if (style == RelativeStyle.Short) "in {0}" else "in {0}", "now now", if (style == RelativeStyle.Short) ENGLISH_UNITS_SHORT else ENGLISH_UNITS_LONG, "Today", "Tomorrow", "Yesterday", "Recently", if (style == RelativeStyle.Short) "" else " ", shortlyString = "ᒫᓐᓇᕈᓘᓂᐊᖅᑐᖅ")
         "en" -> enConfig(locale, style)
 
-        "af" -> config(locale, "{0} gelede", "oor {0}", "nou net", u2("sekonde","minuut","uur","dag","week","maand","jaar", "sekondes","minute","ure","dae","weke","maande","jaar"), "Vandag", "Môre", "Gister", "onlangs")
-        "nl" -> config(locale, "{0} geleden", "over {0}", "zojuist", u2("seconde","minuut","uur","dag","week","maand","jaar", "seconden","minuten","uren","dagen","weken","maanden","jaren"), "Vandaag", "Morgen", "Gisteren", "onlangs")
+        "af" -> config(locale, "{0} gelede", "oor {0}", "nou net", u2("sekonde","minuut","uur","dag","week","maand","jaar", "sekondes","minute","ure","dae","weke","maande","jaar"), "Vandag", "Môre", "Gister", "onlangs", shortlyString = "binnekort")
+        "nl" -> config(locale, "{0} geleden", "over {0}", "zojuist", u2("seconde","minuut","uur","dag","week","maand","jaar", "seconden","minuten","uren","dagen","weken","maanden","jaren"), "Vandaag", "Morgen", "Gisteren", "onlangs", shortlyString = "binnenkort")
 
         "de" -> config(locale, "vor {0}", "in {0}", "gerade eben",
             u2("Sekunde","Minute","Stunde","Tag","Woche","Monat","Jahr",
                "Sekunden","Minuten","Stunden","Tage","Wochen","Monate","Jahre"),
-            todayString = "Heute", tomorrowString = "Morgen", yesterdayString = "Gestern", recentlyString = "vor kurzem")
-        
+            todayString = "Heute", tomorrowString = "Morgen", yesterdayString = "Gestern", recentlyString = "vor kurzem", shortlyString = "in Kürze")
+
+        "da" -> config(locale, "for {0} siden", "om {0}", "lige nu",
+            u2("sekund","minut","time","dag","uge","måned","år",
+               "sekunder","minutter","timer","dage","uger","måneder","år"),
+            todayString = "I dag", tomorrowString = "I morgen", yesterdayString = "I går", recentlyString = "For nylig", shortlyString = "Om lidt")
+
+        "nb", "no" -> config(locale, "for {0} siden", "om {0}", "akkurat nå",
+            u2("sekund","minutt","time","dag","uke","måned","år",
+               "sekunder","minutter","timer","dager","uker","måneder","år"),
+            todayString = "I dag", tomorrowString = "I morgen", yesterdayString = "I går", recentlyString = "Nylig", shortlyString = "Snart")
+
+        "nn" -> config(locale, "for {0} sidan", "om {0}", "akkurat no",
+            u2("sekund","minutt","time","dag","veke","månad","år",
+               "sekund","minutt","timar","dagar","veker","månader","år"),
+            todayString = "I dag", tomorrowString = "I morgon", yesterdayString = "I går", recentlyString = "Nyleg", shortlyString = "Snart")
+
+        "sv" -> config(locale, "för {0} sedan", "om {0}", "alldeles nyss",
+            u2("sekund","minut","timme","dag","vecka","månad","år",
+               "sekunder","minuter","timmar","dagar","veckor","månader","år"),
+            todayString = "I dag", tomorrowString = "I morgon", yesterdayString = "I går", recentlyString = "Nyligen", shortlyString = "Inom kort")
+
+        "is" -> config(locale, "fyrir {0} síðan", "eftir {0}", "rétt í þessu",
+            u2("sekúndu","mínútu","klukkustund","dag","viku","mánuð","ár",
+               "sekúndum","mínútum","klukkustundum","dögum","vikum","mánuðum","árum"),
+            todayString = "Í dag", tomorrowString = "Á morgun", yesterdayString = "Í gær", recentlyString = "Nýlega", shortlyString = "Innan skammens")
+
         "fr" -> config(locale, "il y a {0}", "dans {0}", "à l'instant",
             u2("seconde","minute","heure","jour","semaine","mois","an",
                "secondes","minutes","heures","jours","semaines","mois","ans"),
-            todayString = "Aujourd'hui", tomorrowString = "Demain", yesterdayString = "Hier", recentlyString = "récemment")
+            todayString = "Aujourd'hui", tomorrowString = "Demain", yesterdayString = "Hier", recentlyString = "récemment", shortlyString = "bientôt")
 
         "es" -> config(locale, "hace {0}", "en {0}", "ahora mismo",
             u2("segundo","minuto","hora","día","semana","mes","año",
                "segundos","minutos","horas","días","semanas","meses","años"),
-            todayString = "Hoy", tomorrowString = "Mañana", yesterdayString = "Ayer", recentlyString = "recientemente")
+            todayString = "Hoy", tomorrowString = "Mañana", yesterdayString = "Ayer", recentlyString = "recientemente", shortlyString = "próximamente")
 
         "it" -> config(locale, "{0} fa", "tra {0}", "proprio ora",
             u2("secondo","minuto","ora","giorno","settimana","mese","anno",
                "secondi","minuti","ore","giorni","settimane","mesi","anni"),
-            todayString = "Oggi", tomorrowString = "Domani", yesterdayString = "Ieri", recentlyString = "recentemente")
+            todayString = "Oggi", tomorrowString = "Domani", yesterdayString = "Ieri", recentlyString = "recentemente", shortlyString = "a breve")
 
         "pt" -> config(locale, "há {0}", "em {0}", "agora mesmo",
             u2("segundo","minuto","hora","dia","semana","mês","ano",
                "segundos","minutos","horas","dias","semanas","meses","anos"),
-            todayString = "Hoje", tomorrowString = "Amanhã", yesterdayString = "Ontem", recentlyString = "recentemente")
+            todayString = "Hoje", tomorrowString = "Amanhã", yesterdayString = "Ontem", recentlyString = "recentemente", shortlyString = "em breve")
 
         "ca" -> config(locale, "fa {0}", "d'aquí a {0}", "ara mateix",
             u2("segon","minut","hora","dia","setmana","mes","any",
-               "segons","minuts","hores","dies","setmanes","mesos","anys"), recentlyString = "recentment")
+               "segons","minuts","hores","dies","setmanes","mesos","anys"), recentlyString = "recentment", shortlyString = "més endavant")
 
         "gl" -> config(locale, "hai {0}", "en {0}", "agora mesmo",
             u2("segundo","minuto","hora","día","semana","mes","ano",
-               "segundos","minutos","horas","días","semanas","meses","anos"), recentlyString = "recentemente")
+               "segundos","minutos","horas","días","semanas","meses","anos"), recentlyString = "recentemente", shortlyString = "en breve")
 
         "ro" -> config(locale, "acum {0}", "în {0}", "tocmai acum",
             u2("secundă","minut","oră","zi","săptămână","lună","an",
-               "secunde","minute","ore","zile","săptămâni","luni","ani"), recentlyString = "recent")
+               "secunde","minute","ore","zile","săptămâni","luni","ani"), recentlyString = "recent", shortlyString = "în curând")
 
         // ── Slavic / Baltic (Complex plurals) ─────────────────────────────────
         "ru" -> config(locale, "{0} назад", "через {0}", "только что",
             u3("секунда","минута","час","день","неделя","месяц","год",
                "секунды","минуты","часа","дня","недели","месяца","года",
-               "секунд","минут","часов","дней","недель","месяцев","лет"), recentlyString = "недавно")
+               "секунд","минут","часов","дней","недель","месяцев","лет"), recentlyString = "недавно", shortlyString = "скоро")
 
         "uk" -> config(locale, "{0} тому", "через {0}", "щойно",
             u3("секунда","хвилина","година","день","тиждень","місяць","рік",
                "секунди","хвилини","години","дні","тижні","місяці","роки",
-               "секунд","хвилин","годин","днів","тижнів","місяців","років"), recentlyString = "нещодавно")
+               "секунд","хвилин","годин","днів","тижнів","місяців","років"), recentlyString = "нещодавно", shortlyString = "незабаром")
 
         "be" -> config(locale, "{0} таму", "праз {0}", "толькі што",
             u3("секунда","хвіліна","гадзіна","дзень","тыдзень","месяц","год",
                "секунды","хвіліны","гадзіны","дні","тижні","месяцы","гады",
-               "секунд","хвілін","гадзін","дзён","тыдняў","месяцаў","гадоў"), recentlyString = "нядаўна")
+               "секунд","хвілін","гадзін","дзён","тыдняў","месяцаў","гадоў"), recentlyString = "нядаўна", shortlyString = "хутка")
 
         "bg" -> config(locale, "преди {0}", "след {0}", "точно сега",
             u2("секунда","минута","час","ден","седмица","месец","година",
-               "секунди","минути","часа","дни","седмици","месеца","години"), recentlyString = "наскоро")
+               "секунди","минути","часа","дни","седмици","месеца","години"), recentlyString = "наскоро", shortlyString = "скоро")
 
         "pl" -> config(locale, "{0} temu", "za {0}", "właśnie teraz",
             u3("sekunda","minuta","godzina","dzień","tydzień","miesiąc","rok",
                "sekundy","minuty","godziny","dni","tygodnie","miesiące","lata",
-               "sekund","minut","godzin","dni","tygodni","miesięcy","lat"), recentlyString = "niedawno")
+               "sekund","minut","godzin","dni","tygodni","miesięcy","lat"), recentlyString = "niedawno", shortlyString = "wkrótce")
 
         "cs" -> config(locale, "před {0}", "za {0}", "právě teď",
             u3("sekunda","minuta","hodina","den","týden","měsíc","rok",
                "sekundy","minuty","hodiny","dny","týdny","měsíce","roky",
-               "sekund","minut","hodin","дní","týdnů","měsíců","let"), recentlyString = "nedávno")
+               "sekund","minut","hodin","дní","týdnů","měsíců","let"), recentlyString = "nedávno", shortlyString = "brzy")
 
         "sk" -> config(locale, "pred {0}", "za {0}", "práve teraz",
             u3("sekunda","minúta","hodina","deň","týždeň","mesiac","rok",
                "sekundy","minúty","hodiny","dni","týždne","mesiace","roky",
-               "sekúnd","minút","hodín","dní","týždňov","mesiacov","rokov"), recentlyString = "nedávno")
+               "sekúnd","minút","hodín","dní","týždňov","mesiacov","rokov"), recentlyString = "nedávno", shortlyString = "čoskoro")
 
         "hr" -> config(locale, "prije {0}", "za {0}", "upravo sada",
             u3("sekunda","minuta","sat","dan","tjedan","mjesec","godina",
                "sekunde","minute","sata","dana","tjedna","mjeseca","godine",
-               "sekundi","minuta","sati","dana","tjedana","mjeseci","godina"), recentlyString = "nedavno")
+               "sekundi","minuta","sati","dana","tjedana","mjeseci","godina"), recentlyString = "nedavno", shortlyString = "uskoro")
 
         "sr" -> config(locale, "пре {0}", "за {0}", "управо сада",
             u3("секунда","минут","сат","дан","недеља","месец","година",
                "секунде","минута","сата","дана","недеље","месеца","године",
-               "секунди","минута","сати","дана","недеља","месеци","година"), recentlyString = "недавно")
+               "секунди","минута","сати","дана","недеља","месеци","година"), recentlyString = "недавно", shortlyString = "ускоро")
 
         "mk" -> config(locale, "пред {0}", "за {0}", "токму сега",
             u2("секунда","минуτα","час","ден","недела","месец","година",
-               "секунди","минути","часови","дена","недели","месеци","години"), recentlyString = "неодамна")
+               "секунди","минути","часови","дена","недели","месеци","години"), recentlyString = "неодамна", shortlyString = "наскоро")
 
         "sl" -> config(locale, "pred {0}", "čez {0}", "ravno zdaj",
             u3("секунда","minuta","ura","dan","teden","mesec","leto",
                "sekundi","minuti","uri","dneva","tedna","meseca","leti",
-               "sekunde","minute","ure","dni","tednov","mesecev","let"), recentlyString = "pred kratkim")
+               "sekunde","minute","ure","dni","tednov","mesecev","let"), recentlyString = "pred kratkim", shortlyString = "kmalu")
 
         "lt" -> config(locale, "prieš {0}", "po {0}", "ką tik",
             u3("sekundė","minutė","valanda","diena","savaitė","mėnuo","metai",
                "sekundės","minutės","valandos","dienos","savaitės","mėnesiai","metai",
-               "sekundžių","minučių","valandų","dienų","savaičių","mėnesių","metų"), recentlyString = "neseniai")
+               "sekundžių","minučių","valandų","dienų","savaičių","mėnesių","metų"), recentlyString = "neseniai", shortlyString = "netrukus")
 
         "lv" -> config(locale, "pirms {0}", "pēc {0}", "tikko",
             u3("sekunde","minūte","stunda","diena","nedēļa","mēnesis","gads",
                "sekundes","minūtes","stundas","dienas","nedēļas","mēneši","gadi",
-               "sekundēm","minūtēm","stundām","dienām","nedēļām","mēnešiem","gadiem"), recentlyString = "nesen")
+               "sekundēm","minūtēm","stundām","dienām","nedēļām","mēnešiem","gadiem"), recentlyString = "nesen", shortlyString = "drīzumā")
 
         "sq" -> config(locale, "{0} më parë", "pas {0}", "tani",
             u2("sekondë","minutë","orë","ditë","javë","muaj","vit",
-               "sekonda","minuta","orë","ditë","javë","muaj","vite"), recentlyString = "kohët e fundit")
+               "sekonda","minuta","orë","ditë","javë","muaj","vite"), recentlyString = "kohët e fundit", shortlyString = "së shpejti")
 
         // ── East Asian / SE Asian (no unit separator, single form) ───────────
         "ja" -> config(locale, "{0}前", "{0}後", "たった今",
             u2("秒","分","時間","日","週間","ヶ月","年",
-               "秒","分","時間","日","週間","ヶ月","年"), recentlyString = "最近", sep = "")
+               "秒","分","時間","日","週間","ヶ月","年"), recentlyString = "最近", sep = "", shortlyString = "まもなく")
 
         "zh-TW", "zh-HK", "zh-Hant" -> config(locale, "{0}前", "{0}後", "剛剛",
             u2("秒","分","小時","天","週","月","年",
-               "秒","分","小時","天","週","月","年"), recentlyString = "最近", sep = "")
+               "秒","分","小時","天","週","月","年"), recentlyString = "最近", sep = "", shortlyString = "即將")
 
         "zh", "zh-Hans" -> config(locale, "{0}前", "{0}后", "刚刚",
             u2("秒","分","小时","天","周","月","年",
-               "秒","分","小时","天","周","月","年"), recentlyString = "最近", sep = "")
+               "秒","分","小时","天","周","月","年"), recentlyString = "最近", sep = "", shortlyString = "即将")
 
         "ko" -> config(locale, "{0} 전", "{0} 후", "방금",
             u2("초","분","시간","일","주","달","년",
-               "초","분","시간","일","주","달","년"), recentlyString = "최근에", sep = "")
+               "초","분","시간","일","주","달","년"), recentlyString = "최근에", sep = "", shortlyString = "곧")
 
         "th" -> config(locale, "{0}ที่แล้ว", "อีก {0}", "เมื่อกี้",
             u2("วินาที","นาที","ชั่วโมง","วัน","สัปดาห์","เดือน","ปี",
-               "วินาที","นาที","ชั่วโมง","วัน","สัปดาห์","เดือน","ปี"), recentlyString = "เมื่อเร็วๆ นี้", sep = "")
+               "วินาที","นาที","ชั่วโมง","วัน","สัปดาห์","เดือน","ปี"), recentlyString = "เมื่อเร็วๆ นี้", sep = "", shortlyString = "เร็วๆ นี้")
 
         "vi" -> config(locale, "{0} trước", "{0} nữa", "vừa xong",
             u2("giây","phút","giờ","ngày","tuần","tháng","نăm",
-               "giây","phút","giờ","ngày","tuần","tháng","năm"), recentlyString = "gần đây")
+               "giây","phút","giờ","ngày","tuần","tháng","năm"), recentlyString = "gần đây", shortlyString = "sắp tới")
 
         "iu" -> config(locale, "{0} ᖄᖏᖅᑐᖅ", "{0} ᐊᓂᒍᖅᐸᑦ", "ᒫᓐᓇᑲᐅᑎᒋ",
             u4("ᓯᑲᓐᑎ","ᓯᑲᓐᑎᒃ","ᓯᑲᓐᑎᑦ","ᓯᑲᓐᑎᑦ",
@@ -357,19 +385,19 @@ fun buildRelativeTimeConfig(tag: String, locale: Locale, style: RelativeStyle = 
         // ── South / Central Asian ─────────────────────────────────────────────
         "hi" -> config(locale, "{0} पहले", "{0} बाद", "अभी",
             u2("सेकंड","मिनट","घंटा","दिन","सप्ताह","महीना","वर्ष",
-               "सेकंड","मिनट","घंटे","दिन","सप्ताह","महीने","वर्ष"), recentlyString = "हाल ही में")
+               "सेकंड","मिनट","घंटे","दिन","सप्ताह","महीने","वर्ष"), recentlyString = "हाल ही में", shortlyString = "शीघ्र ही")
 
         "id" -> config(locale, "{0} yang lalu", "dalam {0}", "baru saja",
             u2("detik","menit","jam","hari","minggu","bulan","tahun",
-               "detik","menit","jam","hari","minggu","bulan","tahun"), recentlyString = "baru-baru ini")
+               "detik","menit","jam","hari","minggu","bulan","tahun"), recentlyString = "baru-baru ini", shortlyString = "segera")
 
         "ms" -> config(locale, "{0} yang lalu", "dalam {0}", "baru sahaja",
             u2("saat","minit","jam","hari","minggu","bulan","tahun",
-               "saat","minit","jam","hari","minggu","bulan","tahun"), recentlyString = "baru-baru ini")
+               "saat","minit","jam","hari","minggu","bulan","tahun"), recentlyString = "baru-baru ini", shortlyString = "tidak lama lagi")
 
         "sw" -> config(locale, "{0} iliyopita", "baada ya {0}", "sasa hivi",
             u2("sekunde","dakika","saa","siku","wiki","mwezi","mwaka",
-               "sekunde","dakika","saa","siku","wiki","miezi","miaka"), recentlyString = "hivi karibuni")
+               "sekunde","dakika","saa","siku","wiki","miezi","miaka"), recentlyString = "hivi karibuni", shortlyString = "hivi punde")
 
         // ── Middle Eastern ────────────────────────────────────────────────────
         "ar" -> config(locale, "منذ {0}", "خلال {0}", "الآن",
@@ -379,11 +407,11 @@ fun buildRelativeTimeConfig(tag: String, locale: Locale, style: RelativeStyle = 
                "يوم","يوم","يومان","أيام","يوم","يوم",
                "أسبوع","أسبوع","أسبوعان","أسابيع","أسبوع","أسبوع",
                "شهر","شهر","شهران","أشهر","شهر","شهر",
-               "سنة","سنة","سنتان","سنوات","سنة","سنة"), recentlyString = "مؤخرا")
+               "سنة","سنة","سنتان","سنوات","سنة","سنة"), recentlyString = "مؤخرا", shortlyString = "قريبا")
 
         "fa" -> config(locale, "{0} پیش", "{0} دیگر", "همین الان",
             u2("ثانية","دقيقة","ساعة","روز","هفته","ماه","سال",
-               "ثانية","دقيقة","ساعت","روز","هفته","ماه","سال"), recentlyString = "به تازگی")
+               "ثانية","دقيقة","ساعت","روز","هفته","ماه","سال"), recentlyString = "به تازگی", shortlyString = "به زودی")
 
         "he" -> config(locale, "לפני {0}", "בעוד {0}", "ממש עכשיו",
             u4("שנייה","שנייה","שניות","שניות",
@@ -392,54 +420,54 @@ fun buildRelativeTimeConfig(tag: String, locale: Locale, style: RelativeStyle = 
                "יום","יום","ימים","ימים",
                "שבוע","שבוע","שבועות","שבועות",
                "חודש","חודש","חודשים","חודשים",
-               "שנה","שנה","שנים","שנים"), recentlyString = "לאחרונה")
+               "שנה","שנה","שנים","שנים"), recentlyString = "לאחרונה", shortlyString = "בקרוב")
 
         // ── Turkic ────────────────────────────────────────────────────────────
         "tr" -> config(locale, "{0} önce", "{0} sonra", "şimdi",
             u2("saniye","dakika","saat","gün","hafta","ay","yıl",
-               "saniye","dakika","saat","gün","hafta","ay","yıl"), recentlyString = "son zamanlarda")
+               "saniye","dakika","saat","gün","hafta","ay","yıl"), recentlyString = "son zamanlarda", shortlyString = "yakında")
 
         "az" -> config(locale, "{0} əvvəl", "{0} sonra", "indi",
             u2("saniyə","dəqiqə","saat","gün","həftə","ay","il",
-               "saniyə","dəqiqə","saat","gün","həftə","ay","il"), recentlyString = "bu yaxınlarda")
+               "saniyə","dəqiqə","saat","gün","həftə","ay","il"), recentlyString = "bu yaxınlarda", shortlyString = "tezliklə")
 
         "uz" -> config(locale, "{0} oldin", "{0} keyin", "hozir",
             u2("soniya","daqiqa","soat","kun","hafta","oy","yil",
-               "soniya","daqiqa","soat","kun","hafta","oy","yil"), recentlyString = "yaqinda")
+               "soniya","daqiqa","soat","kun","hafta","oy","yil"), recentlyString = "yaqinda", shortlyString = "tez orada")
 
         "kk" -> config(locale, "{0} бұрын", "{0} кейін", "қазір",
             u2("секунд","минут","сағат","күн","апта","ай","жыл",
-               "секунд","минут","сағат","күн","апта","ай","жыл"), recentlyString = "жақында")
+               "секунд","минут","сағат","күн","апта","ай","жыл"), recentlyString = "жақында", shortlyString = "жуырда")
 
         // ── Finno-Ugric ───────────────────────────────────────────────────────
         "fi" -> config(locale, "{0} sitten", "{0} päästä", "juuri nyt",
             u2("sekunti","minuutti","tunti","päivä","viikko","kuukausi","vuosi",
-               "sekuntia","minuuttia","tuntia","päivää","viikkoa","kuukautta","vuotta"), recentlyString = "äskettäin")
+               "sekuntia","minuuttia","tuntia","päivää","viikkoa","kuukautta","vuotta"), recentlyString = "äskettäin", shortlyString = "pian")
 
         "et" -> config(locale, "{0} tagasi", "{0} pärast", "just nüüd",
             u2("sekund","minut","tund","päev","nädal","kuu","aasta",
-               "sekundit","minutit","tundi","päeva","nädalat","kuud","aastat"), recentlyString = "hiljuti")
+               "sekundit","minutit","tundi","päeva","nädalat","kuud","aastat"), recentlyString = "hiljuti", shortlyString = "varsti")
 
         "hu" -> config(locale, "{0} ezelőtt", "{0} múlva", "éppen most",
             u2("másodperc","perc","óra","nap","hét","hónap","év",
-               "másodperc","perc","óra","nap","hét","hónap","év"), recentlyString = "nemrég")
+               "másodperc","perc","óra","nap","hét","hónap","év"), recentlyString = "nemrég", shortlyString = "hamarosan")
 
         // ── Other ─────────────────────────────────────────────────────────────
         "el" -> config(locale, "πριν {0}", "σε {0}", "μόλις τώρα",
             u2("δευτερόλεπτο","λεπτό","ώρα","ημέρα","εβδομάδα","μήνας","έτος",
-               "δευτερόλεπτα","λεπτά","ώρες","ημέρες","εβδομάδες","μήνες","έτη"), recentlyString = "πρόσφατα")
+               "δευτερόλεπτα","λεπτά","ώρες","ημέρες","εβδομάδες","μήνες","έτη"), recentlyString = "πρόσφατα", shortlyString = "σύντομα")
 
         "eu" -> config(locale, "duela {0}", "{0} barru", "orain bertan",
             u2("segundo","minutu","ordu","egun","aste","hilabete","urte",
-               "segundo","minutu","ordu","egun","aste","hilabete","urte"), recentlyString = "berriki")
+               "segundo","minutu","ordu","egun","aste","hilabete","urte"), recentlyString = "berriki", shortlyString = "laster")
 
         "hy" -> config(locale, "{0} առաջ", "{0} հետո", "հենց հիմա",
             u2("վայրկյան","րոպե","ժամ","օր","շաբաթ","ամիս","տարի",
-               "վայրկյան","րոպե","ժամ","օր","շաբաթ","ամիս","տարի"), recentlyString = "վերջերս")
+               "վայրկյան","րոպե","ժամ","օր","շաբաթ","ամիս","տարի"), recentlyString = "վերջերս", shortlyString = "շուտով")
 
         "ka" -> config(locale, "{0}ის წინ", "{0}ში", "ახლავე",
             u2("წამ","წუთ","საათ","დღ","კვირ","თვ","წლ",
-               "წამ","წუთ","საათ","დღ","კვირ","თვ","წლ"), recentlyString = "ახლახან", sep = "")
+               "წამ","წუთ","საათ","დღ","კვირ","თვ","წლ"), recentlyString = "ახლახან", sep = "", shortlyString = "მალე")
 
         else -> if (tag == "en") enConfig(locale, style) else buildRelativeTimeConfig("en", locale, style)
     }

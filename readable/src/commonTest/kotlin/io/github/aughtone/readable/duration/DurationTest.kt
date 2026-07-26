@@ -49,6 +49,22 @@ class DurationTest {
         assertEquals("1小时", 60.minutes.formatReadable(locale = Locales.Chinese))
     }
 
+    @Test
+    fun testAllowListedLocalesReachTheirOwnUnits() {
+        // Regression: these locales had full buildDurationFormatter cases but were missing from
+        // isDurationTagSupported(), so they were unreachable and fell back to English "1 hour".
+        assertEquals("1 ordu", 60.minutes.formatReadable(locale = Locales.Basque))
+        assertEquals("1 valanda", 60.minutes.formatReadable(locale = Locales.Lithuanian))
+        assertEquals("1 stunda", 60.minutes.formatReadable(locale = Locales.Latvian))
+        assertEquals("1 orë", 60.minutes.formatReadable(locale = Locales.Albanian))
+        assertEquals("1 saat", 60.minutes.formatReadable(locale = Locales.Azerbaijani))
+        assertEquals("1 soat", 60.minutes.formatReadable(locale = Locales.Uzbek))
+        assertEquals("1 сағат", 60.minutes.formatReadable(locale = Locales.Kazakh))
+        assertEquals("1 ժամ", 60.minutes.formatReadable(locale = Locales.Armenian))
+        assertEquals("1 საათი", 60.minutes.formatReadable(locale = Locales.Georgian))
+        assertEquals("1 ᐃᑲᕐᕋᖅ", 60.minutes.formatReadable(locale = Locales.Inuktitut))
+    }
+
     @Suppress("DEPRECATION")
     @Test
     fun testDeprecatedCompatibility() {
