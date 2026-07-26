@@ -23,6 +23,26 @@ import kotlin.time.Duration.Companion.seconds
 import kotlin.time.Instant
 
 /**
+ * Returns the style-invariant "Today" / "Tomorrow" / "Yesterday" label for a day delta in `-1..1`,
+ * or `null` for any other delta.
+ *
+ * These labels do not vary by [RelativeStyle] in any supported locale (there is no short or narrow
+ * form of "Yesterday"), so this deliberately takes NO style parameter. That removes the date-vs-time
+ * style choice the relative-date shortcut previously got wrong (GAP-1) — a caller cannot pass the
+ * wrong style here. The underlying invariant is guarded by the `dayLabelsAreStyleInvariant` test.
+ */
+private fun relativeDayLabelFor(locale: Locale, daysDelta: Int): String? {
+    // Any style yields identical day labels; Long is an arbitrary canonical choice.
+    val config = relativeTimeConfigFor(locale, RelativeStyle.Long)
+    return when (daysDelta) {
+        0 -> config.todayString
+        1 -> config.tomorrowString
+        -1 -> config.yesterdayString
+        else -> null
+    }
+}
+
+/**
  * Formats this [Instant] as a localized, human-readable relative string with automatic fallback.
  *
  * For example: "5 minutes ago", "Yesterday", or a full date if the difference exceeds [relativeThreshold].
@@ -84,16 +104,9 @@ fun Instant.formatReadableRelative(
     }
 
     if (useDateUnits && daysDelta in -1..1) {
-        // Date-units branch: resolve from the date style, matching the general
-        // date-units path below. relativeDateStyle can't be None here — that
-        // forces useDateUnits = false above.
-        val config = relativeTimeConfigFor(locale, relativeStyle = relativeDateStyle)
-        return when (daysDelta) {
-            0 -> config.todayString
-            1 -> config.tomorrowString
-            -1 -> config.yesterdayString
-            else -> config.nowString // Should not happen
-        }
+        // Day labels are style-invariant, so relativeDayLabelFor takes no style — the date-vs-time
+        // style choice this branch once got wrong (GAP-1) no longer exists here.
+        relativeDayLabelFor(locale, daysDelta)?.let { return it }
     }
 
     val style = if (useDateUnits) relativeDateStyle else relativeTimeStyle

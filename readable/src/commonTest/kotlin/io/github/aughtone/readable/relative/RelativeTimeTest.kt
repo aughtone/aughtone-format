@@ -158,21 +158,27 @@ class RelativeTimeTest {
         assertEquals("now now", (now - 3.seconds).formatReadableRelative(now = now, locale = Locales.SouthAfricanEnglish))
     }
 
-    // Regression coverage for the date-units shortcut resolving its config from
-    // relativeDateStyle (was relativeTimeStyle). The Today/Tomorrow/Yesterday strings
-    // are currently style-invariant in every locale, so these tests pin intended
-    // behavior rather than reproduce a pre-fix output difference.
-
+    // GAP-1: the "Today/Tomorrow/Yesterday" labels are style-invariant in every supported locale
+    // (there is no short/narrow form of "Yesterday"). That invariant is the ONLY reason the
+    // relative-date shortcut is safe regardless of style, so we guard it DIRECTLY here rather than
+    // pretend an output test can distinguish the date-vs-time style choice — it can't; both styles
+    // produce the same label. If a locale ever gives these labels a style-specific form, this test
+    // fails, signalling that relativeDayLabelFor and that branch must then respect the date style.
     @Test
-    fun testDayStrings_mixedStyles() {
-        val reference = LocalDateTime(2023, 10, 27, 12, 0).toInstant(tz)
-        val tomorrow = reference + 25.hours
-        val yesterday = reference - 25.hours
-
-        assertEquals("Tomorrow", tomorrow.formatReadableRelative(now = reference, relativeDateStyle = RelativeStyle.Short, relativeTimeStyle = RelativeStyle.Long, locale = Locales.English, timeZone = tz))
-        assertEquals("Yesterday", yesterday.formatReadableRelative(now = reference, relativeDateStyle = RelativeStyle.Short, relativeTimeStyle = RelativeStyle.Long, locale = Locales.English, timeZone = tz))
-        assertEquals("Tomorrow", tomorrow.formatReadableRelative(now = reference, relativeDateStyle = RelativeStyle.Long, relativeTimeStyle = RelativeStyle.Short, locale = Locales.English, timeZone = tz))
-        assertEquals("Yesterday", yesterday.formatReadableRelative(now = reference, relativeDateStyle = RelativeStyle.Long, relativeTimeStyle = RelativeStyle.Short, locale = Locales.English, timeZone = tz))
+    fun dayLabelsAreStyleInvariant() {
+        val locales = listOf(
+            Locales.English, Locales.SouthAfricanEnglish, Locales.French,
+            Locales.Afrikaans, Locales.Japanese, Locales.Arabic,
+        )
+        for (loc in locales) {
+            val long = relativeTimeConfigFor(loc, RelativeStyle.Long)
+            for (style in listOf(RelativeStyle.Short, RelativeStyle.None)) {
+                val cfg = relativeTimeConfigFor(loc, style)
+                assertEquals(long.todayString, cfg.todayString, "today label varies by style for $loc")
+                assertEquals(long.tomorrowString, cfg.tomorrowString, "tomorrow label varies by style for $loc")
+                assertEquals(long.yesterdayString, cfg.yesterdayString, "yesterday label varies by style for $loc")
+            }
+        }
     }
 
     @Test
