@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [3.1.0] - 2026-07-25
+
 ### Added
 - **New / completed localizations (from the library-wide locale audit)**:
   - Relative time now localized for Danish (`da`), Norwegian Bokmål (`nb`, also `no`), Norwegian Nynorsk (`nn`), Swedish (`sv`), and Icelandic (`is`) — previously allow-listed but unimplemented, so they rendered in English.
