@@ -98,6 +98,10 @@ internal val localeEraNamesSource by lazy {
             full = EraNames(bce = "公元前", ce = "公元"),
             abbreviated = EraNames(bce = "公元前", ce = "公元")
         ) },
+        "zh-TW" to lazy { EraNamesData(
+            full = EraNames(bce = "西元前", ce = "西元"),
+            abbreviated = EraNames(bce = "西元前", ce = "西元")
+        ) },
         "af" to lazy { EraNamesData(
             full = EraNames(bce = "voor Christus", ce = "ná Christus"),
             abbreviated = EraNames(bce = "v.C.", ce = "n.C.")

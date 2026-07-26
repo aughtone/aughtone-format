@@ -124,7 +124,8 @@ private fun isDurationTagSupported(tag: String): Boolean = when (tag) {
     "et", "fi", "vi", "el", "hu", "ro", "tr", "ru", "uk", "be", "pl", "cs", "sk",
     "sl", "hr", "sr", "bg", "mk", "fr", "it", "es", "pt", "ca", "gl", "hi", "bn",
     "gu", "kn", "ml", "mr", "pa", "ta", "te", "ar", "he", "fa", "ur", "id", "ms",
-    "th", "ko", "ja", "zh-Hans", "zh", "zh-Hant", "zh-TW", "zh-HK" -> true
+    "th", "ko", "ja", "zh-Hans", "zh", "zh-Hant", "zh-TW", "zh-HK",
+    "az", "eu", "hy", "ka", "kk", "lt", "lv", "sq", "uz", "iu" -> true
     else -> false
 }
 

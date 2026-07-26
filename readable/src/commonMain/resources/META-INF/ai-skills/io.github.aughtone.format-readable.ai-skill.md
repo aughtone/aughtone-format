@@ -52,7 +52,10 @@ Formatting for Coordinates, Altitude, and Azimuth.
 Natural language time, timezone naming, and numeric order.
 
 - **Primary APIs**:
-    - `Instant.formatReadableRelative(locale, now, style): String`
+    - `Instant.formatReadableRelative(locale, now, …): String`
+    - `LocalDate.formatReadableRelative(locale, now, …): String` — also emits the fuzzy `Recently` (near past) and `Shortly` (near future) labels for dates within `nowThreshold` beyond Yesterday/Tomorrow.
+    - `LocalTime.formatReadableRelative(now, direction, …): String` — a date-less clock time; `direction: RelativeDirection { Past, Present, Future, Nearest }` disambiguates the delta across midnight.
+    - `LocalTime.formatReadableRelative(now: Instant, timeZone, direction, …): String` — **anchored** to a date, so it can render day labels ("Yesterday"/"Today"/"Tomorrow").
     - `TimeZone.formatReadable(instant, useFullName, locale): String`
     - `TimeZone.formatReadable(offset, useFullName, locale): String`
     - `T.formatReadableOrdinal(locale): String` (e.g., `"1st"`, `"2nd"`, `"1er"`)
@@ -60,6 +63,7 @@ Natural language time, timezone naming, and numeric order.
 - **Contract**:
     - Ordinality rules are locale-aware (handles English suffixes, French gendered suffixes, etc.).
     - TimeZone formatting requires a reference `Instant` or `UtcOffset` to determine daylight saving time status correctly.
+    - `LocalTime.formatReadableRelative` defaults to `RelativeDirection.Nearest` (shortest distance on a 24-hour clock). This changed in 3.1.0 — use `RelativeDirection.Present` for the pre-3.1.0 linear same-day behaviour; `Past`/`Future` force a direction.
 
 ## ⚠️ Deprecated Naming Conventions (Backwards Compatibility)
 
@@ -96,3 +100,4 @@ Natural language time, timezone naming, and numeric order.
 3.  **UI Consistency**: When formatting a list of numbers, ensure all calls use the same `Locale` instance (ideally passed from the View layer) to avoid mixing separator styles.
 4.  **Metric Scaling**: Be aware that `formatReadableMetric` only scales units defined in the SI base set (Meter, Gram, Watt, etc.). Custom or non-SI units will be formatted with the unit symbol but without prefix scaling.
 5.  **Enum usage**: Use the `Locales` object for common constants (e.g., `Locales.English`, `Locales.German`) in tests or static configurations.
+6.  **LocalTime relative direction**: `LocalTime.formatReadableRelative` defaults to `RelativeDirection.Nearest`. When you know the intended direction (a countdown vs. elapsed time), pass `RelativeDirection.Future`/`Past`; for a date-anchored result that can say "Yesterday"/"Tomorrow", use the overload that takes `now: Instant`.

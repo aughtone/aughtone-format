@@ -2,17 +2,15 @@
 
 Aughtone Format is a suite of Kotlin Multiplatform libraries designed to provide consistent, localized formatting for Dates, Times, Numbers, and other human-readable metrics across all platforms.
 
-## 🚀 Major Updates in 3.0.3
+## 🚀 Major Updates in 3.1.0
 
-Aughtone Format 3.0.3 introduces new modules, API modernizations, performance optimizations, and timezone support:
+Aughtone Format 3.1.0 focuses on relative-time expressiveness and completing localization coverage:
 
-- **Thread-Safety & Cache Optimizations**: Migrated all resource caches in `:readable` to thread-safe copy-on-write volatile maps capped at 150 entries, and removed nested formatting allocations.
-- **Auto-Numbering Fallback**: Added automatic selection of native numbering systems (Arabic, Devanagari, Bengali, Thai, Arabic-Indic) for non-Western locales when formatting dates.
-- **iOS Compatibility Target**: Natively compatible with Compose Multiplatform 1.11.1 / Skiko's UIKit requirements by setting iOS deployment target to 16.0.
-- **TimeZone Formatting**: Implemented `TimeZone.formatReadable` extension functions in `:readable` to format timezone names with zero allocations.
-- **New Vector Modules**: Introduced `:viewable` for platform-agnostic vector graphic representations, styling, and path conversion (SVG, WKT, GeoJSON), and `:viewable-compose` for Jetpack / Compose Multiplatform integration.
-- **API Naming Modernization**: Deprecated old `toReadable*` prefix extension functions in favor of unified `formatReadable*` APIs for better readability and style guide alignment.
-- **AI-Skills Integration**: Added machine-readable AI skills documentation for all modules to assist coding agents.
+- **Direction-Aware `LocalTime` Relative Time**: New `RelativeDirection { Past, Present, Future, Nearest }` enum and a `direction` parameter on `LocalTime.formatReadableRelative` resolve the ambiguity of a date-less clock time across midnight (modelled on ICU's `Direction`). The default is now `Nearest` (shortest distance on a 24-hour clock) — a behaviour change from the previous linear same-day math; pass `RelativeDirection.Present` for the old behaviour.
+- **Calendar-Anchored `LocalTime`**: A new `LocalTime.formatReadableRelative(now: Instant, timeZone, …)` overload resolves the time to a concrete occurrence relative to a dated anchor, so it can render day labels like "Yesterday"/"Today"/"Tomorrow".
+- **"Shortly" Near-Future Label**: `LocalDate` relative formatting gains a "Shortly" label — the future mirror of "Recently" — for near-future dates within the `nowThreshold` window.
+- **Completed Localizations**: Relative time now works for Danish, Norwegian (Bokmål/Nynorsk), Swedish, and Icelandic (previously fell back to English); Inuktitut gains full time-zone names (143 zones); Traditional Chinese gains its own compass points and era names; and 11 locales gained proper AM/PM markers.
+- **English-Fallback Fixes**: Indonesian/Malay/Swahili relative time, duration formatting for 10 locales (`az`, `eu`, `hy`, `ka`, `kk`, `lt`, `lv`, `sq`, `uz`, `iu`), and Persian money symbol placement were silently falling back to English or formatting incorrectly — all now fixed, with a coverage-guard test preventing this class of regression.
 
 
 ## 📦 Core Modules
@@ -34,7 +32,7 @@ This project follows a specialized 5-sector documentation hierarchy.
 - 📜 [Changelog](CHANGELOG.md): History of changes and release notes.
 ## ✨ Features
 - **55+ Languages and Regions Supported**: Deep grammatical parity for Slavic, Arabic, Hebrew, Inuktitut, and more.
-- **Relative Time Formatting**: Convert instants and dates into natural language (e.g., "5 minutes ago", "Yesterday").
+- **Relative Time Formatting**: Convert instants, dates, and times into natural language (e.g., "5 minutes ago", "Yesterday", "Shortly"), with direction-aware `LocalTime` handling across midnight.
 - **Automatic Fallback**: Smartly switches from relative to absolute formatting based on configurable thresholds.
 - **Ordinal Numbers**: Localized ordinal suffix support (e.g., 1st, 2nd, 3.º, 第1).
 - **Duration Scaling**: Human-friendly duration strings with perceptual rounding (e.g., "2 weeks" vs "14 days").
@@ -60,19 +58,27 @@ The library provides deep grammatical parity and full BCP 47 subtag fallback (e.
 ```kotlin
 val now = Clock.System.now()
 // Format with styles (Short, Medium, Long, Full)
-println(now.format(DateTimeStyle.Medium, locale = Locale("en"))) // "Apr 23, 2026, 4:15 PM"
+println(now.format(DateTimeStyle.Short, locale = Locale("en-US"))) // "4/23/26, 4:15 PM"
+println(now.format(DateTimeStyle.Short, locale = Locale("en-CA"))) // "2026-04-23, 4:15 p.m."
 ```
 
 ### Human-Readable Metrics (`:readable`)
 ```kotlin
 // Ordinals
-println(123L.formatReadableOrdinal(Locale("en"))) // "123rd"
+println(123L.formatReadableOrdinal(Locale("en-US"))) // "123rd"
+println(123L.formatReadableOrdinal(Locale("fr-FR"))) // "123e"
 
 // Durations
-println(1.5.hours.formatReadable(Locale("en"))) // "1.5 hours"
+println(1.5.hours.formatReadable(Locale("en-US"))) // "1.5 hours"
+println(1.5.hours.formatReadable(Locale("es-ES"))) // "1,5 horas"
 
 // Relative Time
-println(instant.formatReadableRelative(locale = Locale.current)) // "3 minutes ago"
+println(instant.formatReadableRelative(locale = Locale("en-US"))) // "3 minutes ago"
+println(instant.formatReadableRelative(locale = Locale("de-DE"))) // "vor 3 Minuten"
+
+// Relative Time — direction-aware LocalTime (disambiguates a clock time across midnight)
+val alarm = LocalTime(1, 0)
+println(alarm.formatReadableRelative(now = LocalTime(23, 0), direction = RelativeDirection.Future)) // "in 2 hours"
 
 // Data Sizes
 println(1048576L.formatReadableDataSize()) // "1.0 MiB"
