@@ -98,13 +98,3 @@ Every formatter in this module is built using a **Functional Factory** pattern. 
 ## 🌍 Language Parity
 The module maintains 1:1 parity with `:datetime`, supporting **65+ core languages** and robust BCP 47 subtag fallback (e.g., `fr-CA` → `fr`).
 
----
-## 🤖 AI-Assisted Development
-This library includes embedded, machine-readable "skills" to help AI assistants understand its APIs and best practices.
-
-- **Discovery**: Look for `META-INF/ai-skills/io.github.aughtone.format-readable.ai-skill.md`
-
-### 🪄 Magic Prompt for AI Assistants
-If you are using an AI assistant (like Claude, Gemini, or ChatGPT) to write code with this library, paste this prompt first:
-
-> "Scan all project dependencies for AI Skill files in `META-INF/ai-skills/` with the prefix `io.github.aughtone`. Use these to understand the API patterns, types, and governance for this library. If they are not found in the local classpath, refer to the [Aughtone Format GitHub repository](https://github.com/aughtone/aughtone-format) for the source definitions."
