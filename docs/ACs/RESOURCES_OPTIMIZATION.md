@@ -32,7 +32,6 @@ This document defines the goals and requirements for optimizing the resource inf
 > **As a developer, I want my AI to understand how this library works automatically, so it makes fewer mistakes.**
 
 ### Acceptance Criteria
-- **AC: Machine-Readable Skills.** Update the `META-INF/ai-skills` documentation for the module to reflect the new caching and lookup patterns so that future agent interactions remain consistent with these optimizations.
 
 ---
 

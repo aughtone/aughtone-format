@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [3.1.1] - 2026-09-07
+
+### Added
+- **`NOTICE.md` and `THIRD-PARTY-NOTICES.md`**: Attribute the Unicode CLDR data compiled into the published artifact — the localized time-zone names in `TimeZoneNamesLookup.kt` (`:datetime`) — under the Unicode License, distinct from the Apache-2.0 licence that covers the library's own code. First-party curated data (for example the relative-time and duration phrasings) is recorded as carrying no third-party terms.
+
+### Fixed
+- **`LICENSE` copyright notice**: The Apache-2.0 appendix carried a stray `Copyright 2023 JetBrains s.r.o.` line copied from a template; it is reset to the standard `Copyright [yyyy] [name of copyright owner]` placeholder, with the project copyright asserted in `NOTICE.md`.
+
 ## [3.1.0] - 2026-07-25
 
 ### Added

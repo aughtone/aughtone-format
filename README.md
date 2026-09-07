@@ -88,15 +88,3 @@ println(1048576L.formatReadableDataSize()) // "1.0 MiB"
 ## 🛠️ Governance Standards
 Access the [Governance Skills](docs/standards/) for specialized development rules.
 
----
-## 🤖 AI-Assisted Development
-This library includes embedded, machine-readable "skills" to help AI assistants understand its APIs and best practices.
-
-- **Discovery**: Look for `META-INF/ai-skills/*.ai-skill.md`
-
-### 🪄 Magic Prompt for AI Assistants
-If you are using an AI assistant (like Claude, Gemini, or ChatGPT) to write code with this library, paste this prompt first:
-
-> "Scan all project dependencies for AI Skill files in `META-INF/ai-skills/` with the prefix `io.github.aughtone`. Use these to understand the API patterns, types, and governance for this library. If they are not found in the local classpath, refer to the [Aughtone Format GitHub repository](https://github.com/aughtone/aughtone-format) for the source definitions."
-
-To learn how to add this capability to your own library, see our [AI Skill Publishing Standard](docs/standards/ai-skill-publishing.md).

@@ -1,0 +1,16 @@
+{
+  "tracker": {
+    "type": "github",
+    "connection": "github-aughtone-format",
+    "mcpServer": "github-aughtone-format",
+    "repo": "aughtone/aughtone-format",
+    "prefix": "AOF",
+    "project": "2"
+  },
+  "snapshot": "synced",
+  "updates": {
+    "check": true,
+    "skillsRepo": "bpappin/skills",
+    "skillsBranch": "master"
+  }
+}
