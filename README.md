@@ -2,6 +2,14 @@
 
 Aughtone Format is a suite of Kotlin Multiplatform libraries designed to provide consistent, localized formatting for Dates, Times, Numbers, and other human-readable metrics across all platforms.
 
+## 🚀 Major Updates in 3.2.0
+
+Aughtone Format 3.2.0 adds byte-stable **identifier normalization** to `:toolbox`, for callers that must produce the *same* canonical form on every platform and over time — for example hashing an email into a breach-safe token for blind matching.
+
+- **Email Normalizer**: `normalizeEmail(value, policy)` returns an `Outcome<NormalizedEmail>` (from `aughtone-types`) carrying the canonical string plus the policy `id` + `version` to store beside any derived hash. It applies only ASCII-level, Unicode-version-independent rules, so a normalized value **never drifts, expires, or fails when Unicode ships a new version**, and is byte-identical across JVM, Android, iOS, wasmJs, and JS.
+- **Frozen, Named Policies**: `EmailPolicy.ByteStableV1` (the shared canonical form) and a looser `EmailPolicy.Lenient`. A policy's output never changes in place — any rule change mints a new version — so a token derived under one is reproducible forever.
+- **Explicit, Value-Free Failures**: malformed input yields a typed `EmailNormalizationError` (`MissingAtSign`, `EmptyLocalPart`, `EmptyDomain`, `UnpairedSurrogate`) that never echoes the input into a log, rather than a best-effort token.
+
 ## 🚀 Major Updates in 3.1.0
 
 Aughtone Format 3.1.0 focuses on relative-time expressiveness and completing localization coverage:
@@ -19,7 +27,7 @@ Aughtone Format 3.1.0 focuses on relative-time expressiveness and completing loc
 - **`:readable`**: Human-friendly formatting for metrics (abbreviations), ordinals, and data sizes.
 - **`:viewable`**: Platform-agnostic vector graphics representation, styling, and path conversion (GeoJSON, SVG, WKT).
 - **`:viewable-compose`**: Jetpack / Compose Multiplatform integration for rendering viewable vector graphics (Painters, ImageVectors).
-- **`:toolbox`**: Shared utilities and common formatting primitives.
+- **`:toolbox`**: Shared utilities, common formatting primitives, and byte-stable identifier normalization (email).
 
 This project follows a specialized 5-sector documentation hierarchy.
 

@@ -1,77 +1,87 @@
 package io.github.aughtone.toolbox.normalize
 
-/**
- * A named, frozen email-normalization policy.
- *
- * Each entry is an **immutable** rule-set with a stable [id] and [version]. The identifier is what a
- * byte-stability–sensitive caller (e.g. blind tokenization, where the normalized value is hashed)
- * stores alongside anything derived from the result, so re-normalization always uses the same rules.
- *
- * Policies are **additive**: a new rule-set is a new entry, never an edit to an existing one.
- * Changing the output of an existing policy would silently invalidate every value already derived
- * from it — so if the rules must change, add a new policy (or bump [version]) and keep the old one.
- */
-enum class EmailNormalization(val id: String, val version: Int) {
-    /**
-     * The safe default: trim surrounding whitespace and lowercase the whole address (locale-independent
-     * Unicode default case mapping). No provider-specific rules. Two addresses collide only if they
-     * differ solely by case or surrounding whitespace.
-     *
-     * Note: this does not apply Unicode NFC. It is byte-stable (a given input always yields the same
-     * output), but does not collapse canonically-equivalent Unicode sequences. If that is required,
-     * it must be added as a separate policy, since changing this one would break existing values.
-     */
-    Conservative("email.conservative", 1),
-
-    /**
-     * [Conservative] plus Gmail-style canonicalization for `gmail.com` / `googlemail.com`: the domain
-     * is canonicalized to `gmail.com`, any `+`-subaddress is dropped, and dots are removed from the
-     * local part. Deliberately collides more addresses. Non-Gmail addresses are treated as [Conservative].
-     */
-    GmailAware("email.gmail-aware", 1),
-}
+import io.github.aughtone.types.outcome.Outcome
+import io.github.aughtone.types.outcome.runOutcome
 
 /**
- * Normalizes this email address to a byte-stable canonical form under [policy].
+ * Normalize [value] under [policy] into a byte-stable canonical string.
  *
- * Intended for producing a stable key before hashing / blind-tokenization: the same logical address
- * always yields byte-identical output under the same [policy], and the operation is idempotent
- * (`s.normalizeEmail(p).normalizeEmail(p) == s.normalizeEmail(p)`). Store [EmailNormalization.id] and
- * [EmailNormalization.version] beside anything derived from the result so it can be reproduced under
- * the exact rules.
+ * - **No default policy:** the caller must name one, so output is never produced under rules nobody chose.
+ * - **Total or explicitly failing:** malformed input yields `Outcome.Error(EmailNormalizationError)`,
+ *   never a best-effort token. It never rejects a valid address, and never fails when Unicode changes.
+ * - **Idempotent:** `normalizeEmail(normalizeEmail(v, p).data.canonical, p)` yields the same canonical.
  *
- * This does **not** validate the address. A value without an `@` is returned trimmed and lowercased
- * only (no local/domain handling); validate separately if you need it.
- *
- * @param policy the frozen normalization policy to apply (defaults to [EmailNormalization.Conservative]).
+ * Consume:
+ * ```
+ * when (val o = normalizeEmail(value, EmailPolicy.ByteStableV1)) {
+ *     is Outcome.Success -> o.data               // NormalizedEmail; hash o.data.canonical
+ *     is Outcome.Error   -> o.exception          // an EmailNormalizationError
+ * }
+ * ```
  */
-fun String.normalizeEmail(policy: EmailNormalization = EmailNormalization.Conservative): String {
-    // Conservative base: trim + locale-independent lowercase. Applies to every policy.
-    val base = trim().lowercase()
+fun normalizeEmail(value: String, policy: EmailPolicy): Outcome<NormalizedEmail> = runOutcome {
+    if (value.hasUnpairedSurrogate()) throw EmailNormalizationError.UnpairedSurrogate()
 
-    return when (policy) {
-        EmailNormalization.Conservative -> base
-        EmailNormalization.GmailAware -> base.gmailCanonicalize()
+    val trimmed = value.trimAsciiWhitespace()
+    val at = trimmed.lastIndexOf('@')
+    if (at < 0) throw EmailNormalizationError.MissingAtSign()
+
+    var local = trimmed.substring(0, at).asciiLowercase()
+    val domain = trimmed.substring(at + 1).asciiLowercase()
+    if (domain.isEmpty()) throw EmailNormalizationError.EmptyDomain()
+    if (local.isEmpty()) throw EmailNormalizationError.EmptyLocalPart()
+
+    if (policy.stripPlusSubaddress) {
+        local = local.substringBefore('+')
+        if (local.isEmpty()) throw EmailNormalizationError.EmptyLocalPart()
     }
+
+    NormalizedEmail(canonical = "$local@$domain", policyId = policy.id, policyVersion = policy.version)
 }
 
-private val GMAIL_DOMAINS = setOf("gmail.com", "googlemail.com")
-
 /**
- * Applies Gmail equivalence rules to an already-[EmailNormalization.Conservative]-normalized address.
- * Only `gmail.com` / `googlemail.com` are affected; everything else is returned unchanged.
+ * Loose convenience: the canonical string, or `null` if [value] cannot be normalized under [policy].
+ * NOT for blind tokenization — use [normalizeEmail] and persist `policyId` + `policyVersion` there.
  */
-private fun String.gmailCanonicalize(): String {
-    val at = lastIndexOf('@')
-    if (at <= 0 || at == length - 1) return this // no usable local@domain split
+fun String.normalizeEmailOrNull(policy: EmailPolicy): String? =
+    when (val outcome = normalizeEmail(this, policy)) {
+        is Outcome.Success -> outcome.data.canonical
+        is Outcome.Error -> null
+    }
 
-    val local = substring(0, at)
-    val domain = substring(at + 1)
-    if (domain !in GMAIL_DOMAINS) return this
+// --- byte-level helpers: ASCII only, Unicode-version-independent ---
 
-    val withoutSubaddress = local.substringBefore('+')
-    val withoutDots = withoutSubaddress.replace(".", "")
-    if (withoutDots.isEmpty()) return this // never produce an empty local part
+/** True if the string contains a high surrogate without a following low surrogate, or vice-versa. */
+private fun String.hasUnpairedSurrogate(): Boolean {
+    var i = 0
+    while (i < length) {
+        val c = this[i]
+        if (c.isHighSurrogate()) {
+            if (i + 1 >= length || !this[i + 1].isLowSurrogate()) return true
+            i += 2
+        } else {
+            if (c.isLowSurrogate()) return true
+            i += 1
+        }
+    }
+    return false
+}
 
-    return "$withoutDots@gmail.com"
+private fun Char.isAsciiWhitespace(): Boolean =
+    this == ' ' || this == '\t' || this == '\n' || this == '\r' || this == '\u000B' || this == '\u000C'
+
+private fun String.trimAsciiWhitespace(): String {
+    var start = 0
+    var end = length
+    while (start < end && this[start].isAsciiWhitespace()) start++
+    while (end > start && this[end - 1].isAsciiWhitespace()) end--
+    return substring(start, end)
+}
+
+/** Lowercases ASCII `A`–`Z` only; every other code unit (including all non-ASCII) is left untouched. */
+private fun String.asciiLowercase(): String {
+    if (none { it in 'A'..'Z' }) return this
+    val sb = StringBuilder(length)
+    for (c in this) sb.append(if (c in 'A'..'Z') c + 32 else c)
+    return sb.toString()
 }
