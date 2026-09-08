@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [3.1.2] - 2026-09-07
+
+### Changed
+- Maintenance release: internal repository and documentation housekeeping only. No functional or API changes from 3.1.1; the published artifact is behaviourally identical.
+
 ## [3.1.1] - 2026-09-07
 
 ### Added
