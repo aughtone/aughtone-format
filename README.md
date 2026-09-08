@@ -2,7 +2,11 @@
 
 Aughtone Format is a suite of Kotlin Multiplatform libraries designed to provide consistent, localized formatting for Dates, Times, Numbers, and other human-readable metrics across all platforms.
 
-## 🚀 Major Updates in 3.1.0
+## 🚀 Latest Release: 3.1.2
+
+3.1.1 and 3.1.2 are maintenance releases — licensing notices and repository housekeeping, with no functional or API changes. The most recent feature release is 3.1.0, highlighted below.
+
+### Highlights from 3.1.0
 
 Aughtone Format 3.1.0 focuses on relative-time expressiveness and completing localization coverage:
 
