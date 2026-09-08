@@ -10,8 +10,9 @@
 #   ./install.sh --github     per-developer GitHub setup: PAT -> connection,
 #                             register the 'github' MCP server in agent configs
 #   ./install.sh --register [--connection <name>]   re-push the connection's
-#                             token into every agent's MCP config (run after
-#                             rotating a token - registrations embed it)
+#                             token into every agent's MCP config - YouTrack
+#                             or GitHub, whichever the connection is (run
+#                             after rotating a token - registrations embed it)
 #   ./install.sh --list | --show | --help
 #
 # Everything lives under one well-known root:
@@ -2233,9 +2234,15 @@ case "${1:-}" in
       [[ "$(grep -c . <<<"$profiles")" == "1" ]] && profile="$profiles"
     fi
     [[ -z "$profile" ]] && { say "usage: install.sh --register [--connection <name>]  (several connections exist - name one)" >&2; exit 1; }
-    load_connection "$profile" || { say "error: connection '$profile' not found" >&2; exit 1; }
-    PROFILE="$profile"
-    register_agents
+    # Tracker-agnostic, matching the shipped .agents/setup.sh copy: a
+    # connection is a YouTrack one or a GitHub one, and --register re-pushes
+    # whichever it is. This arm was YouTrack-only while the shipped copy
+    # already fell back, so the same flag did different things depending on
+    # which script you ran - and the GitHub binding documents this flag for
+    # rotating a GitHub token.
+    if load_connection "$profile"; then PROFILE="$profile"; register_agents
+    elif load_github "$profile"; then register_agents_github "$profile"
+    else say "error: connection '$profile' not found" >&2; exit 1; fi
     say ""
     say "Registrations updated. Restart your agent sessions so they reconnect"
     say "with the new token.";;
