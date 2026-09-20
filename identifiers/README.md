@@ -31,5 +31,6 @@ The notation formatters are pure, table-free transforms with no external depende
 | IPv4 address | `String.formatIpv4` | `Dotted` (default), `ReverseDns`, `Integer` |
 | IPv6 address | `String.formatIpv6` | `Compressed` (default), `Expanded`, `UrlHost`, `ReverseNibbles` |
 | IPv4 network | `String.formatIpNetwork` | `Cidr` (default), `Netmask`, `Wildcard`, `Range` |
+| Domain / host | `String.formatDomain` | `Unicode` (default, Punycode decode), `Ascii` |
 
-More identifiers (domain, phone) are tracked under the parent epic.
+The phone formatter (E.164 → national/international) is tracked under the parent epic; it is the one formatter that takes a dependency (`aughtone-phonenumber`).
