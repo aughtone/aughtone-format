@@ -21,6 +21,7 @@ Aughtone Format 3.1.0 focuses on relative-time expressiveness and completing loc
 
 - **`:datetime`**: Advanced formatting for `kotlinx-datetime` types with multi-locale support.
 - **`:readable`**: Human-friendly formatting for metrics (abbreviations), ordinals, and data sizes.
+- **`:identifiers`**: Display formatters for canonical identifiers — render a normalized MAC, UUID, IBAN, card number, IPv4/IPv6, domain, or phone number in an alternative notation.
 - **`:viewable`**: Platform-agnostic vector graphics representation, styling, and path conversion (GeoJSON, SVG, WKT).
 - **`:viewable-compose`**: Jetpack / Compose Multiplatform integration for rendering viewable vector graphics (Painters, ImageVectors).
 - **`:toolbox`**: Shared utilities and common formatting primitives.

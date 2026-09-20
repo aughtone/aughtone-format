@@ -64,9 +64,13 @@ kotlin {
 
     sourceSets {
         val commonMain by getting {
-            // No external dependencies: the identifier notation formatters are
-            // pure, table-free transforms. (The phone slice, #14, adds the one
-            // dependency — aughtone-phonenumber — when it lands.)
+            dependencies {
+                // The module's only dependency: the phone formatter needs
+                // aughtone-phonenumber's per-country metadata. Every other
+                // formatter is a pure, table-free transform. The metadata is
+                // dead-code-eliminated for consumers that never format a phone (#8).
+                implementation(libs.aughtone.phonenumber)
+            }
         }
         val commonTest by getting {
             dependencies {

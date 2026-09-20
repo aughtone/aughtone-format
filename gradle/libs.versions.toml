@@ -17,6 +17,7 @@ vanniktech = "0.37.0"
 androidx-startup = "1.2.0"
 
 aughtone-types = "3.4.0"
+aughtone-phonenumber = "0.0.3"
 
 [libraries]
 androidx-rules = { module = "androidx.test:rules", version.ref = "rules" }
@@ -31,6 +32,7 @@ jetbrains-compose-ui  = { module = "org.jetbrains.compose.ui:ui", version.ref = 
 jetbrains-compose-resources  = { module = "org.jetbrains.compose.components:components-resources", version.ref = "compose-multiplatform" }
 
 aughtone-types = { module = "io.github.aughtone:types", version.ref = "aughtone-types" }
+aughtone-phonenumber = { module = "io.github.aughtone:phonenumber", version.ref = "aughtone-phonenumber" }
 
 [plugins]
 multiplatformLibrary = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
