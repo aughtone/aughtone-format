@@ -24,5 +24,12 @@ The notation formatters are pure, table-free transforms with no external depende
 | Identifier | Entry point | Notations |
 | :--- | :--- | :--- |
 | MAC address | `String.formatMac` | `Colon` (default), `Ieee`, `CiscoDotted`, `Bare`, `UppercaseColon` |
+| UUID | `String.formatUuid`, `Uuid.format` | `Hyphenated` (default), `Braces`, `Urn`, `Uppercase`, `NoHyphens` |
+| Username | `String.formatHandle` | `@handle` |
+| IBAN | `String.formatIban` | `Grouped` (default), `Compact` |
+| Card number (PAN) | `String.formatCardNumber` | `Grouped` (default, issuer pattern), `Masked` (lossy) |
+| IPv4 address | `String.formatIpv4` | `Dotted` (default), `ReverseDns`, `Integer` |
+| IPv6 address | `String.formatIpv6` | `Compressed` (default), `Expanded`, `UrlHost`, `ReverseNibbles` |
+| IPv4 network | `String.formatIpNetwork` | `Cidr` (default), `Netmask`, `Wildcard`, `Range` |
 
-More identifiers (UUID, IBAN, card/PAN, IPv4/IPv6/network, domain, phone) are tracked under the parent epic.
+More identifiers (domain, phone) are tracked under the parent epic.
