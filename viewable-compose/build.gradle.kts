@@ -33,12 +33,17 @@ kotlin {
                 outputFileName = "aughtone-format-viewable-compose.js"
             }
         }
+        binaries.executable()
     }
 
-    js(IR) {
+    js {
         browser {
             generateTypeScriptDefinitions()
+            webpackTask {
+                output.libraryTarget = "commonjs2"
+            }
         }
+        binaries.executable()
         useEsModules()
     }
     listOf(
@@ -46,7 +51,7 @@ kotlin {
         iosSimulatorArm64()
     ).forEach { iosTarget ->
         iosTarget.binaries.framework {
-            baseName = "AughtoneFormatViewableComposeKit"
+            baseName = "AOFormatViewableComposeKit"
             isStatic = true
             binaryOption(
                 "bundleId",

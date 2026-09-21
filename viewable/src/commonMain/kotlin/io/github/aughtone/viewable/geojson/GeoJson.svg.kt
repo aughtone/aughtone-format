@@ -43,15 +43,6 @@ fun GeoGeometry.toSvgPathData(
     is GeoPolygon -> coordinates.toSvgPolygonData(projection, precision)
     is GeoMultiPolygon -> coordinates.joinToString(" ") { it.toSvgPolygonData(projection, precision) }
     is GeometryCollection -> geometries.joinToString(" ") { it.toSvgPathData(projection, precision) }
-    is GeoBoundingBox -> listOf(
-        listOf(
-            listOf(west, south),
-            listOf(east, south),
-            listOf(east, north),
-            listOf(west, north),
-            listOf(west, south)
-        )
-    ).toSvgPolygonData(projection, precision)
 }
 
 private fun List<Double>.toSvgPointData(projection: GeoProjection, precision: Int): String {

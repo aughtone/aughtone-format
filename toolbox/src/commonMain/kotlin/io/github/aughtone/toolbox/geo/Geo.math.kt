@@ -30,7 +30,6 @@ fun GeoGeometry.calculateBoundingBox(): GeoBoundingBox? = when (this) {
         val boxes = geometries.mapNotNull { it.calculateBoundingBox() }
         if (boxes.isEmpty()) null else boxes.reduce { acc, box -> acc.merge(box) }
     }
-    is GeoBoundingBox -> this
 }
 
 private fun List<List<Double>>.toBoundingBox(): GeoBoundingBox? {

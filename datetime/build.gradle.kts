@@ -13,7 +13,7 @@ plugins {
     alias(libs.plugins.composeCompiler)
 }
 
-group = libs.versions.namespace.get().toString()
+group = libs.versions.namespace.get()
 version = libs.versions.versionName.get()
 
 kotlin {
@@ -46,13 +46,18 @@ kotlin {
                 }
             }
         }
+        binaries.executable()
     }
 
     // See: https://kotlinlang.org/docs/js-project-setup.html
-    js(IR) {
+    js {
         browser {
             generateTypeScriptDefinitions()
+            webpackTask {
+                output.libraryTarget = "commonjs2"
+            }
         }
+        binaries.executable()
         useEsModules() // Enables ES2015 modules
     }
     listOf(
@@ -61,7 +66,7 @@ kotlin {
     //noinspection WrongGradleMethod
     ).forEach { iosTarget ->
         iosTarget.binaries.framework {
-            baseName = "AughtoneFormatDatetimeKit"
+            baseName = "AOFormatDatetimeKit"
             isStatic = true
             binaryOption(
                 "bundleId",
@@ -69,7 +74,7 @@ kotlin {
             ) //"app.occurrence"
             binaryOption(
                 "bundleShortVersionString",
-                libs.versions.versionName.get().toString()
+                libs.versions.versionName.get()
             ) //"1.0.0"
         }
     }

@@ -40,13 +40,18 @@ kotlin {
                 }
             }
         }
+        binaries.executable()
     }
 
     // See: https://kotlinlang.org/docs/js-project-setup.html
-    js(IR) {
+    js {
         browser {
             generateTypeScriptDefinitions()
+            webpackTask {
+                output.libraryTarget = "commonjs2"
+            }
         }
+        binaries.executable()
         useEsModules()
     }
     listOf(
@@ -55,7 +60,7 @@ kotlin {
     //noinspection WrongGradleMethod
     ).forEach { iosTarget ->
         iosTarget.binaries.framework {
-            baseName = "AughtoneFormatIdentifiersKit"
+            baseName = "AOFormatIdentifiersKit"
             isStatic = true
             binaryOption("bundleId", "${libs.versions.namespace.get()}.format.identifiers")
             binaryOption("bundleShortVersionString", libs.versions.versionName.get().toString())

@@ -21,7 +21,6 @@ dependencyResolutionManagement {
                 includeGroupAndSubgroups("com.google")
             }
         }
-        mavenLocal()
         mavenCentral()
     }
 }
