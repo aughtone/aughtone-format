@@ -1,13 +1,13 @@
 [versions]
 namespace = "io.github.aughtone"
-versionName = "3.1.2"
+versionName = "4.0.0"
 # versionNameSiffix = ""
 android-minSdk = "24" ### this will impact all projects that import the library.
 android-compileSdk = "37"
 
-agp = "9.2.1"
-kotlin = "2.4.0"
-compose-multiplatform = "1.11.1"
+agp = "9.4.1"
+kotlin = "2.4.20"
+compose-multiplatform = "1.12.0"
 kotlinx-coroutines = "1.10.1"
 kotlinx-serialization = "1.11.0"
 kotlinx-datetime = "0.8.0"
@@ -16,7 +16,8 @@ runner = "1.7.0"
 vanniktech = "0.37.0"
 androidx-startup = "1.2.0"
 
-aughtone-types = "3.4.0"
+aughtone-types = "4.0.0"
+aughtone-phonenumber = "0.0.4"
 
 [libraries]
 androidx-rules = { module = "androidx.test:rules", version.ref = "rules" }
@@ -31,6 +32,7 @@ jetbrains-compose-ui  = { module = "org.jetbrains.compose.ui:ui", version.ref = 
 jetbrains-compose-resources  = { module = "org.jetbrains.compose.components:components-resources", version.ref = "compose-multiplatform" }
 
 aughtone-types = { module = "io.github.aughtone:types", version.ref = "aughtone-types" }
+aughtone-phonenumber = { module = "io.github.aughtone:phonenumber", version.ref = "aughtone-phonenumber" }
 
 [plugins]
 multiplatformLibrary = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }

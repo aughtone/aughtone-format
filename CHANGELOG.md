@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [4.0.0] - 2026-09-21
+
+### Added
+- **New `:identifiers` module** (`io.github.aughtone:format-identifiers`) — display formatters that render a canonical identifier in an alternative notation: `String.formatMac`, `formatUuid` (and `kotlin.uuid.Uuid.format`), `formatHandle`, `formatIban`, `formatCardNumber`, `formatIpv4`, `formatIpv6`, `formatIpNetwork`, `formatDomain` (table-free Punycode / RFC 3492 decode), and `formatPhone` (E.164 → national / international / RFC 3966). Each takes an already-canonical value plus a defaulted notation enum. Every formatter is dependency-free except `formatPhone`, which uses `aughtone-phonenumber` for per-country grouping metadata (dead-code-eliminated for consumers that never format a phone).
+
+### Changed
+- **BREAKING — upgraded to `aughtone-types` 4.0.0.** Types is re-exported (`api`) by `:datetime`, `:readable`, and `:toolbox`, so its 4.0.0 API changes are part of this library's public surface.
+- **BREAKING — `GeoBoundingBox` is no longer a `GeoGeometry`** (a types 4.0.0 change). Rendering a bounding box as a polygon geometry was therefore removed from `:viewable` (`toViewablePath`, `toSvgPathData`, `toWkt`) and `:toolbox` (`GeoGeometry.calculateBoundingBox` no longer has a `GeoBoundingBox` case). A `GeoBoundingBox` is a bounds value, not a geometry, and is no longer accepted by those functions.
+- Toolchain bumps: Kotlin 2.4.20, Android Gradle Plugin 9.4.1, Compose Multiplatform 1.12.0, Gradle 9.6.0.
+
 ## [3.1.2] - 2026-09-07
 
 ### Changed

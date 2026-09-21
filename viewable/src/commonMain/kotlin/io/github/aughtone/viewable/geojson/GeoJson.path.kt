@@ -54,15 +54,6 @@ fun GeoGeometry.toViewablePath(
         is GeoPolygon -> coordinates.toPolygonCommands(projection)
         is GeoMultiPolygon -> coordinates.flatMap { it.toPolygonCommands(projection) }
         is GeometryCollection -> geometries.flatMap { it.toViewablePath(projection).commands }
-        is GeoBoundingBox -> listOf(
-            listOf(
-                listOf(west, south),
-                listOf(east, south),
-                listOf(east, north),
-                listOf(west, north),
-                listOf(west, south)
-            )
-        ).toPolygonCommands(projection)
     }
     return ViewablePath(commands, bounds = commands.calculateBounds())
 }

@@ -2,9 +2,11 @@
 
 Aughtone Format is a suite of Kotlin Multiplatform libraries designed to provide consistent, localized formatting for Dates, Times, Numbers, and other human-readable metrics across all platforms.
 
-## 🚀 Latest Release: 3.1.2
+## 🚀 Major Updates in 4.0.0
 
-3.1.1 and 3.1.2 are maintenance releases — licensing notices and repository housekeeping, with no functional or API changes. The most recent feature release is 3.1.0, highlighted below.
+- **New `:identifiers` module**: display formatters for canonical identifiers — MAC, UUID, IBAN, card/PAN, IPv4/IPv6/network, domain (Punycode decode), and phone (E.164 → national/international/RFC 3966). Each renders an already-canonical value in an alternative notation via `String.formatX(notation)`.
+- **`aughtone-types` 4.0.0 (breaking)**: types is re-exported by the formatting modules, so its 4.0.0 API is part of this library's surface. Notably `GeoBoundingBox` is no longer a `GeoGeometry`, so rendering a bounding box as a path/SVG/WKT geometry has been removed from `:viewable` and `:toolbox`.
+- **Toolchain**: Kotlin 2.4.20, Compose Multiplatform 1.12.0, Android Gradle Plugin 9.4.1, Gradle 9.6.0.
 
 ### Highlights from 3.1.0
 
@@ -21,6 +23,7 @@ Aughtone Format 3.1.0 focuses on relative-time expressiveness and completing loc
 
 - **`:datetime`**: Advanced formatting for `kotlinx-datetime` types with multi-locale support.
 - **`:readable`**: Human-friendly formatting for metrics (abbreviations), ordinals, and data sizes.
+- **`:identifiers`**: Display formatters for canonical identifiers — render a normalized MAC, UUID, IBAN, card number, IPv4/IPv6, domain, or phone number in an alternative notation.
 - **`:viewable`**: Platform-agnostic vector graphics representation, styling, and path conversion (GeoJSON, SVG, WKT).
 - **`:viewable-compose`**: Jetpack / Compose Multiplatform integration for rendering viewable vector graphics (Painters, ImageVectors).
 - **`:toolbox`**: Shared utilities and common formatting primitives.

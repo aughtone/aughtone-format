@@ -46,13 +46,18 @@ kotlin {
                 }
             }
         }
+        binaries.executable()
     }
 
     // See: https://kotlinlang.org/docs/js-project-setup.html
-    js(IR) {
+    js {
         browser {
             generateTypeScriptDefinitions()
+            webpackTask {
+                output.libraryTarget = "commonjs2"
+            }
         }
+        binaries.executable()
         useEsModules() // Enables ES2015 modules
     }
     listOf(
@@ -61,7 +66,7 @@ kotlin {
     //noinspection WrongGradleMethod
     ).forEach { iosTarget ->
         iosTarget.binaries.framework {
-            baseName = "AughtoneFormatReadableKit"
+            baseName = "AOFormatReadableKit"
             isStatic = true
             binaryOption(
                 "bundleId",
@@ -132,7 +137,11 @@ compose.resources {
 mavenPublishing {
     publishToMavenCentral(automaticRelease = true)
 
-    if (!project.hasProperty("skip-signing")) {
+    val hasInMemoryKey = project.hasProperty("signingInMemoryKey") ||
+            project.hasProperty("signingInMemoryKeyId") ||
+            project.hasProperty("signing.gnupg.keyName")
+
+    if (hasInMemoryKey && !project.hasProperty("skip-signing")) {
         signAllPublications()
     }
 

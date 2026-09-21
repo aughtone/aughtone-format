@@ -37,12 +37,17 @@ kotlin {
                 outputFileName = "aughtone-format-viewable.js"
             }
         }
+        binaries.executable()
     }
 
-    js(IR) {
+    js {
         browser {
             generateTypeScriptDefinitions()
+            webpackTask {
+                output.libraryTarget = "commonjs2"
+            }
         }
+        binaries.executable()
         useEsModules()
     }
     listOf(
@@ -50,7 +55,7 @@ kotlin {
         iosSimulatorArm64()
     ).forEach { iosTarget ->
         iosTarget.binaries.framework {
-            baseName = "AughtoneFormatViewableKit"
+            baseName = "AOFormatViewableKit"
             isStatic = true
             binaryOption(
                 "bundleId",
@@ -93,7 +98,11 @@ kotlin {
 mavenPublishing {
     publishToMavenCentral(automaticRelease = true)
 
-    if (!project.hasProperty("skip-signing")) {
+    val hasInMemoryKey = project.hasProperty("signingInMemoryKey") ||
+            project.hasProperty("signingInMemoryKeyId") ||
+            project.hasProperty("signing.gnupg.keyName")
+
+    if (hasInMemoryKey && !project.hasProperty("skip-signing")) {
         signAllPublications()
     }
 

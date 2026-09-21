@@ -21,13 +21,13 @@ dependencyResolutionManagement {
                 includeGroupAndSubgroups("com.google")
             }
         }
-        mavenLocal()
         mavenCentral()
     }
 }
 
 rootProject.name = "AOFormat"
 include(":datetime")
+include(":identifiers")
 include(":readable")
 include(":toolbox")
 include(":viewable")

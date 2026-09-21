@@ -1,6 +1,4 @@
-import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompileCommon
 
@@ -8,9 +6,6 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.multiplatformLibrary)
     alias(libs.plugins.vanniktech.mavenPublish)
-    alias(libs.plugins.kotlinSerialization)
-    alias(libs.plugins.composeMultiplatform)
-    alias(libs.plugins.composeCompiler)
 }
 
 group = libs.versions.namespace.get()
@@ -21,7 +16,7 @@ kotlin {
 
     jvm()
     android {
-        namespace = "${libs.versions.namespace.get()}.format.datetime"
+        namespace = "${libs.versions.namespace.get()}.format.identifiers"
         compileSdk {
             version = release(libs.versions.android.compileSdk.get().toInt())
         }
@@ -35,11 +30,10 @@ kotlin {
             val rootDirPath = project.rootDir.path
             val projectDirPath = project.projectDir.path
             commonWebpackConfig {
-                outputModuleName = "aughtone-format-datetime"
-                outputFileName = "aughtone-format-datetime.js"
+                outputModuleName = "aughtone-format-identifiers"
+                outputFileName = "aughtone-format-identifiers.js"
                 devServer = (devServer ?: KotlinWebpackConfig.DevServer()).apply {
                     static = (static ?: mutableListOf()).apply {
-                        // Serve sources to debug inside browser
                         add(rootDirPath)
                         add(projectDirPath)
                     }
@@ -58,7 +52,7 @@ kotlin {
             }
         }
         binaries.executable()
-        useEsModules() // Enables ES2015 modules
+        useEsModules()
     }
     listOf(
         iosArm64(),
@@ -66,54 +60,31 @@ kotlin {
     //noinspection WrongGradleMethod
     ).forEach { iosTarget ->
         iosTarget.binaries.framework {
-            baseName = "AOFormatDatetimeKit"
+            baseName = "AOFormatIdentifiersKit"
             isStatic = true
-            binaryOption(
-                "bundleId",
-                "${libs.versions.namespace.get()}.format.datetime"
-            ) //"app.occurrence"
-            binaryOption(
-                "bundleShortVersionString",
-                libs.versions.versionName.get()
-            ) //"1.0.0"
+            binaryOption("bundleId", "${libs.versions.namespace.get()}.format.identifiers")
+            binaryOption("bundleShortVersionString", libs.versions.versionName.get().toString())
         }
     }
 
     sourceSets {
-        val androidMain by getting {
-            dependencies {
-                implementation(libs.androidx.startup.runtime)
-            }
-        }
-
         val commonMain by getting {
             dependencies {
-                implementation(libs.jetbrains.compose.ui)
-                implementation(libs.jetbrains.compose.resources)
-                api(libs.kotlinx.serialization.json)
-                // XXX This might require additional libraries if you enable WASM or JS.
-                //  See: https://klibs.io/project/Kotlin/kotlinx-datetime#using-in-your-projects
-                api(libs.kotlinx.datetime)
-                api(libs.aughtone.types)
-                api(project(":toolbox"))
+                // The module's only dependency: the phone formatter needs
+                // aughtone-phonenumber's per-country metadata. Every other
+                // formatter is a pure, table-free transform. The metadata is
+                // dead-code-eliminated for consumers that never format a phone (#8).
+                implementation(libs.aughtone.phonenumber)
             }
         }
         val commonTest by getting {
             dependencies {
                 implementation(libs.kotlin.test)
-                api(libs.kotlinx.serialization.json)
             }
         }
     }
 
-    compilerOptions {
-        // XXX Activate when this is resolved:
-        //  https://youtrack.jetbrains.com/issue/KT-57847/Move-common-for-all-the-backends-module-name-compiler-option-to-the-KotlinCommonCompilerOptions
-        // moduleName = "io.github.aughtone.datetime.format"
-    }
-
-    // XXX Remove when the above is resolved. This is a workaround.
-    //  https://youtrack.jetbrains.com/issue/KT-66568/w-KLIB-resolver-The-same-uniquename...-found-in-more-than-one-library
+    // Workaround: https://youtrack.jetbrains.com/issue/KT-66568
     metadata {
         compilations.all {
             val compilationName = rootProject.name
@@ -124,12 +95,6 @@ kotlin {
             }
         }
     }
-}
-
-compose.resources {
-    publicResClass = true
-    packageOfResClass = "${libs.versions.namespace.get()}.format.datetime.resources"
-    generateResClass = always
 }
 
 mavenPublishing {
@@ -143,12 +108,12 @@ mavenPublishing {
         signAllPublications()
     }
 
-    coordinates(group.toString(), "format-datetime", version.toString())
+    coordinates(group.toString(), "format-identifiers", version.toString())
 
     pom {
-        name = "Aughtone Format Multiplatform - Datetime"
-        description = "A Multiplatform library for formatting dates and times using kotlinx-datetime."
-        inceptionYear = "2025"
+        name = "Aughtone Format Multiplatform - Identifiers"
+        description = "Display formatters for canonical identifiers (MAC, UUID, IBAN, IP, domain, phone) in the Aughtone ecosystem."
+        inceptionYear = "2026"
         url = "https://github.com/aughtone/aughtone-format"
         licenses {
             license {
@@ -160,7 +125,7 @@ mavenPublishing {
         developers {
             developer {
                 id = "bpappin"
-                name = "Brill pappin"
+                name = "bpappin"
                 url = "https://github.com/bpappin"
             }
         }
