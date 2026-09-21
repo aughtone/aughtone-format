@@ -1,6 +1,6 @@
-# Aughtone Format
+# Aught One Format
 
-Aughtone Format is a suite of Kotlin Multiplatform libraries designed to provide consistent, localized formatting for Dates, Times, Numbers, and other human-readable metrics across all platforms.
+Aught One Format is a suite of Kotlin Multiplatform libraries designed to provide consistent, localized formatting for Dates, Times, Numbers, and other human-readable metrics across all platforms.
 
 ## 🚀 Major Updates in 4.0.0
 
@@ -94,4 +94,3 @@ println(1048576L.formatReadableDataSize()) // "1.0 MiB"
 ---
 ## 🛠️ Governance Standards
 Access the [Governance Skills](docs/standards/) for specialized development rules.
-
