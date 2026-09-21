@@ -28,6 +28,7 @@ dependencyResolutionManagement {
 
 rootProject.name = "AOFormat"
 include(":datetime")
+include(":identifiers")
 include(":readable")
 include(":toolbox")
 include(":viewable")

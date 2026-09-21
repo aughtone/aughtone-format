@@ -6,8 +6,6 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.multiplatformLibrary)
     alias(libs.plugins.vanniktech.mavenPublish)
-    alias(libs.plugins.composeMultiplatform)
-    alias(libs.plugins.composeCompiler)
 }
 
 group = libs.versions.namespace.get()
@@ -18,9 +16,12 @@ kotlin {
 
     jvm()
     android {
-        namespace = "${libs.versions.namespace.get()}.format.viewable.compose"
+        namespace = "${libs.versions.namespace.get()}.format.identifiers"
         compileSdk {
             version = release(libs.versions.android.compileSdk.get().toInt())
+        }
+        minSdk {
+            version = release(libs.versions.android.minSdk.get().toInt())
         }
     }
     @OptIn(ExperimentalWasmDsl::class)
@@ -29,12 +30,19 @@ kotlin {
             val rootDirPath = project.rootDir.path
             val projectDirPath = project.projectDir.path
             commonWebpackConfig {
-                outputModuleName = "aughtone-format-viewable-compose"
-                outputFileName = "aughtone-format-viewable-compose.js"
+                outputModuleName = "aughtone-format-identifiers"
+                outputFileName = "aughtone-format-identifiers.js"
+                devServer = (devServer ?: KotlinWebpackConfig.DevServer()).apply {
+                    static = (static ?: mutableListOf()).apply {
+                        add(rootDirPath)
+                        add(projectDirPath)
+                    }
+                }
             }
         }
     }
 
+    // See: https://kotlinlang.org/docs/js-project-setup.html
     js(IR) {
         browser {
             generateTypeScriptDefinitions()
@@ -44,26 +52,24 @@ kotlin {
     listOf(
         iosArm64(),
         iosSimulatorArm64()
+    //noinspection WrongGradleMethod
     ).forEach { iosTarget ->
         iosTarget.binaries.framework {
-            baseName = "AughtoneFormatViewableComposeKit"
+            baseName = "AughtoneFormatIdentifiersKit"
             isStatic = true
-            binaryOption(
-                "bundleId",
-                "${libs.versions.namespace.get()}.format.viewable.compose"
-            )
-            binaryOption(
-                "bundleShortVersionString",
-                libs.versions.versionName.get()
-            )
+            binaryOption("bundleId", "${libs.versions.namespace.get()}.format.identifiers")
+            binaryOption("bundleShortVersionString", libs.versions.versionName.get().toString())
         }
     }
 
     sourceSets {
         val commonMain by getting {
             dependencies {
-                api( project(":viewable"))
-                implementation(libs.jetbrains.compose.ui)
+                // The module's only dependency: the phone formatter needs
+                // aughtone-phonenumber's per-country metadata. Every other
+                // formatter is a pure, table-free transform. The metadata is
+                // dead-code-eliminated for consumers that never format a phone (#8).
+                implementation(libs.aughtone.phonenumber)
             }
         }
         val commonTest by getting {
@@ -73,6 +79,7 @@ kotlin {
         }
     }
 
+    // Workaround: https://youtrack.jetbrains.com/issue/KT-66568
     metadata {
         compilations.all {
             val compilationName = rootProject.name
@@ -96,12 +103,12 @@ mavenPublishing {
         signAllPublications()
     }
 
-    coordinates(group.toString(), "format-viewable-compose", version.toString())
+    coordinates(group.toString(), "format-identifiers", version.toString())
 
     pom {
-        name = "Aughtone Format Multiplatform - Viewable Compose"
-        description = "Compose Multiplatform components for rendering Aughtone visual models."
-        inceptionYear = "2025"
+        name = "Aughtone Format Multiplatform - Identifiers"
+        description = "Display formatters for canonical identifiers (MAC, UUID, IBAN, IP, domain, phone) in the Aughtone ecosystem."
+        inceptionYear = "2026"
         url = "https://github.com/aughtone/aughtone-format"
         licenses {
             license {
@@ -113,7 +120,7 @@ mavenPublishing {
         developers {
             developer {
                 id = "bpappin"
-                name = "Brill pappin"
+                name = "bpappin"
                 url = "https://github.com/bpappin"
             }
         }
