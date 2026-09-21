@@ -127,7 +127,11 @@ mavenPublishing {
 //    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
     publishToMavenCentral()
 
-    if (!project.hasProperty("skip-signing")) {
+    val hasInMemoryKey = project.hasProperty("signingInMemoryKey") ||
+            project.hasProperty("signingInMemoryKeyId") ||
+            project.hasProperty("signing.gnupg.keyName")
+
+    if (hasInMemoryKey && !project.hasProperty("skip-signing")) {
         signAllPublications()
     }
 
