@@ -1,6 +1,6 @@
 [versions]
 namespace = "io.github.aughtone"
-versionName = "4.0.0"
+versionName = "4.1.0-alpha1"
 # versionNameSiffix = ""
 android-minSdk = "24" ### this will impact all projects that import the library.
 android-compileSdk = "37"
@@ -18,6 +18,8 @@ androidx-startup = "1.2.0"
 
 aughtone-types = "4.0.0"
 aughtone-phonenumber = "0.0.4"
+# Dependency skills trial: ships each module's skill in its sources jar. Local publish only, until released.
+dependencyskills = "0.1.0"
 
 [libraries]
 androidx-rules = { module = "androidx.test:rules", version.ref = "rules" }
@@ -41,3 +43,4 @@ kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", versio
 composeMultiplatform = { id = "org.jetbrains.compose", version.ref = "compose-multiplatform" }
 composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 vanniktech-mavenPublish = { id = "com.vanniktech.maven.publish", version.ref = "vanniktech" }
+dependencySkills = { id = "org.dependencyskills.plugin", version.ref = "dependencyskills" }
