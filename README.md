@@ -59,6 +59,17 @@ The library provides deep grammatical parity and full BCP 47 subtag fallback (e.
 | **Middle Eastern & African** | Arabic (`ar-EG`), Hebrew (`he-IL`), Persian (`fa-IR`), Turkish (`tr-TR`), Azerbaijani (`az-AZ`), Swahili (`sw-KE`) |
 | **Other & Finno-Ugric** | Finnish (`fi-FI`), Estonian (`et-EE`), Hungarian (`hu-HU`), Greek (`el-GR`), Basque (`eu-ES`), Albanian (`sq-AL`), Inuktitut (`iu-CA`) |
 
+### Coverage over consistency
+For localized *display names* (time-zone names, and similar large translation sets) the library favours **coverage over consistency**. Byte-identical output on every platform was the original goal — the property bundled tables give — but it was judged not worth its cost. The new priority is that every reader sees text in **their own language**, even where the exact wording differs slightly across platforms and OS versions.
+
+**Why not simply bundle every translation?** A complete localized dataset — every name in every supported language — is a large matrix (hundreds of KB even gzipped) and, unlike the library's own types, it **cannot be dead-code-eliminated**: a table reached by the reader's display language keeps every entry live. Bundling it in common code puts that weight on *every* target, including the browser and mobile, where the platform's runtime already holds the same CLDR data. So instead:
+
+- **Delegate to the platform's CLDR** where it exists (JVM, Android, Apple, JS, Wasm) — the browser especially, where `Intl` is complete and bundling would only duplicate it.
+- **Bundle the complete tables only where the platform has none** — desktop targets, where the size is affordable.
+- **Carry a small supplement in common code** for the few languages CLDR itself omits (e.g. Inuktitut), so no reader silently falls back to English.
+
+The trade is explicit: this delivers coverage, not consistency — four platform CLDR versions will word things a little differently and drift over time. Where consistency matters more than size (a desktop-only consumer), the bundled tables remain the option.
+
 ## 🚀 Quick Usage
 
 ### Datetime Formatting (`:datetime`)

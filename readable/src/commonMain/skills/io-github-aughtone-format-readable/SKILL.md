@@ -75,7 +75,7 @@ The `geo`/`quantitative` families split by package: `Coordinates`/`Altitude`/`Az
 
 ## What moved, and what it used to be called
 
-**New in 4.1.0: `List<String>.formatReadableList(locale, type)`** — locale-correct list joining ("Monday, Wednesday, and Friday"), CLDR list patterns, types `And`/`Or`/`Unit`. Coverage is seeded (English every type; French/German/Spanish for And/Or; everything else falls back to English), wide forms only for now.
+**New in 4.1.0: `List<String>.formatReadableList(locale, type)`** — locale-correct list joining ("Monday, Wednesday, and Friday" / "lundi, mercredi et vendredi"), from CLDR list patterns, types `And`/`Or`/`Unit`. Covers the ~55 bundled locales (English fallback beyond); wide forms only for now (no short/narrow).
 
 **`toReadable*` → `formatReadable*` (renamed in 3.0.0).** This is the single most likely stale call. Every human-formatting entry point was `toReadable…` and is now `formatReadable…`. The old names still exist as `@Deprecated` wrappers with `ReplaceWith`, so old code compiles with a warning — but write the new name:
 

@@ -72,10 +72,10 @@ class ListFunctionsTest {
     }
 
     @Test
-    fun frenchUnitFallsBackToEnglishCommaJoin() {
-        // French has no seeded Unit patterns; it falls back to English (plain commas).
+    fun frenchUnitUsesConjunction() {
+        // CLDR gives French a real Unit pattern that uses "et" (like German), not a plain comma.
         assertEquals(
-            "a, b, c",
+            "a, b et c",
             listOf("a", "b", "c").formatReadableList(fr, ListType.Unit),
         )
     }

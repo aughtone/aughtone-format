@@ -9,6 +9,8 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.offsetAt
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
+import kotlin.test.assertTrue
 
 class TimeZoneDisplayNameTest {
 
@@ -51,10 +53,15 @@ class TimeZoneDisplayNameTest {
     }
 
     @Test
-    fun unknownZoneFallsBackToOffsetString() {
-        // A zone not in the curated tables yields its UTC offset string, not a name.
-        val chagos = zone("Indian/Chagos") ?: return // +06:00, no DST, not bundled
-        val expectedOffset = chagos.offsetAt(winter).toString()
-        assertEquals(expectedOffset, chagos.displayName(winter, TextWidth.Full, en))
+    fun uncuratedZoneGetsPlatformName() {
+        // A real IANA zone outside the small English scaffolding now gets its name
+        // from the platform CLDR (coverage over consistency), so it is a real
+        // localized string, not the bare UTC offset the old bundled table fell
+        // back to.
+        val chagos = zone("Indian/Chagos") ?: return // +06:00, no DST, not in the scaffolding
+        val name = chagos.displayName(winter, TextWidth.Full, en)
+        val bareOffset = chagos.offsetAt(winter).toString() // "+06:00"
+        assertTrue(name.isNotBlank(), "expected a platform name, got blank")
+        assertNotEquals(bareOffset, name, "expected a platform name, not the bare offset")
     }
 }

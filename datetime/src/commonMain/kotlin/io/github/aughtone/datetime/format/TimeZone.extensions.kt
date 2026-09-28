@@ -8,7 +8,6 @@ import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 import kotlinx.datetime.TimeZone
-import kotlinx.datetime.offsetAt
 
 /**
  * The localized display name of this time zone **at [instant]**, in the given
@@ -17,17 +16,21 @@ import kotlinx.datetime.offsetAt
  * This is the *specific* name — the one that distinguishes standard time from
  * daylight time — which is why it needs an instant: `America/Toronto` is
  * "Eastern Standard Time" / "EST" in winter and "Eastern Daylight Time" / "EDT"
- * in summer, and only the instant says which. It reads the same bundled zone
- * tables the `.format` path uses for its Long/Full styles, localized for the
- * ~50 languages those tables carry.
+ * in summer, and only the instant says which.
  *
- * It is **not** the generic, instant-independent name ("Eastern Time"): that is
- * a separate CLDR metazone dataset this module does not yet bundle.
+ * The name comes from the **platform's own CLDR** — `java.time` on JVM,
+ * ICU-backed `java.util.TimeZone` on Android, `NSTimeZone` on Apple, and `Intl`
+ * on JS/Wasm — so its exact wording follows the reader's OS and runtime rather
+ * than a bundled table (the library favours *coverage over consistency* for
+ * large translation sets). A small bundled supplement covers languages no
+ * platform ships (notably Inuktitut), so those never fall back to English.
  *
- * Coverage is a curated set of IANA zones. A zone that is not in the tables, or
- * a locale with no bundled name, falls back to the zone's **UTC offset string**
- * (for example `"-05:00"`) rather than throwing or returning null — so a result
- * that looks like an offset means "no bundled name for this zone".
+ * It is **not** the generic, instant-independent name ("Eastern Time").
+ *
+ * When no platform or supplement name applies — an unrecognized zone, or a
+ * language the platform's CLDR omits — the result falls back to the English
+ * name and finally to the zone's **UTC offset string** (for example `"-05:00"`)
+ * rather than throwing or returning null.
  *
  * ```kotlin
  * val toronto = TimeZone.of("America/Toronto")
@@ -41,18 +44,15 @@ import kotlinx.datetime.offsetAt
  * @param width [TextWidth.Full] for the full name (default) or
  *   [TextWidth.Abbreviated] for the abbreviation.
  * @param locale the locale whose names to use. Defaults to [Locale.current].
- * @return the zone's localized name at [instant] in [width], or its UTC offset
- *   string when no bundled name applies.
+ * @return the zone's localized name at [instant] in [width], or an English name
+ *   / UTC offset string when no localized name applies.
  * @see TextWidth
  */
 fun TimeZone.displayName(
     instant: Instant = Clock.System.now(),
     width: TextWidth = TextWidth.Full,
     locale: Locale = Locale.current,
-): String {
-    val offset = offsetAt(instant)
-    return when (width) {
-        TextWidth.Full -> TimeZoneAbbreviationLookup.getTimeZoneFullName(this, offset, locale)
-        TextWidth.Abbreviated -> TimeZoneAbbreviationLookup.getTimeZoneAbbreviation(this, offset, locale)
-    }
+): String = when (width) {
+    TextWidth.Full -> TimeZoneAbbreviationLookup.getTimeZoneFullName(this, instant, locale)
+    TextWidth.Abbreviated -> TimeZoneAbbreviationLookup.getTimeZoneAbbreviation(this, instant, locale)
 }

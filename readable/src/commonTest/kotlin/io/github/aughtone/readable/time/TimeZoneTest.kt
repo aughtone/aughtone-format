@@ -7,29 +7,43 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.UtcOffset
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
+import kotlin.test.assertTrue
 
 class TimeZoneTest {
 
     private val utcTz = TimeZone.UTC
-    
+
     // 2024-01-15T12:00:00Z
     private val winterInstant = Instant.parse("2024-01-15T12:00:00Z")
-    
+
     // 2024-07-15T12:00:00Z
     private val summerInstant = Instant.parse("2024-07-15T12:00:00Z")
 
+    // Instant-based names come from each platform's CLDR (coverage over
+    // consistency), so UTC's specific name varies: "UTC" / "Coordinated Universal
+    // Time" on java.time and Intl, "GMT" / "Greenwich Mean Time" on Apple.
+    private val utcAbbr = setOf("UTC", "GMT")
+    private val utcFull = setOf("Coordinated Universal Time", "Greenwich Mean Time")
+
+    // Named zones need the IANA tz database, unavailable on some JS/Wasm runners.
+    private fun zone(id: String): TimeZone? = runCatching { TimeZone.of(id) }.getOrNull()
+
     @Test
     fun testFormatReadable_abbreviation_instant() {
-        assertEquals("UTC", utcTz.formatReadable(instant = winterInstant, locale = Locales.English))
-        assertEquals("UTC", utcTz.formatReadable(instant = summerInstant, locale = Locales.English))
+        assertTrue(utcTz.formatReadable(instant = winterInstant, locale = Locales.English) in utcAbbr)
+        assertTrue(utcTz.formatReadable(instant = summerInstant, locale = Locales.English) in utcAbbr)
     }
 
     @Test
     fun testFormatReadable_fullName_instant() {
-        assertEquals("Coordinated Universal Time", utcTz.formatReadable(instant = winterInstant, useFullName = true, locale = Locales.English))
-        assertEquals("Coordinated Universal Time", utcTz.formatReadable(instant = summerInstant, useFullName = true, locale = Locales.English))
+        assertTrue(utcTz.formatReadable(instant = winterInstant, useFullName = true, locale = Locales.English) in utcFull)
+        assertTrue(utcTz.formatReadable(instant = summerInstant, useFullName = true, locale = Locales.English) in utcFull)
     }
 
+    // The offset-only overload does not delegate to the platform (an offset has no
+    // instant), so it uses the bundled English scaffolding and is consistent
+    // across every platform.
     @Test
     fun testFormatReadable_abbreviation_offset() {
         assertEquals("UTC", utcTz.formatReadable(offset = UtcOffset.ZERO, locale = Locales.English))
@@ -49,69 +63,25 @@ class TimeZoneTest {
     }
 
     @Test
-    fun testFormatReadable_localized_french() {
-        val tz = try {
-            TimeZone.of("America/New_York")
-        } catch (e: Exception) {
-            // Skip IANA timezone tests on environments without full timezone DB (e.g. JS/Wasm browser runner)
-            return
-        }
-
-        val estOffset = UtcOffset(hours = -5)
-        val edtOffset = UtcOffset(hours = -4)
-
-        // French locale translations
-        val localeFr = Locale(languageCode = "fr", displayName = "French")
-        assertEquals("HNE", tz.formatReadable(offset = estOffset, locale = localeFr))
-        assertEquals("HAE", tz.formatReadable(offset = edtOffset, locale = localeFr))
-        assertEquals("Heure normale de l'Est nord-américain", tz.formatReadable(offset = estOffset, useFullName = true, locale = localeFr))
-        assertEquals("Heure d'été de l'Est nord-américain", tz.formatReadable(offset = edtOffset, useFullName = true, locale = localeFr))
-        
-        // French-Canada (fr-CA) resolves directly to fr-CA (with Canadian French names)
-        val localeFrCa = Locale(languageCode = "fr", regionCode = "CA", displayName = "French (Canada)")
-        assertEquals("HNE", tz.formatReadable(offset = estOffset, locale = localeFrCa))
-        assertEquals("Heure normale de l'Est", tz.formatReadable(offset = estOffset, useFullName = true, locale = localeFrCa))
-
-        // French-Belgium (fr-BE) is not in the map, so it falls back to French (fr)
-        val localeFrBe = Locale(languageCode = "fr", regionCode = "BE", displayName = "French (Belgium)")
-        assertEquals("HNE", tz.formatReadable(offset = estOffset, locale = localeFrBe))
-        assertEquals("Heure normale de l'Est nord-américain", tz.formatReadable(offset = estOffset, useFullName = true, locale = localeFrBe))
+    fun testFormatReadable_inuktitut_offset_fromSupplement() {
+        // Inuktitut is not shipped by any platform CLDR, so it comes from the
+        // bundled supplement on every platform — even the offset-only overload,
+        // and even though no instant is involved.
+        val iu = Locale(languageCode = "iu", displayName = "Inuktitut")
+        val name = utcTz.formatReadable(offset = UtcOffset.ZERO, useFullName = true, locale = iu)
+        assertTrue(name.any { it.code in 0x1400..0x167F }, "expected Inuktitut syllabics, got: $name")
     }
 
     @Test
-    fun testFormatReadable_localized_spanish() {
-        val tz = try {
-            TimeZone.of("America/New_York")
-        } catch (e: Exception) {
-            // Skip IANA timezone tests on environments without full timezone DB (e.g. JS/Wasm browser runner)
-            return
-        }
-
-        val estOffset = UtcOffset(hours = -5)
-        val edtOffset = UtcOffset(hours = -4)
-
-        // Spanish locale translations
-        val localeEs = Locale(languageCode = "es", displayName = "Spanish")
-        assertEquals("EST", tz.formatReadable(offset = estOffset, locale = localeEs))
-        assertEquals("EDT", tz.formatReadable(offset = edtOffset, locale = localeEs))
-        assertEquals("Hora estándar oriental", tz.formatReadable(offset = estOffset, useFullName = true, locale = localeEs))
-        assertEquals("Hora de verano oriental", tz.formatReadable(offset = edtOffset, useFullName = true, locale = localeEs))
-    }
-
-    @Test
-    fun testFormatReadable_localized_german() {
-        val tz = try {
-            TimeZone.of("Europe/Berlin")
-        } catch (e: Exception) {
-            return
-        }
-
-        val cetOffset = UtcOffset(hours = 1)
-        val cestOffset = UtcOffset(hours = 2)
-
-        // German locale translations
-        val localeDe = Locale(languageCode = "de", displayName = "German")
-        assertEquals("Mitteleuropäische Normalzeit", tz.formatReadable(offset = cetOffset, useFullName = true, locale = localeDe))
-        assertEquals("Mitteleuropäische Sommerzeit", tz.formatReadable(offset = cestOffset, useFullName = true, locale = localeDe))
+    fun testFormatReadable_localized_french_instant() {
+        // The instant overload delegates to the platform CLDR, which localizes:
+        // the French name is non-blank and differs from the English one. Exact
+        // wording follows the platform, so this asserts the property, not a string.
+        val tz = zone("America/New_York") ?: return
+        val fr = Locale(languageCode = "fr", displayName = "French")
+        val frFull = tz.formatReadable(instant = winterInstant, useFullName = true, locale = fr)
+        val enFull = tz.formatReadable(instant = winterInstant, useFullName = true, locale = Locales.English)
+        assertTrue(frFull.isNotBlank(), "expected a French zone name")
+        assertNotEquals(enFull, frFull, "French full name should differ from English")
     }
 }

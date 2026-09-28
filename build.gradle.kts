@@ -13,10 +13,12 @@ plugins {
     alias(libs.plugins.dependencySkills) apply false
 }
 
-// Dependency skills trial: every published module writes the skill an agent uses to write its guide.
+// Dependency skills trial: the librarian, for the libraries format uses (aughtone-types among them),
+// and the skill an agent uses to write each published module's guide.
 subprojects {
     pluginManager.withPlugin("org.dependencyskills.plugin") {
         extensions.configure<org.dependencyskills.plugin.DependencySkillsExtension> {
+            consumer { }
             author { }
         }
     }
