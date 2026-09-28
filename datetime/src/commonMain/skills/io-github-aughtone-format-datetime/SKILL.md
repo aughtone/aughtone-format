@@ -67,7 +67,7 @@ Month.MARCH.displayName(TextWidth.Abbreviated, localeFor("en")!!)   // "Mar"
 
 ## What moved, and what it used to be called
 
-**New in 4.1.0: standalone weekday/month names.** `DayOfWeek.displayName(width, locale)` and `Month.displayName(width, locale)` expose the locale's day and month names — `Full`/`Abbreviated` via the `TextWidth` enum — that were previously reachable only inside a formatted date. There is no `Narrow` width and no separate stand-alone-vs-in-context form yet; unsupported locales fall back to English.
+**New in 4.1.0: standalone names.** `DayOfWeek.displayName(width, locale)` and `Month.displayName(width, locale)` expose the locale's day and month names — `Full`/`Abbreviated` via the `TextWidth` enum — that were previously reachable only inside a formatted date. There is no `Narrow` width and no separate stand-alone-vs-in-context form yet; unsupported locales fall back to English. `TimeZone.displayName(instant, width, locale)` gives the zone's localized *specific* name at that instant ("Eastern Standard Time" / "EST"); it is instant-keyed because standard vs. daylight depends on the moment, and an unbundled zone falls back to its UTC offset string. The instant-independent *generic* name ("Eastern Time") is a separate CLDR metazone dataset and is not bundled.
 
 **The iOS framework was renamed in 4.0.0: `AughtoneFormatDatetimeKit` → `AOFormatDatetimeKit`.** A Swift/CocoaPods consumer importing the old framework name must update the import.
 

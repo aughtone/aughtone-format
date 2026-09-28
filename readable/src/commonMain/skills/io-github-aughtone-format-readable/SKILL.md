@@ -3,9 +3,10 @@ name: io-github-aughtone-format-readable
 description: >-
   Format "3 days ago", "1.5 km", "$1,234.56", "1st", "1.5k", "8 minutes ago" —
   human-facing, localized formatting of relative times, durations, numbers
-  (grouped and abbreviated), ordinals, money, data sizes, coordinates, and time
-  zones. Reach for it instead of hand-rolling relative-time phrasing, unit
-  scaling, ordinals, or locale number/money formatting. Output is lossy,
+  (grouped and abbreviated), ordinals, money, data sizes, coordinates, time
+  zones, and locale-correct list joining ("Mon, Wed and Fri"). Reach for it
+  instead of hand-rolling relative-time phrasing, unit scaling, ordinals, list
+  conjunctions, or locale number/money formatting. Output is lossy,
   rounded, localized prose — never a value to parse back (that is :identifiers).
 license: Apache-2.0
 metadata:
@@ -25,6 +26,7 @@ Turning a raw value into the short, localized phrase a person reads:
 - Money — "$1,234.56", "1 234,56 €".
 - Geo — coordinates as decimal degrees or DMS, azimuths "225° (SW)", altitudes.
 - Time zones — "Coordinated Universal Time".
+- Lists — locale-correct joining: "Monday, Wednesday, and Friday" / "lundi, mercredi et vendredi".
 
 Reach for it instead of assembling these strings by hand — the plural rules, unit thresholds, and locale grouping are the whole point.
 
@@ -44,6 +46,9 @@ import io.github.aughtone.readable.number.formatReadableAbbreviated
 Distance(1500.0).formatReadable(Locales.English)                // "1.5 km"
 Money(123456L, usd).formatReadable(Locales.English)             // "$1,234.56"
 1.formatReadableOrdinal(Locales.English)                        // "1st"
+
+// Locale-correct list joining (new in 4.1.0)
+listOf("Monday", "Wednesday", "Friday").formatReadableList(Locales.English)  // "Monday, Wednesday, and Friday"
 
 // Relative time: pin `now` explicitly (see traps)
 val now = Clock.System.now()
@@ -69,6 +74,8 @@ The `geo`/`quantitative` families split by package: `Coordinates`/`Altitude`/`Az
 **`RelativeStyle.Short` drops the affix.** In English, `5.days` short is `"5d"`, not `"5d ago"`; `RelativeStyle.None` suppresses that component entirely. The bare `LocalTime.formatReadableRelative` handles time units only and defaults `relativeThreshold = 3.hours` — for calendar-aware output ("Tomorrow") use the `Instant`-anchored overload.
 
 ## What moved, and what it used to be called
+
+**New in 4.1.0: `List<String>.formatReadableList(locale, type)`** — locale-correct list joining ("Monday, Wednesday, and Friday"), CLDR list patterns, types `And`/`Or`/`Unit`. Coverage is seeded (English every type; French/German/Spanish for And/Or; everything else falls back to English), wide forms only for now.
 
 **`toReadable*` → `formatReadable*` (renamed in 3.0.0).** This is the single most likely stale call. Every human-formatting entry point was `toReadable…` and is now `formatReadable…`. The old names still exist as `@Deprecated` wrappers with `ReplaceWith`, so old code compiles with a warning — but write the new name:
 

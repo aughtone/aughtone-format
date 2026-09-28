@@ -13,6 +13,15 @@ plugins {
     alias(libs.plugins.dependencySkills) apply false
 }
 
+// Dependency skills trial: every published module writes the skill an agent uses to write its guide.
+subprojects {
+    pluginManager.withPlugin("org.dependencyskills.plugin") {
+        extensions.configure<org.dependencyskills.plugin.DependencySkillsExtension> {
+            author { }
+        }
+    }
+}
+
 rootProject.plugins.withType<YarnPlugin> {
     rootProject.the<YarnRootExtension>().apply {
         lockFileDirectory = project.rootDir.resolve("kotlin-js-store")

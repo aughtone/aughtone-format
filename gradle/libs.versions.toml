@@ -19,7 +19,7 @@ androidx-startup = "1.2.0"
 aughtone-types = "4.0.0"
 aughtone-phonenumber = "0.0.4"
 # Dependency skills trial: ships each module's skill in its sources jar. Local publish only, until released.
-dependencyskills = "0.1.0"
+dependencyskills = "0.0.1"
 
 [libraries]
 androidx-rules = { module = "androidx.test:rules", version.ref = "rules" }
