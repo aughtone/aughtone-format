@@ -17,7 +17,7 @@ description: >-
   io.github.aughtone:format-identifiers.
 license: Apache-2.0
 metadata:
-  version: "4.1.0-SNAPSHOT"
+  version: "4.1.0"
   repository: https://github.com/aughtone/aughtone-format
 ---
 
@@ -84,7 +84,9 @@ The `geo`/`quantitative` families split by package: `Coordinates`/`Altitude`/`Az
 
 ## What moved, and what it used to be called
 
-**New in this release: `List<String>.formatReadableList(locale, type)`** — locale-correct list joining ("Monday, Wednesday, and Friday" / "lundi, mercredi et vendredi"), from CLDR list patterns, types `And`/`Or`/`Unit`. Covers ~55 bundled locales (English fallback beyond); wide forms only for now (no short/narrow).
+**Silent change in 4.1.0: `TimeZone.formatReadable` wording.** The `Instant` overload now takes its name from the platform's own CLDR, so the wording can differ from 4.0.0 and between targets (UTC is "Coordinated Universal Time" on most, "Greenwich Mean Time" on Apple). The bare-`UtcOffset` overload cannot consult the platform, so it now returns the English name (or Inuktitut) — it no longer localizes into other languages. Pass an `Instant` to get the reader's language.
+
+**New in 4.1.0: `List<String>.formatReadableList(locale, type)`** — locale-correct list joining ("Monday, Wednesday, and Friday" / "lundi, mercredi et vendredi"), from CLDR list patterns, types `And`/`Or`/`Unit`. Covers ~55 bundled locales (English fallback beyond); wide forms only for now (no short/narrow).
 
 **`toReadable*` → `formatReadable*` (renamed in 3.0.0).** This is the single most likely stale call. Every human-formatting entry point was `toReadable…` and is now `formatReadable…`. The old names still exist as `@Deprecated` wrappers with `ReplaceWith`, so old code compiles with a warning — but write the new name:
 
