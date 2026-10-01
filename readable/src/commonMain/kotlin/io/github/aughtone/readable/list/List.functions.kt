@@ -14,10 +14,11 @@ import io.github.aughtone.types.locale.Locale
  * weekday list, format each day with `DayOfWeek.displayName` first).
  *
  * The [locale] is resolved with the module's usual BCP-47 fallback, ending at
- * English. Coverage is currently a seeded set — English carries every [type];
- * French, German, and Spanish carry [ListType.And] and [ListType.Or]; every
- * other locale falls back to English. Only the wide forms exist, so there is no
- * width parameter yet; short and narrow forms arrive with the CLDR data.
+ * English. Coverage is a seeded set of ~55 locales; each covered locale carries
+ * all three types — [ListType.And], [ListType.Or], and [ListType.Unit]. Any
+ * locale outside the bundled set falls back to English. Only the wide forms
+ * exist, so there is no width parameter yet; short and narrow forms arrive with
+ * the CLDR data.
  *
  * Empty returns `""`; a single element returns that element unchanged.
  *

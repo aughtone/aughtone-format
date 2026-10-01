@@ -42,7 +42,7 @@ fun Azimuth.formatReadable(locale: Locale = Locale.current, precision: Int = 0):
  * Formats these [Coordinates] into a localized human-readable string.
  *
  * Supports two main formats:
- * - [CoordinateFormat.DecimalDegrees]: e.g., `"40.7128° N, 74.0060° W"`
+ * - [CoordinateFormat.DecimalDegrees]: e.g., `"40.7128° N, 74.006° W"`
  * - [CoordinateFormat.DegreesMinutesSeconds]: e.g., `"40° 42' 46\" N, 74° 0' 21\" W"`
  *
  * @param format The desired coordinate format (defaults to [CoordinateFormat.DecimalDegrees]).
@@ -62,7 +62,7 @@ fun Coordinates.formatReadable(
 /**
  * Formats these [Coordinates] into a localized string using the decimal degrees format.
  *
- * For example, a coordinate pair might be formatted as `"40.7128° N, 74.0060° W"`.
+ * For example, a coordinate pair might be formatted as `"40.7128° N, 74.006° W"`.
  * The latitude and longitude are formatted to 4 decimal places, and the cardinal
  * directions are localized according to the provided [locale].
  *

@@ -14,7 +14,8 @@ import io.github.aughtone.types.geo.*
  *
  * @param projection The projection to use. Defaults to [WebMercatorProjection].
  * @param precision The number of decimal places to include in the output.
- * @return A string containing SVG path instructions (M, L, Z).
+ * @return A string containing SVG path instructions (`M`, `L`, `l`, `Z`). Point
+ *   geometry emits a zero-length relative lineto (`l0,0`) after its moveto.
  */
 fun GeoJson.toSvgPathData(
     projection: GeoProjection = WebMercatorProjection,
@@ -30,7 +31,8 @@ fun GeoJson.toSvgPathData(
  *
  * @param projection The projection to use. Defaults to [WebMercatorProjection].
  * @param precision The number of decimal places to include in the output.
- * @return A string containing SVG path instructions (M, L, Z).
+ * @return A string containing SVG path instructions (`M`, `L`, `l`, `Z`). Point
+ *   geometry emits a zero-length relative lineto (`l0,0`) after its moveto.
  */
 fun GeoGeometry.toSvgPathData(
     projection: GeoProjection = WebMercatorProjection,

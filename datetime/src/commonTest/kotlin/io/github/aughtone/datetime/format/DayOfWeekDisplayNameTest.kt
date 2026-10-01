@@ -41,6 +41,17 @@ class DayOfWeekDisplayNameTest {
     }
 
     @Test
+    fun inuktitutUsesIdiomaticDayWords() {
+        // Full weekday names are the idiomatic Inuktut day-words from the Inuktut
+        // Tusaalanga glossary (South Qikiqtaaluk dialect), not the earlier
+        // machine-generated "day being the Nth" phrases.
+        val iu = Locale(languageCode = "iu", displayName = "Inuktitut")
+        assertEquals("ᓇᒡᒐᔾᔭᐅ", DayOfWeek.MONDAY.displayName(TextWidth.Full, iu))
+        assertEquals("ᐊᐃᑉᐱᖅ", DayOfWeek.TUESDAY.displayName(TextWidth.Full, iu))
+        assertEquals("ᓈᑦᓰᖑᔭᖅ", DayOfWeek.SUNDAY.displayName(TextWidth.Full, iu))
+    }
+
+    @Test
     fun regionFallsBackToLanguage() {
         assertEquals(
             "lundi",

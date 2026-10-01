@@ -17,3 +17,6 @@ _to_delete/
 docs/stories/
 .agents/config/dimensions.md
 # END story-tools
+
+# Drafts of outgoing correspondence and briefs — not part of the published repo
+docs/outbox/

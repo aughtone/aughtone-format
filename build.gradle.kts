@@ -10,18 +10,20 @@ plugins {
     alias(libs.plugins.kotlinSerialization) apply false
     alias(libs.plugins.composeMultiplatform) apply false
     alias(libs.plugins.composeCompiler) apply false
-    alias(libs.plugins.dependencySkills) apply false
 }
 
-// Dependency skills trial: the librarian, for the libraries format uses (aughtone-types among them),
-// and the skill an agent uses to write each published module's guide.
+// Ships each module's agent skill in every one of its sources jars, where a consumer's tooling reads it.
+// The skill is written at src/commonMain/skills/<name>/, a directory beside the source that no sources jar
+// picks up by itself, and lands at commonMain/skills/<name>/ in each: the root and every per-target jar.
 subprojects {
-    pluginManager.withPlugin("org.dependencyskills.plugin") {
-        extensions.configure<org.dependencyskills.plugin.DependencySkillsExtension> {
-            consumer { }
-            author { }
+    tasks.withType<Zip>()
+        .matching { it.name == "sourcesJar" || it.name.endsWith("SourcesJar") }
+        .configureEach {
+            from("src/commonMain/skills") {
+                include("*/SKILL.md", "*/references/**", "*/assets/**")
+                into("commonMain/skills")
+            }
         }
-    }
 }
 
 rootProject.plugins.withType<YarnPlugin> {

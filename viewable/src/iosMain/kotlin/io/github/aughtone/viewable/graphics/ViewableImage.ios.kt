@@ -88,7 +88,6 @@ actual fun ViewableImage.toByteArray(format: ImageFormat): ByteArray {
     val data = when (format) {
         ImageFormat.PNG -> UIImagePNGRepresentation(this)
         ImageFormat.JPEG -> UIImageJPEGRepresentation(this, 1.0)
-        ImageFormat.WEBP -> UIImagePNGRepresentation(this)
     }
     
     return data?.let {

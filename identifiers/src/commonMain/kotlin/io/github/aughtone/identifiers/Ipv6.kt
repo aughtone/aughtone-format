@@ -46,8 +46,9 @@ enum class Ipv6Notation {
  *
  * The receiver must be a valid IPv6 address in hex-group form — canonical
  * compressed (`2001:db8::1`) or fully expanded — with at most one `::`. Groups
- * are parsed case-insensitively; every notation but [Ipv6Notation.Expanded]
- * emits lower-case. Because the address is parsed into its eight groups first,
+ * are parsed case-insensitively and every notation emits lower-case hex;
+ * [Ipv6Notation.Expanded] differs only in that it keeps all leading zeros and
+ * never collapses a zero run to `::`. Because the address is parsed into its eight groups first,
  * [Ipv6Notation.Compressed] returns the RFC 5952 canonical form regardless of how
  * the input was written.
  *

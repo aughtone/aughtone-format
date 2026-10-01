@@ -12,8 +12,8 @@ import kotlin.math.pow
  *
  * Example:
  * ```kotlin
- * 1234.56.toReadable(Locale("en"), precision = 1) // "1,234.6"
- * 1234.56.toReadable(Locale("de"), precision = 1) // "1.234,6"
+ * 1234.56.formatReadable(Locale("en"), precision = 1) // "1,234.6"
+ * 1234.56.formatReadable(Locale("de"), precision = 1) // "1.234,6"
  * ```
  *
  * @param locale The locale defining the formatting rules (defaults to [Locale.current]).
