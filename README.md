@@ -9,6 +9,9 @@ Aught One Format is a suite of Kotlin Multiplatform libraries designed to provid
 - **Locale-correct list joining** (`:readable`): `List<String>.formatReadableList(locale, type)` — "Monday, Wednesday, and Friday" / "lundi, mercredi et vendredi" — from CLDR list patterns, ~55 locales.
 - **Zone names now delegate to the platform's CLDR** (java.time / Android ICU / Apple / Intl) with a small bundled Inuktitut supplement, replacing a ~500 KB bundled table — see [Coverage over consistency](#coverage-over-consistency). Wording follows the reader's OS and can differ across platforms.
 - **Better Inuktitut (`iu`) weekday names**: idiomatic Inuktut day-words from the Inuktut Tusaalanga glossary, replacing the previous machine-generated phrases.
+- **`ImageFormat.WEBP` removed (breaking)** (`:viewable`): it produced real WebP only on Android. Raster export is PNG or JPEG; cross-platform WebP is planned to return.
+- **JPEG export fixed on the JVM** (`:viewable`): it previously returned empty bytes.
+- **Dependencies**: `aughtone-types` 4.1.0, Compose Multiplatform 1.12.1.
 
 ## 🚀 Major Updates in 4.0.0
 

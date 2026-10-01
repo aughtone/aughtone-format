@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
-_These are the changes prepared for 4.1.0. When the release is tagged, rename this heading to `## [4.1.0] - <date>`._
+## [4.1.0] - 2026-09-30
 
 ### Added
 - **Standalone localized weekday and month names** (`:datetime`): `DayOfWeek.displayName(width, locale)` and `Month.displayName(width, locale)`, with a `TextWidth { Full, Abbreviated }` enum — the locale's day/month names ("Monday"/"Mon", "lundi", "mars") without formatting a whole date. Unsupported locales fall back to English; there is no narrow width or separate stand-alone form yet.
@@ -17,6 +17,8 @@ _These are the changes prepared for 4.1.0. When the release is tagged, rename th
 ### Changed
 - **BREAKING (behaviour) — time-zone display names now delegate to each platform's own CLDR** (`java.time` on JVM, ICU on Android, `NSTimeZone` on Apple, `Intl` on JS/Wasm) with a small bundled Inuktitut supplement, replacing the previously bundled all-locale table. The library now favours **coverage over byte-identical consistency** for zone names: exact wording follows the reader's OS and runtime and can differ across targets (UTC reads "Coordinated Universal Time" on most platforms, "Greenwich Mean Time" on Apple). This affects `:datetime` Long/Full time formatting and `TimeZone.displayName`, and `:readable`'s `TimeZone.formatReadable(instant, …)`. The bare-offset `TimeZone.formatReadable(offset, …)` overload cannot consult the platform (no instant) and resolves the bundled supplement then an English name.
 - Documentation/KDoc corrected across all modules in a pre-release audit (behaviour descriptions, return/throws tags, and out-of-date examples).
+- Upgraded to `aughtone-types` 4.1.0 (re-exported by `:datetime`, `:readable` and `:toolbox`).
+- Compose Multiplatform 1.12.1.
 
 ### Fixed
 - **JPEG export on the JVM returned empty bytes** (`:viewable`): images are drawn with an alpha channel, which `ImageIO`'s JPEG writer rejects, so `ViewableImage.toByteArray(JPEG)` and `toDataUri(JPEG)` silently produced nothing. JPEG output is now flattened onto an opaque white background before encoding.
