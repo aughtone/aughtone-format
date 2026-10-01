@@ -6,6 +6,10 @@ import kotlin.math.min
 
 /**
  * Calculates the bounding box of a [GeoJson] object.
+ *
+ * @return The bounding box enclosing the object's coordinates, or `null` when there
+ *   are no usable coordinates — for example a [GeoFeature] with no geometry or an
+ *   empty [GeoFeatureCollection].
  */
 fun GeoJson.calculateBoundingBox(): GeoBoundingBox? = when (this) {
     is GeoGeometry -> calculateBoundingBox()
@@ -18,6 +22,9 @@ fun GeoJson.calculateBoundingBox(): GeoBoundingBox? = when (this) {
 
 /**
  * Calculates the bounding box of a [GeoGeometry].
+ *
+ * @return The bounding box enclosing the geometry's coordinates, or `null` when there
+ *   are no usable coordinates — for example an empty [GeometryCollection].
  */
 fun GeoGeometry.calculateBoundingBox(): GeoBoundingBox? = when (this) {
     is GeoPoint -> GeoBoundingBox(coordinates[0], coordinates[1], coordinates[0], coordinates[1])
@@ -52,6 +59,9 @@ private fun List<List<Double>>.toBoundingBox(): GeoBoundingBox? {
 
 /**
  * Merges two bounding boxes into a single one that contains both.
+ *
+ * @param other The bounding box to merge with this one.
+ * @return A bounding box that encloses both this box and [other].
  */
 fun GeoBoundingBox.merge(other: GeoBoundingBox): GeoBoundingBox = GeoBoundingBox(
     west = min(west, other.west),

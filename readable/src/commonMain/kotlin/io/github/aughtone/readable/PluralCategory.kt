@@ -6,11 +6,22 @@ import io.github.aughtone.types.locale.Locale
  * Standard plural categories based on Unicode CLDR.
  */
 enum class PluralCategory {
+    /** CLDR `zero` category. */
     Zero,
+
+    /** CLDR `one` category. */
     One,
+
+    /** CLDR `two` category. */
     Two,
+
+    /** CLDR `few` category. */
     Few,
+
+    /** CLDR `many` category. */
     Many,
+
+    /** CLDR `other` category — the required catch-all every locale defines. */
     Other
 }
 

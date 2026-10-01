@@ -14,8 +14,8 @@ import kotlin.math.pow
  *
  * Examples:
  * ```kotlin
- * 1024.0.toReadableDataSize() // "1.0 KiB"
- * 1048576.0.toReadableDataSize(UnitOfMeasure.Byte) // "1.0 MiB"
+ * 1024.0.formatReadableDataSize() // "1.0 KiB"
+ * 1048576.0.formatReadableDataSize(UnitOfMeasure.Byte) // "1.0 MiB"
  * ```
  *
  * @param unit The unit of measure (defaults to [UnitOfMeasure.Byte]).

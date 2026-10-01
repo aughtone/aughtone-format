@@ -25,22 +25,35 @@ class LocalTimeExtTest {
         assertEquals("16:08:39", testTime1.format(DateTimeStyle.Medium, locale = testLocal, timeZone = testTimeZone, is24HourFormat = true))
     }
 
+    // Zone names now come from each platform's CLDR (coverage over consistency),
+    // so the appended zone token varies: java.time and Intl render UTC as
+    // "UTC" / "Coordinated Universal Time", while Apple's Foundation renders it as
+    // "GMT" / "Greenwich Mean Time". These tests assert the time portion exactly
+    // and accept either UTC-family wording for the zone. The zone-name lexicon
+    // itself is covered by TimeZoneDisplayNameTest / TimeZoneCoverageTest.
+    private val utcAbbr = setOf("UTC", "GMT")
+    private val utcFull = setOf("Coordinated Universal Time", "Greenwich Mean Time")
+
     @Test
     fun testFormatLong() {
-        val actual1= testTime1.format(DateTimeStyle.Long, locale = testLocal, timeZone = testTimeZone)
-        assertEquals("4:08:39 p.m. UTC", actual1)
+        val actual1 = testTime1.format(DateTimeStyle.Long, locale = testLocal, timeZone = testTimeZone)
+        assertTrue(actual1.startsWith("4:08:39 p.m. "), "unexpected time portion: $actual1")
+        assertTrue(actual1.removePrefix("4:08:39 p.m. ") in utcAbbr, "unexpected zone: $actual1")
 
         val actual2 = testTime1.format(DateTimeStyle.Long, locale = testLocal, timeZone = testTimeZone, is24HourFormat = true)
-        assertEquals("16:08:39 UTC", actual2)
+        assertTrue(actual2.startsWith("16:08:39 "), "unexpected time portion: $actual2")
+        assertTrue(actual2.removePrefix("16:08:39 ") in utcAbbr, "unexpected zone: $actual2")
     }
 
     @Test
     fun testFormatFull() {
         val actual1 = testTime1.format(DateTimeStyle.Full, locale = testLocal, timeZone = testTimeZone)
-        assertEquals("4:08:39 p.m. Coordinated Universal Time", actual1)
+        assertTrue(actual1.startsWith("4:08:39 p.m. "), "unexpected time portion: $actual1")
+        assertTrue(actual1.removePrefix("4:08:39 p.m. ") in utcFull, "unexpected zone: $actual1")
 
         val actual2 = testTime1.format(DateTimeStyle.Full, locale = testLocal, timeZone = testTimeZone, is24HourFormat = true)
-        assertEquals("16:08:39 Coordinated Universal Time", actual2)
+        assertTrue(actual2.startsWith("16:08:39 "), "unexpected time portion: $actual2")
+        assertTrue(actual2.removePrefix("16:08:39 ") in utcFull, "unexpected zone: $actual2")
     }
     @Test
     fun testFormatNone() {

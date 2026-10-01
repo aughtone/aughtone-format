@@ -29,11 +29,15 @@ fun String.format(vararg args: Any): String {
  * Obfuscates a string, showing only the last N characters (or digits).
  * Leading characters (or digits) are replaced with an obfuscation character.
  *
+ * If the string (or, when [digitsOnly] is true, its digits) has [count] or fewer
+ * characters there is nothing to hide, and the original string is returned unchanged.
+ *
  * @param count The number of characters/digits to keep visible at the end. Defaults to 4.
  * @param obfuscationChar The character to use for replacing hidden parts. Defaults to '•'.
  * @param digitsOnly If true, the obfuscation will only consider digits in the string.
  *                   If false (default), it will consider all characters.
- * @return The obfuscated string.
+ * @return The obfuscated string, or the original string unchanged when it has [count]
+ *   or fewer characters (digits, when [digitsOnly] is true).
  */
 fun String.obfuscateLast(
     count: Int = 4,

@@ -2,7 +2,6 @@ package io.github.aughtone.viewable.geojson
 
 import io.github.aughtone.toolbox.geo.GeoProjection
 import io.github.aughtone.toolbox.geo.WebMercatorProjection
-import io.github.aughtone.types.geo.GeoBoundingBox
 import io.github.aughtone.types.geo.GeoFeature
 import io.github.aughtone.types.geo.GeoFeatureCollection
 import io.github.aughtone.types.geo.GeoGeometry

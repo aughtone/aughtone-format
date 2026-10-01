@@ -88,11 +88,28 @@ actual fun ViewableGraphic.toImage(
 
 actual fun ViewableImage.toByteArray(format: ImageFormat): ByteArray {
     val output = ByteArrayOutputStream()
-    val formatName = when (format) {
-        ImageFormat.PNG -> "png"
-        ImageFormat.WEBP -> "webp"
-        ImageFormat.JPEG -> "jpg"
+    val (formatName, source) = when (format) {
+        ImageFormat.PNG -> "png" to this
+        // JPEG has no alpha channel, and ImageIO's JPEG writer rejects ARGB images
+        // outright, so flatten onto an opaque white background first.
+        ImageFormat.JPEG -> "jpg" to toOpaqueRgb()
     }
-    ImageIO.write(this, formatName, output)
+    // ImageIO.write returns false when no writer handles the image, leaving the
+    // stream empty — surface that rather than silently returning empty bytes.
+    val wrote = ImageIO.write(source, formatName, output)
+    check(wrote) { "No ImageIO writer produced output for image format '$formatName'." }
     return output.toByteArray()
+}
+
+private fun BufferedImage.toOpaqueRgb(): BufferedImage {
+    val rgb = BufferedImage(width, height, BufferedImage.TYPE_INT_RGB)
+    val g = rgb.createGraphics()
+    try {
+        g.color = java.awt.Color.WHITE
+        g.fillRect(0, 0, width, height)
+        g.drawImage(this, 0, 0, null)
+    } finally {
+        g.dispose()
+    }
+    return rgb
 }

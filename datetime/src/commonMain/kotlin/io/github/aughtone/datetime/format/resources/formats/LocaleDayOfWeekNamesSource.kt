@@ -47,8 +47,14 @@ internal val localeDayOfWeekNamesSource = mapOf(
         full = DayOfWeekNames(listOf("Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato", "Domenica")),
         abbreviated = DayOfWeekNames(listOf("Lun", "Mar", "Mer", "Gio", "Ven", "Sab", "Dom"))
     ) },
+    // Full weekday names use the idiomatic Inuktut day-words (naggajjau, aippiq,
+    // pingatsiq, sitammiq, tallirmiq, sivataarvik, naatsiingujaq) from the Inuktut
+    // Tusaalanga glossary (South Qikiqtaaluk dialect). They replace this project's
+    // earlier machine-generated "day being the Nth" phrases; CLDR has no Inuktitut
+    // weekday names, only placeholders. The abbreviated forms are still those
+    // earlier number-based ones and are not yet verified.
     "iu" to lazy { DayOfWeekNamesData(
-        full = DayOfWeekNames(listOf("ᐅᓪᓗᓂ ᐊᑕᐅᓯᕐᒥᐅᑕᐅᕙᑦᑐᓂ", "ᐅᓪᓗᓂ ᒪᕐᕉᖕᓂᐅᑕᐅᕙᑦᑐᓂ", "ᐅᓪᓗᓂ ᐱᖓᓱᓂᐅᑕᐅᕙᑦᑐᓂ", "ᐅᓪᓗᓂ ᓯᑕᒪᓂᐅᑕᐅᕙᑦᑐᓂ", "ᐅᓪᓗᓂ ᑕᓪᓕᒪᓂᐅᑕᐅᕙᑦᑐᓂ", "ᐅᓪᓗᓂ ᖄᕐᓂᐅᑕᐅᕙᑦᑐᓂ", "ᐅᓪᓗᓂ ᐅᓪᓗᖓᑕ ᐱᒋᐊᕐᕕᖓ")),
+        full = DayOfWeekNames(listOf("ᓇᒡᒐᔾᔭᐅ", "ᐊᐃᑉᐱᖅ", "ᐱᖓᑦᓯᖅ", "ᓯᑕᒻᒥᖅ", "ᑕᓪᓕᕐᒥᖅ", "ᓯᕙᑖᕐᕕᒃ", "ᓈᑦᓰᖑᔭᖅ")),
         abbreviated = DayOfWeekNames(listOf("ᐅᓪᓗ", "ᒪᕐᕉ", "ᐱᖓ", "ᓯᑕ", "ᑕᓪᓕ", "ᖄᕐ", "ᐱᒋ"))
     ) },
     "ja" to lazy { DayOfWeekNamesData(

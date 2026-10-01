@@ -1,5 +1,4 @@
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
-import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompileCommon
 
 plugins {
@@ -31,34 +30,13 @@ kotlin {
 
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs {
-        browser {
-            val rootDirPath = project.rootDir.path
-            val projectDirPath = project.projectDir.path
-            commonWebpackConfig {
-                outputModuleName = "aughtone-format-readable"
-                outputFileName = "aughtone-format-readable.js"
-                devServer = (devServer ?: KotlinWebpackConfig.DevServer()).apply {
-                    static = (static ?: mutableListOf()).apply {
-                        // Serve sources to debug inside browser
-                        add(rootDirPath)
-                        add(projectDirPath)
-                    }
-                }
-            }
-        }
+        browser()
         binaries.executable()
     }
 
-    // See: https://kotlinlang.org/docs/js-project-setup.html
     js {
-        browser {
-            generateTypeScriptDefinitions()
-            webpackTask {
-                output.libraryTarget = "commonjs2"
-            }
-        }
+        browser()
         binaries.executable()
-        useEsModules() // Enables ES2015 modules
     }
     listOf(
         iosArm64(),

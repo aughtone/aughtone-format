@@ -6,6 +6,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [4.1.0] - 2026-09-30
+
+### Added
+- **Standalone localized weekday and month names** (`:datetime`): `DayOfWeek.displayName(width, locale)` and `Month.displayName(width, locale)`, with a `TextWidth { Full, Abbreviated }` enum — the locale's day/month names ("Monday"/"Mon", "lundi", "mars") without formatting a whole date. Unsupported locales fall back to English; there is no narrow width or separate stand-alone form yet.
+- **Localized time-zone display names** (`:datetime`): `TimeZone.displayName(instant, width, locale)` returns the zone's *specific* (daylight-aware) name at an instant ("Eastern Standard Time" / "EST").
+- **Locale-correct list joining** (`:readable`): `List<String>.formatReadableList(locale, type = And | Or | Unit)` — "Monday, Wednesday, and Friday" / "lundi, mercredi et vendredi" — from CLDR list patterns, covering ~55 bundled locales (English fallback beyond), wide forms only.
+- **Improved Inuktitut (`iu`) weekday names**: the full weekday names now use the idiomatic Inuktut day-words (ᓇᒡᒐᔾᔭᐅ, ᐊᐃᑉᐱᖅ, ᐱᖓᑦᓯᖅ, …) from the Inuktut Tusaalanga glossary, replacing the previous machine-generated descriptive "day-being-the-Nth" phrases. (CLDR carries no Inuktitut weekday names, only placeholders.)
+
+### Changed
+- **BREAKING (behaviour) — time-zone display names now delegate to each platform's own CLDR** (`java.time` on JVM, ICU on Android, `NSTimeZone` on Apple, `Intl` on JS/Wasm) with a small bundled Inuktitut supplement, replacing the previously bundled all-locale table. The library now favours **coverage over byte-identical consistency** for zone names: exact wording follows the reader's OS and runtime and can differ across targets (UTC reads "Coordinated Universal Time" on most platforms, "Greenwich Mean Time" on Apple). This affects `:datetime` Long/Full time formatting and `TimeZone.displayName`, and `:readable`'s `TimeZone.formatReadable(instant, …)`. The bare-offset `TimeZone.formatReadable(offset, …)` overload cannot consult the platform (no instant) and resolves the bundled supplement then an English name.
+- Documentation/KDoc corrected across all modules in a pre-release audit (behaviour descriptions, return/throws tags, and out-of-date examples).
+- Upgraded to `aughtone-types` 4.1.0 (re-exported by `:datetime`, `:readable` and `:toolbox`).
+- Compose Multiplatform 1.12.1.
+
+### Fixed
+- **JPEG export on the JVM returned empty bytes** (`:viewable`): images are drawn with an alpha channel, which `ImageIO`'s JPEG writer rejects, so `ViewableImage.toByteArray(JPEG)` and `toDataUri(JPEG)` silently produced nothing. JPEG output is now flattened onto an opaque white background before encoding.
+
+### Removed
+- **BREAKING — `ImageFormat.WEBP` removed** (`:viewable`). It produced real WebP only on Android: on the JVM `ViewableImage.toByteArray(WEBP)` silently returned an empty byte array (the JDK has no WebP `ImageIO` writer) and on iOS it returned PNG bytes that `toDataUri` labelled `image/webp`. Use `ImageFormat.PNG` or `ImageFormat.JPEG`; cross-platform WebP will return once an encoder is chosen. The JVM encoder now also fails loudly if any format's writer produces no output, instead of returning empty bytes.
+- The bundled all-locale `TimeZoneNamesLookup` zone-name table (~500 KB) in `:datetime`, superseded by platform-CLDR delegation plus the bundled Inuktitut supplement.
+
 ## [4.0.0] - 2026-09-21
 
 ### Added
