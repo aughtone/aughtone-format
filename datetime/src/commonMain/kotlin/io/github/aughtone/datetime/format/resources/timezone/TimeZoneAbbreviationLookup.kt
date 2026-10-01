@@ -1,11 +1,18 @@
+@file:OptIn(ExperimentalTime::class)
+
 package io.github.aughtone.datetime.format.resources.timezone
 
+import io.github.aughtone.datetime.format.platform.platformZoneName
+import io.github.aughtone.types.locale.Locale
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.UtcOffset
-import io.github.aughtone.types.locale.Locale
-import io.github.aughtone.datetime.format.resources.formats.TimeZoneNamesLookup
+import kotlinx.datetime.offsetAt
 
-// Lookup table for time zone IDs to three-letter abbreviations.
+// English scaffolding (zone+offset -> English abbreviation, abbreviation ->
+// English full name) plus the resolver that turns those into a localized name by
+// consulting the bundled supplement and then the platform CLDR.
 
 object TimeZoneAbbreviationLookup {
 
@@ -272,23 +279,72 @@ object TimeZoneAbbreviationLookup {
     fun getTimeZoneVariants(timeZone: TimeZone): Map<String, String>? =
         timeZoneAbbreviatedMap[timeZone.id]
 
+    /**
+     * The localized abbreviation for [timeZone] at [instant] ("EST", "HNE"),
+     * resolved in order: the bundled supplement (for languages no platform ships,
+     * e.g. Inuktitut), then the platform CLDR ([platformZoneName]), then the
+     * English abbreviation as a backstop.
+     */
+    fun getTimeZoneAbbreviation(
+        timeZone: TimeZone,
+        instant: Instant,
+        locale: Locale = Locale(languageCode = "en", displayName = "English")
+    ): String {
+        val offset = timeZone.offsetAt(instant)
+        val englishAbbr = getTimeZoneVariants(timeZone = timeZone)?.get(offset.toString()) ?: offset.toString()
+        TimeZoneNameSupplement.getAbbreviation(englishAbbr, locale)?.let { return it }
+        platformZoneName(timeZone, instant, abbreviated = true, locale)?.let { return it }
+        return englishAbbr
+    }
+
+    /**
+     * The localized full name for [timeZone] at [instant] ("Eastern Standard
+     * Time"), resolved in order: the bundled supplement (for languages no
+     * platform ships, e.g. Inuktitut), then the platform CLDR
+     * ([platformZoneName]), then the English full name, then the UTC offset
+     * string when nothing else applies.
+     */
+    fun getTimeZoneFullName(
+        timeZone: TimeZone,
+        instant: Instant,
+        locale: Locale = Locale(languageCode = "en", displayName = "English")
+    ): String {
+        val offset = timeZone.offsetAt(instant)
+        val englishAbbr = getTimeZoneVariants(timeZone = timeZone)?.get(offset.toString()) ?: offset.toString()
+        TimeZoneNameSupplement.getFullName(englishAbbr, locale)?.let { return it }
+        platformZoneName(timeZone, instant, abbreviated = false, locale)?.let { return it }
+        return timeZoneFullNameMap[englishAbbr] ?: offset.toString()
+    }
+
+    /**
+     * The abbreviation for [timeZone] at a bare [offset], **without** platform
+     * CLDR delegation — the platform names a zone at a moment, and an offset has
+     * none. Resolves the bundled supplement, then the English abbreviation.
+     * Prefer the [Instant]-based overload wherever an instant is available, so
+     * the reader gets their own language.
+     */
     fun getTimeZoneAbbreviation(
         timeZone: TimeZone,
         offset: UtcOffset,
-        locale: Locale = Locale(languageCode = "en", displayName = "English")
+        locale: Locale,
     ): String {
         val englishAbbr = getTimeZoneVariants(timeZone = timeZone)?.get(offset.toString()) ?: offset.toString()
-        return TimeZoneNamesLookup.getAbbreviation(englishAbbr, locale) ?: englishAbbr
+        TimeZoneNameSupplement.getAbbreviation(englishAbbr, locale)?.let { return it }
+        return englishAbbr
     }
 
+    /**
+     * The full name for [timeZone] at a bare [offset], **without** platform CLDR
+     * delegation (see the abbreviation overload). Resolves the bundled
+     * supplement, then the English full name, then the offset string.
+     */
     fun getTimeZoneFullName(
         timeZone: TimeZone,
         offset: UtcOffset,
-        locale: Locale = Locale(languageCode = "en", displayName = "English")
+        locale: Locale,
     ): String {
         val englishAbbr = getTimeZoneVariants(timeZone = timeZone)?.get(offset.toString()) ?: offset.toString()
-        val localizedFullName = TimeZoneNamesLookup.getFullName(englishAbbr, locale)
-        if (localizedFullName != null) return localizedFullName
+        TimeZoneNameSupplement.getFullName(englishAbbr, locale)?.let { return it }
         return timeZoneFullNameMap[englishAbbr] ?: offset.toString()
     }
 }

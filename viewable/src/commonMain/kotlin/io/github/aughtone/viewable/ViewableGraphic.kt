@@ -41,6 +41,13 @@ private fun List<ViewableLayer>.calculateBounds(): ViewableRect? {
 
 /**
  * Converts a [ViewableGraphic] into a full SVG document string.
+ *
+ * @param width The value for the SVG `width` attribute in pixels. When `null`,
+ *   the attribute is omitted and the image scales to its `viewBox`.
+ * @param height The value for the SVG `height` attribute in pixels. When `null`,
+ *   the attribute is omitted and the image scales to its `viewBox`.
+ * @param precision The number of decimal places to include in the output.
+ * @return A string containing the full SVG document.
  */
 fun ViewableGraphic.toSvgDocument(
     width: Int? = null,

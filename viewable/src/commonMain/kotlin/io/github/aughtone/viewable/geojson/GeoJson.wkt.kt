@@ -7,12 +7,29 @@ import io.github.aughtone.types.geo.*
  * Extension functions to convert GeoJSON objects to Well-Known Text (WKT).
  */
 
+/**
+ * Converts a [GeoJson] object to a Well-Known Text (WKT) representation.
+ *
+ * A [GeoFeature] renders its geometry, or `GEOMETRYCOLLECTION EMPTY` when it has
+ * none; a [GeoFeatureCollection] renders as a `GEOMETRYCOLLECTION`.
+ *
+ * @param precision The number of decimal places to include for each coordinate.
+ *   Defaults to `6`.
+ * @return The WKT string for this object.
+ */
 fun GeoJson.toWkt(precision: Int = 6): String = when (this) {
     is GeoGeometry -> toWkt(precision)
     is GeoFeature -> geometry?.toWkt(precision) ?: "GEOMETRYCOLLECTION EMPTY"
     is GeoFeatureCollection -> "GEOMETRYCOLLECTION (${features.joinToString(", ") { it.toWkt(precision) }})"
 }
 
+/**
+ * Converts a [GeoGeometry] to its Well-Known Text (WKT) representation.
+ *
+ * @param precision The number of decimal places to include for each coordinate.
+ *   Defaults to `6`.
+ * @return The WKT string for this geometry (e.g. `POINT (...)`, `POLYGON (...)`).
+ */
 fun GeoGeometry.toWkt(precision: Int = 6): String = when (this) {
     is GeoPoint -> "POINT (${coordinates.toWktPoints(precision)})"
     is GeoMultiPoint -> "MULTIPOINT (${coordinates.joinToString(", ") { "(${it.toWktPoints(precision)})" }})"

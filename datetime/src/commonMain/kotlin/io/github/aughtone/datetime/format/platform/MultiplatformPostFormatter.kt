@@ -4,8 +4,6 @@ import io.github.aughtone.datetime.format.DateTimeStyle
 import io.github.aughtone.datetime.format.resources.timezone.TimeZoneAbbreviationLookup
 import kotlin.time.Instant
 import kotlinx.datetime.TimeZone
-import kotlinx.datetime.UtcOffset
-import kotlinx.datetime.offsetAt
 import io.github.aughtone.types.locale.Locale
 
 import io.github.aughtone.datetime.format.resources.NumberingSystem
@@ -62,14 +60,13 @@ object MultiplatformPostFormatter {
         numberingSystem: NumberingSystem? = null,
     ): String? {
         if (formattedTime == null) return null
-        val offset: UtcOffset = timeZone.offsetAt(instant)
-        
+
         var result = when (timeStyle) {
             DateTimeStyle.Long -> {
                 "$formattedTime ${
                     TimeZoneAbbreviationLookup.getTimeZoneAbbreviation(
                         timeZone = timeZone,
-                        offset = offset,
+                        instant = instant,
                         locale = locale
                     )
                 }"
@@ -79,7 +76,7 @@ object MultiplatformPostFormatter {
                 "$formattedTime ${
                     TimeZoneAbbreviationLookup.getTimeZoneFullName(
                         timeZone = timeZone,
-                        offset = offset,
+                        instant = instant,
                         locale = locale
                     )
                 }"

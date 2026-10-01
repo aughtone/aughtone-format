@@ -13,8 +13,8 @@ import io.github.aughtone.viewable.ViewablePath
  * This painter automatically scales and translates the path to fit the draw area
  * if the [ViewablePath] has bounds.
  *
- * @property viewablePath The path to render.
- * @property color The color to fill the path with.
+ * @param viewablePath The path to render.
+ * @param color The color to fill the path with.
  */
 class ViewablePathPainter(
     private val viewablePath: ViewablePath,

@@ -15,7 +15,9 @@ import io.github.aughtone.viewable.WindingRule
 /**
  * Converts a [ViewablePath] into a Compose [Path].
  *
- * @param path An optional existing [Path] to append to.
+ * @param path An optional existing [Path] to append to. Its fill type is
+ * overwritten with the fill type derived from this path's winding rule before
+ * the commands are appended.
  * @return A Compose [Path] representing the viewable path.
  */
 fun ViewablePath.toComposePath(path: Path = Path()): Path {

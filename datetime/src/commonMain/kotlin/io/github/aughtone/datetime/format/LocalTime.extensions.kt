@@ -19,6 +19,7 @@ import io.github.aughtone.datetime.format.resources.NumberingSystem
  * @param timeStyle [DateTimeStyle] The style to use for the time.
  * @param locale [Locale] The locale to use for formatting. Defaults to [Locale.current].
  * @param timeZone [TimeZone] The time zone to use for formatting. Defaults to [TimeZone.currentSystemDefault].
+ * @param is24HourFormat [Boolean] Whether to use 24 hour clock or not. Defaults to [is24HourFormat].
  * @param numberingSystem [NumberingSystem] Optional numbering system to use for digits.
  * @return [String] The formatted time.
  */

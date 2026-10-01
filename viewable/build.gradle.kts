@@ -1,5 +1,4 @@
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
-import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompileCommon
 
 plugins {
@@ -29,26 +28,13 @@ kotlin {
     }
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs {
-        browser {
-            val rootDirPath = project.rootDir.path
-            val projectDirPath = project.projectDir.path
-            commonWebpackConfig {
-                outputModuleName = "aughtone-format-viewable"
-                outputFileName = "aughtone-format-viewable.js"
-            }
-        }
+        browser()
         binaries.executable()
     }
 
     js {
-        browser {
-            generateTypeScriptDefinitions()
-            webpackTask {
-                output.libraryTarget = "commonjs2"
-            }
-        }
+        browser()
         binaries.executable()
-        useEsModules()
     }
     listOf(
         iosArm64(),

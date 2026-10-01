@@ -38,8 +38,8 @@ fun Speed.formatReadable(locale: Locale = Locale.current, precision: Int = 1): S
  *
  * Example:
  * ```kotlin
- * 1500.0.toReadableMetric(UnitOfMeasure.Meter) // "1.5 km"
- * 500.0.toReadableMetric(UnitOfMeasure.Watt)   // "500 W"
+ * 1500.0.formatReadableMetric(UnitOfMeasure.Meter) // "1.5 km"
+ * 500.0.formatReadableMetric(UnitOfMeasure.Watt)   // "500 W"
  * ```
  *
  * @param unit The base unit of measure (e.g., [UnitOfMeasure.Meter]).

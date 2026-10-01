@@ -72,7 +72,6 @@ actual fun ViewableImage.toByteArray(format: ImageFormat): ByteArray {
     val output = ByteArrayOutputStream()
     val compressFormat = when (format) {
         ImageFormat.PNG -> Bitmap.CompressFormat.PNG
-        ImageFormat.WEBP -> Bitmap.CompressFormat.WEBP
         ImageFormat.JPEG -> Bitmap.CompressFormat.JPEG
     }
     compress(compressFormat, 100, output)

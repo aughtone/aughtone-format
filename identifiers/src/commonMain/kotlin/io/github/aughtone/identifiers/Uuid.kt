@@ -148,7 +148,7 @@ private fun canonicalUuidHex(value: String): String {
             g.length == UUID_GROUP_LENGTHS[i] && g.all { it.digitToIntOrNull(16) != null }
         }
     require(valid) {
-        "Not a canonical UUID (expected 8-4-4-4-12 lower-case hex groups): \"$value\""
+        "Not a canonical UUID (expected 8-4-4-4-12 hex groups): \"$value\""
     }
     return groups.joinToString("") { it.lowercase() }
 }
