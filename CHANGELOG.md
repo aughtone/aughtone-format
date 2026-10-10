@@ -45,7 +45,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - **Portuguese (Portugal) groups thousands with a space** (`:readable`); Brazilian Portuguese keeps the dot.
 
 ### Known issues
-- Relative phrases in the languages that keep the compact form may be worded differently from CLDR where both wordings are valid (Spanish "en 2 horas" for "dentro de 2 horas"); these are left as they were. Hebrew relative phrases always show the digit.
+- Relative phrases in the languages that keep the compact form may be worded differently from CLDR where both wordings are valid (Spanish "en 2 horas" for "dentro de 2 horas"); these are left as they were, and are listed in [docs/gap/0002-relative-time-wording-differences-from-cldr.md](docs/gap/0002-relative-time-wording-differences-from-cldr.md). Hebrew relative phrases always show the digit.
 - The "Recently" and "Shortly" labels are English for most languages, and `RelativeStyle.Short` abbreviates only in English. These and the other open items are collected in [#19](https://github.com/aughtone/aughtone-format/issues/19).
 - `Altitude.formatReadable` and `Azimuth.formatReadable` are declared in both `…readable.geo` and `…readable.quantitative`; import them by name from one package.
 

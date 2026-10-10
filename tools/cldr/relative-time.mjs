@@ -12,7 +12,8 @@
 // the unit takes a different grammatical case in each direction (Czech: "před 5 minutami" but
 // "za 5 minut"), or because the phrase changes shape (Arabic drops the count for one and two,
 // Swahili writes the unit before the count). Every other bundled language keeps its compact
-// template-and-words form in RelativeTime.resources.kt.
+// template-and-words form in RelativeTime.resources.kt; where its wording differs from CLDR, see
+// docs/gap/0002-relative-time-wording-differences-from-cldr.md.
 import { writeFileSync } from "node:fs";
 
 const LANGUAGES = ["ar", "cs", "fi", "hu", "hy", "is", "ka", "kk", "lt", "sk", "sl", "sq", "sr", "sw"];
