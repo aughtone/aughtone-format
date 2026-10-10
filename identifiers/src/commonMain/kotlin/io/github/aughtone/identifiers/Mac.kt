@@ -10,10 +10,12 @@ package io.github.aughtone.identifiers
  * result.
  *
  * It deliberately does **not** parse, validate, or normalize arbitrary input.
- * Accepting messy spellings, upper-case input, or alternative separators is a
- * normalization concern and belongs upstream; a formatter's contract is
- * "canonical value in, chosen notation out". Passing anything that is not
- * already canonical is treated as a programming error (see the `@throws`).
+ * Accepting messy spellings or alternative separators is a normalization
+ * concern and belongs upstream; a formatter's contract is "canonical value in,
+ * chosen notation out". Passing anything that is not six colon-separated pairs
+ * of hexadecimal digits is treated as a programming error (see the `@throws`).
+ * The one latitude is letter case: the hex digits may be upper or lower case,
+ * and each notation applies its own.
  *
  * Example:
  * ```kotlin
@@ -59,7 +61,7 @@ fun String.formatMac(notation: MacNotation = MacNotation.Colon): String {
  */
 private fun canonicalMacHex(value: String): String {
     val octets = value.split(':')
-    require(octets.size == 6 && octets.all { o -> o.length == 2 && o.all { it.digitToIntOrNull(16) != null } }) {
+    require(octets.size == 6 && octets.all { o -> o.length == 2 && o.all { it.isAsciiHexDigit() } }) {
         "Not a canonical MAC address (expected six colon-separated hex pairs): \"$value\""
     }
     return octets.joinToString("") { it.lowercase() }

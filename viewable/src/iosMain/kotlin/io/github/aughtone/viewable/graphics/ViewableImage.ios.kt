@@ -76,6 +76,9 @@ actual fun ViewableGraphic.toImage(
             CGContextAddPath(context, cgPath)
             CGContextStrokePath(context)
         }
+
+        // Core Foundation objects are not managed by Kotlin: the path has to be released by hand.
+        CGPathRelease(cgPath)
     }
     
     val image = UIGraphicsGetImageFromCurrentImageContext()
@@ -98,5 +101,5 @@ actual fun ViewableImage.toByteArray(format: ImageFormat): ByteArray {
                 memcpy(pinned.addressOf(0), bytes, it.length)
             }
         }
-    } ?: ByteArray(0)
+    } ?: error("The image could not be encoded as ${format.name}.")
 }

@@ -280,6 +280,18 @@ object TimeZoneAbbreviationLookup {
         timeZoneAbbreviatedMap[timeZone.id]
 
     /**
+     * The English abbreviation the scaffolding lists for [timeZone] at [offset], or the offset's
+     * own text when the zone or offset is not listed.
+     *
+     * A zero offset prints as `"Z"`, while the table keys it as `"+00:00"`, so both are tried.
+     */
+    private fun englishAbbreviationFor(timeZone: TimeZone, offset: UtcOffset): String {
+        val variants = getTimeZoneVariants(timeZone = timeZone)
+        val key = offset.toString()
+        return variants?.get(key) ?: (if (offset == UtcOffset.ZERO) variants?.get("+00:00") else null) ?: key
+    }
+
+    /**
      * The localized abbreviation for [timeZone] at [instant] ("EST", "HNE"),
      * resolved in order: the bundled supplement (for languages no platform ships,
      * e.g. Inuktitut), then the platform CLDR ([platformZoneName]), then the
@@ -291,8 +303,9 @@ object TimeZoneAbbreviationLookup {
         locale: Locale = Locale(languageCode = "en", displayName = "English")
     ): String {
         val offset = timeZone.offsetAt(instant)
-        val englishAbbr = getTimeZoneVariants(timeZone = timeZone)?.get(offset.toString()) ?: offset.toString()
-        TimeZoneNameSupplement.getAbbreviation(englishAbbr, locale)?.let { return it }
+        val englishAbbr = englishAbbreviationFor(timeZone, offset)
+        (TimeZoneNameSupplement.getAbbreviation(englishAbbr, locale)
+            ?: TimeZoneNameSupplement.getAbbreviation(offset.toString(), locale))?.let { return it }
         platformZoneName(timeZone, instant, abbreviated = true, locale)?.let { return it }
         return englishAbbr
     }
@@ -310,8 +323,9 @@ object TimeZoneAbbreviationLookup {
         locale: Locale = Locale(languageCode = "en", displayName = "English")
     ): String {
         val offset = timeZone.offsetAt(instant)
-        val englishAbbr = getTimeZoneVariants(timeZone = timeZone)?.get(offset.toString()) ?: offset.toString()
-        TimeZoneNameSupplement.getFullName(englishAbbr, locale)?.let { return it }
+        val englishAbbr = englishAbbreviationFor(timeZone, offset)
+        (TimeZoneNameSupplement.getFullName(englishAbbr, locale)
+            ?: TimeZoneNameSupplement.getFullName(offset.toString(), locale))?.let { return it }
         platformZoneName(timeZone, instant, abbreviated = false, locale)?.let { return it }
         return timeZoneFullNameMap[englishAbbr] ?: offset.toString()
     }
@@ -328,8 +342,9 @@ object TimeZoneAbbreviationLookup {
         offset: UtcOffset,
         locale: Locale,
     ): String {
-        val englishAbbr = getTimeZoneVariants(timeZone = timeZone)?.get(offset.toString()) ?: offset.toString()
-        TimeZoneNameSupplement.getAbbreviation(englishAbbr, locale)?.let { return it }
+        val englishAbbr = englishAbbreviationFor(timeZone, offset)
+        (TimeZoneNameSupplement.getAbbreviation(englishAbbr, locale)
+            ?: TimeZoneNameSupplement.getAbbreviation(offset.toString(), locale))?.let { return it }
         return englishAbbr
     }
 
@@ -343,8 +358,9 @@ object TimeZoneAbbreviationLookup {
         offset: UtcOffset,
         locale: Locale,
     ): String {
-        val englishAbbr = getTimeZoneVariants(timeZone = timeZone)?.get(offset.toString()) ?: offset.toString()
-        TimeZoneNameSupplement.getFullName(englishAbbr, locale)?.let { return it }
+        val englishAbbr = englishAbbreviationFor(timeZone, offset)
+        (TimeZoneNameSupplement.getFullName(englishAbbr, locale)
+            ?: TimeZoneNameSupplement.getFullName(offset.toString(), locale))?.let { return it }
         return timeZoneFullNameMap[englishAbbr] ?: offset.toString()
     }
 }

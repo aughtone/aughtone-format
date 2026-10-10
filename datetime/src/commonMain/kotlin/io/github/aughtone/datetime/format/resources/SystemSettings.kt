@@ -8,13 +8,14 @@ import kotlin.time.Clock
  *
  * **Note**: not all platforms have a way to determine if the users system is in 24 hour mode.
  * if the code is running on one of those platforms, this function will take a guess, based on
- * the local. If the local is not recognized, it will default to 12 hour formatting.
+ * the locale's region. A locale with no region, or a region that is not listed, defaults to
+ * 24 hour formatting.
  *
  * @return true if 24 hour time format is selected, false otherwise.
  */
 fun is24HourFormat(locale: Locale = Locale.current): Boolean {
     // XXX Not all platforms know if the users system is in 24 hour mode,
-    //  so if null is returned, we'll take a guess based on locale, and fall back to false.
+    //  so if null is returned, we'll take a guess based on locale, and fall back to 24-hour.
     try {
         return isPlatform24HourSettingEnabled() ?: Resources.getClockHours(locale = locale).is24hour
     } catch (e: Exception) {

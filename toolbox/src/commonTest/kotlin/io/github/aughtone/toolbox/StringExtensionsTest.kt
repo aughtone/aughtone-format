@@ -74,4 +74,14 @@ class StringExtensionsTest {
         assertEquals("Xhort", "Short".obfuscateLast(obfuscationChar='X'))
         assertEquals("Tiny", "Tiny".obfuscateLast(obfuscationChar='X'))
     }
+
+    @OptIn(ExperimentalMultiplatform::class)
+    @Test
+    fun formatSubstitutesEachPlaceholderOnceAndLeavesArgumentTextAlone() {
+        assertEquals("%2 and B", "%1 and %2".format("%2", "B"))
+        assertEquals("j", "%10".format("a", "b", "c", "d", "e", "f", "g", "h", "i", "j"))
+        assertEquals("a0", "%10".format("a"))
+        assertEquals("100% of %3", "100% of %3".format("x"))
+        assertEquals("Hello World, today is Monday", "Hello %1, today is %2".format("World", "Monday"))
+    }
 }

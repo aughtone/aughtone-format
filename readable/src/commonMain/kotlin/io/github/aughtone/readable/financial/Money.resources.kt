@@ -2,10 +2,10 @@
 
 package io.github.aughtone.readable.financial
 
-import io.github.aughtone.readable.number.numberFormatterFor
+import io.github.aughtone.readable.number.formatDecimalText
 import io.github.aughtone.types.financial.Money
 import io.github.aughtone.types.locale.Locale
-import kotlin.math.pow
+import io.github.aughtone.types.number.RoundingMode
 import kotlin.concurrent.Volatile
 
 /**
@@ -24,18 +24,27 @@ internal typealias MoneyFormatRule = (String, String) -> String
  * Rules dictate whether the symbol is prefixed or suffixed, and whether there's a space.
  */
 private fun buildFormatRule(code: String): MoneyFormatRule? = when (code) {
+    // German- and Italian-speaking Switzerland put the symbol first, with a space ("CHF 1'234.56")
+    "de-CH", "it-CH" ->
+        { numStr, sym -> "$sym $numStr" }
     // Suffix with space (e.g. "1 234,56 €")
-    "af", "az", "be", "bg", "ca", "cs", "da", "de", "el", "es", "et", "eu", "fi", "fr", "gl", "hr", "hu", "hy", "is", "it", "ka", "kk", "lt", "lv", "mk", "nb", "nn", "no", "pl", "pt", "ro", "ru", "sk", "sl", "sq", "sr", "sv", "sw", "uk", "uz", "vi", "ar", "fa" ->
+    "az", "be", "bg", "ca", "cs", "da", "de", "el", "es", "et", "eu", "fi", "fr", "gl", "hr", "hu", "hy", "is", "it", "ka", "kk", "lt", "lv", "mk", "nb", "nn", "no", "pl", "pt", "ro", "ru", "sk", "sl", "sq", "sr", "sv", "uk", "uz", "vi", "ar", "fa", "he" ->
         { numStr, sym -> "$numStr $sym" }
     // Prefix without space (e.g. "$1,234.56")
-    "en", "ja", "zh", "ko", "th", "hi", "he", "id", "ms", "tr", "iu" ->
-        { numStr, sym -> "$sym$numStr" }
+    "en", "af", "ja", "zh", "ko", "th", "hi", "id", "ms", "tr", "iu" -> ::prefixSymbol
     // Prefix with space (e.g. "€ 1.234,56")
-    "nl" ->
+    "nl", "sw" ->
         { numStr, sym -> "$sym $numStr" }
     // Null means continue fallback
     else -> null
 }
+
+/**
+ * Places the symbol directly before the number. A negative amount keeps its sign in front of the
+ * symbol ("-$123.00"), never between the symbol and the digits.
+ */
+private fun prefixSymbol(numStr: String, sym: String): String =
+    if (numStr.startsWith('-')) "-$sym${numStr.substring(1)}" else "$sym$numStr"
 
 @Volatile private var moneyRuleCache = emptyMap<String, MoneyFormatRule>()
 @Volatile private var moneyFormatterCache = emptyMap<Pair<String, Boolean>, MoneyFormatter>()
@@ -55,7 +64,7 @@ private fun moneyRuleFor(locale: Locale): MoneyFormatRule {
         currentTag = currentTag.substringBeforeLast('-', "")
     }
     // Default to prefix no-space if completely unknown
-    val resolved = rule ?: { numStr, sym -> "$sym$numStr" }
+    val resolved = rule ?: ::prefixSymbol
 
     val oldCache = moneyRuleCache
     if (!oldCache.containsKey(fullTag)) {
@@ -86,9 +95,10 @@ fun moneyFormatterFor(locale: Locale, showSymbol: Boolean = true): MoneyFormatte
     val formatter: MoneyFormatter = { money ->
         val currency = money.currency
         val digits = currency.digits
-        val value = money.cents.toDouble() / 10.0.pow(digits)
-        val numFormatter = numberFormatterFor(locale, digits)
-        val numberStr = numFormatter(value)
+        // Rounded and rendered from the decimal amount itself, never through a Double: every
+        // digit stays exact and the fraction keeps the currency's full minor-unit width.
+        val amount = money.value.setScale(digits, RoundingMode.HALF_EVEN)
+        val numberStr = formatDecimalText(amount.toString(), locale, digits, fixedFraction = true)
 
         if (showSymbol) {
             rule(numberStr, currency.symbol)

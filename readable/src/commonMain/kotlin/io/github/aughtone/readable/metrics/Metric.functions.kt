@@ -1,12 +1,12 @@
 package io.github.aughtone.readable.metrics
 
 import io.github.aughtone.readable.number.numberFormatterFor
+import io.github.aughtone.readable.number.prefixRungFor
 import io.github.aughtone.types.locale.Locale
 import io.github.aughtone.types.quantitative.Distance
 import io.github.aughtone.types.quantitative.Speed
 import io.github.aughtone.types.units.MetricPrefix
 import io.github.aughtone.types.units.UnitOfMeasure
-import kotlin.math.abs
 import kotlin.math.pow
 
 /**
@@ -34,12 +34,17 @@ fun Speed.formatReadable(locale: Locale = Locale.current, precision: Int = 1): S
 /**
  * Generic extension to format a [Double] value with a unit and automatic metric scaling.
  *
- * Only scales standard SI-compatible units (Meter, Gram, Watt, etc.) by default.
+ * Only scales standard SI-compatible units (Meter, Gram, Watt, etc.) by default. The prefix is
+ * chosen so the number shown is from 1 up to, but not including, 1,000 — a value that rounds up to
+ * 1,000 moves to the next prefix. Values below 1 scale down (m, μ, n, …). Zero, not-a-number and
+ * the infinities are shown with the bare unit.
  *
  * Example:
  * ```kotlin
- * 1500.0.formatReadableMetric(UnitOfMeasure.Meter) // "1.5 km"
- * 500.0.formatReadableMetric(UnitOfMeasure.Watt)   // "500 W"
+ * 1500.0.formatReadableMetric(UnitOfMeasure.Meter)  // "1.5 km"
+ * 500.0.formatReadableMetric(UnitOfMeasure.Watt)    // "500 W"
+ * 999.96.formatReadableMetric(UnitOfMeasure.Meter)  // "1 km", not "1,000 m"
+ * 0.5.formatReadableMetric(UnitOfMeasure.Meter)     // "500 mm"
  * ```
  *
  * @param unit The base unit of measure (e.g., [UnitOfMeasure.Meter]).
@@ -52,42 +57,27 @@ fun Double.formatReadableMetric(
     locale: Locale = Locale.current,
     precision: Int = 1
 ): String {
-    val absoluteValue = abs(this)
     val formatter = numberFormatterFor(locale, precision)
-
-    // Only scale SI-compatible units (basic set for now)
-    val siBaseUnits = listOf(
-        UnitOfMeasure.Meter,
-        UnitOfMeasure.Gram,
-        UnitOfMeasure.Watt,
-        UnitOfMeasure.Hertz,
-        UnitOfMeasure.Ampere,
-        UnitOfMeasure.Volt,
-        UnitOfMeasure.Joule
-    )
-
-    if (unit !in siBaseUnits || absoluteValue == 0.0) {
-        return "${formatter(this)} ${unit.symbol}"
-    }
-
-    // Only scale if we are outside the [1, 1000) range
-    if (absoluteValue >= 1.0 && absoluteValue < 1000.0) {
-        return "${formatter(this)} ${unit.symbol}"
-    }
-
-    // Find the largest prefix that is <= absoluteValue
-    val prefix = MetricPrefix.entries
-        .filter { it.exponent % 3 == 0 } // Standard k, M, G, T, m, μ, n...
-        .sortedByDescending { it.exponent }
-        .find { 10.0.pow(it.exponent) <= absoluteValue }
-
-    return if (prefix != null && prefix.exponent != 0) {
-        val scaledValue = this / 10.0.pow(prefix.exponent)
-        "${formatter(scaledValue)} ${prefix.symbol}${unit.symbol}"
-    } else {
-        "${formatter(this)} ${unit.symbol}"
-    }
+    val (symbol, divisor) = (if (unit in siBaseUnits) prefixRungFor(this, precision, metricLadder) else null)
+        ?: return "${formatter(this)} ${unit.symbol}"
+    return "${formatter(this / divisor)} $symbol${unit.symbol}"
 }
+
+/** The units that take an SI prefix (a basic set for now); every other unit is shown unscaled. */
+private val siBaseUnits = listOf(
+    UnitOfMeasure.Meter,
+    UnitOfMeasure.Gram,
+    UnitOfMeasure.Watt,
+    UnitOfMeasure.Hertz,
+    UnitOfMeasure.Ampere,
+    UnitOfMeasure.Volt,
+    UnitOfMeasure.Joule
+)
+
+/** The SI prefixes in steps of a thousand (q … m, none, k … Q), smallest first. */
+private val metricLadder: List<Pair<String, Double>> =
+    (MetricPrefix.entries.filter { it.exponent % 3 == 0 }.map { it.symbol to 10.0.pow(it.exponent) } + ("" to 1.0))
+        .sortedBy { it.second }
 
 @Deprecated(
     message = "Use formatReadableMetric instead",

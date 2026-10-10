@@ -16,7 +16,7 @@ description: >-
   io.github.aughtone:format-toolbox.
 license: Apache-2.0
 metadata:
-  version: "4.1.0"
+  version: "4.1.1"
   repository: https://github.com/aughtone/aughtone-format
 ---
 
@@ -41,6 +41,7 @@ You have GeoJSON (or a bare `GeoGeometry`) and need to *render* it, without pull
 ```kotlin
 import io.github.aughtone.viewable.*
 import io.github.aughtone.viewable.geojson.*
+import io.github.aughtone.viewable.graphics.*   // toImage, toByteArray, toDataUri, ImageFormat, isImageSupported
 
 // GeoJSON -> projected path -> SVG document
 val path = geometry.toViewablePath()                 // default projection: WebMercatorProjection
@@ -65,11 +66,13 @@ Pass a `GeoProjection` argument to override the projection; `WebMercatorProjecti
 
 ## Invariants and traps
 
-**The string conversions do not throw — malformed or empty input degrades silently.** There are no `require`/`check` guards on the SVG/path/WKT output. Symptom: an empty `""` (SVG/path), `"GEOMETRYCOLLECTION EMPTY"` (WKT), or a `viewBox="0 0 1 1"` box means the input produced no drawable geometry — the call did not fail, it had nothing to draw (coordinates with fewer than two numbers are dropped; a feature with a null geometry yields nothing).
+**The string conversions do not throw — empty input degrades silently.** There are no `require`/`check` guards on the SVG/path/WKT/EPS output. Symptom: an empty `""` (SVG/path) or an `EMPTY` geometry (WKT: `"GEOMETRYCOLLECTION EMPTY"`, `"POLYGON EMPTY"`) means the input had nothing to draw — a feature with a null geometry, or a geometry with no parts. A coordinate that is not a number is written as `NaN`. A `viewBox="0 0 1 1"` means the path carries no bounds: either it had no geometry, or it is a `ViewablePath` built by hand without passing `bounds`, which is not computed for you. Numbers are always plain decimals, at most `precision` places, with trailing zeros dropped.
+
+**EPS output matches the SVG and raster output: same way up, fill and stroke both drawn.** A layer with both a fill and a stroke gets both, and the drawing is not mirrored. EPS has no transparency, so a colour's alpha is ignored there; `ViewableGraphic.toSvgDocument` carries it as `fill-opacity` / `stroke-opacity`. In 4.1.0 and earlier the EPS was upside down and lost the stroke of any filled layer, and the graphic's SVG dropped alpha.
 
 **Bitmap generation throws on JS/Wasm.** `toImage` and `ViewableImage.toByteArray` are implemented on JVM, Android and iOS, but on JS and Wasm they raise `IllegalStateException` ("Bitmap generation is not supported"). Symptom: an `IllegalStateException` in a browser build — gate on `isImageSupported` (false on JS/Wasm) and use the SVG string output there instead.
 
-**The default projection is Web Mercator, in screen space.** Every `toViewablePath`/`toSvgPathData` defaults to `WebMercatorProjection`. That flips Y (larger latitude → smaller Y, the screen convention), normalizes to roughly degree scale rather than EPSG:3857 meters, and is undefined near the poles (about ±85°). Symptom: a shape mirrored top-to-bottom, wrongly scaled for meters, or degenerate above ~85°. Pass `EquirectangularProjection` (x = lon, y = −lat) for a plain mapping.
+**The default projection is Web Mercator, in screen space.** Every `toViewablePath`/`toSvgPathData` defaults to `WebMercatorProjection`. That flips Y (larger latitude → smaller Y, the screen convention), normalizes to degree scale rather than EPSG:3857 meters, and holds any latitude beyond about ±85.0511° at that limit, as web maps do. Symptom: a shape mirrored top-to-bottom, wrongly scaled for meters, or flattened along the edge near a pole. Pass `EquirectangularProjection` (x = lon, y = −lat) for a plain mapping.
 
 **Precision defaults differ by format.** SVG path/document precision defaults to **3**; `toWkt` defaults to **6**. Symptom: SVG and WKT of the same geometry disagree in decimal places — set it explicitly if they must match.
 
@@ -80,6 +83,8 @@ Pass a `GeoProjection` argument to override the projection; `WebMercatorProjecti
 **`ViewableRect` is corners, not extents.** It is `(left, top, right, bottom)`; `width`/`height` are computed getters. Symptom: a rect the wrong size when you passed width/height — construct it from corners.
 
 ## What moved, and what it used to be called
+
+**JPEG is flattened onto white on every platform.** JPEG has no transparency; transparent areas become white on JVM, Android and iOS alike. In 4.1.0 Android flattened them to black, which with the default black fill gave an all-black image. An image that cannot be encoded throws `IllegalStateException` rather than returning empty bytes.
 
 **`ImageFormat.WEBP` was removed in 4.1.0.** Raster export is `ImageFormat.PNG` or `ImageFormat.JPEG` only; code naming `ImageFormat.WEBP` no longer compiles. It only ever produced real WebP on Android — the JVM returned empty bytes and iOS returned PNG labelled as WebP — so nothing portable relied on it.
 

@@ -19,7 +19,10 @@ import kotlin.concurrent.Volatile
 typealias DurationFormatter = (Duration, RelativeStyle) -> String
 
 private class DurationUnitNames(val forms: Map<PluralCategory, String>) {
-    fun get(category: PluralCategory): String = forms[category] ?: forms[PluralCategory.Other] ?: forms.values.first()
+    // A three-form table stores its general plural under Many; languages whose rule calls that
+    // form Other (Czech, Croatian, Lithuanian, …) reach it through this chain.
+    fun get(category: PluralCategory): String =
+        forms[category] ?: forms[PluralCategory.Other] ?: forms[PluralCategory.Many] ?: forms.values.first()
 }
 
 // ── Factories ─────────────────────────────────────────────────────────────────
@@ -87,23 +90,43 @@ private fun u6(
     "year"   to DurationUnitNames(mapOf(PluralCategory.Zero to yZ, PluralCategory.One to y1, PluralCategory.Two to y2, PluralCategory.Few to yF, PluralCategory.Many to yM, PluralCategory.Other to yO)),
 )
 
-private fun buildFormatter(locale: Locale, units: Map<String, DurationUnitNames>, sep: String = " "): DurationFormatter = { duration, style ->
+/**
+ * Builds a formatter from a unit table.
+ *
+ * Each unit takes over half a step early — a minute from 59.5 seconds, an hour from 59.5 minutes,
+ * a day from 23.5 hours, a week from 6.5 days, a month from 29.5 days — so a value that rounds up
+ * to a whole larger unit is shown as that unit ("1 minute") and never as "60 seconds".
+ *
+ * @param numberFirst `false` for a language that writes the unit before the count ("dakika 5").
+ */
+private fun buildFormatter(
+    locale: Locale,
+    units: Map<String, DurationUnitNames>,
+    sep: String = " ",
+    numberFirst: Boolean = true,
+): DurationFormatter = { duration, _ ->
     val totalSeconds = abs(duration.toDouble(DurationUnit.SECONDS))
     val (value, unitKey) = when {
         totalSeconds >= 31536000 -> (totalSeconds / 31536000.0) to "year"
-        totalSeconds >= 2592000  -> (totalSeconds / 2592000.0)  to "month"
-        totalSeconds >= 604800 && (totalSeconds / 604800.0).roundToLong() <= 3 -> (totalSeconds / 604800.0) to "week"
-        totalSeconds >= 86400   -> (totalSeconds / 86400.0)   to "day"
-        totalSeconds >= 3600    -> (totalSeconds / 3600.0)    to "hour"
-        totalSeconds >= 60      -> (totalSeconds / 60.0)      to "minute"
+        totalSeconds >= 2548800  -> (totalSeconds / 2592000.0)  to "month"
+        totalSeconds >= 561600 && (totalSeconds / 604800.0).roundToLong() <= 3 -> (totalSeconds / 604800.0) to "week"
+        totalSeconds >= 84600   -> (totalSeconds / 86400.0)   to "day"
+        totalSeconds >= 3570    -> (totalSeconds / 3600.0)    to "hour"
+        totalSeconds >= 59.5    -> (totalSeconds / 60.0)      to "minute"
         else                    -> totalSeconds               to "second"
     }
     val n = value.roundToLong()
     val category = pluralCategoryFor(locale, n)
     val names = units[unitKey]!!
     val label = names.get(category)
-    "$n$sep$label"
+    if (numberFirst) "$n$sep$label" else "$label$sep$n"
 }
+
+/** Builds a unit table from one row of seven words — second, minute, hour, day, week, month, year — per plural category. */
+private fun unitTable(vararg rows: Pair<PluralCategory, List<String>>): Map<String, DurationUnitNames> =
+    listOf("second", "minute", "hour", "day", "week", "month", "year").withIndex().associate { (index, key) ->
+        key to DurationUnitNames(rows.associate { (category, words) -> category to words[index] })
+    }
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -130,11 +153,27 @@ private fun isDurationTagSupported(tag: String): Boolean = when (tag) {
 }
 
 fun buildDurationFormatter(tag: String, locale: Locale, style: RelativeStyle = RelativeStyle.Long): DurationFormatter {
-    val sep = if (style == RelativeStyle.Short) "" else " "
+    // Only English has abbreviated unit words ("5m"). Every other language keeps its full word in
+    // the Short style, and so keeps the space before it.
+    val sep = " "
     return when (tag) {
-        "en" -> if (style == RelativeStyle.Short) buildFormatter(locale, ENGLISH_DURATION_UNITS_SHORT, sep) else buildFormatter(locale, ENGLISH_DURATION_UNITS, sep)
-        "af", "nl", "id", "ms", "sw" ->
-            buildFormatter(locale, ENGLISH_DURATION_UNITS, sep)
+        "en" -> if (style == RelativeStyle.Short) buildFormatter(locale, ENGLISH_DURATION_UNITS_SHORT, "") else buildFormatter(locale, ENGLISH_DURATION_UNITS, sep)
+        "af" ->
+            buildFormatter(locale, u2("sekonde","minuut","uur","dag","week","maand","jaar",
+                             "sekondes","minute","uur","dae","weke","maande","jaar"), sep)
+        "nl" ->
+            buildFormatter(locale, u2("seconde","minuut","uur","dag","week","maand","jaar",
+                             "seconden","minuten","uur","dagen","weken","maanden","jaar"), sep)
+        "id" ->
+            buildFormatter(locale, u2("detik","menit","jam","hari","minggu","bulan","tahun",
+                             "detik","menit","jam","hari","minggu","bulan","tahun"), sep)
+        "ms" ->
+            buildFormatter(locale, u2("saat","minit","jam","hari","minggu","bulan","tahun",
+                             "saat","minit","jam","hari","minggu","bulan","tahun"), sep)
+        // Swahili writes the unit before the count: "dakika 5".
+        "sw" ->
+            buildFormatter(locale, u2("sekunde","dakika","saa","siku","wiki","mwezi","mwaka",
+                             "sekunde","dakika","saa","siku","wiki","miezi","miaka"), sep, numberFirst = false)
         "de" ->
             buildFormatter(locale, u2("Sekunde","Minute","Stunde","Tag","Woche","Monat","Jahr",
                              "Sekunden","Minuten","Stunden","Tage","Wochen","Monate","Jahre"), sep)
@@ -146,7 +185,7 @@ fun buildDurationFormatter(tag: String, locale: Locale, style: RelativeStyle = R
                              "sekunder","minutter","timer","dager","uker","måneder","år"), sep)
         "nn" ->
             buildFormatter(locale, u2("sekund","minutt","time","dag","veke","månad","år",
-                             "sekunder","minutt","timar","dagar","veker","månader","år"), sep)
+                             "sekund","minutt","timar","dagar","veker","månadar","år"), sep)
         "sv" ->
             buildFormatter(locale, u2("sekund","minut","timme","dag","vecka","månad","år",
                              "sekunder","minuter","timmar","dagar","veckor","månader","år"), sep)
@@ -157,9 +196,12 @@ fun buildDurationFormatter(tag: String, locale: Locale, style: RelativeStyle = R
         "fr" ->
             buildFormatter(locale, u2("seconde","minute","heure","jour","semaine","mois","an",
                              "secondes","minutes","heures","jours","semaines","mois","ans"), sep)
-        "es", "gl" ->
+        "es" ->
             buildFormatter(locale, u2("segundo","minuto","hora","día","semana","mes","año",
                              "segundos","minutos","horas","días","semanas","meses","años"), sep)
+        "gl" ->
+            buildFormatter(locale, u2("segundo","minuto","hora","día","semana","mes","ano",
+                             "segundos","minutos","horas","días","semanas","meses","anos"), sep)
         "it" ->
             buildFormatter(locale, u2("secondo","minuto","ora","giorno","settimana","mese","anno",
                              "secondi","minuti","ore","giorni","settimane","mesi","anni"), sep)
@@ -169,9 +211,13 @@ fun buildDurationFormatter(tag: String, locale: Locale, style: RelativeStyle = R
         "ca" ->
             buildFormatter(locale, u2("segon","minut","hora","dia","setmana","mes","any",
                              "segons","minuts","hores","dies","setmanes","mesos","anys"), sep)
+        // Romanian joins the count to the unit with "de" from twenty onwards.
         "ro" ->
-            buildFormatter(locale, u2("secundă","minut","oră","zi","săptămână","lună","an",
-                             "secunde","minute","ore","zile","săptămâni","luni","ani"), sep)
+            buildFormatter(locale, unitTable(
+                PluralCategory.One to listOf("secundă","minut","oră","zi","săptămână","lună","an"),
+                PluralCategory.Few to listOf("secunde","minute","ore","zile","săptămâni","luni","ani"),
+                PluralCategory.Other to listOf("de secunde","de minute","de ore","de zile","de săptămâni","de luni","de ani"),
+            ), sep)
 
         "ru" -> buildFormatter(locale, u3("секунда","минута","час","день","неделя","месяц","год",
                                    "секунды","минуты","часа","дня","недели","месяца","года",
@@ -180,7 +226,7 @@ fun buildDurationFormatter(tag: String, locale: Locale, style: RelativeStyle = R
                                    "секунди","хвилини","години","дні","тижні","місяці","роки",
                                    "секунд","хвилин","годин","днів","тижнів","місяців","років"), sep)
         "be" -> buildFormatter(locale, u3("секунда","хвіліна","гадзіна","дзень","тыдзень","месяц","год",
-                                   "секунды","хвіліны","гадзіны","дні","тижні","месяцы","гады",
+                                   "секунды","хвіліны","гадзіны","дні","тыдні","месяцы","гады",
                                    "секунд","хвілін","гадзін","дзён","тыдняў","месяцаў","гадоў"), sep)
         "bg" -> buildFormatter(locale, u2("секунда","минута","час","ден","седмица","месец","година",
                                    "секунди","минути","часа","дни","седмици","месеца","години"), sep)
@@ -188,7 +234,7 @@ fun buildDurationFormatter(tag: String, locale: Locale, style: RelativeStyle = R
                                    "sekundy","minuty","godziny","dni","tygodnie","miesiące","lata",
                                    "sekund","minut","godzin","dni","tygodni","miesięcy","lat"), sep)
         "cs" -> buildFormatter(locale, u3("sekunda","minuta","hodina","den","týden","měsíc","rok",
-                                   "sekundy","minuty","hodiny","dny","týdnů","měsíce","roky",
+                                   "sekundy","minuty","hodiny","dny","týdny","měsíce","roky",
                                    "sekund","minut","hodin","dní","týdnů","měsíců","let"), sep)
         "sk" -> buildFormatter(locale, u3("sekunda","minúta","hodina","deň","týždeň","mesiac","rok",
                                    "sekundy","minúty","hodiny","dni","týždne","mesiace","roky",
@@ -201,17 +247,22 @@ fun buildDurationFormatter(tag: String, locale: Locale, style: RelativeStyle = R
                                    "секунди","минута","сати","дана","недеља","месеци","година"), sep)
         "mk" -> buildFormatter(locale, u2("секунда","минута","час","ден","недела","месец","година",
                                    "секунди","минути","часови","дена","недели","месеци","години"), sep)
-        "sl" -> buildFormatter(locale, u3("sekunda","minuta","ura","dan","teden","mesec","leto",
-                                   "sekundi","minuti","uri","dneva","tedna","meseca","leti",
-                                   "секунде","minute","ure","dni","tednov","mesecev","let"), sep)
+        "sl" -> buildFormatter(locale, unitTable(
+            PluralCategory.One to listOf("sekunda","minuta","ura","dan","teden","mesec","leto"),
+            PluralCategory.Two to listOf("sekundi","minuti","uri","dneva","tedna","meseca","leti"),
+            PluralCategory.Few to listOf("sekunde","minute","ure","dni","tedni","meseci","leta"),
+            PluralCategory.Other to listOf("sekund","minut","ur","dni","tednov","mesecev","let"),
+        ), sep)
         "lt" -> buildFormatter(locale, u3("sekundė","minutė","valanda","diena","savaitė","mėnuo","metai",
                                    "sekundės","minutės","valandos","dienos","savaitės","mėnesiai","metai",
                                    "sekundžių","minučių","valandų","dienų","savaičių","mėnesių","metų"), sep)
-        "lv" -> buildFormatter(locale, u3("sekunde","minūte","stunda","diena","nedēļa","mēnesis","gads",
-                                   "sekundes","minūtes","stundas","dienas","nedēļas","mēneši","gadi",
-                                   "sekundēm","minūtēm","stundām","dienām","nedēļām","mēnešiem","gadiem"), sep)
+        "lv" -> buildFormatter(locale, unitTable(
+            PluralCategory.Zero to listOf("sekunžu","minūšu","stundu","dienu","nedēļu","mēnešu","gadu"),
+            PluralCategory.One to listOf("sekunde","minūte","stunda","diena","nedēļa","mēnesis","gads"),
+            PluralCategory.Other to listOf("sekundes","minūtes","stundas","dienas","nedēļas","mēneši","gadi"),
+        ), sep)
         "sq" -> buildFormatter(locale, u2("sekondë","minutë","orë","ditë","javë","muaj","vit",
-                                   "sekonda","minuta","orë","ditë","javë","muaj","vite"), sep)
+                                   "sekonda","minuta","orë","ditë","javë","muaj","vjet"), sep)
 
         "ja" -> buildFormatter(locale, u2("秒","分","時間","日","週間","ヶ月","年",
                                    "秒","分","時間","日","週間","ヶ月","年"), "")
@@ -244,16 +295,14 @@ fun buildDurationFormatter(tag: String, locale: Locale, style: RelativeStyle = R
                                    "سنة","سنة","سنتان","سنوات","سنة","سنة"), " ")
         "fa" -> buildFormatter(locale, u2("ثانیه","دقیقه","ساعت","روز","هفته","ماه","سال",
                                    "ثانیه","دقیقه","ساعت","روز","هفته","ماه","سال"), " ")
-        "he" -> buildFormatter(locale, u4("שנייה","שנייה","שניות","שניות",
-                                   "דקה","דקה","דקות","דקות",
-                                   "שעה","שעה","שעות","שעות",
-                                   "יום","יום","ימים","ימים",
-                                   "שבוע","שבוע","שבועות","שבועות",
-                                   "חודש","חודש","חודשים","חודשים",
-                                   "שנה","שנה","שנים","שנים"), " ")
+        // Two takes the plural with its numeral ("2 דקות"); the dual words carry no numeral.
+        "he" -> buildFormatter(locale, u2("שנייה","דקה","שעה","יום","שבוע","חודש","שנה",
+                                   "שניות","דקות","שעות","ימים","שבועות","חודשים","שנים"), " ")
 
-        "tr", "az" -> buildFormatter(locale, u2("saniye","dakika","saat","gün","hafta","ay","yıl",
-                                         "saniye","dakika","saat","gün","hafta","ay","yıl"), " ")
+        "tr" -> buildFormatter(locale, u2("saniye","dakika","saat","gün","hafta","ay","yıl",
+                                   "saniye","dakika","saat","gün","hafta","ay","yıl"), " ")
+        "az" -> buildFormatter(locale, u2("saniyə","dəqiqə","saat","gün","həftə","ay","il",
+                                   "saniyə","dəqiqə","saat","gün","həftə","ay","il"), " ")
         "uz" -> buildFormatter(locale, u2("soniya","daqiqa","soat","kun","hafta","oy","yil",
                                    "soniya","daqiqa","soat","kun","hafta","oy","yil"), " ")
         "kk" -> buildFormatter(locale, u2("секунд","минут","сағат","күн","апта","ай","жыл",

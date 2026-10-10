@@ -19,39 +19,39 @@ internal object DynamicLocalDateFormats {
     private fun getMonthNamesResource(locale: Locale): MonthNamesResource =
         Resources.getMonthNamesResource(locale)
 
-    fun short(locale: Locale, timeZone: TimeZone): DateTimeFormat<LocalDate> {
+    fun short(locale: Locale, timeZone: TimeZone, twoDigitYearBase: Int = 2000): DateTimeFormat<LocalDate> {
         val patterns = getPatterns(locale)
         val dayOfWeekNames = getDayOfWeekNamesResource(locale)
         val monthNames = getMonthNamesResource(locale)
         return LocalDate.Format {
-            appendPattern(patterns.short, dayOfWeekNames, monthNames)
+            appendPattern(patterns.short, dayOfWeekNames, monthNames, twoDigitYearBase)
         }
     }
 
-    fun medium(locale: Locale, timeZone: TimeZone): DateTimeFormat<LocalDate> {
+    fun medium(locale: Locale, timeZone: TimeZone, twoDigitYearBase: Int = 2000): DateTimeFormat<LocalDate> {
         val patterns = getPatterns(locale)
         val dayOfWeekNames = getDayOfWeekNamesResource(locale)
         val monthNames = getMonthNamesResource(locale)
         return LocalDate.Format {
-            appendPattern(patterns.medium, dayOfWeekNames, monthNames)
+            appendPattern(patterns.medium, dayOfWeekNames, monthNames, twoDigitYearBase)
         }
     }
 
-    fun long(locale: Locale, timeZone: TimeZone): DateTimeFormat<LocalDate> {
+    fun long(locale: Locale, timeZone: TimeZone, twoDigitYearBase: Int = 2000): DateTimeFormat<LocalDate> {
         val patterns = getPatterns(locale)
         val dayOfWeekNames = getDayOfWeekNamesResource(locale)
         val monthNames = getMonthNamesResource(locale)
         return LocalDate.Format {
-            appendPattern(patterns.long, dayOfWeekNames, monthNames)
+            appendPattern(patterns.long, dayOfWeekNames, monthNames, twoDigitYearBase)
         }
     }
 
-    fun full(locale: Locale, timeZone: TimeZone): DateTimeFormat<LocalDate> {
+    fun full(locale: Locale, timeZone: TimeZone, twoDigitYearBase: Int = 2000): DateTimeFormat<LocalDate> {
         val patterns = getPatterns(locale)
         val dayOfWeekNames = getDayOfWeekNamesResource(locale)
         val monthNames = getMonthNamesResource(locale)
         return LocalDate.Format {
-            appendPattern(patterns.full, dayOfWeekNames, monthNames)
+            appendPattern(patterns.full, dayOfWeekNames, monthNames, twoDigitYearBase)
         }
     }
 }

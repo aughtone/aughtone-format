@@ -2,22 +2,28 @@ package io.github.aughtone.readable.number
 
 import io.github.aughtone.types.locale.Locale
 import io.github.aughtone.types.units.MetricPrefix
-import kotlin.math.abs
 import kotlin.math.pow
 
 /**
  * Formats this [Double] into a localized string representation.
  *
- * Uses the specified [locale] to determine decimal and grouping separators.
+ * Uses the specified [locale] to determine decimal and grouping separators. The value is rounded
+ * half away from zero to [precision] decimal places and trailing zeros are trimmed, so [precision]
+ * is a maximum, not a fixed width. Every digit is written out — there is no exponent notation,
+ * however large or small the value.
+ *
+ * This never throws. Not-a-number renders as `"NaN"`, and the infinities as `"∞"` and `"-∞"`.
  *
  * Example:
  * ```kotlin
- * 1234.56.formatReadable(Locale("en"), precision = 1) // "1,234.6"
- * 1234.56.formatReadable(Locale("de"), precision = 1) // "1.234,6"
+ * 1234.56.formatReadable(Locales.English, precision = 1) // "1,234.6"
+ * 1234.56.formatReadable(Locales.German, precision = 1)  // "1.234,6"
+ * (-1234.0).formatReadable(Locales.English)              // "-1,234"
+ * 12345678.0.formatReadable(Locales.English)             // "12,345,678"
  * ```
  *
  * @param locale The locale defining the formatting rules (defaults to [Locale.current]).
- * @param precision The number of decimal places to include (default is 1).
+ * @param precision The maximum number of decimal places to include (default is 1).
  */
 fun Double.formatReadable(locale: Locale = Locale.current, precision: Int = 1): String =
     numberFormatterFor(locale, precision)(this)
@@ -48,11 +54,14 @@ fun Float.toReadable(locale: Locale = Locale.current, precision: Int = 1): Strin
 /**
  * Formats this [Long] into a localized string representation.
  *
+ * The digits are exact across the whole [Long] range; the value is never routed through a [Double].
+ *
  * @param locale The locale defining the formatting rules (defaults to [Locale.current]).
- * @param precision The number of decimal places to include (default is 0).
+ * @param precision The number of decimal places to include (default is 0). A whole number has no
+ *   fraction, so this only matters when negative, which rounds to tens, hundreds, and so on.
  */
 fun Long.formatReadable(locale: Locale = Locale.current, precision: Int = 0): String =
-    toDouble().formatReadable(locale, precision)
+    formatDecimalText(toString(), locale, precision)
 
 @Deprecated(
     message = "Use formatReadable instead",
@@ -112,11 +121,13 @@ fun Byte.toReadable(locale: Locale = Locale.current, precision: Int = 0): String
 /**
  * Formats this [ULong] into a localized string representation.
  *
+ * The digits are exact across the whole [ULong] range; the value is never routed through a [Double].
+ *
  * @param locale The locale defining the formatting rules (defaults to [Locale.current]).
  * @param precision The number of decimal places to include (default is 0).
  */
 fun ULong.formatReadable(locale: Locale = Locale.current, precision: Int = 0): String =
-    toDouble().formatReadable(locale, precision)
+    formatDecimalText(toString(), locale, precision)
 
 @Deprecated(
     message = "Use formatReadable instead",
@@ -177,13 +188,17 @@ fun UByte.toReadable(locale: Locale = Locale.current, precision: Int = 0): Strin
  * Formats this [Double] into a localized human-readable abbreviated string.
  *
  * This function uses standard SI metric prefixes (k, M, G, T, etc.) for values 1000 or greater.
- * Small values (under 1000) are formatted using [formatReadable].
+ * Small values (under 1000) are formatted using [formatReadable]. A value that rounds up to the
+ * next thousand moves to the next prefix, so the number shown is always below 1,000 until the
+ * largest prefix (Q, 10^30) is reached. Not-a-number and the infinities carry no prefix.
  *
  * Examples:
  * ```kotlin
- * 1500.0.formatReadableAbbreviated(Locale("en")) // "1.5k"
- * 1000000.0.formatReadableAbbreviated(Locale("en")) // "1M"
- * 500.0.formatReadableAbbreviated(Locale("en")) // "500"
+ * 1500.0.formatReadableAbbreviated(Locales.English)    // "1.5k"
+ * 1000000.0.formatReadableAbbreviated(Locales.English) // "1M"
+ * 999999.0.formatReadableAbbreviated(Locales.English)  // "1M", not "1,000k"
+ * 500.0.formatReadableAbbreviated(Locales.English)     // "500"
+ * (-1500.0).formatReadableAbbreviated(Locales.English) // "-1.5k"
  * ```
  *
  * @param locale The locale to use for numeric formatting (defaults to [Locale.current]).
@@ -194,25 +209,17 @@ fun Double.formatReadableAbbreviated(
     locale: Locale = Locale.current,
     precision: Int = 1
 ): String {
-    val absoluteValue = abs(this)
-
-    if (absoluteValue < 1000.0) {
-        return formatReadable(locale, precision)
-    }
-
-    // Find the largest prefix that is <= absoluteValue
-    val prefix = MetricPrefix.entries
-        .filter { it.exponent > 0 && it.exponent % 3 == 0 } // Standard k, M, G, T...
-        .sortedByDescending { it.exponent }
-        .find { 10.0.pow(it.exponent) <= absoluteValue }
-
-    return if (prefix != null) {
-        val scaledValue = this / 10.0.pow(prefix.exponent)
-        "${scaledValue.formatReadable(locale, precision)}${prefix.symbol}"
-    } else {
-        formatReadable(locale, precision)
-    }
+    val (symbol, divisor) = prefixRungFor(this, precision, abbreviationLadder)
+        ?: return formatReadable(locale, precision)
+    return "${(this / divisor).formatReadable(locale, precision)}$symbol"
 }
+
+/** No prefix, then the standard SI thousands (k, M, G, T, …), smallest first. */
+private val abbreviationLadder: List<Pair<String, Double>> =
+    listOf("" to 1.0) + MetricPrefix.entries
+        .filter { it.exponent > 0 && it.exponent % 3 == 0 }
+        .sortedBy { it.exponent }
+        .map { it.symbol to 10.0.pow(it.exponent) }
 
 @Deprecated(
     message = "Use formatReadableAbbreviated instead",

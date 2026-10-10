@@ -16,7 +16,7 @@ description: >-
   number with issuer grouping use io.github.aughtone:format-identifiers.
 license: Apache-2.0
 metadata:
-  version: "4.1.0"
+  version: "4.1.1"
   repository: https://github.com/aughtone/aughtone-format
 ---
 
@@ -28,7 +28,7 @@ The low-level pieces the other `aughtone-format` modules (and their callers) reu
 
 - Round a `Double` to a few decimals as a plain string — `1234.5678.format(2)` → `"1234.57"`.
 - Fill numbered placeholders in a template string — `"hello %1".format("world")` → `"hello world"`. This is the multiplatform stand-in for the `String.format(...)` that Kotlin common does not have.
-- Mask the trailing characters of a string for display — `"…123-4567".obfuscateLast(digitsOnly = true)` → `"•••••••4567"`.
+- Mask the trailing characters of a string for display — `"+1 (555) 123-4567".obfuscateLast(digitsOnly = true)` → `"•••••••4567"`.
 - Compute the bounding box of a GeoJSON geometry or feature, and merge boxes — `geometry.calculateBoundingBox()`, `boxA.merge(boxB)`.
 - Turn longitude/latitude into projected screen/SVG coordinates through the `GeoProjection` functional interface, with `WebMercatorProjection` and `EquirectangularProjection` provided.
 
@@ -60,13 +60,13 @@ val identity = GeoProjection { lon, lat -> lon to lat }
 
 **`calculateBoundingBox()` returns `GeoBoundingBox?` — nullable.** It is `null` for an empty feature collection, an empty geometry collection, or coordinates that never yield two usable numbers. Symptom: a `NullPointerException` at the call site, or an empty/defaulted box downstream — always null-check; do not assume a box comes back.
 
-**`Double.format` is a rounding helper, not a locale formatter, and it does not pad.** `precision <= 0` returns an integer string (no decimal point at all), and a trailing `.0` is stripped — so `2.0.format(2)` yields `"2"`, **not** `"2.00"`. Symptom: fewer decimals than you asked for, or a whole number where you expected `"x.00"`. There are no thousands separators and no locale awareness; for grouped, localized, or currency numbers use `io.github.aughtone:format-readable` or a platform API.
+**`Double.format` is a rounding helper, not a locale formatter, and it does not pad.** `precision <= 0` returns an integer string (no decimal point at all), and a trailing `.0` is stripped — so `2.0.format(2)` yields `"2"`, **not** `"2.00"`. Symptom: fewer decimals than you asked for, or a whole number where you expected `"x.00"`. There are no thousands separators and no locale awareness; for grouped, localized, or currency numbers use `io.github.aughtone:format-readable` or a platform API. It always writes plain digits — no exponent notation for large or small values, on any platform — rounds halves away from zero, and never throws: `Double.NaN.format(2)` is `"NaN"` and an infinity is `"Infinity"` or `"-Infinity"`. In 4.1.0 and earlier it returned `"1.0E7"` for ten million and `"1.0E-4"` for 0.0001 on JVM, Android and iOS, and threw on `NaN`.
 
-**`String.format` is a literal placeholder filler, not `printf`/ICU.** Placeholders are `%1`, `%2`, … (1-based) and are substituted by simple replacement. Symptom: a raw `%3` left in the output means a *missing* argument; an extra argument vanishes silently; and because `%1` is replaced before `%10`, two-digit indexes past `%9` mis-substitute. Keep templates to `%1`–`%9`.
+**`String.format` is a literal placeholder filler, not `printf`/ICU.** Placeholders are `%1`, `%2`, … (1-based). The template is read once, left to right, taking the longest run of digits that names an argument — so `%10` is the tenth argument when there are ten — and text inside an argument is never scanned again. Symptom: a raw `%3` left in the output means a *missing* argument; an extra argument vanishes silently. In 4.1.0 and earlier `%10` was read as `%1` followed by `0`, and an argument containing `%2` was substituted into.
 
 **`obfuscateLast` has two quiet surprises.** When the string is no longer than `count` it returns the **original unchanged** — symptom: a short value comes back with nothing masked. With `digitsOnly = true` it keeps only the digits and drops every other character, so `"+1 (555) 123-4567"` becomes `"•••••••4567"` — symptom: the original punctuation and spacing are gone, not preserved.
 
-**Projections flip the Y axis and are screen-space, not geodesic.** Both projections return Y increasing *downward* (SVG/screen convention), so a higher latitude gives a smaller Y. `WebMercatorProjection` normalizes to roughly degree scale (`180/π`), **not** EPSG:3857 meters, and Web Mercator is undefined near the poles (about ±85°). Symptom: a shape mirrored top-to-bottom, at the wrong scale for meters, or degenerate above ~85° latitude. Pass `EquirectangularProjection` (x = lon, y = −lat) for a plain mapping.
+**Projections flip the Y axis and are screen-space, not geodesic.** Both projections return Y increasing *downward* (SVG/screen convention), so a higher latitude gives a smaller Y. `WebMercatorProjection` normalizes to degree scale (`180/π`), **not** EPSG:3857 meters, so both X and Y run from −180 to 180. A latitude beyond about ±85.0511° — the limit every web map uses — is projected as that limit, so a polygon that reaches a pole stays finite. Symptom: a shape mirrored top-to-bottom, wrongly scaled for meters, or flattened along the top or bottom edge near a pole. In 4.1.0 and earlier latitude −90 projected to infinity.
 
 ## What moved, and what it used to be called
 

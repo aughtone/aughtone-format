@@ -54,6 +54,19 @@ object Resources {
     @Volatile private var clockHoursCache = emptyMap<String, ClockHours>()
     @Volatile private var eraNamesCache = emptyMap<String, EraNamesResource>()
 
+    /**
+     * Resolves a table entry: the exact `language-REGION`, then the language, then the bare region.
+     *
+     * The tables carry a few region-only keys ("US", "CA", "GB") that hold English conventions.
+     * English consults them before its language entry, as it always has; every other language
+     * reaches them only when it has no entry of its own, so French in Canada stays French.
+     */
+    private fun <T> Map<String, T>.resolve(lang: String, region: String?, langRegion: String?): T? =
+        this[langRegion]
+            ?: (if (lang == "en") this[region] else null)
+            ?: this[lang]
+            ?: this[region]
+
     private fun <T> lookup(
         locale: Locale,
         getCurrentCache: () -> Map<String, T>,
@@ -70,9 +83,7 @@ object Resources {
         val region = locale.regionCode
         val langRegion = region?.let { "${lang}-$it" }
 
-        val rawResolved = source[langRegion]
-            ?: source[region]
-            ?: source[lang]
+        val rawResolved = source.resolve(lang, region, langRegion)
             ?: source.getValue(defaultKey)
 
         val resolved = sanitizer?.invoke(rawResolved) ?: rawResolved
@@ -105,9 +116,7 @@ object Resources {
         val region = locale.regionCode
         val langRegion = region?.let { "${lang}-$it" }
 
-        val resolved = source[langRegion]
-            ?: source[region]
-            ?: source[lang]
+        val resolved = source.resolve(lang, region, langRegion)
 
         if (resolved != null) {
             val oldCache = getCurrentCache()
@@ -123,12 +132,24 @@ object Resources {
         return resolved
     }
 
-    fun getDateFormat(locale: Locale, timeZone: TimeZone, style: FormatStyle): DateTimeFormat<LocalDate> {
+    fun getDateFormat(locale: Locale, timeZone: TimeZone, style: FormatStyle): DateTimeFormat<LocalDate> =
+        getDateFormat(locale, timeZone, style, twoDigitYearBase = 2000)
+
+    /**
+     * As [getDateFormat], for a date in the century that starts at [twoDigitYearBase]. Only a
+     * pattern with a two-digit year depends on it.
+     */
+    internal fun getDateFormat(
+        locale: Locale,
+        timeZone: TimeZone,
+        style: FormatStyle,
+        twoDigitYearBase: Int,
+    ): DateTimeFormat<LocalDate> {
         return when (style) {
-            FormatStyle.SHORT -> DynamicLocalDateFormats.short(locale, timeZone)
-            FormatStyle.MEDIUM -> DynamicLocalDateFormats.medium(locale, timeZone)
-            FormatStyle.LONG -> DynamicLocalDateFormats.long(locale, timeZone)
-            FormatStyle.FULL -> DynamicLocalDateFormats.full(locale, timeZone)
+            FormatStyle.SHORT -> DynamicLocalDateFormats.short(locale, timeZone, twoDigitYearBase)
+            FormatStyle.MEDIUM -> DynamicLocalDateFormats.medium(locale, timeZone, twoDigitYearBase)
+            FormatStyle.LONG -> DynamicLocalDateFormats.long(locale, timeZone, twoDigitYearBase)
+            FormatStyle.FULL -> DynamicLocalDateFormats.full(locale, timeZone, twoDigitYearBase)
         }
     }
 

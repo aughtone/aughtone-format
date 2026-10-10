@@ -16,7 +16,10 @@ import kotlin.time.DurationUnit
 typealias RelativeTimeFormatter = (Duration, Boolean) -> String
 
 private class RelativeTimeUnitNames(val forms: Map<PluralCategory, String>) {
-    fun get(category: PluralCategory): String = forms[category] ?: forms[PluralCategory.Other] ?: forms.values.first()
+    // A three-form table stores its general plural under Many; languages whose rule calls that
+    // form Other (Czech, Croatian, Lithuanian, …) reach it through this chain.
+    fun get(category: PluralCategory): String =
+        forms[category] ?: forms[PluralCategory.Other] ?: forms[PluralCategory.Many] ?: forms.values.first()
 }
 
 /**
@@ -139,12 +142,15 @@ private fun config(
         val isPast = totalSeconds < 0
 
         val (value, unitKey) = when {
+            // Each unit takes over half a step early (a minute from 59.5 seconds, an hour from
+            // 59.5 minutes, …) so a delta that rounds up to a whole larger unit reads "1 minute
+            // ago", never "60 seconds ago".
             allowDates && absSeconds >= 31536000 -> (absSeconds / 31536000.0) to "year"
-            allowDates && absSeconds >= 2592000  -> (absSeconds / 2592000.0)  to "month"
-            allowDates && absSeconds >= 604800 && (absSeconds / 604800.0).roundToLong() <= 3 -> (absSeconds / 604800.0) to "week"
-            allowDates && absSeconds >= 86400   -> (absSeconds / 86400.0)   to "day"
-            absSeconds >= 3600    -> (absSeconds / 3600.0)    to "hour"
-            absSeconds >= 60      -> (absSeconds / 60.0)      to "minute"
+            allowDates && absSeconds >= 2548800  -> (absSeconds / 2592000.0)  to "month"
+            allowDates && absSeconds >= 561600 && (absSeconds / 604800.0).roundToLong() <= 3 -> (absSeconds / 604800.0) to "week"
+            allowDates && absSeconds >= 84600   -> (absSeconds / 86400.0)   to "day"
+            absSeconds >= 3570    -> (absSeconds / 3600.0)    to "hour"
+            absSeconds >= 59.5    -> (absSeconds / 60.0)      to "minute"
             else                  -> absSeconds               to "second"
         }
 
@@ -210,17 +216,27 @@ private fun isRelativeTimeTagSupported(tag: String): Boolean = when (tag) {
  * @return a [RelativeTimeConfig] for the specified parameters.
  */
 fun buildRelativeTimeConfig(tag: String, locale: Locale, style: RelativeStyle = RelativeStyle.Long): RelativeTimeConfig {
+    val base = buildBaseRelativeTimeConfig(tag, locale, style)
+    val (today, tomorrow, yesterday) = cldrRelativeDayLabels[tag] ?: return base
+    return RelativeTimeConfig(
+        base.formatter, base.nowString, today, tomorrow, yesterday, base.recentlyString, base.shortlyString
+    )
+}
+
+/** The hand-written configuration for [tag], before the CLDR day labels are applied. */
+private fun buildBaseRelativeTimeConfig(tag: String, locale: Locale, style: RelativeStyle): RelativeTimeConfig {
     return when (tag) {
         // ── English / Germanic ────────────────────────────────────────────────
-        "en-ZA" -> config(locale, if (style == RelativeStyle.Short) "{0}" else "{0} ago", if (style == RelativeStyle.Short) "in {0}" else "in {0}", "now now", if (style == RelativeStyle.Short) ENGLISH_UNITS_SHORT else ENGLISH_UNITS_LONG, "Today", "Tomorrow", "Yesterday", "Recently", if (style == RelativeStyle.Short) "" else " ", shortlyString = "ᒫᓐᓇᕈᓘᓂᐊᖅᑐᖅ")
+        "en-ZA" -> config(locale, if (style == RelativeStyle.Short) "{0}" else "{0} ago", if (style == RelativeStyle.Short) "in {0}" else "in {0}", "now now", if (style == RelativeStyle.Short) ENGLISH_UNITS_SHORT else ENGLISH_UNITS_LONG, "Today", "Tomorrow", "Yesterday", "Recently", if (style == RelativeStyle.Short) "" else " ", shortlyString = "Shortly")
         "en" -> enConfig(locale, style)
 
         "af" -> config(locale, "{0} gelede", "oor {0}", "nou net", u2("sekonde","minuut","uur","dag","week","maand","jaar", "sekondes","minute","ure","dae","weke","maande","jaar"), "Vandag", "Môre", "Gister", "onlangs", shortlyString = "binnekort")
         "nl" -> config(locale, "{0} geleden", "over {0}", "zojuist", u2("seconde","minuut","uur","dag","week","maand","jaar", "seconden","minuten","uren","dagen","weken","maanden","jaren"), "Vandaag", "Morgen", "Gisteren", "onlangs", shortlyString = "binnenkort")
 
         "de" -> config(locale, "vor {0}", "in {0}", "gerade eben",
+            // "vor" and "in" both take the dative, so the plurals are Tagen, Monaten, Jahren.
             u2("Sekunde","Minute","Stunde","Tag","Woche","Monat","Jahr",
-               "Sekunden","Minuten","Stunden","Tage","Wochen","Monate","Jahre"),
+               "Sekunden","Minuten","Stunden","Tagen","Wochen","Monaten","Jahren"),
             todayString = "Heute", tomorrowString = "Morgen", yesterdayString = "Gestern", recentlyString = "vor kurzem", shortlyString = "in Kürze")
 
         "da" -> config(locale, "for {0} siden", "om {0}", "lige nu",
@@ -282,18 +298,19 @@ fun buildRelativeTimeConfig(tag: String, locale: Locale, style: RelativeStyle = 
 
         // ── Slavic / Baltic (Complex plurals) ─────────────────────────────────
         "ru" -> config(locale, "{0} назад", "через {0}", "только что",
-            u3("секунда","минута","час","день","неделя","месяц","год",
+            // The singular is accusative: both "назад" and "через" take it.
+            u3("секунду","минуту","час","день","неделю","месяц","год",
                "секунды","минуты","часа","дня","недели","месяца","года",
                "секунд","минут","часов","дней","недель","месяцев","лет"), recentlyString = "недавно", shortlyString = "скоро")
 
         "uk" -> config(locale, "{0} тому", "через {0}", "щойно",
-            u3("секунда","хвилина","година","день","тиждень","місяць","рік",
+            u3("секунду","хвилину","годину","день","тиждень","місяць","рік",
                "секунди","хвилини","години","дні","тижні","місяці","роки",
                "секунд","хвилин","годин","днів","тижнів","місяців","років"), recentlyString = "нещодавно", shortlyString = "незабаром")
 
         "be" -> config(locale, "{0} таму", "праз {0}", "толькі што",
-            u3("секунда","хвіліна","гадзіна","дзень","тыдзень","месяц","год",
-               "секунды","хвіліны","гадзіны","дні","тижні","месяцы","гады",
+            u3("секунду","хвіліну","гадзіну","дзень","тыдзень","месяц","год",
+               "секунды","хвіліны","гадзіны","дні","тыдні","месяцы","гады",
                "секунд","хвілін","гадзін","дзён","тыдняў","месяцаў","гадоў"), recentlyString = "нядаўна", shortlyString = "хутка")
 
         "bg" -> config(locale, "преди {0}", "след {0}", "точно сега",
@@ -301,7 +318,7 @@ fun buildRelativeTimeConfig(tag: String, locale: Locale, style: RelativeStyle = 
                "секунди","минути","часа","дни","седмици","месеца","години"), recentlyString = "наскоро", shortlyString = "скоро")
 
         "pl" -> config(locale, "{0} temu", "za {0}", "właśnie teraz",
-            u3("sekunda","minuta","godzina","dzień","tydzień","miesiąc","rok",
+            u3("sekundę","minutę","godzinę","dzień","tydzień","miesiąc","rok",
                "sekundy","minuty","godziny","dni","tygodnie","miesiące","lata",
                "sekund","minut","godzin","dni","tygodni","miesięcy","lat"), recentlyString = "niedawno", shortlyString = "wkrótce")
 
@@ -414,13 +431,8 @@ fun buildRelativeTimeConfig(tag: String, locale: Locale, style: RelativeStyle = 
                "ثانية","دقيقة","ساعت","روز","هفته","ماه","سال"), recentlyString = "به تازگی", shortlyString = "به زودی")
 
         "he" -> config(locale, "לפני {0}", "בעוד {0}", "ממש עכשיו",
-            u4("שנייה","שנייה","שניות","שניות",
-               "דקה","דקה","דקות","דקות",
-               "שעה","שעה","שעות","שעות",
-               "יום","יום","ימים","ימים",
-               "שבוע","שבוע","שבועות","שבועות",
-               "חודש","חודש","חודשים","חודשים",
-               "שנה","שנה","שנים","שנים"), recentlyString = "לאחרונה", shortlyString = "בקרוב")
+            u2("שנייה","דקה","שעה","יום","שבוע","חודש","שנה",
+               "שניות","דקות","שעות","ימים","שבועות","חודשים","שנים"), recentlyString = "לאחרונה", shortlyString = "בקרוב")
 
         // ── Turkic ────────────────────────────────────────────────────────────
         "tr" -> config(locale, "{0} önce", "{0} sonra", "şimdi",
@@ -469,7 +481,7 @@ fun buildRelativeTimeConfig(tag: String, locale: Locale, style: RelativeStyle = 
             u2("წამ","წუთ","საათ","დღ","კვირ","თვ","წლ",
                "წამ","წუთ","საათ","დღ","კვირ","თვ","წლ"), recentlyString = "ახლახან", sep = "", shortlyString = "მალე")
 
-        else -> if (tag == "en") enConfig(locale, style) else buildRelativeTimeConfig("en", locale, style)
+        else -> enConfig(locale, style)
     }
 }
 

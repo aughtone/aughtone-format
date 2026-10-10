@@ -50,9 +50,9 @@ private fun relativeDayLabelFor(locale: Locale, daysDelta: Int): String? {
  * Examples:
  * ```kotlin
  * val now = Clock.System.now()
- * (now - 5.minutes).toReadableRelative() // "5 minutes ago"
- * (now + 1.days).toReadableRelative()    // "Tomorrow"
- * (now - 10.days).toReadableRelative()   // "May 3, 2026" (fallback to absolute)
+ * (now - 5.minutes).formatReadableRelative() // "5 minutes ago"
+ * (now + 1.days).formatReadableRelative()    // "Tomorrow"
+ * (now - 10.days).formatReadableRelative()   // "May 3, 2026" (fallback to absolute)
  * ```
  *
  * @param now The reference instant to compare against (defaults to current system time).

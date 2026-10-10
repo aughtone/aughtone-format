@@ -51,6 +51,19 @@ fun List<String>.formatReadableList(
     return patterns.end.fill(accumulated, this[size - 1])
 }
 
-/** Fills a CLDR list template's `{0}` and `{1}` placeholders. */
-private fun String.fill(first: String, second: String): String =
-    replace("{0}", first).replace("{1}", second)
+/**
+ * Fills a CLDR list template's `{0}` and `{1}` placeholders.
+ *
+ * Only the template is scanned for placeholders: text that arrives in [first] or [second] is
+ * copied as it is, so an element that happens to contain "{1}" is never substituted into.
+ */
+private fun String.fill(first: String, second: String): String = buildString {
+    var index = 0
+    while (index < this@fill.length) {
+        when {
+            this@fill.startsWith("{0}", index) -> { append(first); index += 3 }
+            this@fill.startsWith("{1}", index) -> { append(second); index += 3 }
+            else -> { append(this@fill[index]); index++ }
+        }
+    }
+}

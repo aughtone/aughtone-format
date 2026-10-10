@@ -44,4 +44,12 @@ class MacTest {
         assertFailsWith<IllegalArgumentException> { "00:00:5e:00:53:0g".formatMac() } // non-hex digit
         assertFailsWith<IllegalArgumentException> { "0000.5e00.5301".formatMac() }    // not colon form
     }
+
+    @Test
+    fun digitsFromOtherScriptsAreNotHexDigits() {
+        // Fullwidth and Arabic-Indic digits are digits to Unicode, but not to a MAC address.
+        assertFailsWith<IllegalArgumentException> { "００:00:5e:00:53:01".formatMac() }
+        assertFailsWith<IllegalArgumentException> { "ａｂ:00:5e:00:53:01".formatMac(MacNotation.Bare) }
+        assertFailsWith<IllegalArgumentException> { "٠٠:00:5e:00:53:01".formatMac() }
+    }
 }

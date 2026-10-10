@@ -3,6 +3,8 @@ package io.github.aughtone.viewable
 import io.github.aughtone.toolbox.format
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.math.ceil
+import kotlin.math.floor
 
 /**
  * A layer in a [ViewableGraphic], combining a path with a style.
@@ -68,12 +70,12 @@ fun ViewableGraphic.toSvgDocument(
         val d = layer.path.toSvgPathData(precision)
         val fill = if (layer.style.fillColor != 0) {
             val hex = "#" + (layer.style.fillColor and 0xFFFFFF).toString(16).padStart(6, '0')
-            " fill=\"$hex\""
+            " fill=\"$hex\"${opacityAttribute("fill-opacity", layer.style.fillColor)}"
         } else " fill=\"none\""
         
         val stroke = if (layer.style.strokeColor != 0) {
             val hex = "#" + (layer.style.strokeColor and 0xFFFFFF).toString(16).padStart(6, '0')
-            " stroke=\"$hex\" stroke-width=\"${layer.style.strokeWidth.format(precision)}\""
+            " stroke=\"$hex\"${opacityAttribute("stroke-opacity", layer.style.strokeColor)} stroke-width=\"${layer.style.strokeWidth.format(precision)}\""
         } else ""
 
         val fillRule = when (layer.path.winding) {
@@ -88,20 +90,35 @@ fun ViewableGraphic.toSvgDocument(
     return sb.toString()
 }
 
+/** An SVG opacity attribute for the alpha channel of an ARGB [color], or nothing when it is opaque. */
+private fun opacityAttribute(name: String, color: Int): String {
+    val opacity = ((color shr 24) and 0xFF) / 255.0
+    return if (opacity < 1.0) " $name=\"${opacity.format(2)}\"" else ""
+}
+
 /**
  * Converts a [ViewableGraphic] into an Encapsulated PostScript (EPS) string.
  *
- * @param precision The number of decimal places to include in the output.
+ * A path's y axis grows downward and PostScript's grows upward, so every y coordinate is
+ * mirrored within the bounds: the drawing comes out the same way up as the SVG and raster
+ * output. A layer with both a fill and a stroke gets both. EPS has no transparency, so the alpha
+ * channel of a colour is ignored.
+ *
+ * @param precision The maximum number of decimal places to include in the output.
  * @return A string containing the full EPS document.
  */
 fun ViewableGraphic.toEpsDocument(precision: Int = 3): String {
     val b = bounds ?: ViewableRect(0.0, 0.0, 1.0, 1.0)
     val sb = StringBuilder()
     sb.append("%!PS-Adobe-3.0 EPSF-3.0\n")
-    sb.append("%%BoundingBox: ${b.left.toInt()} ${b.top.toInt()} ${b.right.toInt()} ${b.bottom.toInt()}\n")
+    // The integer box has to enclose the drawing: round the low corner down and the high one up.
+    sb.append("%%BoundingBox: ${floor(b.left).toLong()} ${floor(b.top).toLong()} ${ceil(b.right).toLong()} ${ceil(b.bottom).toLong()}\n")
     sb.append("%%HiResBoundingBox: ${b.left.format(precision)} ${b.top.format(precision)} ${b.right.format(precision)} ${b.bottom.format(precision)}\n")
     sb.append("%%LanguageLevel: 2\n")
     sb.append("%%EndComments\n")
+
+    // Mirrors a y coordinate within the bounds, turning the path's y-down space into PostScript's y-up.
+    fun flipY(y: Double): Double = b.top + b.bottom - y
 
     layers.forEach { layer ->
         sb.append("gsave\n")
@@ -110,8 +127,8 @@ fun ViewableGraphic.toEpsDocument(precision: Int = 3): String {
         sb.append("newpath\n")
         layer.path.commands.forEach { command ->
             when (command) {
-                is PathCommand.MoveTo -> sb.append("${command.x.format(precision)} ${command.y.format(precision)} moveto\n")
-                is PathCommand.LineTo -> sb.append("${command.x.format(precision)} ${command.y.format(precision)} lineto\n")
+                is PathCommand.MoveTo -> sb.append("${command.x.format(precision)} ${flipY(command.y).format(precision)} moveto\n")
+                is PathCommand.LineTo -> sb.append("${command.x.format(precision)} ${flipY(command.y).format(precision)} lineto\n")
                 is PathCommand.Close -> sb.append("closepath\n")
             }
         }
@@ -121,6 +138,9 @@ fun ViewableGraphic.toEpsDocument(precision: Int = 3): String {
             val r = ((layer.style.fillColor shr 16) and 0xFF) / 255.0
             val g = ((layer.style.fillColor shr 8) and 0xFF) / 255.0
             val bColor = (layer.style.fillColor and 0xFF) / 255.0
+            // Filling consumes the current path, so it runs inside its own gsave/grestore and
+            // leaves the path in place for the stroke.
+            sb.append("gsave\n")
             sb.append("${r.format(precision)} ${g.format(precision)} ${bColor.format(precision)} setrgbcolor\n")
             
             if (layer.path.winding == WindingRule.EvenOdd) {
@@ -128,6 +148,7 @@ fun ViewableGraphic.toEpsDocument(precision: Int = 3): String {
             } else {
                 sb.append("fill\n")
             }
+            sb.append("grestore\n")
         }
         
         // Stroke

@@ -4,6 +4,11 @@ package io.github.aughtone.toolbox
  * Formats the string by replacing placeholders with the given arguments.
  *
  * Placeholders are in the format `%1`, `%2`, etc., where the number corresponds to the index of the argument in [args] (starting from 1).
+ * A number may have several digits, so `%10` is the tenth argument when there are at least ten. A `%` that is not followed by
+ * the number of an argument is left as it is.
+ *
+ * The template is read once, left to right: text that arrives in an argument is never scanned for placeholders, so an argument
+ * containing `%2` is emitted unchanged.
  *
  * **Experimental**: This is intended to partly fill the role of the string format functions missing from KMP, that are available in Java/Android.
  *
@@ -17,12 +22,29 @@ package io.github.aughtone.toolbox
  * ```
  */
 @ExperimentalMultiplatform()
-fun String.format(vararg args: Any): String {
-    var newString = this
-    args.forEachIndexed { index, arg ->
-        newString = newString.replace("%${index+1}", "$arg")
+fun String.format(vararg args: Any): String = buildString {
+    val template = this@format
+    var index = 0
+    while (index < template.length) {
+        if (template[index] == '%') {
+            var end = index + 1
+            while (end < template.length && template[end] in '0'..'9') end++
+            // The longest run of digits that names an argument: "%10" is the tenth argument when
+            // there are ten, and otherwise the first argument followed by a literal "0".
+            while (end > index + 1) {
+                val number = template.substring(index + 1, end).toIntOrNull()
+                if (number != null && number in 1..args.size) break
+                end--
+            }
+            if (end > index + 1) {
+                append(args[template.substring(index + 1, end).toInt() - 1])
+                index = end
+                continue
+            }
+        }
+        append(template[index])
+        index++
     }
-    return newString
 }
 
 /**

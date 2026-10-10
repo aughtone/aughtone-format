@@ -4,7 +4,14 @@ This library embeds localization reference data whose terms are independent of t
 
 ## Unicode CLDR
 
-Values derived from the Unicode Common Locale Data Repository (CLDR), published by Unicode, Inc., are compiled into the published artifact in `List.resources.kt` (in the `:readable` module) — the locale list-join patterns.
+Values derived from the Unicode Common Locale Data Repository (CLDR), published by Unicode, Inc., are compiled into the published artifact in these places:
+
+- `List.resources.kt` (in the `:readable` module) — the locale list-join patterns.
+- `RelativeDayLabels.resources.kt` (in the `:readable` module) — the words for today, tomorrow and yesterday.
+- `PluralCategory.kt` (in the `:readable` module) — the plural rules for whole numbers.
+- `Duration.resources.kt` (in the `:readable` module) — the duration unit words for Afrikaans, Dutch, Indonesian, Malay, Swahili, Azerbaijani, Slovenian, Latvian and Romanian.
+- `Number.resources.kt` and `Money.resources.kt` (in the `:readable` module) — which decimal and grouping separators a language uses, and on which side it writes a currency symbol.
+- `LocaleDatePatterns.kt` (in the `:datetime` module) — the date patterns for English outside North America and for French in Canada.
 
 Most localized time-zone names are read from the reader's own platform CLDR at runtime (`java.time`, Android ICU, Apple `NSTimeZone`, JavaScript/Wasm `Intl`) and are not compiled into this artifact.
 
@@ -20,4 +27,4 @@ Source: https://tusaalanga.ca/glossary
 
 ## First-party curated data — not from CLDR
 
-Data authored for this project is maintained under this project's own copyright and is **not** extracted from CLDR or any other third-party source. This includes, for example, the relative-time and duration phrasings across supported locales, and the Inuktitut time-zone names in `TimeZoneNameSupplement.kt` (in the `:datetime` module) — CLDR carries no Inuktitut time-zone names, so these were curated for this project. It carries no third-party terms.
+Data authored for this project is maintained under this project's own copyright and is **not** extracted from CLDR or any other third-party source. This includes, for example, the relative-time phrasings and most of the duration phrasings across supported locales, and the Inuktitut time-zone names in `TimeZoneNameSupplement.kt` (in the `:datetime` module) — CLDR carries no Inuktitut time-zone names, so these were curated for this project. It carries no third-party terms.

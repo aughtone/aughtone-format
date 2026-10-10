@@ -16,7 +16,7 @@ description: >-
   "1.5 MB" or "3 days ago" use io.github.aughtone:format-readable.
 license: Apache-2.0
 metadata:
-  version: "4.1.0"
+  version: "4.1.1"
   repository: https://github.com/aughtone/aughtone-format
 ---
 
@@ -56,7 +56,7 @@ Where a Kotlin-native type exists, an overload hangs off it: `kotlin.uuid.Uuid.f
 
 ## Invariants and traps
 
-**Canonical input only — these throw on anything else.** Every formatter expects the identifier already normalized (the lower-case colon MAC, the 8-4-4-4-12 UUID, the compact upper-case IBAN, bare card digits, dotted-decimal IPv4, E.164 phone). Symptom: an `IllegalArgumentException` at the format call — non-canonical input is treated as a *programming error*, it is not "cleaned up". Do not point these at raw user input; normalize upstream first, then format. The one input latitude is UUID and IPv6 hex case, accepted in any case and emitted canonically.
+**Canonical input only — these throw on anything else.** Every formatter expects the identifier already normalized (the lower-case colon MAC, the 8-4-4-4-12 UUID, the compact upper-case IBAN, bare card digits, dotted-decimal IPv4, E.164 phone). Symptom: an `IllegalArgumentException` at the format call — non-canonical input is treated as a *programming error*, it is not "cleaned up". Do not point these at raw user input; normalize upstream first, then format. The one input latitude is hexadecimal letter case — a MAC address, a UUID and an IPv6 address are accepted in either case and emitted in the notation's own. Only the ASCII digits and letters count as hexadecimal: fullwidth or other-script digits are rejected. `formatHandle` collapses any leading `@` signs into one and rejects a value that is nothing but `@`.
 
 **`CardNotation.Masked` is lossy by design.** It keeps only the last four digits behind a fixed `••••` group and does not preserve length. Symptom: you cannot recover the PAN from the output — use it for display only, never as a value you store or parse back.
 
@@ -64,7 +64,7 @@ Where a Kotlin-native type exists, an overload hangs off it: `kotlin.uuid.Uuid.f
 
 **`formatIpv6` rejects IPv4-embedded forms.** Symptom: an `IllegalArgumentException` on a trailing dotted-quad such as `::ffff:192.0.2.1`; more than one `::`, the wrong group count, or a group over four hex digits also throw.
 
-**`formatPhone` is the one impure formatter.** National and international grouping are not derivable from E.164 alone, so it uses per-country metadata from `io.github.aughtone:phonenumber` (the module's only dependency; the metadata is dead-code-eliminated for callers that never format a phone). Symptom: a country whose metadata is not bundled comes back as the national significant number without grouping, rather than throwing.
+**`formatPhone` is the one impure formatter.** National and international grouping are not derivable from E.164 alone, so it uses per-country metadata from `io.github.aughtone:phonenumber` (the module's only dependency; the metadata is dead-code-eliminated for callers that never format a phone). Its parser is lenient, so a number written with spaces, hyphens or parentheses is usually accepted too — do not rely on that, pass E.164. Symptom: an `IllegalArgumentException` for a calling code the metadata does not know.
 
 ## What moved, and what it used to be called
 

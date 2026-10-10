@@ -8,7 +8,7 @@ description: >-
   DateTimeFormatter.ofLocalizedDate would on the JVM; format a timestamp or epoch
   milliseconds; show a start-to-end date range with a placeholder for a missing
   end; get weekday and month names in the user's language ("Monday"/"Mon",
-  "mars"); get a time zone's localized name ("Eastern Standard Time", "EST");
+  "Mars"); get a time zone's localized name ("Eastern Standard Time", "EST");
   follow the locale's 12-hour or 24-hour clock and its native digits. Works on
   kotlinx-datetime LocalDate, LocalTime, LocalDateTime and kotlin.time.Instant.
   Not for relative time like "3 days ago" or "tomorrow", durations or numbers
@@ -16,7 +16,7 @@ description: >-
   "yyyy-MM-dd"; and not a parser.
 license: Apache-2.0
 metadata:
-  version: "4.1.0"
+  version: "4.1.1"
   repository: https://github.com/aughtone/aughtone-format
 ---
 
@@ -67,13 +67,17 @@ Month.MARCH.displayName(TextWidth.Abbreviated, localeFor("en")!!)   // "Mar"
 
 **Locales silently switch digit systems.** Even with `numberingSystem = null`, Arabic (`ar`), Persian/Urdu (`fa`/`ur`), Hindi (`hi`), Bengali (`bn`), and Thai (`th`) render localized digits. Symptom: non-ASCII digits in the output — force Western digits with `numberingSystem = NumberingSystem.LATN`.
 
-**`is24HourFormat` detection differs by platform — pass it explicitly for reproducible output.** The default probes the platform: it is a real system setting on Android (needs the app `Context`, wired via `androidx.startup`) and locale-derived on iOS/JS, but on JVM and wasmJs there is no detection at all — it falls back to a locale-based guess (12-hour when the locale is unknown). Symptom: the same locale renders 12- vs 24-hour differently across targets — supply `is24HourFormat = true/false` when determinism matters.
+**`is24HourFormat` detection differs by platform — pass it explicitly for reproducible output.** The default probes the platform: it is a real system setting on Android (needs the app `Context`, wired via `androidx.startup`) and locale-derived on iOS/JS, but on JVM and wasmJs there is no detection at all — it falls back to a guess from the locale's region (24-hour when the locale has no region or the region is not listed — so a bare `en` is 24-hour). On JS the platform probe never reports a setting, so JS takes the same guess. Symptom: the same locale renders 12- vs 24-hour differently across targets — supply `is24HourFormat = true/false` when determinism matters.
 
 **These `Instant`s are `kotlin.time.Instant`, not `kotlinx.datetime.Instant`.** The `Instant`/`Pair<Instant?, Instant?>` APIs use the stdlib `kotlin.time.Instant` (experimental time API); callers opt in to `kotlin.time.ExperimentalTime`. Symptom: a type mismatch when you pass a `kotlinx.datetime.Instant`.
 
-**Nothing throws for a caller.** A formatter that cannot produce a string falls back to the value's `toString()` (raw ISO), and `None`/`None` yields `""`. Symptom: a raw ISO string in the output means the styled path could not run. There are no `@Throws`, and no deprecated symbols, in this module.
+**Nothing throws for a caller — from 4.1.1.** `None`/`None` yields `""`, and there are no `@Throws` and no deprecated symbols in this module. In 4.1.0 and earlier, `Long` and `Full` dates threw `IllegalArgumentException("Unrecognized pattern character …")` for Spanish, Portuguese, Catalan, Galician, Basque, Lithuanian and Latvian (and `Full` for Danish and Finnish), because the quoted words in those patterns were read as pattern letters. Symptom on those versions: a crash formatting a date on a device set to one of those languages — upgrade, or use `Short`/`Medium` there.
+
+**Pattern literals and years, corrected in 4.1.1.** Literal text in a locale's pattern now reaches the output intact: Russian and Bulgarian dates no longer show stray quote marks (`2024 'г'.`), Japanese times keep `時分秒`, and a zone in parentheses no longer leaves a doubled space. A two-digit year shows the last two digits in any century (`31.12.99`, not `31.12.+1999`); a bare year is not zero-padded (`800`, not `0800`); and at `Full` a year before the common era is counted from one (ISO year 0 is "1 Before Common Era"). A region variant keeps its language's patterns (French in Canada is French, not English order), and English outside North America writes the day first (`05/03/2024` in the UK).
 
 ## What moved, and what it used to be called
+
+**Zone names for the repeated hour (4.1.1).** `Instant.format` names the zone for the exact instant, so 01:30 after clocks go back reads "EST"; it used to read "EDT" for both passes. `LocalDate.format` no longer shifts to the next day in a zone where that day's midnight does not exist.
 
 **Silent change in 4.1.0: zone names now come from the platform.** `Long`/`Full` time styles (and so the default `Instant.format()`) append a zone name that is now read from the platform's own CLDR instead of a bundled table. Same signature, but the wording can differ from 4.0.0 and between targets — UTC reads "UTC" / "Coordinated Universal Time" on the JVM and in the browser, "GMT" / "Greenwich Mean Time" on Apple. Tests that compared exact zone strings may need loosening. Inuktitut full weekday names also changed, to idiomatic day-words (ᐊᐃᑉᐱᖅ for Tuesday).
 

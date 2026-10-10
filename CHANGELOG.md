@@ -6,6 +6,35 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+### Fixed
+- **Dates no longer throw for nine languages** (`:datetime`): `Long` and `Full` dates threw `IllegalArgumentException` for Spanish, Portuguese, Catalan, Galician, Basque, Lithuanian and Latvian, and `Full` for Danish and Finnish, because quoted words in the locale's pattern (`'de'`) were read as pattern letters. Literal text is now copied through, so Russian and Bulgarian dates also lose their stray quote marks, Japanese times keep `時分秒`, and a zone in parentheses no longer leaves a doubled space.
+- **Year formatting** (`:datetime`): a two-digit year shows the last two digits in any century (`31.12.99`, was `31.12.+1999`); a bare year is no longer zero-padded (`800`, was `0800`); at `Full`, years before the common era are counted from one (ISO year 0 is "1 Before Common Era").
+- **Region variants keep their language's patterns** (`:datetime`): French in Canada and Spanish in the United States were given English date order; Inuktitut in Canada was given English AM/PM.
+- **Zone name in the repeated hour** (`:datetime`): `Instant.format` named the zone for the first pass of the hour when clocks go back, so both read "EDT"; it now uses the exact instant. `LocalDate.format` no longer shifts a date in a zone where that day's midnight does not exist. A zone at zero offset (London in winter) resolves "GMT" where it returned "Z".
+- **Number formatting** (`:readable`): negative numbers grouped their minus sign (`"-,123"`); values from ten million up, and below 0.001, came out as fragments of exponent notation on JVM, Android and iOS (`"1"`, `"5.0E-4"`); `Double.NaN` threw. Numbers are now written out in full on every platform, `Long` and `ULong` keep every digit, and not-a-number and the infinities render as `"NaN"`, `"∞"` and `"-∞"`.
+- **Money** (`:readable`): amounts dropped trailing zeros (`"$12.5"`, `"$12"`), large amounts were truncated (`"$1.0E"`), and negatives read `"$-,123"`. Money now always shows the currency's minor-unit digits, is exact for any amount, and puts the minus sign before an attached symbol (`"-$123.00"`).
+- **Unit boundaries** (`:readable`): a value that rounds up to the next unit is shown in that unit — `"1 minute"` not `"60 seconds"`, `"1M"` not `"1,000k"`, `"1 MiB"` not `"1,024 KiB"`, `"1 km"` not `"1,000 m"`.
+- **Plural forms** (`:readable`): Czech, Slovak, Croatian, Serbian, Slovenian, Lithuanian and Latvian always used the singular ("5 den"); Icelandic, Macedonian and Romanian mis-handled 21 and 20+. `pluralCategoryFor` now follows the CLDR plural rules for every bundled language. Slovenian and Latvian unit words, which were wrong, are replaced.
+- **Language gaps** (`:readable`): "Today"/"Tomorrow"/"Yesterday" were English for about forty languages; Dutch, Afrikaans, Indonesian, Malay and Swahili durations used English unit words; Azerbaijani used Turkish ones. German relative time used the wrong case ("vor 2 Tage"), as did the singular in Russian, Ukrainian, Belarusian and Polish.
+- **Separators and currency placement** (`:readable`): decimal and grouping separators were wrong for fifteen languages (Indonesian and Vietnamese had them swapped); the currency symbol was on the wrong side for Afrikaans, Hebrew, Swahili and German- and Italian-speaking Switzerland.
+- **Smaller `:readable` fixes**: `RelativeStyle.Short` durations outside English lost their space (`"5Minuten"`); a list element containing `{1}` was substituted into; a coordinate on a whole minute could read one second short (`1° 8' 59"`); an azimuth that rounds to 360° reads 0°; negative ordinals take the right suffix (`"-1st"`); Georgian ordinal suffixes were written in Armenian script; the South African English "Shortly" label was in Inuktitut.
+- **`Double.format` and `String.format`** (`:toolbox`): `Double.format` returned exponent notation for large and small values (which reached SVG, EPS and WKT output), saturated above about 9.2e18, and threw on `NaN`. `String.format` read `%10` as `%1` followed by `0` and substituted into the text of earlier arguments.
+- **Web Mercator at the poles** (`:toolbox`): latitude −90 projected to infinity, leaving any polygon that reaches the pole undrawable. Latitudes beyond about ±85.0511° are now held at that limit.
+- **Identifier validation** (`:identifiers`): MAC, UUID and IPv6 accepted fullwidth and other-script digits as hexadecimal; `formatHandle` accepted a bare `@`; `formatDomain` accepted an empty `xn--` label and a Punycode label with a leading delimiter.
+- **`ViewablePathPainter` drew in the wrong place** (`:viewable-compose`): it scaled about the centre of the draw area, so a path was displaced — usually off-canvas, a blank `Image` — unless the draw size equalled its bounds.
+- **EPS, SVG and WKT output** (`:viewable`): EPS was upside down, lost the stroke of any filled layer, and could have a bounding box smaller than the drawing; `ViewableGraphic.toSvgDocument` dropped alpha; empty geometries produced invalid WKT (`POLYGON ()`, now `POLYGON EMPTY`).
+- **Raster export** (`:viewable`): Android flattened JPEG transparency to black; `drawTo(Graphics2D)` left its transform on the caller's context; iOS leaked a `CGPath` per layer; Android and iOS could return empty bytes instead of failing.
+
+### Changed
+- **`Money.formatReadable` always shows minor-unit digits** (`:readable`): twelve dollars is `"$12.00"`, where it was `"$12"`.
+- **Rounding of negative halves** (`:readable`, `:toolbox`): halves round away from zero, so −2.5 rounds to −3, where it rounded to −2.
+- **English date patterns outside North America** (`:datetime`): `en-GB`, `en-AU`, `en-NZ`, `en-IE`, `en-IN` and `en-ZA` write the day first, where they used the United States order.
+- **Portuguese (Portugal) groups thousands with a space** (`:readable`); Brazilian Portuguese keeps the dot.
+
+### Known issues
+- Relative phrases ("5 minutes ago", "in 3 days") put the unit in the wrong grammatical case for many languages, among them Czech, Slovak, Slovenian, Croatian, Lithuanian, Latvian, Finnish, Estonian, Hungarian and Greek ([#18](https://github.com/aughtone/aughtone-format/issues/18)).
+- The "Recently" and "Shortly" labels are English for most languages, and `RelativeStyle.Short` abbreviates only in English. These and other smaller items are collected in [#19](https://github.com/aughtone/aughtone-format/issues/19).
+
 ## [4.1.0] - 2026-09-30
 
 ### Added

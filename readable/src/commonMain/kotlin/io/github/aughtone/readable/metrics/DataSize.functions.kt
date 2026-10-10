@@ -1,21 +1,23 @@
 package io.github.aughtone.readable.metrics
 
 import io.github.aughtone.readable.number.numberFormatterFor
+import io.github.aughtone.readable.number.prefixRungFor
 import io.github.aughtone.types.locale.Locale
 import io.github.aughtone.types.units.MetricPrefix
 import io.github.aughtone.types.units.UnitOfMeasure
-import kotlin.math.abs
 import kotlin.math.pow
 
 /**
  * Formats this [Double] value into a localized human-readable data size string using binary scaling (IEC).
  *
- * For example: 1024 -> "1.0 KiB", 1048576 -> "1.0 MiB".
+ * For example: 1024 -> "1 KiB", 1048576 -> "1 MiB", 1536 -> "1.5 KiB". Trailing zeros are
+ * trimmed, so a whole number of units never shows a decimal point. A value that rounds up to 1,024
+ * of one unit moves to the next, so 1,048,575 bytes is "1 MiB" rather than "1,024 KiB".
  *
  * Examples:
  * ```kotlin
- * 1024.0.formatReadableDataSize() // "1.0 KiB"
- * 1048576.0.formatReadableDataSize(UnitOfMeasure.Byte) // "1.0 MiB"
+ * 1024.0.formatReadableDataSize() // "1 KiB"
+ * 1048576.0.formatReadableDataSize(UnitOfMeasure.Byte) // "1 MiB"
  * ```
  *
  * @param unit The unit of measure (defaults to [UnitOfMeasure.Byte]).
@@ -28,38 +30,22 @@ fun Double.formatReadableDataSize(
     locale: Locale = Locale.current,
     precision: Int = 1
 ): String {
-    val absoluteValue = abs(this)
     val formatter = numberFormatterFor(locale, precision)
-
-    if (absoluteValue < 1024.0) {
-        return "${formatter(this)} ${unit.symbol}"
-    }
-
-    // Binary prefixes follow the same order as SI but with 2^10 steps
-    // Kilo (3) -> 2^10, Mega (6) -> 2^20, Giga (9) -> 2^30...
-    val prefixes = listOf(
-        MetricPrefix.Quetta to 10,
-        MetricPrefix.Ronna to 9,
-        MetricPrefix.Yotta to 8,
-        MetricPrefix.Zetta to 7,
-        MetricPrefix.Exa to 6,
-        MetricPrefix.Peta to 5,
-        MetricPrefix.Tera to 4,
-        MetricPrefix.Giga to 3,
-        MetricPrefix.Mega to 2,
-        MetricPrefix.Kilo to 1
-    )
-
-    val (prefix, factor) = prefixes.find { 1024.0.pow(it.second) <= absoluteValue }
+    val (symbol, divisor) = prefixRungFor(this, precision, binaryLadder)
         ?: return "${formatter(this)} ${unit.symbol}"
-
-    val scaledValue = this / 1024.0.pow(factor)
-
-    // For binary scaling, we use the IEC symbol (Ki, Mi, Gi...)
-    val binarySymbol = if (prefix == MetricPrefix.Kilo) "Ki" else "${prefix.symbol}i"
-
-    return "${formatter(scaledValue)} $binarySymbol${unit.symbol}"
+    return "${formatter(this / divisor)} $symbol${unit.symbol}"
 }
+
+/** No prefix, then the IEC binary prefixes in steps of 1024 (Ki, Mi, Gi, … Qi), smallest first. */
+private val binaryLadder: List<Pair<String, Double>> =
+    listOf("" to 1.0) + listOf(
+        MetricPrefix.Kilo, MetricPrefix.Mega, MetricPrefix.Giga, MetricPrefix.Tera, MetricPrefix.Peta,
+        MetricPrefix.Exa, MetricPrefix.Zetta, MetricPrefix.Yotta, MetricPrefix.Ronna, MetricPrefix.Quetta,
+    ).mapIndexed { index, prefix ->
+        // IEC writes kibi with a capital K, unlike the SI kilo.
+        val symbol = if (prefix == MetricPrefix.Kilo) "Ki" else "${prefix.symbol}i"
+        symbol to 1024.0.pow(index + 1)
+    }
 
 @Deprecated(
     message = "Use formatReadableDataSize instead",
@@ -72,7 +58,7 @@ fun Double.toReadableDataSize(
 ): String = formatReadableDataSize(unit, locale, precision)
 
 /**
- * Formats this [Float] value into a human-readable data size string (e.g., 1024.0f -> "1.0 KiB").
+ * Formats this [Float] value into a human-readable data size string (e.g., 1024.0f -> "1 KiB").
  *
  * @param unit The unit of measure (defaults to [UnitOfMeasure.Byte]).
  * @param locale The locale for numeric formatting (defaults to [Locale.current]).
@@ -95,7 +81,7 @@ fun Float.toReadableDataSize(
 ): String = formatReadableDataSize(unit, locale, precision)
 
 /**
- * Formats this [Long] value into a human-readable data size string (e.g., 1048576L -> "1.0 MiB").
+ * Formats this [Long] value into a human-readable data size string (e.g., 1048576L -> "1 MiB").
  *
  * @param unit The unit of measure (defaults to [UnitOfMeasure.Byte]).
  * @param locale The locale for numeric formatting (defaults to [Locale.current]).

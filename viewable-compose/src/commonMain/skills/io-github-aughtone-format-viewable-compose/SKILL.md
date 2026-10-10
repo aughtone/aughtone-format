@@ -14,7 +14,7 @@ description: >-
   Multiplatform dependency.
 license: Apache-2.0
 metadata:
-  version: "4.1.0"
+  version: "4.1.1"
   repository: https://github.com/aughtone/aughtone-format
 ---
 
@@ -56,13 +56,13 @@ fun PathShape(path: ViewablePath) {
 
 ## Invariants and traps
 
-**`toComposePath` does not scale or translate — drawing its output raw usually shows nothing.** It emits the path's own (projected) coordinates, which for the default Web Mercator projection are large. Symptom: a `Canvas` that draws nothing / off-screen. For "just render it", use `ViewablePathPainter` (scales to fit and centres) or `toImageVector` (translates to the bounds origin). Reach for `toComposePath` only when you are doing your own transform in the `DrawScope`.
+**`toComposePath` does not scale or translate — drawing its output raw usually shows nothing.** It emits the path's own (projected) coordinates, which for the default Web Mercator projection are large. Symptom: a `Canvas` that draws nothing / off-screen. For "just render it", use `ViewablePathPainter` (scales to fit and centres) or `toImageVector` (translates to the bounds origin). Reach for `toComposePath` only when you are doing your own transform in the `DrawScope`. In 4.1.0 `ViewablePathPainter` scaled about the centre of the draw area instead of the origin, so the shape was displaced — usually off-canvas, a blank `Image` — whenever the draw size differed from the path's bounds; that is fixed.
 
 **None of these are `@Composable` or memoized.** `toComposePath`, `toImageVector`, and the `ViewablePathPainter` constructor all do real work every time they run (the painter builds its path eagerly at construction). Symptom: jank / rebuilding on every recomposition — wrap them in `remember(key)` yourself.
 
 **`toComposePath` overwrites the passed path's fill type.** When you hand it an existing `Path` to append to, it first sets that path's `fillType` from the receiver's winding rule. Symptom: a reused `Path` silently changes fill rule — pass a fresh `Path` unless you intend that.
 
-**Empty or degenerate paths draw nothing, quietly.** A path with no computable bounds makes `toImageVector` fall back to a 1×1 image and `ViewablePathPainter` report `Size.Unspecified`. A path whose bounds have zero width or height divides by zero in the painter's scale (→ infinite scale, nothing visible) — guarded on the draw size but not the bounds size. Symptom: a blank `Image` where you expected a shape.
+**Empty or degenerate paths draw nothing, quietly.** A path with no computable bounds makes `toImageVector` fall back to a 1×1 image and `ViewablePathPainter` report `Size.Unspecified`. A path whose bounds have zero width *and* zero height (a single point) divides by zero in the painter's scale (→ infinite scale, nothing visible) — guarded on the draw size but not the bounds size. Symptom: a blank `Image` where you expected a shape.
 
 **Fill only, single colour, `Color.Black` by default.** There is no stroke, no per-layer style, and no opacity handling at this layer. The winding rule carries through from the `ViewablePath`. Coordinates are narrowed `Double`→`Float`, so very large projected values lose precision. Symptom: a filled silhouette where you wanted an outline, or jitter at extreme coordinates.
 

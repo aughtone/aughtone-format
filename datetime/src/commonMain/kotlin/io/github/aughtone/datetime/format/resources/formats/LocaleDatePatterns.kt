@@ -80,6 +80,13 @@ internal val localeDatePatterns = mapOf(
         medium = "MMM d, y",
         short = "M/d/yy"
     ),
+    // English outside North America writes the day first. Patterns follow Unicode CLDR.
+    "en-GB" to DatePatterns(full = "EEEE, d MMMM y", long = "d MMMM y", medium = "d MMM y", short = "dd/MM/y"),
+    "en-AU" to DatePatterns(full = "EEEE, d MMMM y", long = "d MMMM y", medium = "d MMM y", short = "d/M/yy"),
+    "en-NZ" to DatePatterns(full = "EEEE, d MMMM y", long = "d MMMM y", medium = "d MMM y", short = "dd/MM/y"),
+    "en-IE" to DatePatterns(full = "EEEE d MMMM y", long = "d MMMM y", medium = "d MMM y", short = "dd/MM/y"),
+    "en-IN" to DatePatterns(full = "EEEE, d MMMM y", long = "d MMMM y", medium = "d MMM y", short = "dd/MM/yy"),
+    "en-ZA" to DatePatterns(full = "EEEE, dd MMMM y", long = "dd MMMM y", medium = "dd MMM y", short = "y/MM/dd"),
     "US" to DatePatterns( // Maintain legacy key
         short = "M/d/yyyy",
         medium = "MMM d, yyyy",
@@ -116,6 +123,8 @@ internal val localeDatePatterns = mapOf(
         medium = "d.M.y",
         short = "d.M.y"
     ),
+    // French Canada writes the short date year first; the longer forms are the French ones.
+    "fr-CA" to DatePatterns(full = "EEEE d MMMM y", long = "d MMMM y", medium = "d MMM y", short = "y-MM-dd"),
     "fr" to DatePatterns(
         full = "EEEE d MMMM y",
         long = "d MMMM y",

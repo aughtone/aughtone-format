@@ -360,4 +360,63 @@ class RelativeTimeTest {
         val thenTime = LocalTime(12, 5)
         assertEquals("in 5 minutes", thenTime.toReadableRelative(Locales.English, now = nowTime))
     }
+
+    @Test
+    fun aDeltaThatRoundsUpToAWholeLargerUnitIsShownInThatUnit() {
+        val formatter = relativeTimeConfigFor(Locales.English).formatter
+        assertEquals("1 minute ago", formatter((-59.6).seconds, true))
+        assertEquals("59 seconds ago", formatter((-59.4).seconds, true))
+        assertEquals("1 hour ago", formatter((-59.6).minutes, true))
+        assertEquals("in 1 day", formatter(23.6.hours, true))
+        assertEquals("in 1 week", formatter(6.6.days, true))
+        assertEquals("1 month ago", formatter((-29.6).days, true))
+        // Without date units the hour is the largest unit, so it keeps counting.
+        assertEquals("in 24 hours", formatter(23.6.hours, false))
+    }
+
+    @Test
+    fun dayLabelsAreInTheReadersLanguage() {
+        fun labels(locale: io.github.aughtone.types.locale.Locale) =
+            relativeTimeConfigFor(locale).let { listOf(it.todayString, it.tomorrowString, it.yesterdayString) }
+
+        assertEquals(listOf("Сегодня", "Завтра", "Вчера"), labels(Locales.Russian))
+        assertEquals(listOf("今日", "明日", "昨日"), labels(Locales.Japanese))
+        assertEquals(listOf("Dnes", "Zítra", "Včera"), labels(Locales.Czech))
+        assertEquals(listOf("Hari ini", "Besok", "Kemarin"), labels(Locales.Indonesian))
+        assertEquals(listOf("Aujourd'hui", "Demain", "Hier"), labels(Locales.French))
+        assertEquals(listOf("今天", "明天", "昨天"), labels(Locales.TraditionalChinese))
+    }
+
+    @Test
+    fun southAfricanEnglishShortlyLabelIsEnglish() {
+        assertEquals("Shortly", relativeTimeConfigFor(Locales.SouthAfricanEnglish).shortlyString)
+    }
+
+    @Test
+    fun germanUsesTheDativePluralAfterVorAndIn() {
+        val formatter = relativeTimeConfigFor(Locales.German).formatter
+        assertEquals("vor 2 Tagen", formatter((-2).days, true))
+        assertEquals("in 2 Tagen", formatter(2.days, true))
+        assertEquals("vor 2 Monaten", formatter((-60).days, true))
+        assertEquals("vor 2 Jahren", formatter((-730).days, true))
+        assertEquals("vor 1 Tag", formatter((-1).days, true))
+        assertEquals("vor 5 Minuten", formatter((-5).minutes, true))
+    }
+
+    @Test
+    fun eastSlavicLanguagesAndPolishUseTheAccusativeForOne() {
+        assertEquals("1 минуту назад", relativeTimeConfigFor(Locales.Russian).formatter((-1).minutes, true))
+        assertEquals("через 21 секунду", relativeTimeConfigFor(Locales.Russian).formatter(21.seconds, true))
+        assertEquals("1 неделю назад", relativeTimeConfigFor(Locales.Russian).formatter((-7).days, true))
+        assertEquals("5 минут назад", relativeTimeConfigFor(Locales.Russian).formatter((-5).minutes, true))
+        assertEquals("1 годину тому", relativeTimeConfigFor(Locales.Ukrainian).formatter((-1).hours, true))
+        assertEquals("праз 1 хвіліну", relativeTimeConfigFor(Locales.Belarusian).formatter(1.minutes, true))
+        assertEquals("2 тыдні таму", relativeTimeConfigFor(Locales.Belarusian).formatter((-14).days, true))
+        assertEquals("za 1 godzinę", relativeTimeConfigFor(Locales.Polish).formatter(1.hours, true))
+    }
+
+    @Test
+    fun hebrewUsesThePluralForTwo() {
+        assertEquals("לפני 2 ימים", relativeTimeConfigFor(Locales.Hebrew).formatter((-2).days, true))
+    }
 }

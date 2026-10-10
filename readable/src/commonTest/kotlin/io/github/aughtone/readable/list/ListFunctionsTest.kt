@@ -88,4 +88,11 @@ class ListFunctionsTest {
             listOf("Monday", "Wednesday", "Friday").formatReadableList(irish),
         )
     }
+
+    @Test
+    fun elementsContainingPlaceholderTextAreEmittedUnchanged() {
+        assertEquals("a{1} and b", listOf("a{1}", "b").formatReadableList(Locales.English))
+        assertEquals("{0}, {1}, and {0}", listOf("{0}", "{1}", "{0}").formatReadableList(Locales.English))
+        assertEquals("x or {1}", listOf("x", "{1}").formatReadableList(Locales.English, ListType.Or))
+    }
 }

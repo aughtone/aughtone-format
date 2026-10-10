@@ -1,6 +1,7 @@
 package io.github.aughtone.readable.ordinality
 
 import io.github.aughtone.types.locale.localeFor
+import io.github.aughtone.readable.Locales
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -55,5 +56,19 @@ class OrdinalityTest {
     fun testDeprecatedCompatibility() {
         val locale = localeFor("en")!!
         assertEquals("1st", 1.toReadableOrdinal(locale))
+    }
+
+    @Test
+    fun negativeNumbersTakeTheSuffixOfTheirMagnitude() {
+        assertEquals("-1st", (-1).formatReadableOrdinal(Locales.English))
+        assertEquals("-2nd", (-2).formatReadableOrdinal(Locales.English))
+        assertEquals("-11th", (-11).formatReadableOrdinal(Locales.English))
+        assertEquals("-23rd", (-23).formatReadableOrdinal(Locales.English))
+    }
+
+    @Test
+    fun georgianSuffixesAreWrittenInGeorgianScript() {
+        assertEquals("1-ლი", 1.formatReadableOrdinal(Locales.Georgian))
+        assertEquals("21-ე", 21.formatReadableOrdinal(Locales.Georgian))
     }
 }

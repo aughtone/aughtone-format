@@ -3,37 +3,38 @@ package io.github.aughtone.datetime.format
 /**
  * The DateTimeStyle enum is used to specify the style of date and time formatting.
  *
- * The value can be one of the following:
+ * The examples are for English (United States); every locale has its own patterns.
  *```
  * [None]: No style - Empty output.
- * [Short]: Short text style, typically numeric. For example, the format might be '12.13.52' or '3:30pm'.
- * [Medium]: Medium text style, with some detail. For example, the format might be 'Jan 12, 1952'.
- * [Long]: Long text style, with lots of detail. For example, the format might be 'January 12, 1952'.
- * [Full]: Full text style, with the most detail. For example, the format might be 'Tuesday, April 12, 1952 AD' or '3:30:42pm PST'.
+ * [Short]: Short text style, typically numeric. For example '1/12/1952' or '3:30 PM'.
+ * [Medium]: Medium text style, with some detail. For example 'Jan 12, 1952' or '3:30:42 PM'.
+ * [Long]: Long text style, with lots of detail. For example 'January 12, 1952' or '3:30:42 PM PST'.
+ * [Full]: Full text style, with the most detail. For example 'Saturday, January 12, 1952 Common Era' or '3:30:42 PM Pacific Standard Time'.
  *```
  */
 enum class DateTimeStyle {
     /**
      * Short text style, typically numeric.
-     * For example, the format might be '12.13.52' or '3:30pm'.
+     * For example '1/12/1952' or '3:30 PM'.
      */
     Short,
 
     /**
      * Medium text style, with some detail.
-     * For example, the format might be 'Jan 12, 1952'.
+     * For example 'Jan 12, 1952' or '3:30:42 PM'.
      */
     Medium,
 
     /**
-     * Long text style, with lots of detail.
-     * For example, the format might be 'January 12, 1952'.
+     * Long text style, with lots of detail. A time adds the zone's abbreviation.
+     * For example 'January 12, 1952' or '3:30:42 PM PST'.
      * */
     Long,
 
     /**
-     * Full text style, with the most detail.
-     * For example, the format might be 'Tuesday, April 12, 1952 AD' or '3:30:42pm PST'.
+     * Full text style, with the most detail. A date adds the weekday and the era name; a time adds
+     * the zone's full name.
+     * For example 'Saturday, January 12, 1952 Common Era' or '3:30:42 PM Pacific Standard Time'.
      */
     Full,
 

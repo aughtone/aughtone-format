@@ -58,7 +58,7 @@ This project follows a specialized 5-sector documentation hierarchy.
 - **Geospatial Formatting**: Localized altitude, azimuth (with cardinal directions), and coordinates.
 
 ## 🌍 Universal Localization
-The library provides deep grammatical parity and full BCP 47 subtag fallback (e.g., `en-ZA` → `en`) for 59 supported language and region combinations:
+The library provides full BCP 47 subtag fallback (e.g., `en-ZA` → `en`) for 59 supported language and region combinations. Numbers, dates, durations, plural forms and day labels are localized for all of them; the grammar of relative phrases ("5 minutes ago") is complete for some languages and still approximate for others:
 
 | Family | Languages & Regions |
 | :--- | :--- |
@@ -87,30 +87,35 @@ The trade is explicit: this delivers coverage, not consistency — four platform
 ```kotlin
 val now = Clock.System.now()
 // Format with styles (Short, Medium, Long, Full)
-println(now.format(DateTimeStyle.Short, locale = Locale("en-US"))) // "4/23/26, 4:15 PM"
-println(now.format(DateTimeStyle.Short, locale = Locale("en-CA"))) // "2026-04-23, 4:15 p.m."
+println(now.format(dateStyle = DateTimeStyle.Short, timeStyle = DateTimeStyle.Short, locale = localeFor("en-US")!!)) // "4/23/2026 4:15 PM"
+println(now.format(dateStyle = DateTimeStyle.Short, timeStyle = DateTimeStyle.Short, locale = localeFor("en-CA")!!)) // "2026-04-23 4:15 p.m."
 ```
 
 ### Human-Readable Metrics (`:readable`)
+Each family of formatters lives in its own package (`…readable.ordinality`, `.duration`, `.relative`, `.metrics`, `.number`, `.financial`, `.list`, …); predefined locales are in `Locales`.
 ```kotlin
 // Ordinals
-println(123L.formatReadableOrdinal(Locale("en-US"))) // "123rd"
-println(123L.formatReadableOrdinal(Locale("fr-FR"))) // "123e"
+println(123L.formatReadableOrdinal(Locales.English)) // "123rd"
+println(123L.formatReadableOrdinal(Locales.French))  // "123e"
 
-// Durations
-println(1.5.hours.formatReadable(Locale("en-US"))) // "1.5 hours"
-println(1.5.hours.formatReadable(Locale("es-ES"))) // "1,5 horas"
+// Durations — scaled to the most significant unit and rounded
+println(90.minutes.formatReadable(locale = Locales.English)) // "2 hours"
+println(90.minutes.formatReadable(locale = Locales.Spanish)) // "2 horas"
+
+// Numbers and money
+println(1234567.891.formatReadable(Locales.German, precision = 2)) // "1.234.567,89"
+println(Money(123456L, usd).formatReadable(Locales.English))       // "$1,234.56"
 
 // Relative Time
-println(instant.formatReadableRelative(locale = Locale("en-US"))) // "3 minutes ago"
-println(instant.formatReadableRelative(locale = Locale("de-DE"))) // "vor 3 Minuten"
+println(instant.formatReadableRelative(locale = Locales.English)) // "3 minutes ago"
+println(instant.formatReadableRelative(locale = Locales.German))  // "vor 3 Minuten"
 
 // Relative Time — direction-aware LocalTime (disambiguates a clock time across midnight)
 val alarm = LocalTime(1, 0)
 println(alarm.formatReadableRelative(now = LocalTime(23, 0), direction = RelativeDirection.Future)) // "in 2 hours"
 
 // Data Sizes
-println(1048576L.formatReadableDataSize()) // "1.0 MiB"
+println(1048576L.formatReadableDataSize()) // "1 MiB"
 ```
 
 ---

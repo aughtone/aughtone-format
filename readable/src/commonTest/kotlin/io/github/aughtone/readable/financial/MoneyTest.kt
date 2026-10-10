@@ -3,6 +3,7 @@ package io.github.aughtone.readable.financial
 import io.github.aughtone.readable.Locales
 import io.github.aughtone.types.financial.Currency
 import io.github.aughtone.types.financial.Money
+import io.github.aughtone.types.number.BigDecimal
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -76,6 +77,57 @@ class MoneyTest {
         // currency symbol as a suffix with a space.
         val result = Money(123456L, usd).formatReadable(Locales.Persian)
         assertTrue(result.endsWith(" \$"), "expected suffix symbol with space, got: $result")
+    }
+
+    @Test
+    fun amountsKeepTheCurrencysMinorUnitDigits() {
+        assertEquals("$12.50", Money(1250L, usd).formatReadable(Locales.English))
+        assertEquals("$12.00", Money(1200L, usd).formatReadable(Locales.English))
+        assertEquals("$0.05", Money(5L, usd).formatReadable(Locales.English))
+        assertEquals("12,00 €", Money(1200L, eur).formatReadable(Locales.French))
+        assertEquals("12.00", Money(1200L, usd).formatReadable(Locales.English, showSymbol = false))
+    }
+
+    @Test
+    fun largeAmountsKeepEveryDigit() {
+        assertEquals("$10,000,000.00", Money(1_000_000_000L, usd).formatReadable(Locales.English))
+        assertEquals(
+            "$123,456,789,012,345,678,901,234.56",
+            Money(BigDecimal("123456789012345678901234.56"), usd).formatReadable(Locales.English)
+        )
+        assertEquals("¥10,000,000", Money(10_000_000L, jpy).formatReadable(Locales.Japanese))
+    }
+
+    @Test
+    fun negativeAmountsPutTheSignBeforeAPrefixedSymbol() {
+        assertEquals("-$123.00", Money(-12300L, usd).formatReadable(Locales.English))
+        assertEquals("-$1,234.56", Money(-123456L, usd).formatReadable(Locales.English))
+        assertEquals("-¥1,234", Money(-1234L, jpy).formatReadable(Locales.Japanese))
+        assertEquals("-123.00", Money(-12300L, usd).formatReadable(Locales.English, showSymbol = false))
+    }
+
+    @Test
+    fun negativeAmountsKeepTheSignOnTheNumberWhenTheSymbolIsSpacedOrTrailing() {
+        assertEquals("-1 234,56 €", Money(-123456L, eur).formatReadable(Locales.French))
+        assertEquals("€ -1.234,56", Money(-123456L, eur).formatReadable(Locales.Dutch))
+    }
+
+    @Test
+    fun amountsFinerThanTheMinorUnitRoundHalfToEven() {
+        assertEquals("$0.12", Money(BigDecimal("0.125"), usd).formatReadable(Locales.English))
+        assertEquals("$0.14", Money(BigDecimal("0.135"), usd).formatReadable(Locales.English))
+    }
+
+    @Test
+    fun symbolPlacementFollowsTheLanguage() {
+        val money = Money(123456L, usd)
+        assertEquals("$1 234,56", money.formatReadable(Locales.Afrikaans))
+        assertEquals("1,234.56 $", money.formatReadable(Locales.Hebrew))
+        assertEquals("$ 1,234.56", money.formatReadable(Locales.Swahili))
+        assertEquals("$ 1'234.56", money.formatReadable(Locales.SwissGerman))
+        assertEquals("$ 1'234.56", money.formatReadable(Locales.SwissItalian))
+        assertEquals("1.234,56 $", money.formatReadable(Locales.German))
+        assertEquals("1.234,56 $", money.formatReadable(Locales.Italian))
     }
 
     @Suppress("DEPRECATION")

@@ -21,11 +21,11 @@ import kotlinx.datetime.TimeZone
  * ```kotlin
  * val epochMillisPair = Pair(1678886400000L, 1678972800000L) // Example epoch milliseconds
  * val formattedDateTime = epochMillisPair.formatAsDateTime()
- * println(formattedDateTime) // Output (will vary based on locale and time zone): 3/15/23, 12:00 AM - 3/16/23, 12:00 AM
+ * println(formattedDateTime) // For English (US) in UTC: 3/15/2023 1:20 PM - 3/16/2023 1:20 PM
  *
  * val epochMillisPair2 = Pair(1678886400000L, null)
  * val formattedDateTime2 = epochMillisPair2.formatAsDateTime()
- * println(formattedDateTime2) // Output (will vary): 3/15/23, 12:00 AM - ?
+ * println(formattedDateTime2) // For English (US) in UTC: 3/15/2023 1:20 PM - ?
  * ```
  *
  * @param dateStyle The desired style for formatting the date component. Defaults to [DateTimeStyle.Short].

@@ -49,9 +49,10 @@ expect fun ViewableGraphic.toImage(
  * Extension to export a [ViewableImage] as a byte array (e.g., PNG or JPEG).
  *
  * @param format The [ImageFormat] to encode. Defaults to [ImageFormat.PNG].
- * @return The encoded image bytes.
+ * @return The encoded image bytes. Never empty.
  * @throws IllegalStateException on JS and Wasm, where bitmap generation is
- *   unsupported. Guard with [isImageSupported] before calling on those targets.
+ *   unsupported — guard with [isImageSupported] before calling on those targets —
+ *   and on any platform if the image cannot be encoded.
  */
 expect fun ViewableImage.toByteArray(format: ImageFormat = ImageFormat.PNG): ByteArray
 
@@ -82,8 +83,8 @@ fun ViewableImage.toDataUri(format: ImageFormat = ImageFormat.PNG): String {
  *
  * Both are encoded on every platform that supports bitmap generation (JVM,
  * Android, iOS); JS and Wasm do not support bitmap generation at all. [JPEG]
- * carries no transparency, so transparent areas are flattened onto an opaque
- * background — use [PNG] to keep them.
+ * carries no transparency, so transparent areas are flattened onto opaque
+ * white — use [PNG] to keep them.
  */
 enum class ImageFormat {
     PNG,

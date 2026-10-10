@@ -44,22 +44,31 @@ fun ViewablePath.drawTo(g2d: Graphics2D, style: ViewableStyle = ViewableStyle(fi
 }
 
 /**
- * Draws a [ViewableGraphic] to a JVM [Graphics2D] context.
+ * Draws a [ViewableGraphic] to a JVM [Graphics2D] context, scaled uniformly to fit a
+ * [width] by [height] area and centred in it.
+ *
+ * The caller's context is left as it was found: the transform, rendering hints, colour and
+ * stroke used here are applied to a copy, so further drawing on [g2d] is unaffected.
  */
 fun ViewableGraphic.drawTo(g2d: Graphics2D, width: Int, height: Int) {
-    g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
-    val bounds = bounds
-    if (bounds != null) {
-        val scaleX = width / bounds.width
-        val scaleY = height / bounds.height
-        val scale = minOf(scaleX, scaleY)
-        val dx = (width - bounds.width * scale) / 2.0
-        val dy = (height - bounds.height * scale) / 2.0
-        g2d.translate(dx, dy)
-        g2d.scale(scale, scale)
-        g2d.translate(-bounds.left, -bounds.top)
+    val scoped = g2d.create() as Graphics2D
+    try {
+        scoped.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
+        val bounds = bounds
+        if (bounds != null) {
+            val scaleX = width / bounds.width
+            val scaleY = height / bounds.height
+            val scale = minOf(scaleX, scaleY)
+            val dx = (width - bounds.width * scale) / 2.0
+            val dy = (height - bounds.height * scale) / 2.0
+            scoped.translate(dx, dy)
+            scoped.scale(scale, scale)
+            scoped.translate(-bounds.left, -bounds.top)
+        }
+        layers.forEach { it.path.drawTo(scoped, it.style) }
+    } finally {
+        scoped.dispose()
     }
-    layers.forEach { it.path.drawTo(g2d, it.style) }
 }
 
 actual fun ViewablePath.toImage(
