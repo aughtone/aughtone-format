@@ -58,7 +58,7 @@ This project follows a specialized 5-sector documentation hierarchy.
 - **Geospatial Formatting**: Localized altitude, azimuth (with cardinal directions), and coordinates.
 
 ## 🌍 Universal Localization
-The library provides full BCP 47 subtag fallback (e.g., `en-ZA` → `en`) for 59 supported language and region combinations. Numbers, dates, durations, plural forms and day labels are localized for all of them; the grammar of relative phrases ("5 minutes ago") is complete for some languages and still approximate for others:
+The library provides full BCP 47 subtag fallback (e.g., `en-ZA` → `en`) for 59 supported language and region combinations. Numbers, dates, durations, plural forms, day labels and relative phrases ("5 minutes ago") are localized for all of them:
 
 | Family | Languages & Regions |
 | :--- | :--- |

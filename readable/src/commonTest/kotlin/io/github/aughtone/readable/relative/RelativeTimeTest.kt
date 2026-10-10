@@ -85,7 +85,7 @@ class RelativeTimeTest {
         assertEquals("Demain", tomorrow.formatReadableRelative(now = reference, locale = Locales.French, timeZone = tz))
         assertEquals("Hier", yesterday.formatReadableRelative(now = reference, locale = Locales.French, timeZone = tz))
         
-        assertEquals("oor 2 ure", today.formatReadableRelative(now = reference, locale = Locales.Afrikaans, timeZone = tz))
+        assertEquals("oor 2 uur", today.formatReadableRelative(now = reference, locale = Locales.Afrikaans, timeZone = tz))
         assertEquals("Môre", tomorrow.formatReadableRelative(now = reference, locale = Locales.Afrikaans, timeZone = tz))
         assertEquals("Gister", yesterday.formatReadableRelative(now = reference, locale = Locales.Afrikaans, timeZone = tz))
     }
@@ -311,7 +311,8 @@ class RelativeTimeTest {
         // da/nb/nn/sv/is were allow-listed but had no config() -> rendered English. Now translated.
         assertEquals("for 8 minutter siden", (now - 8.minutes).formatReadableRelative(now = now, locale = Locales.Danish, timeZone = tz))
         assertEquals("för 8 minuter sedan", (now - 8.minutes).formatReadableRelative(now = now, locale = Locales.Swedish, timeZone = tz))
-        assertEquals("fyrir 8 mínútum síðan", (now - 8.minutes).formatReadableRelative(now = now, locale = Locales.Icelandic, timeZone = tz))
+        // Icelandic takes its phrases whole from CLDR, which has no trailing "síðan".
+        assertEquals("fyrir 8 mínútum", (now - 8.minutes).formatReadableRelative(now = now, locale = Locales.Icelandic, timeZone = tz))
 
         val reference = LocalDateTime(2023, 10, 27, 12, 0).toInstant(tz)
         assertEquals("I morgen", (reference + 25.hours).formatReadableRelative(now = reference, locale = Locales.NorwegianBokmal, timeZone = tz))
@@ -418,5 +419,46 @@ class RelativeTimeTest {
     @Test
     fun hebrewUsesThePluralForTwo() {
         assertEquals("לפני 2 ימים", relativeTimeConfigFor(Locales.Hebrew).formatter((-2).days, true))
+    }
+
+    private fun phrases(locale: io.github.aughtone.types.locale.Locale, deltas: List<kotlin.time.Duration>): List<String> =
+        deltas.map { relativeTimeConfigFor(locale).formatter(it, true) }
+
+    @Test
+    fun croatianAndLatvianInflectTheSingularAfterTheirPrepositions() {
+        assertEquals(listOf("prije 1 sekundu", "za 21 minutu", "prije 1 godinu"), phrases(Locales.Croatian, listOf((-1).seconds, 21.minutes, (-365).days)))
+        assertEquals(listOf("prije 2 sata", "za 5 sati"), phrases(Locales.Croatian, listOf((-2).hours, 5.hours)))
+        assertEquals(listOf("pirms 1 sekundes", "pēc 21 minūtes", "pirms 1 gada"), phrases(Locales.Latvian, listOf((-1).seconds, 21.minutes, (-365).days)))
+        assertEquals(listOf("pirms 2 stundām", "pēc 10 stundām"), phrases(Locales.Latvian, listOf((-2).hours, 10.hours)))
+    }
+
+    @Test
+    fun unitWordsAreSpelledInTheirOwnLanguageAndScript() {
+        assertEquals(listOf("пред 1 минута", "за 21 минута"), phrases(Locales.Macedonian, listOf((-1).minutes, 21.minutes)))
+        assertEquals(listOf("2 ثانیه پیش", "5 دقیقه پیش", "1 ساعت پیش"), phrases(Locales.Persian, listOf((-2).seconds, (-5).minutes, (-1).hours)))
+    }
+
+    @Test
+    fun dutchAndAfrikaansKeepHourAndYearSingularAfterACount() {
+        assertEquals(listOf("2 uur geleden", "over 5 uur", "2 jaar geleden"), phrases(Locales.Dutch, listOf((-2).hours, 5.hours, (-730).days)))
+        assertEquals(listOf("2 uur gelede", "oor 5 uur"), phrases(Locales.Afrikaans, listOf((-2).hours, 5.hours)))
+    }
+
+    @Test
+    fun romanianAddsDeFromTwenty() {
+        assertEquals(listOf("acum 1 minut", "acum 2 minute", "acum 19 minute", "acum 21 de minute"), phrases(Locales.Romanian, listOf((-1).minutes, (-2).minutes, (-19).minutes, (-21).minutes)))
+    }
+
+    @Test
+    fun hindiAndGreekUseTheObjectFormForOne() {
+        assertEquals("1 घंटे पहले", phrases(Locales.Hindi, listOf((-1).hours)).single())
+        assertEquals("σε 1 μήνα", phrases(Locales.Greek, listOf(30.days)).single())
+    }
+
+    @Test
+    fun estonianAndUzbekInflectTheUnitForTheFuture() {
+        // The past keeps its own wording; only the future needed another form of the unit.
+        assertEquals(listOf("2 tundi tagasi", "2 tunni pärast", "1 minuti pärast"), phrases(Locales.Estonian, listOf((-2).hours, 2.hours, 1.minutes)))
+        assertEquals(listOf("2 soat oldin", "2 soatdan keyin", "1 soniyadan keyin"), phrases(Locales.Uzbek, listOf((-2).hours, 2.hours, 1.seconds)))
     }
 }
