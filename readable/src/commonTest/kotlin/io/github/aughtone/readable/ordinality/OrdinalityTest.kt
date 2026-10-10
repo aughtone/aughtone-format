@@ -71,4 +71,13 @@ class OrdinalityTest {
         assertEquals("1-ლი", 1.formatReadableOrdinal(Locales.Georgian))
         assertEquals("21-ე", 21.formatReadableOrdinal(Locales.Georgian))
     }
+
+    @Test
+    fun unsignedValuesBeyondTheSignedRangeKeepTheirDigits() {
+        assertEquals("18446744073709551615th", ULong.MAX_VALUE.formatReadableOrdinal(Locales.English))
+        assertEquals("9223372036854775811th", 9223372036854775811uL.formatReadableOrdinal(Locales.English))
+        assertEquals("9223372036854775821st", 9223372036854775821uL.formatReadableOrdinal(Locales.English))
+        assertEquals("9223372036854775901e", 9223372036854775901uL.formatReadableOrdinal(Locales.French))
+        assertEquals("21st", 21uL.formatReadableOrdinal(Locales.English))
+    }
 }

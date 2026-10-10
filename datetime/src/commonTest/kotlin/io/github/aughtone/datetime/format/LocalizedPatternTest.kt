@@ -135,4 +135,34 @@ class LocalizedPatternTest {
     fun frenchCanadaKeepsItsIsoShortDate() {
         assertEquals("2024-03-05", LocalDate(2024, 3, 5).format(DateTimeStyle.Short, locale = locale("fr-CA"), timeZone = TimeZone.UTC))
     }
+
+    @Test
+    fun monthsInsideADateTakeTheFormTheLanguageUsesAfterADayNumber() {
+        val fifthOfMarch = LocalDate(2024, 3, 5)
+        fun long(tag: String) = fifthOfMarch.format(DateTimeStyle.Long, locale = locale(tag), timeZone = TimeZone.UTC)
+        assertEquals("5 марта 2024\u202Fг.", long("ru"))
+        assertEquals("5 березня 2024\u202Fр.", long("uk"))
+        assertEquals("5 marca 2024", long("pl"))
+        assertEquals("5. března 2024", long("cs"))
+        assertEquals("5. maaliskuuta 2024", long("fi"))
+    }
+
+    @Test
+    fun aMonthNamedOnItsOwnKeepsItsDictionaryForm() {
+        assertEquals("Март", kotlinx.datetime.Month.MARCH.displayName(TextWidth.Full, locale("ru")))
+        assertEquals("marzec", kotlinx.datetime.Month.MARCH.displayName(TextWidth.Full, locale("pl")))
+    }
+
+    @Test
+    fun aCombinedFormatWithOnlyOneHalfHasNoStraySpace() {
+        val english = Locale(languageCode = "en", regionCode = "US", displayName = "English (US)")
+        val moment = kotlinx.datetime.LocalDateTime(2024, 3, 5, 16, 8)
+        fun format(dateStyle: DateTimeStyle, timeStyle: DateTimeStyle) =
+            io.github.aughtone.datetime.format.platform.MultiplatformDateFormatter
+                .getLocalDateTimeFormat(dateStyle, timeStyle, english, TimeZone.UTC, twentyFourHour = false)
+                .format(moment)
+        assertEquals("4:08 PM", format(DateTimeStyle.None, DateTimeStyle.Short))
+        assertEquals("3/5/2024", format(DateTimeStyle.Short, DateTimeStyle.None))
+        assertEquals("3/5/2024 4:08 PM", format(DateTimeStyle.Short, DateTimeStyle.Short))
+    }
 }

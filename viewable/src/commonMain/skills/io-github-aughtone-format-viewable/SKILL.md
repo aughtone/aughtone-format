@@ -66,7 +66,7 @@ Pass a `GeoProjection` argument to override the projection; `WebMercatorProjecti
 
 ## Invariants and traps
 
-**The string conversions do not throw — empty input degrades silently.** There are no `require`/`check` guards on the SVG/path/WKT/EPS output. Symptom: an empty `""` (SVG/path) or an `EMPTY` geometry (WKT: `"GEOMETRYCOLLECTION EMPTY"`, `"POLYGON EMPTY"`) means the input had nothing to draw — a feature with a null geometry, or a geometry with no parts. A coordinate that is not a number is written as `NaN`. A `viewBox="0 0 1 1"` means the path carries no bounds: either it had no geometry, or it is a `ViewablePath` built by hand without passing `bounds`, which is not computed for you. Numbers are always plain decimals, at most `precision` places, with trailing zeros dropped.
+**The string conversions do not throw — empty input degrades silently.** There are no `require`/`check` guards on the SVG/path/WKT/EPS output. Symptom: an empty `""` (SVG/path) or an `EMPTY` geometry (WKT: `"GEOMETRYCOLLECTION EMPTY"`, `"POLYGON EMPTY"`) means the input had nothing to draw — a feature with a null geometry, or a geometry with no parts. A coordinate that is not a number is written as `NaN`. A `viewBox="0 0 1 1"` means the path has no coordinates at all. A `ViewablePath` built by hand works out its bounds from its commands unless you pass them (in 4.1.0 it had none, and rendered in a 1×1 box). A flat line or a single point has no area, so its box is opened up to a square around it and it stays drawable. Numbers are always plain decimals, at most `precision` places, with trailing zeros dropped.
 
 **EPS output matches the SVG and raster output: same way up, fill and stroke both drawn.** A layer with both a fill and a stroke gets both, and the drawing is not mirrored. EPS has no transparency, so a colour's alpha is ignored there; `ViewableGraphic.toSvgDocument` carries it as `fill-opacity` / `stroke-opacity`. In 4.1.0 and earlier the EPS was upside down and lost the stroke of any filled layer, and the graphic's SVG dropped alpha.
 
@@ -83,6 +83,8 @@ Pass a `GeoProjection` argument to override the projection; `WebMercatorProjecti
 **`ViewableRect` is corners, not extents.** It is `(left, top, right, bottom)`; `width`/`height` are computed getters. Symptom: a rect the wrong size when you passed width/height — construct it from corners.
 
 ## What moved, and what it used to be called
+
+**`toImage` needs a positive width and height** and throws `IllegalArgumentException` otherwise, on every platform that renders. Strokes end flush with the line (butt caps) everywhere; in 4.1.0 the JVM extended them by half the stroke width.
 
 **JPEG is flattened onto white on every platform.** JPEG has no transparency; transparent areas become white on JVM, Android and iOS alike. In 4.1.0 Android flattened them to black, which with the default black fill gave an all-black image. An image that cannot be encoded throws `IllegalStateException` rather than returning empty bytes.
 

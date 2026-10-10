@@ -94,7 +94,8 @@ private fun u6(
  * Builds a formatter from a unit table.
  *
  * Each unit takes over half a step early — a minute from 59.5 seconds, an hour from 59.5 minutes,
- * a day from 23.5 hours, a week from 6.5 days, a month from 29.5 days — so a value that rounds up
+ * a day from 23.5 hours, a week from 6.5 days, a month from 29.5 days, a year from 345 days
+ * (eleven and a half 30-day months) — so a value that rounds up
  * to a whole larger unit is shown as that unit ("1 minute") and never as "60 seconds".
  *
  * @param numberFirst `false` for a language that writes the unit before the count ("dakika 5").
@@ -107,7 +108,7 @@ private fun buildFormatter(
 ): DurationFormatter = { duration, _ ->
     val totalSeconds = abs(duration.toDouble(DurationUnit.SECONDS))
     val (value, unitKey) = when {
-        totalSeconds >= 31536000 -> (totalSeconds / 31536000.0) to "year"
+        totalSeconds >= 29808000 -> (totalSeconds / 31536000.0).coerceAtLeast(1.0) to "year"
         totalSeconds >= 2548800  -> (totalSeconds / 2592000.0)  to "month"
         totalSeconds >= 561600 && (totalSeconds / 604800.0).roundToLong() <= 3 -> (totalSeconds / 604800.0) to "week"
         totalSeconds >= 84600   -> (totalSeconds / 86400.0)   to "day"

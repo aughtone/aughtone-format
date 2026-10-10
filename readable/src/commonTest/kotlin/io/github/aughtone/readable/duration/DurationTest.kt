@@ -77,6 +77,14 @@ class DurationTest {
     }
 
     @Test
+    fun elevenAndAHalfMonthsIsAYearNotTwelveMonths() {
+        assertEquals("11 months", 340.days.formatReadable(locale = Locales.English))
+        assertEquals("1 year", 345.days.formatReadable(locale = Locales.English))
+        assertEquals("1 year", 364.days.formatReadable(locale = Locales.English))
+        assertEquals("1 year", 365.days.formatReadable(locale = Locales.English))
+    }
+
+    @Test
     fun aNegativeDurationReadsAsItsMagnitude() {
         assertEquals("5 minutes", (-5).minutes.formatReadable(locale = Locales.English))
     }

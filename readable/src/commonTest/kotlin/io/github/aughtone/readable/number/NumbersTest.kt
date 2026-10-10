@@ -177,6 +177,39 @@ class NumbersTest {
         assertEquals("1.234.567,89", 1234567.891.formatReadable(brazilian, 2))
     }
 
+    private fun locale(language: String, region: String) =
+        io.github.aughtone.types.locale.Locale(languageCode = language, regionCode = region, displayName = "$language-$region")
+
+    @Test
+    fun someLanguagesLeaveAFourDigitNumberUngrouped() {
+        assertEquals(listOf("1234,5", "12.345", "1.234.567"), listOf(1234.5, 12345.0, 1234567.0).map { it.formatReadable(Locales.Spanish) })
+        assertEquals(listOf("1234", "12.345"), listOf(1234, 12345).map { it.formatReadable(Locales.Italian) })
+        assertEquals(listOf("1234", "12 345"), listOf(1234, 12345).map { it.formatReadable(Locales.Polish) })
+        assertEquals(listOf("1234", "12 345"), listOf(1234, 12345).map { it.formatReadable(Locales.Portuguese) })
+        assertEquals(listOf("1234", "12 345"), listOf(1234, 12345).map { it.formatReadable(Locales.Hungarian) })
+        assertEquals("-1234", (-1234).formatReadable(Locales.Spanish))
+        // Most languages group from four digits.
+        assertEquals("1.234", 1234.formatReadable(Locales.German))
+        assertEquals("1 234", 1234.formatReadable(Locales.French))
+        assertEquals("1.234", 1234.formatReadable(locale("pt", "BR")))
+    }
+
+    @Test
+    fun spanishInTheAmericasFollowsItsOwnRegion() {
+        assertEquals("12,345.67", 12345.67.formatReadable(locale("es", "MX"), 2))
+        assertEquals("1,234", 1234.formatReadable(locale("es", "US")))
+        assertEquals("12.345,67", 12345.67.formatReadable(locale("es", "AR"), 2))
+        assertEquals("1.234", 1234.formatReadable(locale("es", "AR")))
+    }
+
+    @Test
+    fun hindiAndIndianEnglishGroupInLakhsAndCrores() {
+        assertEquals("12,34,567.89", 1234567.891.formatReadable(Locales.Hindi, 2))
+        assertEquals("1,234", 1234.formatReadable(Locales.Hindi))
+        assertEquals("1,23,45,67,890", 1234567890L.formatReadable(locale("en", "IN")))
+        assertEquals("-12,34,567", (-1234567).formatReadable(Locales.Hindi))
+    }
+
     @Suppress("DEPRECATION")
     @Test
     fun testDeprecatedCompatibility() {

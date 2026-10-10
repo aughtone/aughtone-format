@@ -145,7 +145,7 @@ private fun config(
             // Each unit takes over half a step early (a minute from 59.5 seconds, an hour from
             // 59.5 minutes, …) so a delta that rounds up to a whole larger unit reads "1 minute
             // ago", never "60 seconds ago".
-            allowDates && absSeconds >= 31536000 -> (absSeconds / 31536000.0) to "year"
+            allowDates && absSeconds >= 29808000 -> (absSeconds / 31536000.0).coerceAtLeast(1.0) to "year"
             allowDates && absSeconds >= 2548800  -> (absSeconds / 2592000.0)  to "month"
             allowDates && absSeconds >= 561600 && (absSeconds / 604800.0).roundToLong() <= 3 -> (absSeconds / 604800.0) to "week"
             allowDates && absSeconds >= 84600   -> (absSeconds / 86400.0)   to "day"

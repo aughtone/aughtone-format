@@ -62,7 +62,7 @@ fun PathShape(path: ViewablePath) {
 
 **`toComposePath` overwrites the passed path's fill type.** When you hand it an existing `Path` to append to, it first sets that path's `fillType` from the receiver's winding rule. Symptom: a reused `Path` silently changes fill rule — pass a fresh `Path` unless you intend that.
 
-**Empty or degenerate paths draw nothing, quietly.** A path with no computable bounds makes `toImageVector` fall back to a 1×1 image and `ViewablePathPainter` report `Size.Unspecified`. A path whose bounds have zero width *and* zero height (a single point) divides by zero in the painter's scale (→ infinite scale, nothing visible) — guarded on the draw size but not the bounds size. Symptom: a blank `Image` where you expected a shape.
+**Empty or degenerate paths draw nothing, quietly.** A path with no computable bounds makes `toImageVector` fall back to a 1×1 image and `ViewablePathPainter` report `Size.Unspecified`. A flat line is scaled along its length and a single point is drawn at its own scale, so neither breaks the painter; a point still shows nothing with a fill-only painter, because it has no area.
 
 **Fill only, single colour, `Color.Black` by default.** There is no stroke, no per-layer style, and no opacity handling at this layer. The winding rule carries through from the `ViewablePath`. Coordinates are narrowed `Double`→`Float`, so very large projected values lose precision. Symptom: a filled silhouette where you wanted an outline, or jitter at extreme coordinates.
 

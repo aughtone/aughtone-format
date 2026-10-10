@@ -110,7 +110,9 @@ The `geo`/`quantitative` families split by package: `Coordinates` extensions are
 - Durations in Czech, Slovak, Croatian, Serbian, Slovenian, Lithuanian and Latvian always used the singular ("5 den"); Dutch, Afrikaans, Indonesian, Malay and Swahili used English words. Both are fixed.
 - "Today"/"Tomorrow"/"Yesterday" were English for most languages and are now localized.
 - `RelativeStyle.Short` durations outside English lost their space (`"5Minuten"`); they now read `"5 Minuten"`.
-- Decimal and grouping separators were wrong for about fifteen languages — Ukrainian, Bulgarian, Hungarian and others now group with a space, and Indonesian and Vietnamese no longer swap the decimal point and the comma.
+- Decimal and grouping separators were wrong for about fifteen languages — Ukrainian, Bulgarian, Hungarian and others now group with a space, and Indonesian and Vietnamese no longer swap the decimal point and the comma. Spanish in the Americas follows its own region (`1,234.56` in Mexico).
+- Grouping follows the language: Spanish, Italian, Polish, Portuguese (Portugal), Hungarian and others leave a four-digit number whole (`1234,5`, grouping from `12.345`), and Hindi and Indian English group in lakhs (`12,34,567`).
+- Lists in English outside the United States have no comma before "and" (`A, B and C`).
 - A list element containing the text `{1}` was substituted into; elements are now emitted unchanged.
 
 **Silent change in 4.1.0: `TimeZone.formatReadable` wording.** The `Instant` overload now takes its name from the platform's own CLDR, so the wording can differ from 4.0.0 and between targets (UTC is "Coordinated Universal Time" on most, "Greenwich Mean Time" on Apple). The bare-`UtcOffset` overload cannot consult the platform, so it now returns the English name (or Inuktitut) — it no longer localizes into other languages. Pass an `Instant` to get the reader's language.

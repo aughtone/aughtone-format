@@ -84,4 +84,23 @@ class StringExtensionsTest {
         assertEquals("100% of %3", "100% of %3".format("x"))
         assertEquals("Hello World, today is Monday", "Hello %1, today is %2".format("World", "Monday"))
     }
+
+    @Test
+    fun formatAcceptsANullArgument() {
+        val missing: String? = null
+        assertEquals("null and x", "%1 and %2".format(missing, "x"))
+    }
+
+    @Test
+    fun obfuscateLastTreatsANegativeCountAsZero() {
+        assertEquals("•••••", "12345".obfuscateLast(count = -1))
+        assertEquals("•••••", "12345".obfuscateLast(count = 0))
+    }
+
+    @Test
+    fun obfuscateLastNeverSplitsACharacterMadeOfTwoCodeUnits() {
+        assertEquals("••😀cd", "ab😀cd".obfuscateLast(count = 3))
+        assertEquals("•😀", "😀😀".obfuscateLast(count = 1))
+        assertEquals("😀", "😀".obfuscateLast(count = 1))
+    }
 }

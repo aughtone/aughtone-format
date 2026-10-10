@@ -62,7 +62,14 @@ private fun String.fill(first: String, second: String): String = buildString {
     while (index < this@fill.length) {
         when {
             this@fill.startsWith("{0}", index) -> { append(first); index += 3 }
-            this@fill.startsWith("{1}", index) -> { append(second); index += 3 }
+            this@fill.startsWith("{1}", index) -> {
+                // The Hebrew conjunction "ו" is written onto the next word, and takes a hyphen
+                // when that word does not start with a Hebrew letter: "A ו-B".
+                val afterVav = index > 0 && this@fill[index - 1] == 'ו'
+                if (afterVav && second.firstOrNull()?.let { it !in '\u0590'..'\u05FF' } == true) append('-')
+                append(second)
+                index += 3
+            }
             else -> { append(this@fill[index]); index++ }
         }
     }

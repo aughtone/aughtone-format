@@ -56,7 +56,7 @@ fun ViewableGraphic.toSvgDocument(
     height: Int? = null,
     precision: Int = 3
 ): String {
-    val viewBox = bounds?.let {
+    val viewBox = bounds?.withDrawableExtent()?.let {
         "${it.left.format(precision)} ${it.top.format(precision)} ${it.width.format(precision)} ${it.height.format(precision)}"
     } ?: "0 0 1 1"
 
@@ -108,7 +108,7 @@ private fun opacityAttribute(name: String, color: Int): String {
  * @return A string containing the full EPS document.
  */
 fun ViewableGraphic.toEpsDocument(precision: Int = 3): String {
-    val b = bounds ?: ViewableRect(0.0, 0.0, 1.0, 1.0)
+    val b = bounds?.withDrawableExtent() ?: ViewableRect(0.0, 0.0, 1.0, 1.0)
     val sb = StringBuilder()
     sb.append("%!PS-Adobe-3.0 EPSF-3.0\n")
     // The integer box has to enclose the drawing: round the low corner down and the high one up.

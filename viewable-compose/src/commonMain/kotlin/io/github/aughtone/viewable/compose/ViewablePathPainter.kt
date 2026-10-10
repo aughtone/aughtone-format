@@ -31,9 +31,11 @@ class ViewablePathPainter(
     override fun DrawScope.onDraw() {
         val bounds = viewablePath.bounds
         if (bounds != null && size.width > 0 && size.height > 0) {
-            val scaleX = size.width / bounds.width.toFloat()
-            val scaleY = size.height / bounds.height.toFloat()
-            val scale = minOf(scaleX, scaleY)
+            // A dimension of zero does not limit the scale: a flat line is scaled along its
+            // length, and a single point is drawn at its own scale.
+            val scaleX = if (bounds.width > 0.0) size.width / bounds.width.toFloat() else null
+            val scaleY = if (bounds.height > 0.0) size.height / bounds.height.toFloat() else null
+            val scale = listOfNotNull(scaleX, scaleY).minOrNull() ?: 1f
 
             // Center the path in the draw area
             val dx = (size.width - bounds.width.toFloat() * scale) / 2f

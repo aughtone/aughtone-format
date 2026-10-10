@@ -12,6 +12,8 @@ Values derived from the Unicode Common Locale Data Repository (CLDR), published 
 - `Duration.resources.kt` (in the `:readable` module) — the duration unit words for Afrikaans, Dutch, Indonesian, Malay, Swahili, Azerbaijani, Slovenian, Latvian and Romanian.
 - `Number.resources.kt` and `Money.resources.kt` (in the `:readable` module) — which decimal and grouping separators a language uses, and on which side it writes a currency symbol.
 - `LocaleDatePatterns.kt` (in the `:datetime` module) — the date patterns for English outside North America and for French in Canada.
+- `LocaleClockHoursSource.kt` (in the `:datetime` module) — which locales write the time on a 12-hour clock.
+- `LocaleFormatMonthNames.kt` (in the `:datetime` module) — the in-date month names for Czech, Finnish, Polish, Russian and Ukrainian.
 
 Most localized time-zone names are read from the reader's own platform CLDR at runtime (`java.time`, Android ICU, Apple `NSTimeZone`, JavaScript/Wasm `Intl`) and are not compiled into this artifact.
 

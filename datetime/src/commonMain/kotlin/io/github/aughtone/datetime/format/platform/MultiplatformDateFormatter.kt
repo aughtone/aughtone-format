@@ -130,7 +130,8 @@ object MultiplatformDateFormatter : InternalDateFormatter {
                 timeZone = timeZone,
             )
         )
-        char(' ')
+        // The separator belongs between a date and a time, not beside an empty half.
+        if (dateStyle != DateTimeStyle.None && timeStyle != DateTimeStyle.None) char(' ')
         time(
             getLocalTimeFormat(
                 timeStyle = timeStyle,

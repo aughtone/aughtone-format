@@ -10,12 +10,13 @@ import kotlin.math.min
  *
  * @property commands The sequence of [PathCommand]s that define the path.
  * @property winding The winding rule to use when filling the path.
- * @property bounds The bounding box of the path in its local coordinate system.
+ * @property bounds The bounding box of the path in its local coordinate system. When it is not
+ *   passed it is worked out from [commands]; it is `null` only for a path with no coordinates.
  */
 data class ViewablePath(
     val commands: List<PathCommand>,
     val winding: WindingRule = WindingRule.EvenOdd,
-    val bounds: ViewableRect? = null,
+    val bounds: ViewableRect? = commands.calculateBounds(),
 )
 
 /**
@@ -50,7 +51,7 @@ fun ViewablePath.toSvgDocument(
     precision: Int = 3,
 ): String {
     val d = toSvgPathData(precision)
-    val viewBox = bounds?.let {
+    val viewBox = bounds?.withDrawableExtent()?.let {
         "${it.left.format(precision)} ${it.top.format(precision)} ${it.width.format(precision)} ${it.height.format(precision)}"
     } ?: "0 0 1 1"
 

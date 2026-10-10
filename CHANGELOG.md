@@ -25,7 +25,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - **EPS, SVG and WKT output** (`:viewable`): EPS was upside down, lost the stroke of any filled layer, and could have a bounding box smaller than the drawing; `ViewableGraphic.toSvgDocument` dropped alpha; empty geometries produced invalid WKT (`POLYGON ()`, now `POLYGON EMPTY`).
 - **Raster export** (`:viewable`): Android flattened JPEG transparency to black; `drawTo(Graphics2D)` left its transform on the caller's context; iOS leaked a `CGPath` per layer; Android and iOS could return empty bytes instead of failing.
 
+- **12/24-hour clock** (`:datetime`): JavaScript and Wasm never detected the setting; they now read the hour cycle from `Intl`. Where the platform cannot say (the JVM), the convention comes from CLDR for the locale passed in, so a bare `en` is 12-hour where it was 24-hour.
+- **AM/PM placement** (`:datetime`): the marker comes before the time in Korean, Hungarian, Turkish, Japanese and Chinese; it was always a suffix.
+- **Month names inside dates** (`:datetime`): Czech, Finnish, Polish, Russian and Ukrainian use the form the language takes after a day number ("5 марта"), where dates showed the dictionary form ("5 Март").
+- **Zone names that share an abbreviation** (`:datetime`): London's "BST" resolved to Bangladesh Standard Time, Shanghai's "CST" to Central Standard Time, Jerusalem's "IST" to India Standard Time, and so on; each zone now keeps its own name.
+- **Digit grouping** (`:readable`): Spanish, Italian, Polish, Portuguese (Portugal), Hungarian and others no longer group a four-digit number; Hindi and Indian English group in lakhs; Spanish in the Americas uses its region's separators.
+- **Lists** (`:readable`): English outside the United States has no comma before the conjunction; Hebrew joins its conjunction to a non-Hebrew word with a hyphen.
+- **More small fixes**: 345–364 days reads "1 year", not "12 months"; `ULong` ordinals above the signed range keep their digits (`:readable`); `obfuscateLast` no longer throws on a negative count or splits an emoji, and `String.format` accepts a `null` argument (`:toolbox`); a combined date-time format with one half empty has no stray space (`:datetime`).
+- **Flat lines, single points and hand-built paths** (`:viewable`, `:viewable-compose`): a shape with no width or no height gave an infinite scale and an unusable SVG viewBox; JVM strokes overran the ends of a line; `toImage` with a non-positive size failed differently on each platform and now throws `IllegalArgumentException` on all of them.
+
 ### Changed
+- **English in the United Kingdom, Ireland and South Africa defaults to the 24-hour clock** (`:datetime`), following CLDR, where it defaulted to 12-hour. This applies where the platform reports no setting of its own.
+- **A `ViewablePath` built without bounds works them out from its commands** (`:viewable`), so it is scaled to fit when rendered, where it was drawn unscaled.
 - **`Money.formatReadable` always shows minor-unit digits** (`:readable`): twelve dollars is `"$12.00"`, where it was `"$12"`.
 - **Rounding of negative halves** (`:readable`, `:toolbox`): halves round away from zero, so −2.5 rounds to −3, where it rounded to −2.
 - **English date patterns outside North America** (`:datetime`): `en-GB`, `en-AU`, `en-NZ`, `en-IE`, `en-IN` and `en-ZA` write the day first, where they used the United States order.
@@ -33,7 +44,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Known issues
 - Relative phrases ("5 minutes ago", "in 3 days") put the unit in the wrong grammatical case for many languages, among them Czech, Slovak, Slovenian, Croatian, Lithuanian, Latvian, Finnish, Estonian, Hungarian and Greek ([#18](https://github.com/aughtone/aughtone-format/issues/18)).
-- The "Recently" and "Shortly" labels are English for most languages, and `RelativeStyle.Short` abbreviates only in English. These and other smaller items are collected in [#19](https://github.com/aughtone/aughtone-format/issues/19).
+- The "Recently" and "Shortly" labels are English for most languages, and `RelativeStyle.Short` abbreviates only in English. These and the other open items are collected in [#19](https://github.com/aughtone/aughtone-format/issues/19).
+- `Altitude.formatReadable` and `Azimuth.formatReadable` are declared in both `…readable.geo` and `…readable.quantitative`; import them by name from one package.
 
 ## [4.1.0] - 2026-09-30
 

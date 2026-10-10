@@ -1,6 +1,8 @@
 package io.github.aughtone.datetime.format
 
 import io.github.aughtone.datetime.format.resources.Resources
+import io.github.aughtone.datetime.format.resources.formats.MonthNamesData
+import io.github.aughtone.datetime.format.resources.formats.localeFormatMonthNames
 import io.github.aughtone.datetime.format.resources.formats.DatePatterns
 import io.github.aughtone.datetime.format.resources.values.DayOfWeekNamesResource
 import io.github.aughtone.datetime.format.resources.values.MonthNamesResource
@@ -16,8 +18,15 @@ internal object DynamicLocalDateFormats {
     private fun getDayOfWeekNamesResource(locale: Locale): DayOfWeekNamesResource =
         Resources.getDayOfWeekNamesResource(locale)
 
-    private fun getMonthNamesResource(locale: Locale): MonthNamesResource =
-        Resources.getMonthNamesResource(locale)
+    /**
+     * The month names for use inside a date: the locale's own table, with the full names swapped
+     * for the in-date form where the language has one that differs.
+     */
+    private fun getMonthNamesResource(locale: Locale): MonthNamesResource {
+        val names = Resources.getMonthNamesResource(locale)
+        val inDate = localeFormatMonthNames[locale.languageCode] ?: return names
+        return MonthNamesData(full = inDate, abbreviated = names.abbreviated)
+    }
 
     fun short(locale: Locale, timeZone: TimeZone, twoDigitYearBase: Int = 2000): DateTimeFormat<LocalDate> {
         val patterns = getPatterns(locale)

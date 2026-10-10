@@ -127,7 +127,9 @@ class MoneyTest {
         assertEquals("$ 1'234.56", money.formatReadable(Locales.SwissGerman))
         assertEquals("$ 1'234.56", money.formatReadable(Locales.SwissItalian))
         assertEquals("1.234,56 $", money.formatReadable(Locales.German))
-        assertEquals("1.234,56 $", money.formatReadable(Locales.Italian))
+        // Italian leaves a four-digit amount ungrouped.
+        assertEquals("1234,56 $", money.formatReadable(Locales.Italian))
+        assertEquals("12.345,60 $", Money(1234560L, usd).formatReadable(Locales.Italian))
     }
 
     @Suppress("DEPRECATION")

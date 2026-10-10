@@ -280,6 +280,29 @@ object TimeZoneAbbreviationLookup {
         timeZoneAbbreviatedMap[timeZone.id]
 
     /**
+     * English full names for the zones whose abbreviation also belongs to another zone, keyed by
+     * zone id and then by abbreviation. "BST" is British Summer Time in London and Bangladesh
+     * Standard Time elsewhere; "CST", "IST", "AMT" and "BDT" are shared the same way. The other
+     * entries name abbreviations [timeZoneFullNameMap] does not list.
+     */
+    private val zoneFullNameOverrides: Map<String, Map<String, String>> = mapOf(
+        "Europe/London" to mapOf("BST" to "British Summer Time"),
+        "Asia/Shanghai" to mapOf("CST" to "China Standard Time"),
+        "Asia/Taipei" to mapOf("CST" to "Taipei Standard Time"),
+        "Asia/Jerusalem" to mapOf("IST" to "Israel Standard Time", "IDT" to "Israel Daylight Time"),
+        "Asia/Dhaka" to mapOf("BDT" to "Bangladesh Standard Time"),
+        "Asia/Yerevan" to mapOf("AMT" to "Armenia Standard Time"),
+        "Asia/Jakarta" to mapOf("WIB" to "Western Indonesia Time"),
+        "Australia/Lord_Howe" to mapOf("LHDT" to "Lord Howe Daylight Time"),
+        "Pacific/Apia" to mapOf("WSST" to "Apia Standard Time"),
+        "Pacific/Guam" to mapOf("ChST" to "Chamorro Standard Time"),
+    )
+
+    /** The English full name for [abbreviation] as [timeZone] uses it, or `null` if none is listed. */
+    private fun englishFullNameFor(timeZone: TimeZone, abbreviation: String): String? =
+        zoneFullNameOverrides[timeZone.id]?.get(abbreviation) ?: timeZoneFullNameMap[abbreviation]
+
+    /**
      * The English abbreviation the scaffolding lists for [timeZone] at [offset], or the offset's
      * own text when the zone or offset is not listed.
      *
@@ -327,7 +350,7 @@ object TimeZoneAbbreviationLookup {
         (TimeZoneNameSupplement.getFullName(englishAbbr, locale)
             ?: TimeZoneNameSupplement.getFullName(offset.toString(), locale))?.let { return it }
         platformZoneName(timeZone, instant, abbreviated = false, locale)?.let { return it }
-        return timeZoneFullNameMap[englishAbbr] ?: offset.toString()
+        return englishFullNameFor(timeZone, englishAbbr) ?: offset.toString()
     }
 
     /**
@@ -361,6 +384,6 @@ object TimeZoneAbbreviationLookup {
         val englishAbbr = englishAbbreviationFor(timeZone, offset)
         (TimeZoneNameSupplement.getFullName(englishAbbr, locale)
             ?: TimeZoneNameSupplement.getFullName(offset.toString(), locale))?.let { return it }
-        return timeZoneFullNameMap[englishAbbr] ?: offset.toString()
+        return englishFullNameFor(timeZone, englishAbbr) ?: offset.toString()
     }
 }

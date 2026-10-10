@@ -44,4 +44,28 @@ class ZoneResolutionTest {
         val apia = zone("Pacific/Apia") ?: return
         assertEquals("12/30/2011", LocalDate(2011, 12, 30).format(DateTimeStyle.Short, locale = english, timeZone = apia))
     }
+
+    @Test
+    fun zonesThatShareAnAbbreviationKeepTheirOwnNames() {
+        fun fullName(id: String, hours: Int): String? {
+            val timeZone = zone(id) ?: return null
+            return TimeZoneAbbreviationLookup.getTimeZoneFullName(timeZone, UtcOffset(hours = hours), english)
+        }
+        // "BST", "CST", "IST", "AMT" and "BDT" each name more than one zone.
+        assertEquals("British Summer Time", fullName("Europe/London", 1) ?: return)
+        assertEquals("China Standard Time", fullName("Asia/Shanghai", 8))
+        assertEquals("Taipei Standard Time", fullName("Asia/Taipei", 8))
+        assertEquals("Israel Standard Time", fullName("Asia/Jerusalem", 2))
+        assertEquals("Israel Daylight Time", fullName("Asia/Jerusalem", 3))
+        assertEquals("Bangladesh Standard Time", fullName("Asia/Dhaka", 6))
+        assertEquals("Armenia Standard Time", fullName("Asia/Yerevan", 4))
+        assertEquals("Western Indonesia Time", fullName("Asia/Jakarta", 7))
+        // The zones those abbreviations were first written for are unchanged.
+        assertEquals("Central Standard Time", fullName("America/Chicago", -6))
+        val kolkata = zone("Asia/Kolkata") ?: return
+        assertEquals(
+            "India Standard Time",
+            TimeZoneAbbreviationLookup.getTimeZoneFullName(kolkata, UtcOffset(hours = 5, minutes = 30), english),
+        )
+    }
 }

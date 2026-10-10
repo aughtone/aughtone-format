@@ -38,7 +38,8 @@ fun ViewablePath.drawTo(g2d: Graphics2D, style: ViewableStyle = ViewableStyle(fi
     }
     if (style.strokeColor != 0 && style.strokeWidth > 0) {
         g2d.color = Color(style.strokeColor, true)
-        g2d.stroke = BasicStroke(style.strokeWidth.toFloat())
+        // Butt caps, as SVG and the other platforms draw: the stroke stops at the end of the line.
+        g2d.stroke = BasicStroke(style.strokeWidth.toFloat(), BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER)
         g2d.draw(path)
     }
 }
@@ -56,11 +57,7 @@ fun ViewableGraphic.drawTo(g2d: Graphics2D, width: Int, height: Int) {
         scoped.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
         val bounds = bounds
         if (bounds != null) {
-            val scaleX = width / bounds.width
-            val scaleY = height / bounds.height
-            val scale = minOf(scaleX, scaleY)
-            val dx = (width - bounds.width * scale) / 2.0
-            val dy = (height - bounds.height * scale) / 2.0
+            val (scale, dx, dy) = bounds.fitInto(width.toDouble(), height.toDouble())
             scoped.translate(dx, dy)
             scoped.scale(scale, scale)
             scoped.translate(-bounds.left, -bounds.top)
@@ -76,6 +73,7 @@ actual fun ViewablePath.toImage(
     height: Int,
     fillColor: Int
 ): ViewableImage {
+    require(width > 0 && height > 0) { "An image needs a positive size, but was asked for ${width}x$height." }
     val image = BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB)
     val g2d = image.createGraphics()
     val graphic = ViewableGraphic(listOf(ViewableLayer(this, ViewableStyle(fillColor = fillColor))))
@@ -88,6 +86,7 @@ actual fun ViewableGraphic.toImage(
     width: Int,
     height: Int
 ): ViewableImage {
+    require(width > 0 && height > 0) { "An image needs a positive size, but was asked for ${width}x$height." }
     val image = BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB)
     val g2d = image.createGraphics()
     drawTo(g2d, width, height)

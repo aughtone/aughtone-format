@@ -22,6 +22,7 @@ expect val isImageSupported: Boolean
  * @param height The height of the rendered image in pixels.
  * @param fillColor The ARGB fill color applied to the path. Defaults to opaque black.
  * @return The rendered [ViewableImage].
+ * @throws IllegalArgumentException if the width or the height is not positive.
  * @throws IllegalStateException on JS and Wasm, where bitmap generation is
  *   unsupported. Guard with [isImageSupported] before calling on those targets.
  */
@@ -37,6 +38,7 @@ expect fun ViewablePath.toImage(
  * @param width The width of the rendered image in pixels.
  * @param height The height of the rendered image in pixels.
  * @return The rendered [ViewableImage].
+ * @throws IllegalArgumentException if the width or the height is not positive.
  * @throws IllegalStateException on JS and Wasm, where bitmap generation is
  *   unsupported. Guard with [isImageSupported] before calling on those targets.
  */

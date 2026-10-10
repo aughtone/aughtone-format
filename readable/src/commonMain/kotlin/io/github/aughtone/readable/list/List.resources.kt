@@ -50,6 +50,11 @@ private val P20 = ListPatterns(two = "{0} oder {1}", start = "{0}, {1}", middle 
 private val P21 = ListPatterns(two = "{0}, {1}", start = "{0}, {1}", middle = "{0}, {1}", end = "{0} und {1}")
 private val P22 = ListPatterns(two = "{0} και {1}", start = "{0}, {1}", middle = "{0}, {1}", end = "{0} και {1}")
 private val P23 = ListPatterns(two = "{0} ή {1}", start = "{0}, {1}", middle = "{0}, {1}", end = "{0} ή {1}")
+private val worldEnglish = mapOf(
+    ListType.And to ListPatterns(two = "{0} and {1}", start = "{0}, {1}", middle = "{0}, {1}", end = "{0} and {1}"),
+    ListType.Or to ListPatterns(two = "{0} or {1}", start = "{0}, {1}", middle = "{0}, {1}", end = "{0} or {1}"),
+    ListType.Unit to ListPatterns(two = "{0}, {1}", start = "{0}, {1}", middle = "{0}, {1}", end = "{0}, {1}"),
+)
 private val P24 = ListPatterns(two = "{0} and {1}", start = "{0}, {1}", middle = "{0}, {1}", end = "{0}, and {1}")
 private val P25 = ListPatterns(two = "{0} or {1}", start = "{0}, {1}", middle = "{0}, {1}", end = "{0}, or {1}")
 private val P26 = ListPatterns(two = "{0} y {1}", start = "{0}, {1}", middle = "{0}, {1}", end = "{0} y {1}")
@@ -129,6 +134,10 @@ private val listPatterns: Map<String, Map<ListType, ListPatterns>> = mapOf(
     "de" to mapOf(ListType.And to P19, ListType.Or to P20, ListType.Unit to P21),
     "el" to mapOf(ListType.And to P22, ListType.Or to P23, ListType.Unit to P02),
     "en" to mapOf(ListType.And to P24, ListType.Or to P25, ListType.Unit to P02),
+    // English outside the United States (CLDR "en-001" and its children) has no comma before
+    // the conjunction.
+    "en-AU" to worldEnglish, "en-CA" to worldEnglish, "en-GB" to worldEnglish, "en-IE" to worldEnglish,
+    "en-IN" to worldEnglish, "en-NZ" to worldEnglish, "en-ZA" to worldEnglish,
     "es" to mapOf(ListType.And to P26, ListType.Or to P14, ListType.Unit to P26),
     "et" to mapOf(ListType.And to P27, ListType.Or to P28, ListType.Unit to P02),
     "eu" to mapOf(ListType.And to P29, ListType.Or to P30, ListType.Unit to P29),
