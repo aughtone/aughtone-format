@@ -6,6 +6,8 @@ import io.github.aughtone.types.locale.Locale
 import io.github.aughtone.datetime.format.platform.MultiplatformDateFormatter
 import io.github.aughtone.datetime.format.resources.is24HourFormat
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
 
@@ -29,7 +31,9 @@ fun LocalDate.format(
     is24HourFormat: Boolean = is24HourFormat(locale = locale),
     numberingSystem: NumberingSystem? = null,
 ): String = MultiplatformDateFormatter.formatDateTime(
-    localDateTime = atStartOfDayIn(timeZone = timeZone).toLocalDateTime(timeZone = timeZone),
+    // The date itself, at midnight: no trip through the zone, which would land on the next day
+    // wherever local midnight does not exist (a skipped day, or a clock change at midnight).
+    localDateTime = LocalDateTime(this, LocalTime(0, 0)),
     dateStyle = dateStyle,
     timeStyle = DateTimeStyle.None,
     locale = locale,

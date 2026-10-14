@@ -20,4 +20,17 @@ class HandleTest {
         assertFailsWith<IllegalArgumentException> { "".formatHandle() }
         assertFailsWith<IllegalArgumentException> { "   ".formatHandle() }
     }
+
+    @Test
+    fun aHandleNeedsAUsernameAfterTheAtSign() {
+        assertFailsWith<IllegalArgumentException> { "@".formatHandle() }
+        assertFailsWith<IllegalArgumentException> { "@  ".formatHandle() }
+        assertFailsWith<IllegalArgumentException> { "@@".formatHandle() }
+    }
+
+    @Test
+    fun repeatedLeadingAtSignsCollapseToOne() {
+        assertEquals("@alice", "@@alice".formatHandle())
+        assertEquals("@al@ice", "al@ice".formatHandle())
+    }
 }

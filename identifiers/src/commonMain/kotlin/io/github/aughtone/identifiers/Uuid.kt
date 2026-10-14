@@ -145,7 +145,7 @@ private fun canonicalUuidHex(value: String): String {
     val groups = value.split('-')
     val valid = groups.size == UUID_GROUP_LENGTHS.size &&
         groups.withIndex().all { (i, g) ->
-            g.length == UUID_GROUP_LENGTHS[i] && g.all { it.digitToIntOrNull(16) != null }
+            g.length == UUID_GROUP_LENGTHS[i] && g.all { it.isAsciiHexDigit() }
         }
     require(valid) {
         "Not a canonical UUID (expected 8-4-4-4-12 hex groups): \"$value\""

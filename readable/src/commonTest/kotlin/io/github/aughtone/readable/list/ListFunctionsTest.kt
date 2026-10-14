@@ -88,4 +88,30 @@ class ListFunctionsTest {
             listOf("Monday", "Wednesday", "Friday").formatReadableList(irish),
         )
     }
+
+    @Test
+    fun elementsContainingPlaceholderTextAreEmittedUnchanged() {
+        assertEquals("a{1} and b", listOf("a{1}", "b").formatReadableList(Locales.English))
+        assertEquals("{0}, {1}, and {0}", listOf("{0}", "{1}", "{0}").formatReadableList(Locales.English))
+        assertEquals("x or {1}", listOf("x", "{1}").formatReadableList(Locales.English, ListType.Or))
+    }
+
+    @Test
+    fun englishOutsideNorthAmericaHasNoCommaBeforeTheConjunction() {
+        val items = listOf("A", "B", "C")
+        for (region in listOf("GB", "AU", "NZ", "IE", "IN", "ZA", "CA")) {
+            val english = Locale(languageCode = "en", regionCode = region, displayName = "en-$region")
+            assertEquals("A, B and C", items.formatReadableList(english), "en-$region")
+            assertEquals("A, B or C", items.formatReadableList(english, ListType.Or), "en-$region")
+        }
+        assertEquals("A, B, and C", items.formatReadableList(Locales.English))
+        assertEquals("A, B, and C", items.formatReadableList(Locale(languageCode = "en", displayName = "en")))
+    }
+
+    @Test
+    fun hebrewJoinsItsConjunctionToAForeignWordWithAHyphen() {
+        assertEquals("A ו-B", listOf("A", "B").formatReadableList(Locales.Hebrew))
+        assertEquals("A, B ו-C", listOf("A", "B", "C").formatReadableList(Locales.Hebrew))
+        assertEquals("אבא ואמא", listOf("אבא", "אמא").formatReadableList(Locales.Hebrew))
+    }
 }

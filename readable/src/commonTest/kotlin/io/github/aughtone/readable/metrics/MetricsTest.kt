@@ -24,6 +24,39 @@ class MetricsTest {
         assertEquals("1.5 GiB", (1024L * 1024L * 1024L * 1.5).toLong().formatReadableDataSize(UnitOfMeasure.Byte, Locales.English))
     }
 
+    @Test
+    fun metricScalingMovesUpAPrefixWhenRoundingReachesAThousand() {
+        assertEquals("1 km", Distance(999.96).formatReadable(Locales.English))
+        assertEquals("999.9 m", Distance(999.94).formatReadable(Locales.English))
+        assertEquals("1 m", 0.99996.formatReadableMetric(UnitOfMeasure.Meter, Locales.English))
+        assertEquals("1 MW", 999_960.formatReadableMetric(UnitOfMeasure.Watt, Locales.English))
+    }
+
+    @Test
+    fun metricScalingHandlesNegativeSmallAndNonFiniteValues() {
+        assertEquals("-1.5 km", (-1500.0).formatReadableMetric(UnitOfMeasure.Meter, Locales.English))
+        assertEquals("500 mm", 0.5.formatReadableMetric(UnitOfMeasure.Meter, Locales.English))
+        assertEquals("0 m", 0.0.formatReadableMetric(UnitOfMeasure.Meter, Locales.English))
+        assertEquals("12,345,678 Qm", 1.2345678e37.formatReadableMetric(UnitOfMeasure.Meter, Locales.English, 0))
+        assertEquals("NaN m", Double.NaN.formatReadableMetric(UnitOfMeasure.Meter, Locales.English))
+        assertEquals("∞ m", Double.POSITIVE_INFINITY.formatReadableMetric(UnitOfMeasure.Meter, Locales.English))
+    }
+
+    @Test
+    fun dataSizeMovesUpAPrefixWhenRoundingReachesTheNextStep() {
+        assertEquals("1 KiB", 1023.99.formatReadableDataSize(UnitOfMeasure.Byte, Locales.English))
+        assertEquals("1 MiB", 1_048_575L.formatReadableDataSize(UnitOfMeasure.Byte, Locales.English))
+        assertEquals("1,023 B", 1023L.formatReadableDataSize(UnitOfMeasure.Byte, Locales.English))
+        assertEquals("1.5 KiB", 1536L.formatReadableDataSize(UnitOfMeasure.Byte, Locales.English))
+    }
+
+    @Test
+    fun dataSizeHandlesNegativeAndNonFiniteValues() {
+        assertEquals("-1 KiB", (-1024L).formatReadableDataSize(UnitOfMeasure.Byte, Locales.English))
+        assertEquals("NaN B", Double.NaN.formatReadableDataSize(UnitOfMeasure.Byte, Locales.English))
+        assertEquals("∞ B", Double.POSITIVE_INFINITY.formatReadableDataSize(UnitOfMeasure.Byte, Locales.English))
+    }
+
     @Suppress("DEPRECATION")
     @Test
     fun testDeprecatedCompatibility() {

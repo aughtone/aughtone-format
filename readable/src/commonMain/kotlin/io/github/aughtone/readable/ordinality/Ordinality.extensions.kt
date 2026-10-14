@@ -79,12 +79,18 @@ fun Byte.toReadableOrdinal(locale: Locale = Locale.current): String {
 
 /**
  * Converts this [ULong] into its localized human-readable ordinal string representation.
+ * The digits are exact across the whole [ULong] range.
  *
  * @param locale The locale defining the formatting rules (defaults to [Locale.current]).
  * @return The ordinal string representation of this number.
  */
 fun ULong.formatReadableOrdinal(locale: Locale = Locale.current): String {
-    return toLong().formatReadableOrdinal(locale)
+    if (this <= Long.MAX_VALUE.toULong()) return toLong().formatReadableOrdinal(locale)
+    // Too large for a Long. An ordinal's form depends only on its last two digits (and on being
+    // exactly 1, which this is not), so the form is taken from a small stand-in with the same
+    // ending and the stand-in's digits are swapped for the real ones.
+    val standIn = 100L + (this % 100uL).toLong()
+    return standIn.formatReadableOrdinal(locale).replaceFirst(standIn.toString(), toString())
 }
 
 @Deprecated(

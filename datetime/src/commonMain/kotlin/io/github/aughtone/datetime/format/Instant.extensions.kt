@@ -42,5 +42,6 @@ fun Instant.format(
     timeZone = timeZone,
     twentyFourHour = is24HourFormat,
     eraNames = eraNames,
-    numberingSystem = numberingSystem
+    numberingSystem = numberingSystem,
+    instant = this,
 ) ?: toString()

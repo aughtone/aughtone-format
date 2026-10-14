@@ -11,6 +11,12 @@ This document tracks technical debt, missing features, and pending refactors for
 ### Numbering Systems
 - [ ] **Implement Localized Numbering.** Add support for non-Western digits (e.g., Arabic-Indic) in the formatting pipeline, respecting locale preferences while allowing a forced Western digits override.
 
+## 📖 Readable Module (`:readable`)
+
+### Relative Time
+- [x] **Relative-time grammar.** Fourteen languages take whole phrases from CLDR; unit words corrected elsewhere.
+- [ ] **Alternative wordings.** Compact-form languages whose wording differs from CLDR are kept as they are; see [gap/0002](gap/0002-relative-time-wording-differences-from-cldr.md) for the list and when to revisit it.
+
 ## 📖 General
 - [ ] **Indicate Supported Languages.** Update the main `README.md` to clearly indicate the **55 supported languages** and regions provided by the library.
 - [ ] **gap: Resolve KLIB resolver collisions.** Address `unique_name` collisions between AndroidX and JetBrains Compose libraries (e.g., `lifecycle`, `collection`, `annotation`) by implementing a selective `resolutionStrategy` in the root `build.gradle.kts` that aligns versions across targets without breaking Android-specific artifacts (like `-ktx`).

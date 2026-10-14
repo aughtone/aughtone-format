@@ -83,13 +83,17 @@ private fun punycodeDecode(input: String, label: String): String {
     var i = 0
     var bias = PUNY_INITIAL_BIAS
 
+    require(input.isNotEmpty()) { "Invalid Punycode (nothing after the xn-- prefix) in label \"$label\"" }
+
     val lastDelim = input.lastIndexOf('-')
     for (idx in 0 until maxOf(lastDelim, 0)) {
         val c = input[idx]
         require(c.code < 0x80) { "Invalid Punycode (non-ASCII before delimiter) in label \"$label\"" }
         output.add(c.code)
     }
-    var pos = if (lastDelim >= 0) lastDelim + 1 else 0
+    // The delimiter is only consumed when basic code points came before it. One at the very start
+    // separates nothing, so decoding begins on it and rejects it as a digit (RFC 3492 section 6.2).
+    var pos = if (lastDelim > 0) lastDelim + 1 else 0
 
     while (pos < input.length) {
         val oldI = i

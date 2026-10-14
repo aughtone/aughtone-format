@@ -42,8 +42,10 @@ enum class PhoneNotation {
  * from `aughtone-phonenumber`. (That is the module's one dependency; its metadata
  * is dead-code-eliminated for callers that never format a phone.)
  *
- * A country whose metadata is not bundled falls back to the national significant
- * number without grouping.
+ * The number is read by `aughtone-phonenumber`'s parser, which is lenient: a
+ * number written with spaces, hyphens or parentheses is usually accepted too.
+ * That is the parser's behaviour, not a promise of this function — pass E.164.
+ * A calling code the metadata does not know is rejected (see the `@throws`).
  *
  * Example:
  * ```kotlin

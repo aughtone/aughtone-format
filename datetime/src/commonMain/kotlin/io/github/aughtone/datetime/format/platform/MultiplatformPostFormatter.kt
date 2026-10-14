@@ -37,8 +37,9 @@ object MultiplatformPostFormatter {
         var result = when (dateStyle) {
             DateTimeStyle.Full -> {
                 val eras = eraNames ?: io.github.aughtone.datetime.format.resources.Resources.getEraNames(locale, abbreviated = false)
-                val era = if (date.year < 0) eras.bce else eras.ce
-                "$formattedDate $era"
+                // ISO year 0 is 1 BCE and year -500 is 501 BCE: beside an era name the year is
+                // counted from one and carries no sign.
+                if (date.year <= 0) "${formattedDate.withYearOfEra(date.year)} ${eras.bce}" else "$formattedDate ${eras.ce}"
             }
             else -> formattedDate
         }
@@ -94,6 +95,29 @@ object MultiplatformPostFormatter {
 
         return result
     }
+
+    /**
+     * Rewrites the ISO [year] (zero or negative) inside this formatted date as its year of the
+     * BCE era. The formatter printed it as `-500` (or zero-padded, `-0500`), or as a run of zeros
+     * for year 0 — a form no day or month number ever takes — so the first such run is the year.
+     */
+    private fun String.withYearOfEra(year: Int): String {
+        val yearOfEra = (1L - year).toString()
+        var index = 0
+        while (index < length) {
+            if (!this[index].isAsciiDigit()) { index++; continue }
+            var end = index
+            while (end < length && this[end].isAsciiDigit()) end++
+            val digits = substring(index, end)
+            val signed = index > 0 && this[index - 1] == '-'
+            val isYear = if (year == 0) digits.all { it == '0' } else signed && digits.trimStart('0') == (-year.toLong()).toString()
+            if (isYear) return substring(0, if (signed) index - 1 else index) + yearOfEra + substring(end)
+            index = end
+        }
+        return this
+    }
+
+    private fun Char.isAsciiDigit(): Boolean = this in '0'..'9'
 
     private fun resolveNumberingSystem(numberingSystem: NumberingSystem?, locale: Locale): NumberingSystem? {
         if (numberingSystem != null) return numberingSystem

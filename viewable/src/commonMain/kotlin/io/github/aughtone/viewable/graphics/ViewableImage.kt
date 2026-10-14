@@ -22,6 +22,7 @@ expect val isImageSupported: Boolean
  * @param height The height of the rendered image in pixels.
  * @param fillColor The ARGB fill color applied to the path. Defaults to opaque black.
  * @return The rendered [ViewableImage].
+ * @throws IllegalArgumentException if the width or the height is not positive.
  * @throws IllegalStateException on JS and Wasm, where bitmap generation is
  *   unsupported. Guard with [isImageSupported] before calling on those targets.
  */
@@ -37,6 +38,7 @@ expect fun ViewablePath.toImage(
  * @param width The width of the rendered image in pixels.
  * @param height The height of the rendered image in pixels.
  * @return The rendered [ViewableImage].
+ * @throws IllegalArgumentException if the width or the height is not positive.
  * @throws IllegalStateException on JS and Wasm, where bitmap generation is
  *   unsupported. Guard with [isImageSupported] before calling on those targets.
  */
@@ -49,9 +51,10 @@ expect fun ViewableGraphic.toImage(
  * Extension to export a [ViewableImage] as a byte array (e.g., PNG or JPEG).
  *
  * @param format The [ImageFormat] to encode. Defaults to [ImageFormat.PNG].
- * @return The encoded image bytes.
+ * @return The encoded image bytes. Never empty.
  * @throws IllegalStateException on JS and Wasm, where bitmap generation is
- *   unsupported. Guard with [isImageSupported] before calling on those targets.
+ *   unsupported — guard with [isImageSupported] before calling on those targets —
+ *   and on any platform if the image cannot be encoded.
  */
 expect fun ViewableImage.toByteArray(format: ImageFormat = ImageFormat.PNG): ByteArray
 
@@ -82,8 +85,8 @@ fun ViewableImage.toDataUri(format: ImageFormat = ImageFormat.PNG): String {
  *
  * Both are encoded on every platform that supports bitmap generation (JVM,
  * Android, iOS); JS and Wasm do not support bitmap generation at all. [JPEG]
- * carries no transparency, so transparent areas are flattened onto an opaque
- * background — use [PNG] to keep them.
+ * carries no transparency, so transparent areas are flattened onto opaque
+ * white — use [PNG] to keep them.
  */
 enum class ImageFormat {
     PNG,

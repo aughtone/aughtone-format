@@ -79,6 +79,137 @@ class NumbersTest {
         assertEquals("1 234,56", frCaFormatter(1234.56))
     }
 
+    @Test
+    fun negativeNumbersGroupDigitsWithoutTheSign() {
+        assertEquals("-123", (-123).formatReadable(Locales.English))
+        assertEquals("-1,234", (-1234).formatReadable(Locales.English))
+        assertEquals("-123,456", (-123456).formatReadable(Locales.English))
+        assertEquals("-123.5", (-123.5).formatReadable(Locales.English))
+    }
+
+    @Test
+    fun largeNumbersKeepEveryDigit() {
+        assertEquals("10,000,000", 10_000_000.formatReadable(Locales.English))
+        assertEquals("12,345,678", 12345678.0.formatReadable(Locales.English))
+        assertEquals("123,456,789,012.3", 123456789012.34.formatReadable(Locales.English))
+        assertEquals("1,000,000,000,000,000,000,000", 1e21.formatReadable(Locales.English))
+    }
+
+    @Test
+    fun smallFractionsAreWrittenOutNotInExponentForm() {
+        assertEquals("0.0005", 0.0005.formatReadable(Locales.English, precision = 4))
+        assertEquals("0.00012", 0.00012.formatReadable(Locales.English, precision = 5))
+        assertEquals("0", 0.0005.formatReadable(Locales.English, precision = 1))
+        assertEquals("0.001", 0.0005.formatReadable(Locales.English, precision = 3))
+    }
+
+    @Test
+    fun aSmallNegativeThatRoundsToZeroHasNoSign() {
+        assertEquals("0", (-0.04).formatReadable(Locales.English, precision = 1))
+        assertEquals("0", (-0.0).formatReadable(Locales.English))
+    }
+
+    @Test
+    fun negativeHalvesRoundAwayFromZeroLikePositiveOnes() {
+        assertEquals("2.5", 2.45.formatReadable(Locales.English, precision = 1))
+        assertEquals("-2.5", (-2.45).formatReadable(Locales.English, precision = 1))
+        assertEquals("-3", (-2.5).formatReadable(Locales.English, precision = 0))
+    }
+
+    @Test
+    fun roundingCarriesIntoANewLeadingDigit() {
+        assertEquals("1,000", 999.96.formatReadable(Locales.English, precision = 1))
+        assertEquals("10", 9.99.formatReadable(Locales.English, precision = 1))
+    }
+
+    @Test
+    fun valuesThatAreNotFiniteDoNotThrow() {
+        assertEquals("NaN", Double.NaN.formatReadable(Locales.English))
+        assertEquals("∞", Double.POSITIVE_INFINITY.formatReadable(Locales.English))
+        assertEquals("-∞", Double.NEGATIVE_INFINITY.formatReadable(Locales.English))
+        assertEquals("NaN", Float.NaN.formatReadable(Locales.English))
+    }
+
+    @Test
+    fun wholeNumberTypesAreExactAtTheirLimits() {
+        assertEquals("9,223,372,036,854,775,807", Long.MAX_VALUE.formatReadable(Locales.English))
+        assertEquals("-9,223,372,036,854,775,808", Long.MIN_VALUE.formatReadable(Locales.English))
+        assertEquals("18,446,744,073,709,551,615", ULong.MAX_VALUE.formatReadable(Locales.English))
+        assertEquals("9.007.199.254.740.993", 9_007_199_254_740_993L.formatReadable(Locales.German))
+    }
+
+    @Test
+    fun abbreviationMovesUpAPrefixWhenRoundingReachesAThousand() {
+        assertEquals("1M", 999_999.formatReadableAbbreviated(Locales.English))
+        assertEquals("1k", 999.96.formatReadableAbbreviated(Locales.English))
+        assertEquals("999.9k", 999_940.formatReadableAbbreviated(Locales.English))
+        assertEquals("1G", 999_950_000.formatReadableAbbreviated(Locales.English))
+    }
+
+    @Test
+    fun abbreviationHandlesNegativeAndNonFiniteValues() {
+        assertEquals("-1.5k", (-1500).formatReadableAbbreviated(Locales.English))
+        assertEquals("-500", (-500).formatReadableAbbreviated(Locales.English))
+        assertEquals("NaN", Double.NaN.formatReadableAbbreviated(Locales.English))
+        assertEquals("∞", Double.POSITIVE_INFINITY.formatReadableAbbreviated(Locales.English))
+    }
+
+    @Test
+    fun languagesThatGroupWithASpaceUseACommaDecimal() {
+        for (locale in listOf(
+            Locales.Afrikaans, Locales.Belarusian, Locales.Bulgarian, Locales.Estonian, Locales.Hungarian,
+            Locales.Georgian, Locales.Kazakh, Locales.Lithuanian, Locales.Latvian, Locales.Albanian,
+            Locales.Ukrainian, Locales.Uzbek, Locales.Portuguese,
+        )) {
+            assertEquals("1 234 567,89", 1234567.891.formatReadable(locale, 2), "separators for ${locale.languageCode}")
+        }
+    }
+
+    @Test
+    fun indonesianAndVietnameseUseADotForGroupingAndACommaDecimal() {
+        assertEquals("1.234.567,89", 1234567.891.formatReadable(Locales.Indonesian, 2))
+        assertEquals("1.234.567,89", 1234567.891.formatReadable(Locales.Vietnamese, 2))
+    }
+
+    @Test
+    fun brazilianPortugueseKeepsDotGrouping() {
+        val brazilian = io.github.aughtone.types.locale.Locale(languageCode = "pt", regionCode = "BR", displayName = "Portuguese (Brazil)")
+        assertEquals("1.234.567,89", 1234567.891.formatReadable(brazilian, 2))
+    }
+
+    private fun locale(language: String, region: String) =
+        io.github.aughtone.types.locale.Locale(languageCode = language, regionCode = region, displayName = "$language-$region")
+
+    @Test
+    fun someLanguagesLeaveAFourDigitNumberUngrouped() {
+        assertEquals(listOf("1234,5", "12.345", "1.234.567"), listOf(1234.5, 12345.0, 1234567.0).map { it.formatReadable(Locales.Spanish) })
+        assertEquals(listOf("1234", "12.345"), listOf(1234, 12345).map { it.formatReadable(Locales.Italian) })
+        assertEquals(listOf("1234", "12 345"), listOf(1234, 12345).map { it.formatReadable(Locales.Polish) })
+        assertEquals(listOf("1234", "12 345"), listOf(1234, 12345).map { it.formatReadable(Locales.Portuguese) })
+        assertEquals(listOf("1234", "12 345"), listOf(1234, 12345).map { it.formatReadable(Locales.Hungarian) })
+        assertEquals("-1234", (-1234).formatReadable(Locales.Spanish))
+        // Most languages group from four digits.
+        assertEquals("1.234", 1234.formatReadable(Locales.German))
+        assertEquals("1 234", 1234.formatReadable(Locales.French))
+        assertEquals("1.234", 1234.formatReadable(locale("pt", "BR")))
+    }
+
+    @Test
+    fun spanishInTheAmericasFollowsItsOwnRegion() {
+        assertEquals("12,345.67", 12345.67.formatReadable(locale("es", "MX"), 2))
+        assertEquals("1,234", 1234.formatReadable(locale("es", "US")))
+        assertEquals("12.345,67", 12345.67.formatReadable(locale("es", "AR"), 2))
+        assertEquals("1.234", 1234.formatReadable(locale("es", "AR")))
+    }
+
+    @Test
+    fun hindiAndIndianEnglishGroupInLakhsAndCrores() {
+        assertEquals("12,34,567.89", 1234567.891.formatReadable(Locales.Hindi, 2))
+        assertEquals("1,234", 1234.formatReadable(Locales.Hindi))
+        assertEquals("1,23,45,67,890", 1234567890L.formatReadable(locale("en", "IN")))
+        assertEquals("-12,34,567", (-1234567).formatReadable(Locales.Hindi))
+    }
+
     @Suppress("DEPRECATION")
     @Test
     fun testDeprecatedCompatibility() {

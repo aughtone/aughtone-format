@@ -26,17 +26,14 @@ actual fun ViewableGraphic.toImage(
     width: Int,
     height: Int
 ): ViewableImage {
+    require(width > 0 && height > 0) { "An image needs a positive size, but was asked for ${width}x$height." }
     val size = CGSizeMake(width.toDouble(), height.toDouble())
     UIGraphicsBeginImageContextWithOptions(size, false, 1.0)
     val context = UIGraphicsGetCurrentContext()
 
     val bounds = bounds
     if (bounds != null) {
-        val scaleX = width / bounds.width
-        val scaleY = height / bounds.height
-        val scale = minOf(scaleX, scaleY)
-        val dx = (width - bounds.width * scale) / 2.0
-        val dy = (height - bounds.height * scale) / 2.0
+        val (scale, dx, dy) = bounds.fitInto(width.toDouble(), height.toDouble())
         CGContextTranslateCTM(context, dx, dy)
         CGContextScaleCTM(context, scale, scale)
         CGContextTranslateCTM(context, -bounds.left, -bounds.top)
@@ -76,6 +73,9 @@ actual fun ViewableGraphic.toImage(
             CGContextAddPath(context, cgPath)
             CGContextStrokePath(context)
         }
+
+        // Core Foundation objects are not managed by Kotlin: the path has to be released by hand.
+        CGPathRelease(cgPath)
     }
     
     val image = UIGraphicsGetImageFromCurrentImageContext()
@@ -98,5 +98,5 @@ actual fun ViewableImage.toByteArray(format: ImageFormat): ByteArray {
                 memcpy(pinned.addressOf(0), bytes, it.length)
             }
         }
-    } ?: ByteArray(0)
+    } ?: error("The image could not be encoded as ${format.name}.")
 }

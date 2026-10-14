@@ -59,4 +59,9 @@ class UuidTest {
         assertFailsWith<IllegalArgumentException> { "123e4567e89b12d3a456426614174000".formatUuid() }   // unhyphenated
         assertFailsWith<IllegalArgumentException> { "123e4567-e89b-12d3-a456-42661417400g".formatUuid() } // non-hex digit
     }
+
+    @Test
+    fun digitsFromOtherScriptsAreNotHexDigits() {
+        assertFailsWith<IllegalArgumentException> { "１23e4567-e89b-12d3-a456-426614174000".formatUuid() }
+    }
 }

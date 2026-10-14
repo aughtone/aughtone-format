@@ -17,7 +17,7 @@ description: >-
   io.github.aughtone:format-identifiers.
 license: Apache-2.0
 metadata:
-  version: "4.1.0"
+  version: "4.1.1"
   repository: https://github.com/aughtone/aughtone-format
 ---
 
@@ -30,7 +30,7 @@ Turning a raw value into the short, localized phrase a person reads:
 - Relative time — "8 minutes ago", "Tomorrow", "in 3 days" — from an `Instant`, `LocalDateTime`, `LocalDate`, `LocalTime`, or `Duration`.
 - Scaled units — "1.5 km", "500 m", data sizes "1 KiB"/"1 MiB", SI metric quantities.
 - Numbers — grouped ("1,234.6"), abbreviated ("1.5k", "2.5G"), and ordinals ("1st", "1er").
-- Money — "$1,234.56", "1 234,56 €".
+- Money — "$1,234.56", "1 234,56 €", "-$12.00".
 - Geo — coordinates as decimal degrees or DMS, azimuths "225° (SW)", altitudes.
 - Time zones — "Coordinated Universal Time".
 - Lists — locale-correct joining: "Monday, Wednesday, and Friday" / "lundi, mercredi et vendredi".
@@ -41,12 +41,30 @@ Reach for it instead of assembling these strings by hand — the plural rules, u
 
 ## How it is meant to be used
 
-Almost everything is an extension named `formatReadable…`, and **every formatter takes `locale: Locale = Locale.current`** (that is `io.github.aughtone.types.locale.Locale` — *not* `java.util.Locale`). Predefined locales live in `Locales` (e.g. `Locales.English`, `Locales.French`).
+Almost everything is an extension named `formatReadable…`, and nearly every formatter takes `locale: Locale = Locale.current` (that is `io.github.aughtone.types.locale.Locale` — *not* `java.util.Locale`). Predefined locales live in `Locales` (e.g. `Locales.English`, `Locales.French`).
+
+**Each family lives in its own sub-package, and a star import of `io.github.aughtone.readable.*` reaches none of them** — it brings in only `Locales`, `PluralCategory`, `pluralCategoryFor` and `ordinalCategoryFor`. Import each formatter from its package: `duration`, `financial`, `geo`, `list`, `metrics`, `number`, `ordinality`, `quantitative`, `relative`, `time`. Symptom: `Unresolved reference: formatReadable…` although the dependency is present.
 
 ```kotlin
-import io.github.aughtone.readable.*
-import io.github.aughtone.readable.relative.formatReadableRelative
+import io.github.aughtone.readable.Locales
+import io.github.aughtone.readable.duration.formatReadable
+import io.github.aughtone.readable.financial.formatReadable
+import io.github.aughtone.readable.list.formatReadableList
+import io.github.aughtone.readable.metrics.formatReadable
+import io.github.aughtone.readable.metrics.formatReadableDataSize
+import io.github.aughtone.readable.number.formatReadable
 import io.github.aughtone.readable.number.formatReadableAbbreviated
+import io.github.aughtone.readable.ordinality.formatReadableOrdinal
+import io.github.aughtone.readable.relative.formatReadableRelative
+import io.github.aughtone.types.financial.Currency
+import io.github.aughtone.types.financial.Money
+import io.github.aughtone.types.quantitative.Distance
+import io.github.aughtone.types.units.UnitOfMeasure
+import kotlin.time.Clock
+import kotlin.time.Duration.Companion.days
+import kotlin.time.Duration.Companion.minutes
+
+val usd = Currency(code = "USD", number = 840, digits = 2, name = "US Dollar", symbol = "$")
 
 7.days.formatReadable(locale = Locales.English)                 // "1 week"
 1500.0.formatReadableAbbreviated(Locales.English)               // "1.5k"
@@ -64,7 +82,9 @@ val now = Clock.System.now()
 (now - 8.minutes).formatReadableRelative(now = now, locale = Locales.English)  // "8 minutes ago"
 ```
 
-The `geo`/`quantitative` families split by package: `Coordinates`/`Altitude`/`Azimuth` are in `io.github.aughtone.readable.quantitative`, `GeoPoint` extensions in `io.github.aughtone.readable.geo` — import from the right one.
+The `geo`/`quantitative` families split by package: `Coordinates` extensions are in `io.github.aughtone.readable.quantitative`, `GeoPoint` extensions in `io.github.aughtone.readable.geo`. **`Altitude.formatReadable` and `Azimuth.formatReadable` are declared identically in both packages**, so import them by name from one of the two and never star-import both. Symptom: `Overload resolution ambiguity` on `altitude.formatReadable()`.
+
+**Some entry points have no default locale and must be given one:** `formatDecimalDegrees(locale)` and `formatDegreesMinutesSeconds(locale)` (on both `Coordinates` and `GeoPoint`), `pluralCategoryFor(locale, n)` / `ordinalCategoryFor(locale, n)`, `cardinalDirectionsFor(locale)`, and every lower-level `…For(locale)` factory (`numberFormatterFor`, `moneyFormatterFor`, `ordinalityFor`, `durationFormatterFor`, `relativeTimeConfigFor`). Use `formatReadable(format = …)` on a coordinate to get the defaulted locale.
 
 ## Invariants and traps
 
@@ -72,17 +92,40 @@ The `geo`/`quantitative` families split by package: `Coordinates`/`Altitude`/`Az
 
 **The default `Locale.current` makes output environment-dependent.** Grouping, symbols, and words all change with the ambient locale. Symptom: output that differs between machines or CI — pass an explicit `Locales.*` whenever the result must be reproducible.
 
-**Trailing zeros are trimmed and rounding is lossy — do not promise a fixed decimal count.** `1024L.formatReadableDataSize(...)` is `"1 KiB"`, not `"1.0 KiB"`; `Distance(500.0)` is `"500 m"`. Units round to the nearest step (`29.days` → "29 days" but `30.days` → "1 month"; `10.days` → "1 week", `11.days` → "2 weeks"), and the week unit only ever renders 1–3 before jumping to days/months. DMS truncates its seconds field (can read ~1″ low). Symptom: fewer decimals than you set, or a unit that "jumps" at a threshold.
+**Trailing zeros are trimmed and rounding is lossy — do not promise a fixed decimal count.** `precision` is a maximum: `1024L.formatReadableDataSize(...)` is `"1 KiB"`, not `"1.0 KiB"`; `Distance(500.0)` is `"500 m"`. Money is the one exception and always shows its currency's full minor-unit digits (`"$12.00"`). Units round to the nearest step (`29.days` → "29 days" but `30.days` → "1 month"; `10.days` → "1 week", `11.days` → "2 weeks"), the week unit only ever renders 1–3 before jumping to days/months, and a value that rounds up to a whole larger unit is shown as that unit (59.6 seconds → "1 minute", 999,999 → "1M", 1,048,575 bytes → "1 MiB"). A duration under half a second is "0 seconds". DMS truncates its seconds field (21.6″ reads 21″). Symptom: fewer decimals than you set, or a unit that "jumps" at a threshold.
+
+**Numbers are always written out in full, and no formatter throws on a value.** There is no exponent notation however large or small the value; `Long` and `ULong` keep every digit. Not-a-number renders as `"NaN"` and the infinities as `"∞"` / `"-∞"` (with the bare unit, and no prefix, in the metric and data-size formatters). A negative number carries a leading `-`; for money it goes before an attached symbol (`"-$123.00"`) and otherwise on the number (`"-123,00 €"`). The one thing that can throw is the default `locale = Locale.current`, which throws `IllegalArgumentException` if the platform reports no locale at all.
 
 **Data sizes are IEC/base-1024 only.** Symbols are always `KiB`, `MiB`, …; there is no `base`/decimal (`kB`) option. Symptom: `formatReadableDataSize(base = 1000)` does not compile.
 
 **`precision` defaults are not uniform, and integer-vs-float is not the axis.** The plain number `formatReadable` defaults `precision = 1` on `Double` but `0` on `Int`/`Long`. The metric formatters default `1` on *every* receiver — including `Int`/`Long` (`formatReadableMetric`) and `Distance`/`Speed`/`Altitude`. `Azimuth` defaults `0`. Symptom: an integer that keeps no decimals, or a metric value that keeps one you did not ask for — set it explicitly.
 
-**Plural and ordinal rules are simplified CLDR, and unknown locales fall back to English.** They cover the core languages; less-common locales silently degrade to English rather than throwing (there are no exceptions in this module at all). Symptom: English words in an otherwise localized string — treat the output as best-effort human text.
+**Relative phrases follow each language's grammar, but not every wording is CLDR's.** Plural categories follow the CLDR rules for whole numbers in every bundled language, and durations, relative phrases and the "Today"/"Tomorrow"/"Yesterday" labels are in the reader's language. Fourteen languages whose grammar needs it — Arabic, Czech, Finnish, Hungarian, Armenian, Icelandic, Georgian, Kazakh, Lithuanian, Slovak, Slovenian, Albanian, Serbian, Swahili — take each "N units ago" / "in N units" phrase whole from CLDR, so the unit is in the right case for its direction ("před 5 minutami" but "za 5 minut"), Arabic names one and two without a digit, and Swahili writes the unit first. The rest use a compact form and may word a phrase differently from CLDR or from the platform's own formatter (Spanish "en 2 horas" where CLDR has "dentro de 2 horas") — do not compare this output with another formatter's. Hebrew always shows the digit. The "Recently"/"Shortly" labels are English for most languages, and Inuktitut keeps English day labels. A locale outside the bundled set falls back to English rather than throwing. Symptom: a phrase that differs from the platform's wording, or English words in an otherwise localized string.
 
-**`RelativeStyle.Short` drops the affix.** In English, `5.days` short is `"5d"`, not `"5d ago"`; `RelativeStyle.None` suppresses that component entirely. Symptom: a bare `"5d"` with no "ago"/"in". The bare `LocalTime.formatReadableRelative` handles time units only and defaults `relativeThreshold = 3.hours` — for calendar-aware output ("Tomorrow") use the `Instant`-anchored overload.
+**`RelativeStyle.Short` is English-only, and drops "ago".** In English, five days in the past is `"5d"`, not `"5d ago"`, and in the future `"in 5d"`. Every other language has no abbreviated unit words: `Short` gives the same text as `Long` (`"5 Minuten"`, `"vor 5 Minuten"`). `RelativeStyle.None` suppresses that component entirely. Symptom: a bare `"5d"` with no "ago", or a `Short` request that comes back at full length. The bare `LocalTime.formatReadableRelative` handles time units only and defaults `relativeThreshold = 3.hours` — for calendar-aware output ("Tomorrow") use the `Instant`-anchored overload.
 
 ## What moved, and what it used to be called
+
+**Output corrected in 4.1.1 — code that worked around the old output will now be wrong.** These all changed in 4.1.1:
+
+- Negative numbers: `-123` used to format as `"-,123"`; it is now `"-123"`.
+- Large and small numbers: from 10,000,000 up (and below 0.001) the JVM, Android and iOS builds emitted fragments of exponent notation (`"1"`, `"5.0E-4"`, money `"$1.0E"`). Every digit is now written out.
+- Money: `"$12.5"` and `"$12"` are now `"$12.50"` and `"$12.00"`; a negative amount is `"-$123.00"`, not `"$-,123"`.
+- `Double.NaN` used to throw `IllegalArgumentException`; it now renders `"NaN"`.
+- Unit boundaries: `"60 seconds"`, `"1,000k"` and `"1,024 KiB"` are now `"1 minute"`, `"1M"` and `"1 MiB"`.
+- Durations in Czech, Slovak, Croatian, Serbian, Slovenian, Lithuanian and Latvian always used the singular ("5 den"); Dutch, Afrikaans, Indonesian, Malay and Swahili used English words. Both are fixed.
+- "Today"/"Tomorrow"/"Yesterday" were English for most languages and are now localized.
+- Relative phrases used one unit word for both "ago" and "in", which is ungrammatical in many languages ("před 5 minuta"). Fourteen languages now take whole phrases from CLDR, and unit words were corrected in Croatian, Latvian, Estonian, Uzbek, Romanian, Dutch, Afrikaans, Hindi, Greek, Persian and Macedonian. Icelandic lost its trailing "síðan" ("fyrir 8 mínútum").
+- `RelativeStyle.Short` durations outside English lost their space (`"5Minuten"`); they now read `"5 Minuten"`.
+- Decimal and grouping separators were wrong for about fifteen languages — Ukrainian, Bulgarian, Hungarian and others now group with a space, and Indonesian and Vietnamese no longer swap the decimal point and the comma. Spanish in the Americas follows its own region (`1,234.56` in Mexico).
+- Grouping follows the language: Spanish, Italian, Polish, Portuguese (Portugal), Hungarian and others leave a four-digit number whole (`1234,5`, grouping from `12.345`), and Hindi and Indian English group in lakhs (`12,34,567`).
+- Lists in English in Australia, Canada, the UK, Ireland, India, New Zealand and South Africa have no comma before "and" (`A, B and C`); bare `en` and the United States keep it.
+- Relative time in German uses the dative plural (`vor 2 Tagen`, was `vor 2 Tage`), and Russian, Ukrainian, Belarusian and Polish use the accusative singular (`1 минуту назад`, was `1 минута назад`).
+- Halves round away from zero, so −2.5 rounds to −3 (it rounded to −2), matching positive values.
+- The currency symbol moved side for Afrikaans (`$1 234,56`), Hebrew, Swahili and German- and Italian-speaking Switzerland (`CHF 1'234.56`).
+- 345–364 days reads "1 year" (was "12 months"); negative ordinals take the right suffix (`-1st`, was `-1th`); `ULong` ordinals above the signed range keep their digits; Georgian ordinal suffixes are in Georgian script.
+- Coordinates on a whole minute no longer read one second short (`1° 9' 0"`, was `1° 8' 59"`), and an azimuth that rounds to 360° reads `0°`.
+- A list element containing the text `{1}` was substituted into; elements are now emitted unchanged.
 
 **Silent change in 4.1.0: `TimeZone.formatReadable` wording.** The `Instant` overload now takes its name from the platform's own CLDR, so the wording can differ from 4.0.0 and between targets (UTC is "Coordinated Universal Time" on most, "Greenwich Mean Time" on Apple). The bare-`UtcOffset` overload cannot consult the platform, so it now returns the English name (or Inuktitut) — it no longer localizes into other languages. Pass an `Instant` to get the reader's language.
 
@@ -96,6 +139,7 @@ The `geo`/`quantitative` families split by package: `Coordinates`/`Altitude`/`Az
 - `toReadableDataSize` → `formatReadableDataSize`
 - `toReadableMetric` → `formatReadableMetric`
 - `toReadableAbbreviated` → `formatReadableAbbreviated`
+- `Long.toReadableDuration` → `Long.formatReadableDuration`
 
 The legacy `toReadableRelative` overloads carry a stronger warning: they never fall back to an absolute date/time, whereas `formatReadableRelative` does. Prefer the new one.
 
@@ -103,7 +147,7 @@ The legacy `toReadableRelative` overloads carry a stronger warning: they never f
 
 **`RelativeDirection.Nearest` was added and became the `LocalTime` default in 3.1.0** (it was `Present` before), which can change which side of "now" a bare time resolves to.
 
-**`Money`'s `Currency` is non-null (4.0.0).** A `Money` now always carries a `Currency`; code that passed or expected a null currency no longer compiles. This is what decides the fraction digits in the formatted amount.
+**`Money`'s `Currency` is non-null (3.0.0).** A `Money` now always carries a `Currency`; code that passed or expected a null currency no longer compiles. This is what decides the fraction digits in the formatted amount.
 
 ## What it is not for
 

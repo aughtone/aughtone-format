@@ -8,6 +8,7 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
+import kotlin.time.Instant
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.format
 import kotlinx.datetime.format.DateTimeFormat
@@ -43,6 +44,29 @@ object MultiplatformDateFormatter : InternalDateFormatter {
         twentyFourHour: Boolean,
         eraNames: EraNames? = null,
         numberingSystem: NumberingSystem? = null,
+    ): String? = formatDateTime(
+        localDateTime, dateStyle, timeStyle, locale, timeZone, twentyFourHour, eraNames, numberingSystem,
+        instant = null,
+    )
+
+    /**
+     * As [formatDateTime], for a caller that knows the exact [instant] being shown.
+     *
+     * A local date-time alone cannot say which side of a clock change it is on: 01:30 happens
+     * twice on the night clocks go back. When [instant] is given, the zone name is resolved for
+     * it, so the second 01:30 reads "EST" and not "EDT". When it is `null` the local date-time is
+     * resolved in [timeZone], which picks the earlier of the two.
+     */
+    internal fun formatDateTime(
+        localDateTime: LocalDateTime,
+        dateStyle: DateTimeStyle,
+        timeStyle: DateTimeStyle,
+        locale: Locale,
+        timeZone: TimeZone,
+        twentyFourHour: Boolean,
+        eraNames: EraNames?,
+        numberingSystem: NumberingSystem?,
+        instant: Instant?,
     ): String? {
         val formattedDate = if (dateStyle != DateTimeStyle.None) {
             localDateTime.date.format(
@@ -50,6 +74,7 @@ object MultiplatformDateFormatter : InternalDateFormatter {
                     dateStyle = dateStyle,
                     locale = locale,
                     timeZone = timeZone,
+                    twoDigitYearBase = twoDigitYearBaseFor(localDateTime.date.year),
                 )
             ).let {
                 MultiplatformPostFormatter.postFormatDate(
@@ -75,7 +100,7 @@ object MultiplatformDateFormatter : InternalDateFormatter {
                 MultiplatformPostFormatter.postFormatTime(
                     timeStyle = timeStyle,
                     timeZone = timeZone,
-                    instant = localDateTime.toInstant(timeZone),
+                    instant = instant ?: localDateTime.toInstant(timeZone),
                     formattedTime = it,
                     locale = locale,
                     numberingSystem = numberingSystem
@@ -105,7 +130,8 @@ object MultiplatformDateFormatter : InternalDateFormatter {
                 timeZone = timeZone,
             )
         )
-        char(' ')
+        // The separator belongs between a date and a time, not beside an empty half.
+        if (dateStyle != DateTimeStyle.None && timeStyle != DateTimeStyle.None) char(' ')
         time(
             getLocalTimeFormat(
                 timeStyle = timeStyle,
@@ -120,33 +146,32 @@ object MultiplatformDateFormatter : InternalDateFormatter {
         dateStyle: DateTimeStyle,
         locale: Locale,
         timeZone: TimeZone,
-    ): DateTimeFormat<LocalDate> = when (dateStyle) {
-        DateTimeStyle.Short -> Resources.getDateFormat(
-            locale = locale,
-            timeZone = timeZone,
-            style = FormatStyle.SHORT
-        )
+    ): DateTimeFormat<LocalDate> = getLocalDateFormat(dateStyle, locale, timeZone, twoDigitYearBase = 2000)
 
-        DateTimeStyle.Medium -> Resources.getDateFormat(
-            locale = locale,
-            timeZone = timeZone,
-            style = FormatStyle.MEDIUM
-        )
-
-        DateTimeStyle.Long -> Resources.getDateFormat(
-            locale = locale,
-            timeZone = timeZone,
-            style = FormatStyle.LONG
-        )
-
-        DateTimeStyle.Full -> Resources.getDateFormat(
-            locale = locale,
-            timeZone = timeZone,
-            style = FormatStyle.FULL
-        )
-
-        DateTimeStyle.None -> LocalDate.Format { chars("") }
+    /**
+     * As [getLocalDateFormat], for a date in the century that starts at [twoDigitYearBase].
+     */
+    internal fun getLocalDateFormat(
+        dateStyle: DateTimeStyle,
+        locale: Locale,
+        timeZone: TimeZone,
+        twoDigitYearBase: Int,
+    ): DateTimeFormat<LocalDate> {
+        val style = when (dateStyle) {
+            DateTimeStyle.Short -> FormatStyle.SHORT
+            DateTimeStyle.Medium -> FormatStyle.MEDIUM
+            DateTimeStyle.Long -> FormatStyle.LONG
+            DateTimeStyle.Full -> FormatStyle.FULL
+            DateTimeStyle.None -> return LocalDate.Format { chars("") }
+        }
+        return Resources.getDateFormat(locale = locale, timeZone = timeZone, style = style, twoDigitYearBase = twoDigitYearBase)
     }
+
+    /**
+     * The first year of the century [year] falls in, so that a two-digit year shows the last two
+     * digits of any year from 0 to 9999. Outside that range the default window is kept.
+     */
+    private fun twoDigitYearBaseFor(year: Int): Int = if (year in 0..9999) year - year % 100 else 2000
 
     fun getLocalTimeFormat(
         timeStyle: DateTimeStyle,

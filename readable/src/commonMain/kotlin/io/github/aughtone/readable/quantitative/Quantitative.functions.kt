@@ -8,6 +8,7 @@ import io.github.aughtone.types.quantitative.Azimuth
 import io.github.aughtone.types.quantitative.Coordinates
 import io.github.aughtone.types.units.UnitOfMeasure
 import kotlin.math.abs
+import kotlin.math.floor
 
 /**
  * Formats this [Altitude] into a localized human-readable metric string.
@@ -32,10 +33,16 @@ fun Altitude.formatReadable(locale: Locale = Locale.current, precision: Int = 1)
  * @param precision The number of decimal places for the degree value (default is 0).
  * @return A localized human-readable azimuth string.
  */
-fun Azimuth.formatReadable(locale: Locale = Locale.current, precision: Int = 0): String {
+fun Azimuth.formatReadable(locale: Locale = Locale.current, precision: Int = 0): String =
+    formatAzimuth(degrees, locale, precision)
+
+/** Shared by the `quantitative` and `geo` azimuth formatters. */
+internal fun formatAzimuth(degrees: Double, locale: Locale, precision: Int): String {
     val formatter = numberFormatterFor(locale, precision)
-    val cardinal = getCardinalDirection(degrees, locale)
-    return "${formatter(degrees)}° ($cardinal)"
+    val cardinal = cardinalDirectionsFor(locale)[((degrees + 22.5) / 45.0).toInt() % 8]
+    // A bearing just short of a full turn rounds to 360, which is north again: show it as 0.
+    val shown = formatter(degrees).let { if (it == formatter(360.0)) formatter(0.0) else it }
+    return "$shown° ($cardinal)"
 }
 
 /**
@@ -69,7 +76,10 @@ fun Coordinates.formatReadable(
  * @param locale The locale defining the formatting rules and direction indicators.
  * @return A localized string representation in decimal degrees format.
  */
-fun Coordinates.formatDecimalDegrees(locale: Locale): String {
+fun Coordinates.formatDecimalDegrees(locale: Locale): String = formatDecimalDegrees(latitude, longitude, locale)
+
+/** Shared by the [Coordinates] and `GeoPoint` decimal-degree formatters. */
+internal fun formatDecimalDegrees(latitude: Double, longitude: Double, locale: Locale): String {
     val formatter = numberFormatterFor(locale, 4)
     val directions = cardinalDirectionsFor(locale)
     val latDir = if (latitude >= 0) directions[0] else directions[4] // N or S
@@ -83,23 +93,26 @@ fun Coordinates.formatDecimalDegrees(locale: Locale): String {
  * Converts these [Coordinates] into a localized Degrees, Minutes, Seconds (DMS) string.
  *
  * Each component (latitude and longitude) is formatted with its corresponding
- * cardinal direction suffix based on the provided [locale].
+ * cardinal direction suffix based on the provided [locale]. Seconds are whole and truncated, not
+ * rounded, so 21.6 seconds reads as 21.
  *
  * @param locale The locale defining the formatting rules and direction indicators.
  * @return A localized string representation in DMS format (e.g., "40° 42' 46\" N, 74° 0' 21\" W").
  */
-fun Coordinates.formatDegreesMinutesSeconds(locale: Locale): String {
-    val latStr = formatDMS(latitude, true, locale)
-    val lonStr = formatDMS(longitude, false, locale)
-    return "$latStr, $lonStr"
-}
+fun Coordinates.formatDegreesMinutesSeconds(locale: Locale): String =
+    formatDegreesMinutesSeconds(latitude, longitude, locale)
+
+/** Shared by the [Coordinates] and `GeoPoint` degrees-minutes-seconds formatters. */
+internal fun formatDegreesMinutesSeconds(latitude: Double, longitude: Double, locale: Locale): String =
+    "${formatDMS(latitude, true, locale)}, ${formatDMS(longitude, false, locale)}"
 
 private fun formatDMS(value: Double, isLatitude: Boolean, locale: Locale): String {
-    val absolute = abs(value)
-    val degrees = absolute.toInt()
-    val minutesDouble = (absolute - degrees) * 60.0
-    val minutes = minutesDouble.toInt()
-    val seconds = ((minutesDouble - minutes) * 60.0).toInt()
+    // Whole seconds, truncated. The small nudge absorbs binary error, so a value that is exactly
+    // 1° 9' 0" is not shown as 1° 8' 59" for sitting a hair below it.
+    val totalSeconds = floor(abs(value) * 3600.0 + 1e-6).toLong()
+    val degrees = totalSeconds / 3600
+    val minutes = (totalSeconds % 3600) / 60
+    val seconds = totalSeconds % 60
 
     val directions = cardinalDirectionsFor(locale)
     val direction = if (isLatitude) {
@@ -108,12 +121,5 @@ private fun formatDMS(value: Double, isLatitude: Boolean, locale: Locale): Strin
         if (value >= 0) directions[2] else directions[6] // E or W
     }
 
-    val formatter = numberFormatterFor(locale, 0)
-    return "${formatter(degrees.toDouble())}° ${formatter(minutes.toDouble())}' ${formatter(seconds.toDouble())}\" $direction"
-}
-
-private fun getCardinalDirection(degrees: Double, locale: Locale): String {
-    val directions = cardinalDirectionsFor(locale)
-    val index = ((degrees + 22.5) / 45.0).toInt() % 8
-    return directions[index]
+    return "$degrees° $minutes' $seconds\" $direction"
 }

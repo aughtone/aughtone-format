@@ -49,4 +49,10 @@ class Ipv6Test {
         assertFailsWith<IllegalArgumentException> { "::ffff:192.0.2.1".formatIpv6() } // IPv4-embedded not supported
         assertFailsWith<IllegalArgumentException> { "gggg::1".formatIpv6() }          // non-hex
     }
+
+    @Test
+    fun digitsFromOtherScriptsAreNotHexDigits() {
+        assertFailsWith<IllegalArgumentException> { "٢001:db8::1".formatIpv6() }
+        assertFailsWith<IllegalArgumentException> { "２001:db8::1".formatIpv6() }
+    }
 }

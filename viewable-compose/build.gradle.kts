@@ -62,6 +62,13 @@ kotlin {
                 implementation(libs.kotlin.test)
             }
         }
+        val jvmTest by getting {
+            dependencies {
+                // Skia for the host machine, so a test can draw a painter into a bitmap and
+                // read the pixels back.
+                implementation(compose.desktop.currentOs)
+            }
+        }
     }
 
     metadata {

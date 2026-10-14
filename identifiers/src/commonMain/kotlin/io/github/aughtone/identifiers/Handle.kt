@@ -11,11 +11,13 @@ package io.github.aughtone.identifiers
  * "@alice".formatHandle()  // "@alice"  (already a handle)
  * ```
  *
- * @return the username with a single leading `@`.
- * @throws IllegalArgumentException if the receiver is blank — a handle needs a
- *   username to point at.
+ * @return the username with a single leading `@`. Any `@` signs already at the front are
+ *   collapsed into that one; an `@` inside the username is left alone.
+ * @throws IllegalArgumentException if the receiver is blank, or is nothing but `@` signs — a
+ *   handle needs a username to point at.
  */
 fun String.formatHandle(): String {
-    require(isNotBlank()) { "A handle requires a non-blank username." }
-    return if (startsWith('@')) this else "@$this"
+    val username = trimStart('@')
+    require(username.isNotBlank()) { "A handle requires a non-blank username." }
+    return "@$username"
 }

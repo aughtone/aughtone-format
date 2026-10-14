@@ -43,13 +43,20 @@ class LocaleCoverageTest {
     @Test
     fun everySupportedLocaleReachesItsOwnDurationUnits() {
         // Fails if a case in buildDurationFormatter is missing from isDurationTagSupported.
-        // af/nl/id/ms/sw intentionally reuse the English unit words, so they are exempt.
-        val reuseEnglishUnits = setOf("af", "nl", "id", "ms", "sw")
         val englishOut = 60.minutes.formatReadable(locale = Locales.English)
         for (loc in supported) {
-            if (loc.languageCode in reuseEnglishUnits) continue
             val out = 60.minutes.formatReadable(locale = loc)
             assertTrue(out != englishOut, "duration allow-list drift: '${loc.languageCode}' fell back to English ($out)")
+        }
+    }
+
+    @Test
+    fun everySupportedLocaleHasItsOwnDayLabels() {
+        // Inuktitut has no relative-day names in CLDR and still shows the English labels.
+        for (loc in supported) {
+            if (loc.languageCode == "iu") continue
+            val today = relativeTimeConfigFor(loc).todayString
+            assertTrue(today != "Today", "day labels for '${loc.languageCode}' fell back to English")
         }
     }
 }

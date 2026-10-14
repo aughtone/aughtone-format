@@ -1,5 +1,6 @@
 package io.github.aughtone.viewable.compose
 
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
@@ -10,8 +11,9 @@ import io.github.aughtone.viewable.ViewablePath
 /**
  * A [Painter] that renders a [ViewablePath].
  *
- * This painter automatically scales and translates the path to fit the draw area
- * if the [ViewablePath] has bounds.
+ * When the [ViewablePath] has bounds, the painter scales the path uniformly to fit the draw
+ * area and centres it, keeping its shape. A path without bounds is drawn at its own coordinates,
+ * unscaled.
  *
  * @param viewablePath The path to render.
  * @param color The color to fill the path with.
@@ -29,9 +31,11 @@ class ViewablePathPainter(
     override fun DrawScope.onDraw() {
         val bounds = viewablePath.bounds
         if (bounds != null && size.width > 0 && size.height > 0) {
-            val scaleX = size.width / bounds.width.toFloat()
-            val scaleY = size.height / bounds.height.toFloat()
-            val scale = minOf(scaleX, scaleY)
+            // A dimension of zero does not limit the scale: a flat line is scaled along its
+            // length, and a single point is drawn at its own scale.
+            val scaleX = if (bounds.width > 0.0) size.width / bounds.width.toFloat() else null
+            val scaleY = if (bounds.height > 0.0) size.height / bounds.height.toFloat() else null
+            val scale = listOfNotNull(scaleX, scaleY).minOrNull() ?: 1f
 
             // Center the path in the draw area
             val dx = (size.width - bounds.width.toFloat() * scale) / 2f
@@ -39,7 +43,9 @@ class ViewablePathPainter(
 
             withTransform({
                 translate(dx, dy)
-                scale(scale, scale)
+                // Scale from the origin. The default pivot is the centre of the draw area, which
+                // would move the path away from where the two translations put it.
+                scale(scale, scale, pivot = Offset.Zero)
                 translate(-bounds.left.toFloat(), -bounds.top.toFloat())
             }) {
                 drawPath(path, color)

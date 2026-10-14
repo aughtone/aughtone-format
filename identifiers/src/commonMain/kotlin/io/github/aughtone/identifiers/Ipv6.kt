@@ -108,7 +108,7 @@ private fun ipv6Groups(value: String): IntArray {
 
 /** Parses one IPv6 group: 1–4 hex digits into a 16-bit value. */
 private fun parseHextet(group: String, whole: String): Int {
-    require(group.length in 1..4 && group.all { it.digitToIntOrNull(16) != null }) {
+    require(group.length in 1..4 && group.all { it.isAsciiHexDigit() }) {
         "Not a valid IPv6 address (bad group \"$group\"): \"$whole\""
     }
     return group.toInt(16)

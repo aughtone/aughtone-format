@@ -2,6 +2,18 @@
 
 Aught One Format is a suite of Kotlin Multiplatform libraries designed to provide consistent, localized formatting for Dates, Times, Numbers, and other human-readable metrics across all platforms.
 
+## 🚀 Major Updates in 4.1.1
+
+A correctness release: no new API, many fixes to output. Code that pinned the old output in its own tests will need updating; the [CHANGELOG](CHANGELOG.md) lists every change.
+
+- **Dates no longer throw** (`:datetime`): `Long` and `Full` dates threw for Spanish, Portuguese, Catalan, Galician, Basque, Lithuanian and Latvian (and `Full` for Danish and Finnish). Quoted text in locale patterns now reaches the output intact, two-digit years work in any century, and region variants keep their language's patterns.
+- **Numbers and money are written out exactly** (`:readable`): negative numbers, very large and very small values, NaN and infinity, and every digit of a `Long`. Money always shows its minor-unit digits (`$12.00`) and puts the sign before an attached symbol (`-$12.00`). Separators and grouping follow each language.
+- **Grammar in every bundled language** (`:readable`): plural forms follow the CLDR rules, durations and day labels are localized, and relative phrases ("5 minutes ago", "in 3 days") put the unit in the right case. Fourteen languages whose grammar needs it take each phrase whole from CLDR.
+- **Clocks and zone names** (`:datetime`): JavaScript and Wasm detect the 12/24-hour setting; elsewhere the convention comes from CLDR for the locale. AM/PM sits where the language puts it, and zones that share an abbreviation keep their own names.
+- **Rendering** (`:viewable`, `:viewable-compose`): the Compose painter draws where it should, EPS is the right way up with its strokes, SVG keeps alpha, empty geometries give valid WKT, and flat lines and single points render.
+- **Smaller fixes** in `:toolbox` (no exponent notation from `Double.format`, Web Mercator finite at the poles) and `:identifiers` (non-ASCII digits rejected as hex, malformed Punycode rejected).
+- **Behaviour changes to know about**: English in the UK, Ireland and South Africa defaults to the 24-hour clock and writes the day first; Spanish, Italian, Polish and others leave four-digit numbers ungrouped; halves round away from zero.
+
 ## 🚀 Major Updates in 4.1.0
 
 - **Standalone weekday & month names** (`:datetime`): `DayOfWeek.displayName(width, locale)` and `Month.displayName(width, locale)` (with a `TextWidth { Full, Abbreviated }` enum) expose the locale's day and month names — "Monday"/"Mon", "lundi", "mars" — without formatting a whole date.
@@ -58,7 +70,7 @@ This project follows a specialized 5-sector documentation hierarchy.
 - **Geospatial Formatting**: Localized altitude, azimuth (with cardinal directions), and coordinates.
 
 ## 🌍 Universal Localization
-The library provides deep grammatical parity and full BCP 47 subtag fallback (e.g., `en-ZA` → `en`) for 59 supported language and region combinations:
+The library provides full BCP 47 subtag fallback (e.g., `en-ZA` → `en`) for 59 supported language and region combinations. Numbers, dates, durations, plural forms, day labels and relative phrases ("5 minutes ago") are localized for all of them:
 
 | Family | Languages & Regions |
 | :--- | :--- |
@@ -87,30 +99,35 @@ The trade is explicit: this delivers coverage, not consistency — four platform
 ```kotlin
 val now = Clock.System.now()
 // Format with styles (Short, Medium, Long, Full)
-println(now.format(DateTimeStyle.Short, locale = Locale("en-US"))) // "4/23/26, 4:15 PM"
-println(now.format(DateTimeStyle.Short, locale = Locale("en-CA"))) // "2026-04-23, 4:15 p.m."
+println(now.format(dateStyle = DateTimeStyle.Short, timeStyle = DateTimeStyle.Short, locale = localeFor("en-US")!!)) // "4/23/2026 4:15 PM"
+println(now.format(dateStyle = DateTimeStyle.Short, timeStyle = DateTimeStyle.Short, locale = localeFor("en-CA")!!)) // "2026-04-23 4:15 p.m."
 ```
 
 ### Human-Readable Metrics (`:readable`)
+Each family of formatters lives in its own package (`…readable.ordinality`, `.duration`, `.relative`, `.metrics`, `.number`, `.financial`, `.list`, …); predefined locales are in `Locales`.
 ```kotlin
 // Ordinals
-println(123L.formatReadableOrdinal(Locale("en-US"))) // "123rd"
-println(123L.formatReadableOrdinal(Locale("fr-FR"))) // "123e"
+println(123L.formatReadableOrdinal(Locales.English)) // "123rd"
+println(123L.formatReadableOrdinal(Locales.French))  // "123e"
 
-// Durations
-println(1.5.hours.formatReadable(Locale("en-US"))) // "1.5 hours"
-println(1.5.hours.formatReadable(Locale("es-ES"))) // "1,5 horas"
+// Durations — scaled to the most significant unit and rounded
+println(90.minutes.formatReadable(locale = Locales.English)) // "2 hours"
+println(90.minutes.formatReadable(locale = Locales.Spanish)) // "2 horas"
+
+// Numbers and money
+println(1234567.891.formatReadable(Locales.German, precision = 2)) // "1.234.567,89"
+println(Money(123456L, usd).formatReadable(Locales.English))       // "$1,234.56"
 
 // Relative Time
-println(instant.formatReadableRelative(locale = Locale("en-US"))) // "3 minutes ago"
-println(instant.formatReadableRelative(locale = Locale("de-DE"))) // "vor 3 Minuten"
+println(instant.formatReadableRelative(locale = Locales.English)) // "3 minutes ago"
+println(instant.formatReadableRelative(locale = Locales.German))  // "vor 3 Minuten"
 
 // Relative Time — direction-aware LocalTime (disambiguates a clock time across midnight)
 val alarm = LocalTime(1, 0)
 println(alarm.formatReadableRelative(now = LocalTime(23, 0), direction = RelativeDirection.Future)) // "in 2 hours"
 
 // Data Sizes
-println(1048576L.formatReadableDataSize()) // "1.0 MiB"
+println(1048576L.formatReadableDataSize()) // "1 MiB"
 ```
 
 ---

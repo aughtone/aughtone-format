@@ -36,4 +36,16 @@ class DomainTest {
         assertFailsWith<IllegalArgumentException> { "xn--caf-dm@.example".formatDomain() } // invalid digit
         assertFailsWith<IllegalArgumentException> { "xn--0.example".formatDomain() }       // truncated/overflow
     }
+
+    @Test
+    fun anEncodedLabelWithNothingToDecodeIsInvalid() {
+        assertFailsWith<IllegalArgumentException> { "xn--.example".formatDomain() }
+    }
+
+    @Test
+    fun aLeadingDelimiterWithNoBasicCharactersIsInvalid() {
+        // RFC 3492 reads "-dma" as starting with the digit "-", which is not one.
+        assertFailsWith<IllegalArgumentException> { "xn---dma.example".formatDomain() }
+        assertEquals("ȧ.example", "xn--dma.example".formatDomain())
+    }
 }

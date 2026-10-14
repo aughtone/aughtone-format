@@ -36,8 +36,8 @@ private fun buildOrdinalFormatter(tag: String, locale: Locale): OrdinalFormatter
             PluralCategory.Other to "-րդ"
         ))
         "ka" -> buildFormatter(locale, mapOf(
-            PluralCategory.One to "-լի",
-            PluralCategory.Other to "-ե"
+            PluralCategory.One to "-ლი",
+            PluralCategory.Other to "-ე"
         ))
         "sv", "da" -> buildFormatter(locale, mapOf(
             PluralCategory.One to ":a",
