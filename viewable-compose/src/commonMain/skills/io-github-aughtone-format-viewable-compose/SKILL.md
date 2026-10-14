@@ -35,15 +35,25 @@ That is the whole module: three extension functions and one `Painter` subclass, 
 ## How it is meant to be used
 
 ```kotlin
-import io.github.aughtone.viewable.compose.toImageVector
-import io.github.aughtone.viewable.compose.ViewablePathPainter
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.size
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.unit.dp
+import io.github.aughtone.types.geo.GeoJson
+import io.github.aughtone.viewable.ViewablePath
+import io.github.aughtone.viewable.compose.ViewablePathPainter
+import io.github.aughtone.viewable.compose.toImageVector
 
 // GeoJSON -> ImageVector -> Image  (simplest "just draw it")
 @Composable
 fun GeoShape(geoJson: GeoJson) {
     val vector = remember(geoJson) { geoJson.toImageVector(fillColor = Color.Blue) }
-    Image(rememberVectorPainter(vector), contentDescription = null)
+    // The vector's default size is its projected bounds in dp — give it a real size.
+    Image(rememberVectorPainter(vector), contentDescription = null, modifier = Modifier.size(120.dp))
 }
 
 // ViewablePath with the fit-to-bounds Painter
@@ -56,19 +66,21 @@ fun PathShape(path: ViewablePath) {
 
 ## Invariants and traps
 
-**`toComposePath` does not scale or translate — drawing its output raw usually shows nothing.** It emits the path's own (projected) coordinates, which for the default Web Mercator projection are large. Symptom: a `Canvas` that draws nothing / off-screen. For "just render it", use `ViewablePathPainter` (scales to fit and centres) or `toImageVector` (translates to the bounds origin). Reach for `toComposePath` only when you are doing your own transform in the `DrawScope`. In 4.1.0 `ViewablePathPainter` scaled about the centre of the draw area instead of the origin, so the shape was displaced — usually off-canvas, a blank `Image` — whenever the draw size differed from the path's bounds; that is fixed.
+**`toComposePath` does not scale or translate — drawing its output raw usually shows nothing.** It emits the path's own (projected) coordinates, which for the default Web Mercator projection are large. Symptom: a `Canvas` that draws nothing / off-screen. For "just render it", use `ViewablePathPainter` (scales to fit and centres) or `toImageVector` (translates to the bounds origin). Reach for `toComposePath` only when you are doing your own transform in the `DrawScope`.
 
 **None of these are `@Composable` or memoized.** `toComposePath`, `toImageVector`, and the `ViewablePathPainter` constructor all do real work every time they run (the painter builds its path eagerly at construction). Symptom: jank / rebuilding on every recomposition — wrap them in `remember(key)` yourself.
 
 **`toComposePath` overwrites the passed path's fill type.** When you hand it an existing `Path` to append to, it first sets that path's `fillType` from the receiver's winding rule. Symptom: a reused `Path` silently changes fill rule — pass a fresh `Path` unless you intend that.
 
-**Empty or degenerate paths draw nothing, quietly.** A path with no computable bounds makes `toImageVector` fall back to a 1×1 image and `ViewablePathPainter` report `Size.Unspecified`. A flat line is scaled along its length and a single point is drawn at its own scale, so neither breaks the painter; a point still shows nothing with a fill-only painter, because it has no area.
+**Empty or degenerate paths draw nothing, quietly.** A path with no computable bounds makes `toImageVector` fall back to a 1×1 image and `ViewablePathPainter` report `Size.Unspecified`. A flat line is scaled along its length and a single point is drawn at its own scale, so neither breaks the painter, and `toImageVector` gives them a square viewport around the shape; a point still shows nothing with a fill-only painter, because it has no area.
 
 **Fill only, single colour, `Color.Black` by default.** There is no stroke, no per-layer style, and no opacity handling at this layer. The winding rule carries through from the `ViewablePath`. Coordinates are narrowed `Double`→`Float`, so very large projected values lose precision. Symptom: a filled silhouette where you wanted an outline, or jitter at extreme coordinates.
 
 **`ViewableGraphic` is not supported here.** Only `ViewablePath` (and GeoJSON, via `toViewablePath`) has a Compose path. Symptom: no conversion function for a multi-layer, styled `ViewableGraphic` — render it as SVG/EPS/image through `io.github.aughtone:format-viewable` instead.
 
 ## What moved, and what it used to be called
+
+**Fixed in 4.1.1.** `ViewablePathPainter` scaled about the centre of the draw area instead of the origin, so the shape was displaced — usually off-canvas, a blank `Image` — whenever the draw size differed from the path's bounds; it now fits and centres the path. `toImageVector` gave a flat line or a single point a zero-width or zero-height viewport; it now gets a square one. A `ViewablePath` built without bounds now works them out (a change in `io.github.aughtone:format-viewable`), so it is scaled to fit too.
 
 This module was introduced in the 3.0.0 cycle and carried into 4.0.0 unchanged in API; nothing is deprecated and nothing was renamed.
 

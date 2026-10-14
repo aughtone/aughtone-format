@@ -7,9 +7,13 @@ import kotlin.time.Clock
  * Returns true if user preference is set to 24-hour format.
  *
  * **Note**: not all platforms have a way to determine if the users system is in 24 hour mode.
- * if the code is running on one of those platforms, this function will take a guess, based on
- * the locale's region. A locale with no region, or a region that is not listed, defaults to
- * 24 hour formatting.
+ * if the code is running on one of those platforms, this function uses the Unicode CLDR
+ * convention for [locale]: its language and region together where they differ from the language
+ * (en-GB is 24-hour), otherwise its language (en is 12-hour). A language that is not listed
+ * follows its region, and with no listed region defaults to 24 hour formatting.
+ *
+ * On Android and iOS the system setting decides, and on JS and Wasm the hour cycle the runtime
+ * resolves for its own locale; [locale] is used only where the platform gives no answer.
  *
  * @return true if 24 hour time format is selected, false otherwise.
  */

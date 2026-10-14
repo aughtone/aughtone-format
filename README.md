@@ -2,6 +2,18 @@
 
 Aught One Format is a suite of Kotlin Multiplatform libraries designed to provide consistent, localized formatting for Dates, Times, Numbers, and other human-readable metrics across all platforms.
 
+## 🚀 Major Updates in 4.1.1
+
+A correctness release: no new API, many fixes to output. Code that pinned the old output in its own tests will need updating; the [CHANGELOG](CHANGELOG.md) lists every change.
+
+- **Dates no longer throw** (`:datetime`): `Long` and `Full` dates threw for Spanish, Portuguese, Catalan, Galician, Basque, Lithuanian and Latvian (and `Full` for Danish and Finnish). Quoted text in locale patterns now reaches the output intact, two-digit years work in any century, and region variants keep their language's patterns.
+- **Numbers and money are written out exactly** (`:readable`): negative numbers, very large and very small values, NaN and infinity, and every digit of a `Long`. Money always shows its minor-unit digits (`$12.00`) and puts the sign before an attached symbol (`-$12.00`). Separators and grouping follow each language.
+- **Grammar in every bundled language** (`:readable`): plural forms follow the CLDR rules, durations and day labels are localized, and relative phrases ("5 minutes ago", "in 3 days") put the unit in the right case. Fourteen languages whose grammar needs it take each phrase whole from CLDR.
+- **Clocks and zone names** (`:datetime`): JavaScript and Wasm detect the 12/24-hour setting; elsewhere the convention comes from CLDR for the locale. AM/PM sits where the language puts it, and zones that share an abbreviation keep their own names.
+- **Rendering** (`:viewable`, `:viewable-compose`): the Compose painter draws where it should, EPS is the right way up with its strokes, SVG keeps alpha, empty geometries give valid WKT, and flat lines and single points render.
+- **Smaller fixes** in `:toolbox` (no exponent notation from `Double.format`, Web Mercator finite at the poles) and `:identifiers` (non-ASCII digits rejected as hex, malformed Punycode rejected).
+- **Behaviour changes to know about**: English in the UK, Ireland and South Africa defaults to the 24-hour clock and writes the day first; Spanish, Italian, Polish and others leave four-digit numbers ungrouped; halves round away from zero.
+
 ## 🚀 Major Updates in 4.1.0
 
 - **Standalone weekday & month names** (`:datetime`): `DayOfWeek.displayName(width, locale)` and `Month.displayName(width, locale)` (with a `TextWidth { Full, Abbreviated }` enum) expose the locale's day and month names — "Monday"/"Mon", "lundi", "mars" — without formatting a whole date.
