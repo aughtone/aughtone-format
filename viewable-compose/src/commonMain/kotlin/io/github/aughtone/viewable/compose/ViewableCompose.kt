@@ -40,7 +40,8 @@ fun ViewablePath.toComposePath(path: Path = Path()): Path {
  * Converts a [ViewablePath] into an [ImageVector].
  *
  * This function uses the path's bounds to set the viewport. If the path has no bounds
- * (e.g. it is empty), a default 1x1 viewport is used.
+ * (e.g. it is empty), a default 1x1 viewport is used. A shape with no area — a flat line or a
+ * single point — gets a square viewport around it, so the vector is never zero-sized.
  *
  * @param name The name of the [ImageVector].
  * @param fillColor The color to fill the path with.
@@ -50,7 +51,7 @@ fun ViewablePath.toImageVector(
     name: String = "ViewablePath",
     fillColor: Color = Color.Black
 ): ImageVector {
-    val bounds = bounds ?: ViewableRect(0.0, 0.0, 1.0, 1.0)
+    val bounds = (bounds ?: ViewableRect(0.0, 0.0, 1.0, 1.0)).withDrawableExtent()
 
     val nodes = commands.map { command ->
         when (command) {
@@ -80,4 +81,19 @@ fun ViewablePath.toImageVector(
             WindingRule.EvenOdd -> PathFillType.EvenOdd
         }
     ).build()
+}
+
+/**
+ * This rectangle with any zero dimension opened up so there is room to draw in: a flat line gets
+ * a square of its own length centred on it, and a single point a 1×1 square around it. The same
+ * rule the `:viewable` renderers apply to their SVG viewBox.
+ */
+private fun ViewableRect.withDrawableExtent(): ViewableRect {
+    if (width > 0.0 && height > 0.0) return this
+    val side = maxOf(width, height).takeIf { it > 0.0 } ?: 1.0
+    val newWidth = if (width > 0.0) width else side
+    val newHeight = if (height > 0.0) height else side
+    val centerX = (left + right) / 2.0
+    val centerY = (top + bottom) / 2.0
+    return ViewableRect(centerX - newWidth / 2.0, centerY - newHeight / 2.0, centerX + newWidth / 2.0, centerY + newHeight / 2.0)
 }

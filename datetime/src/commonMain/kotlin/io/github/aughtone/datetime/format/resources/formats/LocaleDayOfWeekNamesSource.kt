@@ -154,7 +154,7 @@ internal val localeDayOfWeekNamesSource = mapOf(
         abbreviated = DayOfWeekNames(listOf("יום ב׳", "יום ג׳", "יום ד׳", "יום ה׳", "יום ו׳", "שבת", "יום א׳"))
     ) },
     "hi" to lazy { DayOfWeekNamesData(
-        full = DayOfWeekNames(listOf("सोमवार", "मंगलवार", "बुधवार", "गुरुوار", "शुक्रवार", "शनिवार", "रविवार")),
+        full = DayOfWeekNames(listOf("सोमवार", "मंगलवार", "बुधवार", "गुरुवार", "शुक्रवार", "शनिवार", "रविवार")),
         abbreviated = DayOfWeekNames(listOf("सोम", "मंगल", "बुध", "गुरु", "शुक्र", "शनि", "रवि"))
     ) },
     "hr" to lazy { DayOfWeekNamesData(

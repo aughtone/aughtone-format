@@ -190,8 +190,8 @@ internal val localeMonthNamesSource = mapOf(
                 july = "Juillet",
                 august = "Août",
                 september = "Septembre",
-                october = "October",
-                november = "Octobre",
+                october = "Octobre",
+                november = "Novembre",
                 december = "Décembre"
             ),
             abbreviated = MonthNames(

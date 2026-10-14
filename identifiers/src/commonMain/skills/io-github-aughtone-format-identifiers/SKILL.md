@@ -32,7 +32,7 @@ This is the "I already have the value, I just need the right spelling" layer —
 
 ## How it is meant to be used
 
-Every identifier has **one extension function on `String`, named for what it produces**, taking a **defaulted notation enum**. The default is the canonical or most common form, so the ordinary case needs no argument; pass the enum to pick another spelling.
+Every identifier has **one extension function on `String`, named for what it produces**, taking a **defaulted notation enum** (except `formatHandle`, which has one form). The default is the canonical or most common form, so the ordinary case needs no argument; pass the enum to pick another spelling.
 
 ```kotlin
 import io.github.aughtone.identifiers.*
@@ -56,7 +56,7 @@ Where a Kotlin-native type exists, an overload hangs off it: `kotlin.uuid.Uuid.f
 
 ## Invariants and traps
 
-**Canonical input only — these throw on anything else.** Every formatter expects the identifier already normalized (the lower-case colon MAC, the 8-4-4-4-12 UUID, the compact upper-case IBAN, bare card digits, dotted-decimal IPv4, E.164 phone). Symptom: an `IllegalArgumentException` at the format call — non-canonical input is treated as a *programming error*, it is not "cleaned up". Do not point these at raw user input; normalize upstream first, then format. The one input latitude is hexadecimal letter case — a MAC address, a UUID and an IPv6 address are accepted in either case and emitted in the notation's own. Only the ASCII digits and letters count as hexadecimal: fullwidth or other-script digits are rejected. `formatHandle` collapses any leading `@` signs into one and rejects a value that is nothing but `@`.
+**Canonical input only — most of these throw on anything else.** The MAC, UUID, IBAN, card, IPv4, IPv6 and network formatters expect the identifier already normalized (the colon MAC, the 8-4-4-4-12 UUID, the compact upper-case IBAN, bare card digits, dotted-decimal IPv4) and throw on anything else. `formatDomain`, `formatHandle` and `formatPhone` check far less: `formatDomain(DomainNotation.Ascii)` returns its input as it is, `formatDomain` decodes only `xn--` labels and passes the rest through, `formatHandle` rejects only an empty username, and `formatPhone` is as lenient as its parser (see below). Symptom: an `IllegalArgumentException` at the format call — non-canonical input is treated as a *programming error*, it is not "cleaned up". Do not point these at raw user input; normalize upstream first, then format. The one input latitude is hexadecimal letter case — a MAC address, a UUID and an IPv6 address are accepted in either case and emitted in the notation's own. Only the ASCII digits and letters count as hexadecimal: fullwidth or other-script digits are rejected. `formatHandle` collapses any leading `@` signs into one and rejects a value that is nothing but `@`.
 
 **`CardNotation.Masked` is lossy by design.** It keeps only the last four digits behind a fixed `••••` group and does not preserve length. Symptom: you cannot recover the PAN from the output — use it for display only, never as a value you store or parse back.
 
@@ -67,6 +67,8 @@ Where a Kotlin-native type exists, an overload hangs off it: `kotlin.uuid.Uuid.f
 **`formatPhone` is the one impure formatter.** National and international grouping are not derivable from E.164 alone, so it uses per-country metadata from `io.github.aughtone:phonenumber` (the module's only dependency; the metadata is dead-code-eliminated for callers that never format a phone). Its parser is lenient, so a number written with spaces, hyphens or parentheses is usually accepted too — do not rely on that, pass E.164. Symptom: an `IllegalArgumentException` for a calling code the metadata does not know.
 
 ## What moved, and what it used to be called
+
+**Stricter in 4.1.1.** Fullwidth and other-script digits are no longer accepted as hexadecimal by `formatMac`, `formatUuid` and `formatIpv6` — in 4.1.0 `"００:00:5e:00:53:01".formatMac()` passed them through, and `formatIpv6` silently converted Arabic-Indic digits. `formatHandle` rejects a value that is nothing but `@` (it returned `"@"`) and collapses repeated leading `@` signs (`"@@alice"` gives `"@alice"`, it gave `"@@alice"`). `formatDomain` rejects an empty `xn--` label and a Punycode label that starts with its delimiter. Each now throws `IllegalArgumentException`.
 
 **This module is new in 4.0.0 — there is no earlier version of it.** The trap is not a rename but a wrong instinct: an agent that already "knows" `aughtone-format` will not expect identifier formatting to exist here and will reach for `io.github.aughtone:format-readable`, or invent an identifier value type, or write the string surgery by hand.
 
