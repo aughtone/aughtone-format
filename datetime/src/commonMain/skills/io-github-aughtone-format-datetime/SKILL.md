@@ -6,18 +6,17 @@ description: >-
   with no java.time. Show a date, a time, or both in short, medium, long or full
   style ("Jan 12, 1952", "4:08 p.m."), as DateFormat or
   DateTimeFormatter.ofLocalizedDate would on the JVM; format a timestamp or epoch
-  milliseconds; show a range the way the locale writes one, with the shared month
-  or year written once ("March 3 – 5, 2024", "9:00 – 11:30 AM", "Mon – Fri"), or
-  a start-to-end pair with a placeholder for a missing end; get weekday and month names in the user's language ("Monday"/"Mon",
-  "Mars"); get a time zone's localized name ("Eastern Standard Time", "EST");
-  follow the locale's 12-hour or 24-hour clock and its default digits. Works on
-  kotlinx-datetime LocalDate, LocalTime, LocalDateTime and kotlin.time.Instant.
-  Not for relative time like "3 days ago" or "tomorrow", durations or numbers
-  (use io.github.aughtone:format-readable); not for custom pattern strings such as
-  "yyyy-MM-dd"; and not a parser.
+  milliseconds; show a range the way the locale writes one ("March 3 – 5, 2024",
+  "9:00 – 11:30 AM", "Mon – Fri"); get weekday and month names in the user's
+  language ("Monday"/"Mon", "Mars"); get a time zone's localized name ("Eastern
+  Standard Time", "EST"); follow the locale's 12-hour or 24-hour clock and its
+  default digits. Works on kotlinx-datetime LocalDate, LocalTime, LocalDateTime
+  and kotlin.time.Instant. Not for relative time like "3 days ago" or "tomorrow",
+  durations or numbers (use io.github.aughtone:format-readable); not for custom
+  pattern strings such as "yyyy-MM-dd"; and not a parser.
 license: Apache-2.0
 metadata:
-  version: "4.1.1"
+  version: "4.2.0"
   repository: https://github.com/aughtone/aughtone-format
 ---
 
@@ -84,7 +83,9 @@ Month.MARCH.displayName(TextWidth.Abbreviated, localeFor("en")!!)   // "Mar"
 
 **A range is shortened only where CLDR has a pattern for it.** Time ranges are shortened at the `Short` style only; at `Medium`, `Long` and `Full` they are two complete times joined by the separator, each with its own seconds or zone name. Date ranges are shortened at every style. A `LocalDateTime` or `Instant` range on one day writes the date once and then the time range; across days it writes both ends in full. Equal ends are written once, and an end before the start is written in the order given, not swapped.
 
-**`Instant.format()` with no arguments appends a time-zone token.** Its `timeStyle` **defaults to `Long`**, and `Long`/`Full` time styles append a zone abbreviation or full name ("4:08:39 p.m. UTC"). Symptom: an unexpected zone token on the end — pass `timeStyle = DateTimeStyle.Short` (or `Medium`) to drop it. **No style shows the era unless asked.** `DateTimeStyle.Full` is "Saturday, January 12, 1952"; pass `showEra = true` (on `LocalDate.format`, `LocalDateTime.format` and `Instant.format`) for the locale's abbreviation, "… 1952 CE", or `eraNames = EraNames(bce = …, ce = …)` for words of your own, which also shows it. A date before year 1 always shows its era, at every style, with the year counted from one ("January 1, 501 BCE"): without it the year would read as one of the common era. Symptom: an unexpected "BCE" on an ancient date, or a missing era you expected from `Full`.
+**`Instant.format()` with no arguments appends a time-zone token.** Its `timeStyle` **defaults to `Long`**, and `Long`/`Full` time styles append a zone abbreviation or full name ("4:08:39 p.m. UTC"). Symptom: an unexpected zone token on the end — pass `timeStyle = DateTimeStyle.Short` (or `Medium`) to drop it.
+
+**No style shows the era unless asked.** `DateTimeStyle.Full` is "Saturday, January 12, 1952"; pass `showEra = true` (on `LocalDate.format`, `LocalDateTime.format` and `Instant.format`) for the locale's abbreviation, "… 1952 CE", or `eraNames = EraNames(bce = …, ce = …)` for words of your own, which also shows it. A date before year 1 always shows its era, at every style, with the year counted from one ("January 1, 501 BCE"): without it the year would read as one of the common era. Symptom: an unexpected "BCE" on an ancient date, or a missing era you expected from `Full`.
 
 **Some locales default to native digits, and Arabic's depend on the region.** With `numberingSystem = null` the digits are CLDR's default for the locale: native for Persian (`fa`), Bengali (`bn`), Marathi (`mr`) and Urdu in India (`ur-IN`); Arabic-Indic for Arabic in Egypt, Saudi Arabia, Iraq, Jordan and the other regions that write them, but Latin for bare `ar`, the UAE and the Maghreb; Latin for Hindi, Thai and Urdu in Pakistan. Symptom: non-ASCII digits for `ar-EG` but not for `ar` — force a system with `numberingSystem = NumberingSystem.LATN` (or `DEVA`, `THAI`, `ARAB`, …).
 

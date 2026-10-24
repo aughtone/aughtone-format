@@ -1,6 +1,6 @@
 # `:identifiers`
 
-Display formatters for canonical identifiers — rendering an already-normalized value in an alternative notation for humans. Input is a known-good canonical value (the output a normalizer or `aughtone-phonenumber` produces, or any valid canonical string); this module does not parse, validate, or normalize messy input.
+Display formatters for identifiers — rendering a valid value in an alternative notation for humans. Input is a known-good value (the output a normalizer or `aughtone-phonenumber` produces, or any valid string); this module does not search, validate, or clean up free text. The MAC and IBAN formatters read any of their own notations in either case, and the phone formatter reads an E.164 number with or without punctuation; the output is always the notation asked for.
 
 Published as `io.github.aughtone:format-identifiers`.
 
@@ -13,7 +13,7 @@ Every formatter follows the same shape, consistent with the rest of `aughtone-fo
 - **Where a Kotlin-native type exists, an overload hangs off it** — e.g. `kotlin.uuid.Uuid.format(...)` alongside the `String` overload.
 - **No new value types.** Identifier value types are `aughtone-types`' responsibility; this module does not define them.
 - **These are notation formatters, not `:readable` "human-magic"** (ordinals, data sizes). They are named `format*`, never `formatReadable*`; anything genuinely "readable" belongs in `:readable`.
-- **Malformed input is a programming error** (input is expected canonical): formatters throw `IllegalArgumentException`.
+- **Malformed input is a programming error**: input that is not the identifier makes a formatter throw `IllegalArgumentException`.
 
 ## Dependencies
 
