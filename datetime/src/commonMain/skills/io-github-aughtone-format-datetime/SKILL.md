@@ -10,7 +10,7 @@ description: >-
   or year written once ("March 3 – 5, 2024", "9:00 – 11:30 AM", "Mon – Fri"), or
   a start-to-end pair with a placeholder for a missing end; get weekday and month names in the user's language ("Monday"/"Mon",
   "Mars"); get a time zone's localized name ("Eastern Standard Time", "EST");
-  follow the locale's 12-hour or 24-hour clock and its native digits. Works on
+  follow the locale's 12-hour or 24-hour clock and its default digits. Works on
   kotlinx-datetime LocalDate, LocalTime, LocalDateTime and kotlin.time.Instant.
   Not for relative time like "3 days ago" or "tomorrow", durations or numbers
   (use io.github.aughtone:format-readable); not for custom pattern strings such as
@@ -86,7 +86,7 @@ Month.MARCH.displayName(TextWidth.Abbreviated, localeFor("en")!!)   // "Mar"
 
 **`Instant.format()` with no arguments appends a time-zone token.** Its `timeStyle` **defaults to `Long`**, and `Long`/`Full` time styles append a zone abbreviation or full name ("4:08:39 p.m. UTC"). Symptom: an unexpected zone token on the end — pass `timeStyle = DateTimeStyle.Short` (or `Medium`) to drop it. **No style shows the era unless asked.** `DateTimeStyle.Full` is "Saturday, January 12, 1952"; pass `showEra = true` (on `LocalDate.format`, `LocalDateTime.format` and `Instant.format`) for the locale's abbreviation, "… 1952 CE", or `eraNames = EraNames(bce = …, ce = …)` for words of your own, which also shows it. A date before year 1 always shows its era, at every style, with the year counted from one ("January 1, 501 BCE"): without it the year would read as one of the common era. Symptom: an unexpected "BCE" on an ancient date, or a missing era you expected from `Full`.
 
-**Locales silently switch digit systems.** Even with `numberingSystem = null`, Arabic (`ar`), Persian/Urdu (`fa`/`ur`), Hindi (`hi`), Bengali (`bn`), and Thai (`th`) render localized digits. Symptom: non-ASCII digits in the output — force Western digits with `numberingSystem = NumberingSystem.LATN`.
+**Some locales default to native digits, and Arabic's depend on the region.** With `numberingSystem = null` the digits are CLDR's default for the locale: native for Persian (`fa`), Bengali (`bn`), Marathi (`mr`) and Urdu in India (`ur-IN`); Arabic-Indic for Arabic in Egypt, Saudi Arabia, Iraq, Jordan and the other regions that write them, but Latin for bare `ar`, the UAE and the Maghreb; Latin for Hindi, Thai and Urdu in Pakistan. Symptom: non-ASCII digits for `ar-EG` but not for `ar` — force a system with `numberingSystem = NumberingSystem.LATN` (or `DEVA`, `THAI`, `ARAB`, …).
 
 **`is24HourFormat` detection differs by platform — pass it explicitly for reproducible output.** The default probes the platform: it is a real system setting on Android (needs the app `Context`, wired via `androidx.startup`) and on iOS, and on JS and Wasm it is the hour cycle `Intl` resolves for the browser's own locale. On the JVM there is no detection at all — it uses the CLDR convention for the `locale` you pass: 12-hour for `en`, `en-US`, `es-MX`, `ko`, `hi`; 24-hour for `en-GB`, `de`, `fr`. A language it does not know follows its region (12-hour in the US, Canada, Australia, India, Mexico and a few others) and is otherwise 24-hour. So off the JVM the *device* decides and the `locale` argument does not. Symptom: the same locale renders 12- vs 24-hour differently across targets — supply `is24HourFormat = true/false` when determinism matters.
 
@@ -106,6 +106,7 @@ Month.MARCH.displayName(TextWidth.Abbreviated, localeFor("en")!!)   // "Mar"
 
 - `Full` dates no longer end with the era: "Saturday, January 12, 1952", where 4.1 wrote "… 1952 Common Era". `showEra = true` brings it back, abbreviated ("CE"). A date before year 1 now shows "BCE" at every style, not only at `Full`. Passing `eraNames` still shows the era.
 - Month and weekday names inside a date are lower case where the language writes them so: Spanish `15 de marzo de 2024` (was `15 de Marzo de 2024`), French `15 mars 2024`, Italian, Portuguese, Czech, Kazakh, Uzbek, Vietnamese; abbreviations too, in those languages and in Russian, Ukrainian and Finnish (`15 мар. 2024 г.`, was `15 Мар 2024 г.`). `displayName` is unchanged.
+- Default digits follow CLDR: Hindi, Thai, Urdu (outside India) and Arabic without a region write Latin digits, where 4.1 wrote native ones; Arabic in Egypt, Saudi Arabia and the other Arabic-Indic regions keeps them, and Marathi now gets Devanagari. Pass `numberingSystem` for the old output.
 - Abbreviated Chinese month names are CLDR's `3月`; earlier versions returned the full name `三月` for `Month.displayName(TextWidth.Abbreviated, zh)`.
 
 **Silent changes in 4.1.1 — same calls, different output.** Code or tests written against 4.1.0 output will see these:

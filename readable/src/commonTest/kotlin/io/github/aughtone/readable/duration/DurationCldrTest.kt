@@ -31,16 +31,26 @@ class DurationCldrTest {
         else -> Locale(languageCode = id.substringBefore('-'), regionCode = id.substringAfter('-', "").ifEmpty { null }, displayName = id)
     }
 
+    /**
+     * Checks each case of [fixture] at [style]. A short phrase is CLDR's unless CLDR's is longer
+     * than the library's long phrase, which is then used instead.
+     */
     private fun check(fixture: Map<String, String>, style: RelativeStyle) {
         assertTrue(fixture.isNotEmpty())
+        var cldrPhrases = 0
         for ((language, cases) in fixture) {
             val locale = localeOf(language)
             for (line in cases.trim().lines()) {
                 val (unit, count, phrase) = line.split('|')
+                val duration = durationOf(unit, count.toInt())
+                val long = duration.formatReadable(RelativeStyle.Long, locale)
+                val expected = if (style == RelativeStyle.Short && visibleLength(phrase) > visibleLength(long)) long else phrase
                 // Zero seconds reads as "now", which the fixture does not sample.
-                assertEquals(phrase, durationOf(unit, count.toInt()).formatReadable(style, locale), "$language $style: $count $unit")
+                assertEquals(expected, duration.formatReadable(style, locale), "$language $style: $count $unit")
+                if (expected == phrase) cldrPhrases++
             }
         }
+        assertTrue(cldrPhrases > 0, "no phrase came from CLDR")
     }
 
     @Test

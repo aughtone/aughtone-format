@@ -115,6 +115,16 @@ internal val cldrDurationPatterns: Map<String, DurationPatterns> = mapOf(
         /* month  */ listOf("{0} مہینہ", "{0} مہینے"),
         /* year   */ listOf("{0} سال", "{0} سال"),
     ),
+    "ar" to durationEntry(
+        listOf(PluralCategory.Zero, PluralCategory.One, PluralCategory.Two, PluralCategory.Few, PluralCategory.Many, PluralCategory.Other),
+        /* second */ listOf("{0} ثانية", "ثانية", "ثانيتان", "{0} ثوان", "{0} ثانية", "{0} ثانية"),
+        /* minute */ listOf("{0} دقيقة", "دقيقة", "دقيقتان", "{0} دقائق", "{0} دقيقة", "{0} دقيقة"),
+        /* hour   */ listOf("{0} ساعة", "ساعة", "ساعتان", "{0} ساعات", "{0} ساعة", "{0} ساعة"),
+        /* day    */ listOf("{0} يوم", "يوم", "يومان", "{0} أيام", "{0} يومًا", "{0} يوم"),
+        /* week   */ listOf("{0} أسبوع", "أسبوع", "أسبوعان", "{0} أسابيع", "{0} أسبوعًا", "{0} أسبوع"),
+        /* month  */ listOf("{0} شهر", "شهر", "شهران", "{0} أشهر", "{0} شهرًا", "{0} شهر"),
+        /* year   */ listOf("{0} سنة", "سنة", "سنتان", "{0} سنوات", "{0} سنة", "{0} سنة"),
+    ),
 )
 
 /**

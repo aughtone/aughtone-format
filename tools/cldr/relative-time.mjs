@@ -22,7 +22,7 @@
 // "za 5 minut"), or because the phrase changes shape (Arabic drops the count for one and two,
 // Swahili writes the unit before the count). Every other bundled language keeps its compact
 // template-and-words form in RelativeTime.resources.kt; where its wording differs from CLDR, see
-// docs/gap/0002-relative-time-wording-differences-from-cldr.md.
+// docs/knowledge/decisions/ADR-0004-keep-everyday-wordings-that-differ-from-cldr.md.
 import { writeFileSync } from "node:fs";
 
 // The South Asian languages are here because their phrases are taken whole from CLDR rather
@@ -37,8 +37,9 @@ const SHORT_LANGUAGES = [
   "ja", "zh", "zh-Hant", "zh-HK", "eu", "hy", "ka", "az", "uz", "kk", "lt", "lv", "sq", "id", "ms", "sw", ...SOUTH_ASIAN,
 ];
 // Languages whose long duration words come whole from CLDR; the others are written by hand in
-// Duration.resources.kt.
-const DURATION_LANGUAGES = SOUTH_ASIAN;
+// Duration.resources.kt. Arabic is here because CLDR names one and two without a digit
+// ("دقيقتان", two minutes), which a template with a count cannot express.
+const DURATION_LANGUAGES = [...SOUTH_ASIAN, "ar"];
 // Languages whose duration "now" is written; English is among them, and the region variants
 // the library keys separately.
 const NOW_LANGUAGES = ["en", "en-ZA", ...SHORT_LANGUAGES];

@@ -189,13 +189,33 @@ private fun isDurationTagSupported(tag: String): Boolean = when (tag) {
 
 fun buildDurationFormatter(tag: String, locale: Locale, style: RelativeStyle = RelativeStyle.Long): DurationFormatter {
     val now = cldrDurationNow[cldrIdFor(tag)] ?: cldrDurationNow.getValue("en")
+    val long = cldrDurationPatterns[tag]?.let { patternFormatter(locale, it) }
+        ?: buildWrittenDurationFormatter(tag, locale, RelativeStyle.Long)
+    if (style != RelativeStyle.Short || tag == "en") {
+        return withNow(if (style == RelativeStyle.Short) buildWrittenDurationFormatter(tag, locale, style) else long, now)
+    }
     // English writes its own short form ("5m"); every other language with CLDR data takes CLDR's
-    // short phrases ("5 Min."). A language whose long words come from CLDR takes those.
-    val cldr = (if (style == RelativeStyle.Short && tag != "en") cldrShortDurationPatterns[cldrIdFor(tag)] else null)
-        ?: cldrDurationPatterns[tag]
-    if (cldr != null) return withNow(patternFormatter(locale, cldr), now)
-    return withNow(buildWrittenDurationFormatter(tag, locale, style), now)
+    // short phrases ("5 Min."), except where that is no shorter than the long phrase.
+    val short = cldrShortDurationPatterns[cldrIdFor(tag)]?.let { shorterOf(patternFormatter(locale, it), long) } ?: long
+    return withNow(short, now)
 }
+
+/**
+ * [short], or [long] for a duration that [short] would write at greater length. CLDR's short
+ * phrase is sometimes longer than this library's everyday one — Korean "2개월" against "2달" —
+ * and a short style is never longer than the long one.
+ */
+private fun shorterOf(short: DurationFormatter, long: DurationFormatter): DurationFormatter = { duration, style ->
+    val shortText = short(duration, style)
+    val longText = long(duration, RelativeStyle.Long)
+    if (visibleLength(shortText) > visibleLength(longText)) longText else shortText
+}
+
+/**
+ * The length of [text] without its spaces. The short and long phrases are compared by what they
+ * say, so a space the language writes before its unit never counts against a phrase.
+ */
+internal fun visibleLength(text: String): Int = text.count { !it.isWhitespace() }
 
 /** The hand-written duration formatter for [tag]. */
 private fun buildWrittenDurationFormatter(tag: String, locale: Locale, style: RelativeStyle): DurationFormatter {
@@ -289,8 +309,9 @@ private fun buildWrittenDurationFormatter(tag: String, locale: Locale, style: Re
         "sr" -> buildFormatter(locale, u3("секунда","минут","сат","дан","недеља","месец","година",
                                    "секунде","минута","сата","дана","недеље","месеца","године",
                                    "секунди","минута","сати","дана","недеља","месеци","година"), sep)
+        // After a number a masculine noun takes its count form: "2 часа", not "2 часови".
         "mk" -> buildFormatter(locale, u2("секунда","минута","час","ден","недела","месец","година",
-                                   "секунди","минути","часови","дена","недели","месеци","години"), sep)
+                                   "секунди","минути","часа","дена","недели","месеци","години"), sep)
         "sl" -> buildFormatter(locale, unitTable(
             PluralCategory.One to listOf("sekunda","minuta","ura","dan","teden","mesec","leto"),
             PluralCategory.Two to listOf("sekundi","minuti","uri","dneva","tedna","meseca","leti"),
@@ -308,16 +329,19 @@ private fun buildWrittenDurationFormatter(tag: String, locale: Locale, style: Re
         "sq" -> buildFormatter(locale, u2("sekondë","minutë","orë","ditë","javë","muaj","vit",
                                    "sekonda","minuta","orë","ditë","javë","muaj","vjet"), sep)
 
+        // Japanese, Traditional Chinese and Thai put a space between the count and the unit, as
+        // CLDR writes them ("5 分"); Simplified Chinese and Korean do not.
         "ja" -> buildFormatter(locale, u2("秒","分","時間","日","週間","ヶ月","年",
-                                   "秒","分","時間","日","週間","ヶ月","年"), "")
+                                   "秒","分","時間","日","週間","ヶ月","年"), " ")
         "ko" -> buildFormatter(locale, u2("초","분","시간","일","주","달","년",
                                    "초","분","시간","일","주","달","년"), "")
-        "zh-Hant", "zh-TW", "zh-HK" -> buildFormatter(locale, u2("秒","分","小時","天","週","月","年",
-                                               "秒","分","小時","天","週","月","年"), "")
-        "zh", "zh-Hans" -> buildFormatter(locale, u2("秒","分","小时","天","周","月","年",
-                                   "秒","分","小时","天","周","月","年"), "")
+        // A bare 月 after a count would name a month of the year ("2月" is February).
+        "zh-Hant", "zh-TW", "zh-HK" -> buildFormatter(locale, u2("秒","分鐘","小時","天","週","個月","年",
+                                               "秒","分鐘","小時","天","週","個月","年"), " ")
+        "zh", "zh-Hans" -> buildFormatter(locale, u2("秒","分钟","小时","天","周","个月","年",
+                                   "秒","分钟","小时","天","周","个月","年"), "")
         "th" -> buildFormatter(locale, u2("วินาที","นาที","ชั่วโมง","วัน","สัปดาห์","เดือน","ปี",
-                                   "วินาที","นาที","ชั่วโมง","วัน","สัปดาห์","เดือน","ปี"), "")
+                                   "วินาที","นาที","ชั่วโมง","วัน","สัปดาห์","เดือน","ปี"), " ")
         "vi" -> buildFormatter(locale, u2("giây","phút","giờ","ngày","tuần","tháng","năm",
                                    "giây","phút","giờ","ngày","tuần","tháng","năm"), " ")
         "iu" -> buildFormatter(locale, u4("ᓯᑲᓐᑎ","ᓯᑲᓐᑎᒃ","ᓯᑲᓐᑎᑦ","ᓯᑲᓐᑎᑦ",
@@ -330,13 +354,6 @@ private fun buildWrittenDurationFormatter(tag: String, locale: Locale, style: Re
 
         "hi" -> buildFormatter(locale, u2("सेकंड","मिनट","घंटा","दिन","सप्ताह","महीना","वर्ष",
                                    "सेकंड","मिनट","घंटे","दिन","सप्ताह","महीने","वर्ष"), " ")
-        "ar" -> buildFormatter(locale, u6("ثانية","ثانية","ثانيتان","ثوانٍ","ثانية","ثانية",
-                                   "دقيقة","دقيقة","دقيقتان","دقائق","دقيقة","دقيقة",
-                                   "ساعة","ساعة","ساعتان","ساعات","ساعة","ساعة",
-                                   "يوم","يوم","يومان","أيام","يوم","يوم",
-                                   "أسبوع","أسبوع","أسبوعان","أسابيع","أسبوع","أسبوع",
-                                   "شهر","شهر","شهران","أشهر","شهر","شهر",
-                                   "سنة","سنة","سنتان","سنوات","سنة","سنة"), " ")
         "fa" -> buildFormatter(locale, u2("ثانیه","دقیقه","ساعت","روز","هفته","ماه","سال",
                                    "ثانیه","دقیقه","ساعت","روز","هفته","ماه","سال"), " ")
         // Two takes the plural with its numeral ("2 דקות"); the dual words carry no numeral.

@@ -46,8 +46,9 @@ internal object TimeZoneNameSupplement {
 
     // Inuktitut (iu) — Canadian Inuit syllabics. Curated for this project: CLDR has
     // no Inuktitut zone names, and these are not yet native-speaker verified (see
-    // docs/gap/0001-native-language-support.md). No platform CLDR ships these, so
-    // they are bundled directly to keep full Inuktitut zone coverage.
+    // docs/knowledge/research/RAD-0002-indigenous-and-native-language-support.md).
+    // No platform CLDR ships these, so they are bundled directly to keep full
+    // Inuktitut zone coverage.
     private fun fullNameIu(englishAbbr: String): String? = when (englishAbbr) {
         "+00:00" -> "ᑲᓇᑕᒥ ᐊᑕᐅᓯᐅᖃᑎᒌᒃᑐᑦ ᓯᕿᓐᖑᔭᖓ"
         "-04:00" -> "ᑲᓇᓐᓇᐅᑉ ᐅᓪᓗᒃᑯᑦ ᓯᕿᓐᖑᔭᖓ"

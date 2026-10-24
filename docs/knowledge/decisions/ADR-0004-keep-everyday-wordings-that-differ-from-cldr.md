@@ -1,8 +1,9 @@
-# 0002 — Relative-time wording that differs from CLDR
+# Keep everyday wordings that differ from CLDR
 
-- **Type:** Known differences, kept by decision
-- **Status:** Accepted
-- **Created:** 2026-10-10
+ADR-0004 · 2026-10-10 · Status: accepted
+Keywords: relative time does not match CLDR, duration words differ from the platform, en 2 horas
+          or dentro de 2 horas, døgn or dager, 2달 or 2개월, why not use CLDR wording everywhere,
+          short style longer than long, Hebrew digit with two
 
 ## What this records
 
@@ -30,14 +31,31 @@ All of these are in the compact-form group. The library's wording is a valid alt
 | Malay (past) | 2 jam yang lalu | 2 jam lalu |
 | Vietnamese (future) | 2 giờ nữa | sau 2 giờ nữa |
 | Norwegian Bokmål and Nynorsk (day) | 2 dager / 2 dagar | 2 døgn |
-| Thai | อีก 2ชั่วโมง | ในอีก 2 ชั่วโมง |
+| Thai | อีก 2 ชั่วโมง | ในอีก 2 ชั่วโมง |
 | Korean (month) | 2달 전 | 2개월 전 |
 | Japanese (month) | 2ヶ月前 | 2 か月前 |
-| Chinese (second, minute) | 2秒前 | 2秒钟前 |
-| Macedonian (hour) | 2 часови | 2 часа |
+| Chinese (second) | 2秒前 | 2秒钟前 |
 | Hebrew | לפני 2 ימים | לפני יומיים |
 
-Japanese, Traditional Chinese and Thai also differ from CLDR in whether a space separates the count from the unit.
+Japanese, Traditional Chinese and Thai put a space between the count and the unit, as CLDR does.
+
+## Durations
+
+Duration words follow the same rule: errors were corrected, and an everyday word was kept where CLDR uses a more formal or longer one. Corrected: Arabic, which now takes its durations whole from CLDR so that one and two are named without a digit ("دقيقتان"); Chinese months and minutes ("2个月", "5分钟"), since a bare 月 after a count names a month of the year; and the Macedonian count form after a number ("2 часа"). Kept:
+
+| Language | Library | CLDR |
+|---|---|---|
+| Norwegian, Swedish, Estonian, Belarusian (day) | 2 dager / 2 dagar / 2 päeva / 2 дні | 2 døgn / 2 dygn / 2 ööpäeva / 2 сутак |
+| Belarusian (month) | 2 месяцы | 2 месяца |
+| Czech (day) | 5 dní | 5 dnů |
+| Macedonian (week) | 2 недели | 2 седмици |
+| Korean (month) | 2달 | 2개월 |
+| Simplified Chinese (second) | 2秒 | 2秒钟 |
+| Hebrew (two) | 2 שעות | שעתיים |
+
+Japanese, Traditional Chinese and Thai put a space between the count and the unit, as CLDR does ("5 分").
+
+**The short style is never longer than the long one.** `RelativeStyle.Short` takes CLDR's short phrase, except where that phrase is longer than the library's long phrase, which is then used: Korean "2개월" against "2달", Greek "πριν από 2 λεπ.", and Hebrew "לפני יומיים" against "לפני 2 ימים". Spaces do not count, so a space the language writes before its unit never decides it. The comparison is made phrase by phrase, so a language can take CLDR's short form for one unit and its own for another.
 
 ## Two special cases
 

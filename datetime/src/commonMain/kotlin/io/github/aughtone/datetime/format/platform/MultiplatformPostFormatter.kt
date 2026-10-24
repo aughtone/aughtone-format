@@ -144,16 +144,31 @@ object MultiplatformPostFormatter {
     internal fun applyNumberingSystem(text: String, locale: Locale, numberingSystem: NumberingSystem?): String =
         resolveNumberingSystem(numberingSystem, locale)?.let { text.applyNumberingSystem(it) } ?: text
 
+    /**
+     * [numberingSystem], or the locale's default digits when it is `null`: Unicode CLDR's default
+     * numbering system for the locale (CLDR 48). That is Latin digits for most locales, including
+     * Hindi, Thai, Urdu in Pakistan and Arabic without a region; native digits for Persian,
+     * Bengali, Marathi and Nepali, Urdu in India, and Arabic in the regions that write them.
+     * `null` means Latin digits, written as the formatter produced them.
+     */
     private fun resolveNumberingSystem(numberingSystem: NumberingSystem?, locale: Locale): NumberingSystem? {
         if (numberingSystem != null) return numberingSystem
+        val region = locale.regionCode?.uppercase()
         return when (locale.languageCode) {
-            "ar" -> NumberingSystem.ARAB
-            "fa", "ur" -> NumberingSystem.ARABEXT
-            "hi" -> NumberingSystem.DEVA
+            "ar" -> if (region in ARABIC_INDIC_REGIONS) NumberingSystem.ARAB else null
+            "fa", "ps", "ks" -> NumberingSystem.ARABEXT
+            "ur" -> if (region == "IN") NumberingSystem.ARABEXT else null
+            "pa" -> if (region == "PK") NumberingSystem.ARABEXT else null
+            "sd" -> NumberingSystem.ARAB
             "bn" -> NumberingSystem.BENG
-            "th" -> NumberingSystem.THAI
+            "mr", "ne" -> NumberingSystem.DEVA
             else -> null
         }
     }
+
+    /** The regions whose Arabic CLDR writes with Arabic-Indic digits; the rest use Latin digits. */
+    private val ARABIC_INDIC_REGIONS = setOf(
+        "BH", "DJ", "EG", "ER", "IL", "IQ", "JO", "KM", "KW", "LB", "MR", "OM", "PS", "QA", "SA", "SD", "SO", "SS", "SY", "TD", "YE",
+    )
 }
 

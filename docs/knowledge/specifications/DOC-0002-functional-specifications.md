@@ -1,5 +1,9 @@
 # Functional Specifications
 
+DOC-0002 · 2026-04-19
+Keywords: what the library does, which modules format what, supported features, localization
+          behaviour, regional variants, eras, numbering systems, default digits
+
 ## 🌍 Domain Context
 
 The Aughtone Format library provides a standardized, type-safe foundation for multiplatform applications to format data into human-readable strings.

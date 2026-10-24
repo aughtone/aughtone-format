@@ -49,11 +49,14 @@ class RelativeTimeCldrTest {
         for ((language, cases) in shortRelativeTimeCldrFixture) {
             val locale = Locale(languageCode = language.substringBefore('-'), regionCode = language.substringAfter('-', "").ifEmpty { null }, displayName = language)
             val formatter = relativeTimeConfigFor(locale, RelativeStyle.Short).formatter
+            val long = relativeTimeConfigFor(locale, RelativeStyle.Long).formatter
+            // CLDR's short phrase, unless it is longer than the long phrase, which is then used.
+            fun expected(cldr: String, delta: Duration) = long(delta, true).let { if (io.github.aughtone.readable.duration.visibleLength(cldr) > io.github.aughtone.readable.duration.visibleLength(it)) it else cldr }
             for (line in cases.trim().lines()) {
                 val (unit, count, past, future) = line.split('|')
                 val duration = durationOf(unit, count.toInt())
-                assertEquals(past, formatter(-duration, true), "$language short: $count $unit ago")
-                assertEquals(future, formatter(duration, true), "$language short: in $count $unit")
+                assertEquals(expected(past, -duration), formatter(-duration, true), "$language short: $count $unit ago")
+                assertEquals(expected(future, duration), formatter(duration, true), "$language short: in $count $unit")
             }
         }
         // English keeps its own short form.

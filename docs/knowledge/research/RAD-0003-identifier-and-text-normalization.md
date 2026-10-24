@@ -1,6 +1,11 @@
-# Identifier & Text Normalization — Design
+# Identifier and Text Normalization
 
-Status: working design (not yet an ADR). Captures the decisions made while designing the normalization modules so we can see the whole shape before building.
+RAD-0003 · 2026-09-07
+Keywords: normalize email for hashing, blind matching, canonical form, same bytes on every
+          platform, Unicode normalization tables differ by OS, policy versioning, breach-safe
+          token, phone and domain normalization
+
+A working design, not yet a decision: it captures the choices made while designing the normalization modules, so the whole shape can be seen before building.
 
 ## Purpose
 

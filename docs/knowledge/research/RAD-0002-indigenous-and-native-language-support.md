@@ -1,8 +1,9 @@
-# 0001 — Indigenous & Native Language Support
+# Indigenous and Native Language Support
 
-- **Type:** Spike / exploration
-- **Status:** Not started
-- **Created:** 2026-07-25
+RAD-0002 · 2026-07-25
+Keywords: add Cherokee Māori Hawaiian Navajo Cree Ojibwe Greenlandic, Indigenous languages,
+          CLDR coverage for small languages, script subtags Cans Latn, animacy plurals,
+          polysynthetic relative time, verifying strings with speakers
 
 ## Goal
 
@@ -81,5 +82,4 @@ which is the approach the library already takes.
 
 ---
 
-*Primer contributed by Brill (2026-07-25). Coverage claims above should be re-checked against
-the current CLDR release as the first step of the spike.*
+Coverage claims above should be re-checked against the current CLDR release as the first step of the work.

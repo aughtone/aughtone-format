@@ -1,20 +1,17 @@
-# Repository Structure (repository-structure.md)
----
-name: repository-structure
-description: Defines the 5-sector documentation hierarchy and AI context mapping rules.
----
+# Repository Structure
 
-## The 5 Sectors
-1. 📐 Architecture Guidelines (docs/ARCH.md)
-2. 🧠 Functional Specifications (docs/SPEC.md)
-3. 🎨 Design & UI Rules (docs/DESIGN.md)
-4. 📋 Acceptance Criteria (docs/ACs/)
-5. 📖 Developer Guide (docs/DEVELOPER.md)
+Where things live, and what to read before changing them. [docs/README.md](../README.md) explains the documentation layout in full.
 
-## AI Context Mapping Rules
-1. Before writing logic: Reference docs/SPEC.md AND docs/ACs/.
-2. Before establishing repo definitions: Reference docs/ARCH.md.
-3. When rendering UI: Reference docs/DESIGN.md.
-4. Goal-Oriented Design: Formalize User Stories (STORY-ID) in DESIGN.md first.
-5. Update Docs: Intelligently disperse context into the specific specialized file.
-6. Interaction Protocol: ALWAYS present an implementation plan and wait for explicit user approval before performing any modifications.
+## Where things live
+
+1. **Work** — stories, bugs and their acceptance criteria — is on the GitHub issue tracker, never in a file.
+2. **Knowledge** is in `docs/knowledge/`: decisions (`decisions/`), specifications (`specifications/`), developer guides (`guides/`) and research (`research/`).
+3. **Machinery** — `AGENTS.md`, `docs/README.md` and this folder — is plain git.
+4. **Artifacts for outside readers** are in `docs/outbox/`; retired files are in `docs/_archive/`.
+
+## Context rules
+
+1. Before writing logic, read the story's acceptance criteria on its issue, and the specifications for the module.
+2. Before changing how the library is built or how a module is organised, read the architecture specification and the decision records.
+3. When a change alters documented behaviour, update the document that describes it in the same change.
+4. File a new document in the section whose `README.md` describes it.

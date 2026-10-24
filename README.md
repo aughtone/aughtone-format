@@ -54,11 +54,11 @@ Aughtone Format 3.1.0 focuses on relative-time expressiveness and completing loc
 This project follows a specialized 5-sector documentation hierarchy.
 
 ## 📚 Documentation Sectors
-- 📐 [Architecture](docs/ARCH.md): Engineering rules and design patterns.
-- 🧠 [Functional Specifications](docs/SPEC.md): Business logic and domain constraints.
-- 🎨 [Design & UI](docs/DESIGN.md): Presentation layer and user stories.
-- 📋 [Acceptance Criteria](docs/ACs/README.md): Success outcomes and verification.
-- 📖 [Developer Guide](docs/DEVELOPER.md): Environment setup and onboarding.
+- 📐 [Architecture](docs/knowledge/specifications/DOC-0001-architecture.md): Engineering rules and design patterns.
+- 🧠 [Functional Specifications](docs/knowledge/specifications/DOC-0002-functional-specifications.md): What each module does.
+- 🏛️ [Decisions](docs/knowledge/decisions/README.md): The choices behind the design, and why.
+- 🔬 [Research](docs/knowledge/research/README.md): Investigations and what they found.
+- 📖 [Developer Guide](docs/knowledge/guides/DOC-0005-developer-guide.md): Adding languages, conventions and releases.
 - 📜 [Changelog](CHANGELOG.md): History of changes and release notes.
 ## ✨ Features
 - **55+ Languages and Regions Supported**: Deep grammatical parity for Slavic, Arabic, Hebrew, Inuktitut, and more.
@@ -132,4 +132,4 @@ println(1048576L.formatReadableDataSize()) // "1 MiB"
 
 ---
 ## 🛠️ Governance Standards
-Access the [Governance Skills](docs/standards/) for specialized development rules.
+See [How This Documentation Works](docs/README.md) for where documents live, and [the standards](docs/standards/) for development rules.

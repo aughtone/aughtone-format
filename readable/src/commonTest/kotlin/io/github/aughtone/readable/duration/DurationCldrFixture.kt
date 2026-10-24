@@ -673,6 +673,80 @@ year|101|101 سال
 year|102|102 سال
 year|111|111 سال
 """,
+    "ar" to """
+second|1|ثانية
+second|2|ثانيتان
+second|3|3 ثوان
+second|4|4 ثوان
+second|5|5 ثوان
+second|10|10 ثوان
+second|11|11 ثانية
+second|12|12 ثانية
+second|20|20 ثانية
+second|21|21 ثانية
+second|22|22 ثانية
+second|25|25 ثانية
+second|59|59 ثانية
+minute|1|دقيقة
+minute|2|دقيقتان
+minute|3|3 دقائق
+minute|4|4 دقائق
+minute|5|5 دقائق
+minute|10|10 دقائق
+minute|11|11 دقيقة
+minute|12|12 دقيقة
+minute|20|20 دقيقة
+minute|21|21 دقيقة
+minute|22|22 دقيقة
+minute|25|25 دقيقة
+minute|59|59 دقيقة
+hour|1|ساعة
+hour|2|ساعتان
+hour|3|3 ساعات
+hour|4|4 ساعات
+hour|5|5 ساعات
+hour|10|10 ساعات
+hour|11|11 ساعة
+hour|12|12 ساعة
+hour|20|20 ساعة
+hour|21|21 ساعة
+hour|22|22 ساعة
+hour|23|23 ساعة
+day|1|يوم
+day|2|يومان
+day|3|3 أيام
+day|4|4 أيام
+day|5|5 أيام
+day|6|6 أيام
+day|25|25 يومًا
+day|29|29 يومًا
+week|1|أسبوع
+week|2|أسبوعان
+week|3|3 أسابيع
+month|1|شهر
+month|2|شهران
+month|3|3 أشهر
+month|4|4 أشهر
+month|5|5 أشهر
+month|10|10 أشهر
+month|11|11 شهرًا
+year|1|سنة
+year|2|سنتان
+year|3|3 سنوات
+year|4|4 سنوات
+year|5|5 سنوات
+year|10|10 سنوات
+year|11|11 سنة
+year|12|12 سنة
+year|20|20 سنة
+year|21|21 سنة
+year|22|22 سنة
+year|25|25 سنة
+year|100|100 سنة
+year|101|101 سنة
+year|102|102 سنة
+year|111|111 سنة
+""",
 )
 
 /** As [durationCldrFixture], for CLDR's short phrases. */
