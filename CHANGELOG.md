@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [4.2.1] - 2026-10-24
+
+### Added
+- **New `:astronomy` module** (`io.github.aughtone:format-astronomy`): sunrise, sunset and civil, nautical and astronomical twilight for a latitude, longitude and date (`SunTimes.of`, `SunTimes.ofUtcDay`), with polar day and polar night reported as such; new moons, full moons and the moon's phase (`Moon`); the 24 solar terms (`Sun.solarTerms`); and crescent-visibility predictions by the Odeh or Yallop criterion (`Crescent.visibility`). Pure common code, checked against NOAA's sunrise tables, NASA's moon phases and the Hong Kong Observatory's solar terms.
+- **New `:calendars` module** (`io.github.aughtone:format-calendars`): conversion to and from `LocalDate`, months in a year, days in a month and leap months, for every calendar iCalendar's `RSCALE` (RFC 7529) names — Buddhist, Japanese, ROC, Hebrew, Islamic civil, tabular and Umm al-Qura, Persian, Coptic, Ethiopic (both eras), Indian, Chinese and Korean (Dangi). A leap month is RFC 7529's `5L`. The observation-based Islamic calendars resolve from the month starts a caller supplies (`ObservedIslamicCalendar`), and a predicted month start is its own type (`ObservedIslamicCalendar.predictMonthStart`).
+- **Generic time-zone names** (`:datetime`): `TimeZone.genericDisplayName(width, locale)` gives the name a zone keeps all year — "Eastern Time" / "ET" — from the platform's CLDR.
+- **Windows time-zone names** (`:datetime`): `TimeZone.ianaIdForWindowsName(name, territory)` and `TimeZone.windowsNameForIanaId(id)` translate between Windows zone names, as Outlook and Exchange write them in iCalendar files, and IANA identifiers, from CLDR's mapping, the same on every platform.
+
+### Notes
+- The Chinese and Korean calendars do not use ICU's data, which ICU-based platform calendars (the JVM's ICU4J, Android, JavaScript's `Intl`) are built on: ICU starts nine Chinese months between 1954 and 2070 on the wrong day, including the New Years of 2027 and 2030, wherever a new moon falls within minutes of midnight. The Chinese table comes from the Hong Kong Observatory's published conversion tables, and the Korean calendar is computed. See ADR-0007.
+
 ## [4.2.0] - 2026-10-24
 
 ### Added

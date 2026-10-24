@@ -37,3 +37,16 @@ internal actual fun platformZoneName(
     val name = nsZone.localizedName(style, NSLocale(localeIdentifier = locale.languageTag))
     return name?.ifEmpty { null }
 }
+
+/**
+ * Apple actual for [platformGenericZoneName]: `NSTimeZone.localizedName` in its generic styles.
+ */
+internal actual fun platformGenericZoneName(
+    timeZone: TimeZone,
+    abbreviated: Boolean,
+    locale: Locale,
+): String? {
+    val style = if (abbreviated) NSTimeZoneNameStyle.NSTimeZoneNameStyleShortGeneric else NSTimeZoneNameStyle.NSTimeZoneNameStyleGeneric
+    val name = timeZone.toNSTimeZone().localizedName(style, NSLocale(localeIdentifier = locale.languageTag))
+    return name?.ifEmpty { null }
+}

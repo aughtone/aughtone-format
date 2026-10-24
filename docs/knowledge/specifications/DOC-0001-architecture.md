@@ -15,6 +15,8 @@ Aughtone Format is a suite of Kotlin Multiplatform libraries published to **Mave
     - `format-datetime` (dates, times, ranges, and weekday, month and zone names)
     - `format-readable` (human-readable numbers, durations, relative time, ordinals and lists)
     - `format-identifiers` (display notations for identifiers: MAC, UUID, IBAN, IP, domains, phones)
+    - `format-astronomy` (sunrise, sunset and twilight, moon phases, solar terms and crescent visibility)
+    - `format-calendars` (conversion and arithmetic for the non-Gregorian calendars RFC 7529 names; depends on `format-astronomy`)
     - `format-toolbox` (shared helpers)
     - `format-viewable` (abstract visual models)
     - `format-viewable-compose` (Compose rendering)

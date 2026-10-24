@@ -16,7 +16,7 @@ description: >-
   io.github.aughtone:format-toolbox.
 license: Apache-2.0
 metadata:
-  version: "4.2.0"
+  version: "4.2.1"
   repository: https://github.com/aughtone/aughtone-format
 ---
 

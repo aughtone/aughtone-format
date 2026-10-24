@@ -37,3 +37,21 @@ internal expect fun platformZoneName(
     abbreviated: Boolean,
     locale: Locale,
 ): String?
+
+/**
+ * The platform CLDR's localized **generic** name for [timeZone] — the one that names the zone
+ * all year rather than its standard or daylight time ("Eastern Time" / "ET") — or `null` when
+ * the platform gives none. Each platform applies CLDR's own fallback when a zone has no generic
+ * name in [locale], usually a location form ("Germany Time", "heure : Toronto") or, for a zone
+ * with no location, an offset ("GMT-05:00"); that is returned as given.
+ *
+ * @param timeZone the zone to name.
+ * @param abbreviated `true` for the short form ("ET"), `false` for the full name ("Eastern Time").
+ * @param locale the language to localize into.
+ * @return the platform's generic name, or `null` when the platform has none.
+ */
+internal expect fun platformGenericZoneName(
+    timeZone: TimeZone,
+    abbreviated: Boolean,
+    locale: Locale,
+): String?

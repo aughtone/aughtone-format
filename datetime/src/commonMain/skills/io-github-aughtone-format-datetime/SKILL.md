@@ -8,15 +8,15 @@ description: >-
   DateTimeFormatter.ofLocalizedDate would on the JVM; format a timestamp or epoch
   milliseconds; show a range the way the locale writes one ("March 3 – 5, 2024",
   "9:00 – 11:30 AM", "Mon – Fri"); get weekday and month names in the user's
-  language ("Monday"/"Mon", "Mars"); get a time zone's localized name ("Eastern
-  Standard Time", "EST"); follow the locale's 12-hour or 24-hour clock and its
-  default digits. Works on kotlinx-datetime LocalDate, LocalTime, LocalDateTime
+  language ("Monday"/"Mon", "Mars"); get a time zone's localized name, at an
+  instant ("Eastern Standard Time") or all year ("Eastern Time"); map a Windows
+  zone name to an IANA id; follow the locale's clock and digits. Works on kotlinx-datetime LocalDate, LocalTime, LocalDateTime
   and kotlin.time.Instant. Not for relative time like "3 days ago" or "tomorrow",
   durations or numbers (use io.github.aughtone:format-readable); not for custom
   pattern strings such as "yyyy-MM-dd"; and not a parser.
 license: Apache-2.0
 metadata:
-  version: "4.2.0"
+  version: "4.2.1"
   repository: https://github.com/aughtone/aughtone-format
 ---
 
@@ -101,6 +101,8 @@ Month.MARCH.displayName(TextWidth.Abbreviated, localeFor("en")!!)   // "Mar"
 
 ## What moved, and what it used to be called
 
+**New in 4.2.1: generic zone names and Windows zones.** `TimeZone.genericDisplayName(width, locale)` gives the name a zone keeps all year — "Eastern Time" / "ET" — for a weekly schedule or opening hours that span a daylight-saving change, where `displayName`'s "Eastern Standard Time" is wrong half the year; it comes from the platform's CLDR, like `displayName`. `TimeZone.ianaIdForWindowsName(name, territory)` turns a Windows zone name, as Outlook and Exchange write it in an iCalendar `TZID` ("Eastern Standard Time"), into an IANA identifier for `TimeZone.of` (`"America/New_York"`, or `"America/Toronto"` for territory `"CA"`), and `TimeZone.windowsNameForIanaId(id)` goes the other way. Both are from bundled CLDR data, the same on every platform, return `null` for a name CLDR does not list, and use current IANA names (`"Asia/Kolkata"`) while accepting older ones (`"Asia/Calcutta"`, `"US/Eastern"`).
+
 **New in 4.2.0: ranges.** `LocalTime.formatRange`, `LocalDate.formatRange`, `LocalDateTime.formatRange`, `Instant.formatRange` and `DayOfWeek.formatRange`, from bundled CLDR interval formats. An `Instant` range names each end's zone at its own moment, so a range across a daylight-saving change reads "EST" at one end and "EDT" at the other. Before 4.2.0 the only range API was `Pair.format`, which joins two full values with `" - "`.
 
 **Silent changes in 4.2.0 — same calls, different output:**
@@ -124,7 +126,7 @@ Month.MARCH.displayName(TextWidth.Abbreviated, localeFor("en")!!)   // "Mar"
 
 **Silent change in 4.1.0: zone names now come from the platform.** `Long`/`Full` time styles (and so the default `Instant.format()`) append a zone name that is now read from the platform's own CLDR instead of a bundled table. Same signature, but the wording can differ from 4.0.0 and between targets — UTC reads "UTC" / "Coordinated Universal Time" on the JVM and in the browser, "GMT" / "Greenwich Mean Time" on Apple. Tests that compared exact zone strings may need loosening. Inuktitut full weekday names also changed, to idiomatic day-words (ᐊᐃᑉᐱᖅ for Tuesday).
 
-**New in 4.1.0: standalone names and time-zone names.** `DayOfWeek.displayName(width, locale)` and `Month.displayName(width, locale)` expose the locale's day and month names — `Full`/`Abbreviated` via the `TextWidth` enum — that were previously reachable only inside a formatted date. There is no `Narrow` width, and `displayName` always gives the stand-alone form; unsupported locales fall back to English. `TimeZone.displayName(instant, width, locale)` gives the zone's localized *specific* name at that instant ("Eastern Standard Time" / "EST"); it is instant-keyed because standard vs. daylight depends on the moment. The name comes from the **platform's own CLDR** (`java.time`, Android ICU, Apple `NSTimeZone`, JS/Wasm `Intl`), so its exact wording follows the reader's OS and runtime — the library favours coverage over byte-identical consistency here — with a small bundled supplement for languages no platform ships (notably Inuktitut) and an English-name / UTC-offset fallback. Because the wording is the platform's, it can differ across targets (UTC reads "Coordinated Universal Time" on most, "Greenwich Mean Time" on Apple). The instant-independent *generic* name ("Eastern Time") is not provided.
+**New in 4.1.0: standalone names and time-zone names.** `DayOfWeek.displayName(width, locale)` and `Month.displayName(width, locale)` expose the locale's day and month names — `Full`/`Abbreviated` via the `TextWidth` enum — that were previously reachable only inside a formatted date. There is no `Narrow` width, and `displayName` always gives the stand-alone form; unsupported locales fall back to English. `TimeZone.displayName(instant, width, locale)` gives the zone's localized *specific* name at that instant ("Eastern Standard Time" / "EST"); it is instant-keyed because standard vs. daylight depends on the moment. The name comes from the **platform's own CLDR** (`java.time`, Android ICU, Apple `NSTimeZone`, JS/Wasm `Intl`), so its exact wording follows the reader's OS and runtime — the library favours coverage over byte-identical consistency here — with a small bundled supplement for languages no platform ships (notably Inuktitut) and an English-name / UTC-offset fallback. Because the wording is the platform's, it can differ across targets (UTC reads "Coordinated Universal Time" on most, "Greenwich Mean Time" on Apple). The instant-independent *generic* name ("Eastern Time") was added in 4.2.1 as `genericDisplayName`.
 
 **`Instant` migrated from `kotlinx.datetime.Instant` to `kotlin.time.Instant` in 2.1.0.** An agent that "remembers" the older API will reach for `kotlinx.datetime.Instant`; the `format` extensions and `Long.toInstant()` are on `kotlin.time.Instant` now.
 

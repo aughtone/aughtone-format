@@ -27,6 +27,8 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "AOFormat"
+include(":astronomy")
+include(":calendars")
 include(":datetime")
 include(":identifiers")
 include(":readable")

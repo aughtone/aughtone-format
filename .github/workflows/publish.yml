@@ -11,8 +11,19 @@ env:
   GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=512m -XX:+UseParallelGC"
 
 jobs:
+  # A release is cut only from a commit whose tests pass on every target.
+  test:
+    name: Test before release
+    if: github.event_name == 'push'
+    uses: ./.github/workflows/test.yml
+    secrets: inherit
+    permissions:
+      checks: write
+      contents: read
+
   create-release:
     name: Create GitHub Release
+    needs: test
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
     permissions:
