@@ -91,15 +91,17 @@ class IntervalCldrTest {
         assertTrue(comparedLocales.containsAll(required), "not compared: ${required - comparedLocales}")
     }
 
-    @Test
-    fun dateRangesMatchCldrWhereverTheSingleDatesDo() {
-        val styles = mapOf("short" to DateTimeStyle.Short, "medium" to DateTimeStyle.Medium, "long" to DateTimeStyle.Long)
+    /**
+     * Compares the date cases of one style ([kind] in the fixture) and checks that at least
+     * [minimumLocales] locales, including every one in [required], were comparable. Each style
+     * is its own test, so no single test runs long enough to meet a browser runner's timeout.
+     */
+    private fun checkDateRanges(kind: String, style: DateTimeStyle, minimumLocales: Int, required: Set<String>) {
         var compared = 0
         val comparedLocales = mutableSetOf<String>()
         val mismatches = mutableListOf<String>()
-        for (case in cases.filter { it.kind in styles && !isKnownDateDifference(it) }) {
+        for (case in cases.filter { it.kind == kind && !isKnownDateDifference(it) }) {
             val locale = localeOf(case.locale)
-            val style = styles.getValue(case.kind)
             fun single(date: LocalDate) = date.format(style, locale = locale, timeZone = TimeZone.UTC, numberingSystem = NumberingSystem.LATN)
             val start = LocalDate.parse(case.start)
             val end = LocalDate.parse(case.end)
@@ -110,8 +112,20 @@ class IntervalCldrTest {
             comparedLocales += case.locale
         }
         assertTrue(mismatches.isEmpty(), "${mismatches.size} of $compared:\n" + mismatches.joinToString("\n"))
-        assertTrue(comparedLocales.size >= 30, "only ${comparedLocales.size} locales had comparable date ranges ($compared cases)")
-        val required = setOf("en-GB", "de", "ru", "hu", "es", "ko", "cs")
-        assertTrue(comparedLocales.containsAll(required), "not compared: ${required - comparedLocales}")
+        // Guard against a fixture or a normalisation that quietly compares nothing.
+        assertTrue(comparedLocales.size >= minimumLocales, "only ${comparedLocales.size} locales had comparable $kind date ranges ($compared cases)")
+        assertTrue(comparedLocales.containsAll(required), "$kind not compared: ${required - comparedLocales}")
     }
+
+    @Test
+    fun shortDateRangesMatchCldrWhereverTheSingleDatesDo() =
+        checkDateRanges("short", DateTimeStyle.Short, minimumLocales = 55, required = setOf("en-GB", "de", "fr", "es", "ru", "hu", "cs", "ja", "zh", "ko"))
+
+    @Test
+    fun mediumDateRangesMatchCldrWhereverTheSingleDatesDo() =
+        checkDateRanges("medium", DateTimeStyle.Medium, minimumLocales = 50, required = setOf("en-GB", "de", "fr", "hu", "cs", "ja", "ko"))
+
+    @Test
+    fun longDateRangesMatchCldrWhereverTheSingleDatesDo() =
+        checkDateRanges("long", DateTimeStyle.Long, minimumLocales = 55, required = setOf("en-GB", "de", "fr", "es", "ru", "hu", "cs", "ko"))
 }
