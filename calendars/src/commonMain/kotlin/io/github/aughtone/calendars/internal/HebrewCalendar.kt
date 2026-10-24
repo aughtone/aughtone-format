@@ -3,6 +3,7 @@ package io.github.aughtone.calendars.internal
 import io.github.aughtone.calendars.CalendarDate
 import io.github.aughtone.calendars.CalendarResult
 import io.github.aughtone.calendars.CalendarSystem
+import kotlin.concurrent.Volatile
 
 /**
  * The Hebrew calendar, by the molad and the postponement rules (Reingold and Dershowitz).
@@ -42,11 +43,25 @@ internal object HebrewCalendar : ArithmeticCalendar() {
     /** The fixed day of 1 Tishri of [year]. */
     private fun newYear(year: Long): Long = EPOCH + elapsedDays(year) + yearLengthDelay(year)
 
-    private fun yearLength(year: Long): Long = newYear(year + 1) - newYear(year)
+    /** The fixed days of 1 Tishri of [year] ([start]) and of the year after ([next]). */
+    private class YearBounds(val year: Long, val start: Long, val next: Long)
 
-    /** The year's months in order, each as month number, leap flag and length. */
-    private fun months(year: Long): List<Triple<Int, Boolean, Int>> {
-        val length = yearLength(year)
+    /**
+     * The last year's bounds. Converting a date asks for its year's bounds several times, and a run
+     * of nearby dates asks for the same year again, so one entry saves most of the molad arithmetic.
+     * Thread-safe by replacement: the value is immutable.
+     */
+    @Volatile private var lastBounds: YearBounds? = null
+
+    private fun bounds(year: Long): YearBounds {
+        lastBounds?.let { if (it.year == year) return it }
+        return YearBounds(year, newYear(year), newYear(year + 1)).also { lastBounds = it }
+    }
+
+    private fun yearLength(year: Long): Long = bounds(year).let { it.next - it.start }
+
+    /** The year's months in order, each as month number, leap flag and length; [length] is the year's. */
+    private fun months(year: Long, length: Long = yearLength(year)): List<Triple<Int, Boolean, Int>> {
         val heshvan = if (floorMod(length, 10) == 5L) 30 else 29
         val kislev = if (floorMod(length, 10) == 3L) 29 else 30
         return buildList {
@@ -67,22 +82,23 @@ internal object HebrewCalendar : ArithmeticCalendar() {
     }
 
     override fun fromFixed(fixed: Long): CalendarResult {
-        // The Hebrew year starts in September or October; start from the estimate and correct it.
-        var year = floorDiv(fixed - EPOCH, 366) + 1
-        while (newYear(year + 1) <= fixed) year++
-        while (newYear(year) > fixed) year--
-        var day = fixed - newYear(year)
-        for ((month, leap, length) in months(year)) {
-            if (day < length) return resolved(year, month, (day + 1).toInt(), leap)
+        // The Hebrew year starts in September or October; estimate it from the mean year of
+        // 35975351/98496 days, which is at most a year out, and correct it.
+        var year = bounds(floorDiv(98496 * (fixed - EPOCH), 35975351) + 1)
+        while (year.next <= fixed) year = bounds(year.year + 1)
+        while (year.start > fixed) year = bounds(year.year - 1)
+        var day = fixed - year.start
+        for ((month, leap, length) in months(year.year, year.next - year.start)) {
+            if (day < length) return resolved(year.year, month, (day + 1).toInt(), leap)
             day -= length
         }
         return CalendarResult.Unresolved("no Hebrew month holds the date")
     }
 
     override fun toFixed(date: CalendarDate): Long {
-        val year = date.year.toLong()
-        var fixed = newYear(year)
-        for ((month, leap, length) in months(year)) {
+        val year = bounds(date.year.toLong())
+        var fixed = year.start
+        for ((month, leap, length) in months(year.year, year.next - year.start)) {
             if (month == date.month && leap == date.isLeapMonth) return fixed + date.day - 1
             fixed += length
         }

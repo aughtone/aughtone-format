@@ -59,6 +59,8 @@ The library consists of multiple artifacts. The `publish` command will automatic
 - `:datetime`
 - `:readable`
 - `:identifiers`
+- `:astronomy`
+- `:calendars`
 - `:toolbox`
 - `:viewable`
 - `:viewable-compose`
