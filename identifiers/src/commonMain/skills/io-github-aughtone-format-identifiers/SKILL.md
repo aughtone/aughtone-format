@@ -11,13 +11,13 @@ description: >-
   as a netmask, wildcard mask or first-to-last address range; decode a Punycode
   xn-- internationalized domain name (IDN) to Unicode; format an E.164 phone
   number in national, international or RFC 3966 tel URI form; prefix a social
-  handle with @. Input must already be a valid identifier in one of its own
-  notations; it does not search, validate or clean up free text and defines no
-  value types. For rounded human text such as
-  "1.5 MB" or "3 days ago" use io.github.aughtone:format-readable.
+  handle with @. Input must be the identifier, in one of its notations; it does
+  not search or clean up free text, and defines no value types. For rounded
+  human text such as "1.5 MB" or "3 days ago" use
+  io.github.aughtone:format-readable.
 license: Apache-2.0
 metadata:
-  version: "4.1.1"
+  version: "4.2.0"
   repository: https://github.com/aughtone/aughtone-format
 ---
 

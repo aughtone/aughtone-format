@@ -16,7 +16,7 @@ description: >-
   number with issuer grouping use io.github.aughtone:format-identifiers.
 license: Apache-2.0
 metadata:
-  version: "4.1.1"
+  version: "4.2.0"
   repository: https://github.com/aughtone/aughtone-format
 ---
 

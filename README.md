@@ -2,6 +2,20 @@
 
 Aught One Format is a suite of Kotlin Multiplatform libraries designed to provide consistent, localized formatting for Dates, Times, Numbers, and other human-readable metrics across all platforms.
 
+## 🚀 Major Updates in 4.2.0
+
+New range formatting, and a set of output changes to know about; the [CHANGELOG](CHANGELOG.md) lists every change.
+
+- **Date and time ranges** (`:datetime`): `formatRange` on `LocalTime`, `LocalDate`, `LocalDateTime`, `Instant` and `DayOfWeek` writes a range the way the locale does, from the Unicode CLDR interval formats — "March 3 – 5, 2024", "9:00 – 11:30 AM", "3.–5. März 2024", "Mon – Fri" — with what both ends share written once.
+- **The era is opt-in** (`:datetime`): `Full` dates no longer end with "Common Era"; pass `showEra = true` for "1952 CE". A date before year 1 always shows its era.
+- **Names inside a date follow the language** (`:datetime`): lower case where it writes them so ("15 de marzo de 2024"), while `displayName` keeps the stand-alone form ("Marzo").
+- **Default digits follow CLDR** (`:datetime`): Latin for Hindi, Thai, Urdu outside India and Arabic without a region; Arabic-Indic for Arabic in Egypt, Saudi Arabia and the other regions that write them. `numberingSystem` still overrides.
+- **Short style in every language** (`:readable`): `RelativeStyle.Short` takes CLDR's short phrases outside English ("vor 5 Min."), never longer than the long phrase.
+- **More languages, better words** (`:readable`): Bengali, Gujarati, Kannada, Malayalam, Marathi, Punjabi, Tamil, Telugu and Urdu relative times and durations, which were English; Arabic durations name one and two without a digit; Chinese months read "2个月", not "2月" (February); Georgian ordinals take their prefix form; a duration under half a second reads "now".
+- **Looser identifier input** (`:identifiers`): `formatMac` reads any of its notations and `formatIban` lower case and the spaced form; the output is always the notation asked for.
+- **Deprecated**: the duplicate `Altitude`/`Azimuth.formatReadable` in `io.github.aughtone.readable.geo`; use the ones in `…readable.quantitative`. Removed in 5.0.0.
+- **Dependencies**: Kotlin 2.4.21, Compose Multiplatform 1.12.2.
+
 ## 🚀 Major Updates in 4.1.1
 
 A correctness release: no new API, many fixes to output. Code that pinned the old output in its own tests will need updating; the [CHANGELOG](CHANGELOG.md) lists every change.
@@ -81,6 +95,8 @@ The library provides full BCP 47 subtag fallback (e.g., `en-ZA` → `en`) for 59
 | **South & Central Asian** | Hindi (`hi-IN`), Armenian (`hy-AM`), Georgian (`ka-GE`), Kazakh (`kk-KZ`), Uzbek (`uz-UZ`) |
 | **Middle Eastern & African** | Arabic (`ar-EG`), Hebrew (`he-IL`), Persian (`fa-IR`), Turkish (`tr-TR`), Azerbaijani (`az-AZ`), Swahili (`sw-KE`) |
 | **Other & Finno-Ugric** | Finnish (`fi-FI`), Estonian (`et-EE`), Hungarian (`hu-HU`), Greek (`el-GR`), Basque (`eu-ES`), Albanian (`sq-AL`), Inuktitut (`iu-CA`) |
+
+Relative times and durations in `:readable` are also localized for Bengali (`bn`), Gujarati (`gu`), Kannada (`kn`), Malayalam (`ml`), Marathi (`mr`), Punjabi (`pa`), Tamil (`ta`), Telugu (`te`) and Urdu (`ur`), from CLDR.
 
 ### Coverage over consistency
 For localized *display names* (time-zone names, and similar large translation sets) the library favours **coverage over consistency**. Byte-identical output on every platform was the original goal — the property bundled tables give — but it was judged not worth its cost. The new priority is that every reader sees text in **their own language**, even where the exact wording differs slightly across platforms and OS versions.

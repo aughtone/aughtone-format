@@ -30,7 +30,7 @@ val now = Clock.System.now()
     relativeDateStyle = RelativeStyle.Short,
     relativeThreshold = 10.days,
     locale = Locales.English,
-)  // "5d"   (not "5d ago")
+)  // "5d"   (not "5d ago"); other languages use CLDR's short form, such as German "vor 5 Min." for five minutes
 
 // Calendar phrasing from the date overload
 LocalDate(2023, 10, 28).formatReadableRelative(
@@ -89,7 +89,7 @@ Azimuth(225.0).formatReadable(Locales.English)   // "225° (SW)"
 cardinalDirectionsFor(Locales.English)           // the 8-point compass labels, localized
 ```
 
-`Coordinates`, `Altitude`, and `Azimuth` extensions are in the `io.github.aughtone.readable.quantitative` package; the `GeoPoint` extensions are in `io.github.aughtone.readable.geo`. DMS truncates its seconds field, so it can read up to about 1″ low.
+`Coordinates`, `Altitude`, and `Azimuth` extensions are in the `io.github.aughtone.readable.quantitative` package; the `GeoPoint` extensions are in `io.github.aughtone.readable.geo`. The copies of the `Altitude` and `Azimuth` formatters in `…readable.geo` are deprecated and removed in 5.0.0. DMS truncates its seconds field, so it can read up to about 1″ low.
 
 ## 🧠 Plural handling
 
