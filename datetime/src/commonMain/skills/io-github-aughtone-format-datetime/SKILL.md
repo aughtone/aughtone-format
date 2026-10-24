@@ -6,8 +6,9 @@ description: >-
   with no java.time. Show a date, a time, or both in short, medium, long or full
   style ("Jan 12, 1952", "4:08 p.m."), as DateFormat or
   DateTimeFormatter.ofLocalizedDate would on the JVM; format a timestamp or epoch
-  milliseconds; show a start-to-end date range with a placeholder for a missing
-  end; get weekday and month names in the user's language ("Monday"/"Mon",
+  milliseconds; show a range the way the locale writes one, with the shared month
+  or year written once ("March 3 – 5, 2024", "9:00 – 11:30 AM", "Mon – Fri"), or
+  a start-to-end pair with a placeholder for a missing end; get weekday and month names in the user's language ("Monday"/"Mon",
   "Mars"); get a time zone's localized name ("Eastern Standard Time", "EST");
   follow the locale's 12-hour or 24-hour clock and its native digits. Works on
   kotlinx-datetime LocalDate, LocalTime, LocalDateTime and kotlin.time.Instant.
@@ -52,6 +53,13 @@ dt.format(dateStyle = DateTimeStyle.Short, timeStyle = DateTimeStyle.Short,
 LocalDate(1952, 1, 12).format(DateTimeStyle.Medium, locale = localeFor("en-US")!!)  // "Jan 12, 1952"
 LocalTime(16, 8, 39).format(DateTimeStyle.Short, is24HourFormat = true)            // "16:08"
 
+// Ranges, as the locale writes them (CLDR interval formats)
+LocalDate(2024, 3, 3).formatRange(LocalDate(2024, 3, 5), DateTimeStyle.Long, localeFor("en-US")!!) // "March 3 – 5, 2024"
+LocalTime(9, 0).formatRange(LocalTime(11, 30), locale = localeFor("en-US")!!, is24HourFormat = false) // "9:00 – 11:30 AM"
+LocalDateTime(2024, 3, 5, 9, 0).formatRange(LocalDateTime(2024, 3, 5, 17, 0),
+    DateTimeStyle.Long, DateTimeStyle.Short, localeFor("en-US")!!, is24HourFormat = false) // "March 5, 2024 9:00 AM – 5:00 PM"
+DayOfWeek.MONDAY.formatRange(DayOfWeek.FRIDAY, TextWidth.Abbreviated, localeFor("en-US")!!)     // "Mon – Fri"
+
 // Nullable range with a placeholder for the missing end
 val start: Instant = Instant.parse("2023-03-15T13:20:00Z")
 Pair<Instant?, Instant?>(start, null).format(placeholder = "#")     // "… - #"
@@ -70,6 +78,12 @@ Month.MARCH.displayName(TextWidth.Abbreviated, localeFor("en")!!)   // "Mar"
 
 **`Pair.format` on two nulls returns `"? - ?"`, not `""`.** The code always emits `"<first> - <second>"`, so both-null gives `"? - ?"` (or `"<placeholder> - <placeholder>"`) and a one-null range renders the missing side as the placeholder. Symptom: a stray `"?"` (or your placeholder) where you expected an empty string or a bare single value.
 
+**`formatRange` and `Pair.format` are different tools.** `formatRange` writes a complete range as the locale does — the shared parts once, the locale's own separator and spacing. `Pair.format` joins two independently formatted values with `" - "` and exists for a range with a missing end. Use `formatRange` whenever both ends are known.
+
+**Range separators are not plain spaces.** CLDR writes a thin space (U+2009) around the en dash ("3\u2009–\u20095"), and some languages use no space or another mark ("3.–5. März 2024", "9:00～11:30", "09:00 ~ 17:00"). Symptom: an `assertEquals` against `"March 3 – 5, 2024"` typed with ordinary spaces fails although the text looks identical — build the expectation with `"\u2009–\u2009"`, or compare after normalising spaces.
+
+**A range is shortened only where CLDR has a pattern for it.** Time ranges are shortened at the `Short` style only; at `Medium`, `Long` and `Full` they are two complete times joined by the separator, each with its own seconds or zone name. Date ranges are shortened at every style. A `LocalDateTime` or `Instant` range on one day writes the date once and then the time range; across days it writes both ends in full. Equal ends are written once, and an end before the start is written in the order given, not swapped.
+
 **`Instant.format()` with no arguments appends a time-zone token.** Its `timeStyle` **defaults to `Long`**, and `Long`/`Full` time styles append a zone abbreviation or full name ("4:08:39 p.m. UTC"). Symptom: an unexpected zone token on the end — pass `timeStyle = DateTimeStyle.Short` (or `Medium`) to drop it. Likewise `DateTimeStyle.Full` on a date appends an era word ("… 1952 Common Era"). `Instant.format` and `LocalDateTime.format` take `eraNames = EraNames(bce = …, ce = …)` to change that wording; `LocalDate.format` has no such parameter.
 
 **Locales silently switch digit systems.** Even with `numberingSystem = null`, Arabic (`ar`), Persian/Urdu (`fa`/`ur`), Hindi (`hi`), Bengali (`bn`), and Thai (`th`) render localized digits. Symptom: non-ASCII digits in the output — force Western digits with `numberingSystem = NumberingSystem.LATN`.
@@ -85,6 +99,10 @@ Month.MARCH.displayName(TextWidth.Abbreviated, localeFor("en")!!)   // "Mar"
 **No bundled pattern throws.** `None`/`None` yields `""`, and there are no `@Throws` and no deprecated symbols in this module. Two things outside the patterns can still throw: the default `locale = Locale.current` throws `IllegalArgumentException` if the platform reports no locale at all, and an `Instant` outside the range `LocalDateTime` can hold throws from kotlinx-datetime when it is converted.
 
 ## What moved, and what it used to be called
+
+**New in 4.2.0: ranges.** `LocalTime.formatRange`, `LocalDate.formatRange`, `LocalDateTime.formatRange`, `Instant.formatRange` and `DayOfWeek.formatRange`, from bundled CLDR interval formats. An `Instant` range names each end's zone at its own moment, so a range across a daylight-saving change reads "EST" at one end and "EDT" at the other. Before 4.2.0 the only range API was `Pair.format`, which joins two full values with `" - "`.
+
+**Silent change in 4.2.0.** Abbreviated Chinese month names are CLDR's `3月`; earlier versions returned the full name `三月` for `Month.displayName(TextWidth.Abbreviated, zh)`.
 
 **Silent changes in 4.1.1 — same calls, different output.** Code or tests written against 4.1.0 output will see these:
 

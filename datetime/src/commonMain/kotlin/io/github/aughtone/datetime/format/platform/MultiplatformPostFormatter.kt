@@ -119,6 +119,10 @@ object MultiplatformPostFormatter {
 
     private fun Char.isAsciiDigit(): Boolean = this in '0'..'9'
 
+    /** Writes [text]'s digits in [numberingSystem], or in [locale]'s own when it is `null`. */
+    internal fun applyNumberingSystem(text: String, locale: Locale, numberingSystem: NumberingSystem?): String =
+        resolveNumberingSystem(numberingSystem, locale)?.let { text.applyNumberingSystem(it) } ?: text
+
     private fun resolveNumberingSystem(numberingSystem: NumberingSystem?, locale: Locale): NumberingSystem? {
         if (numberingSystem != null) return numberingSystem
         return when (locale.languageCode) {

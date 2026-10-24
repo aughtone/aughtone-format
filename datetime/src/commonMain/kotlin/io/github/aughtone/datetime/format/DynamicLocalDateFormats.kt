@@ -15,14 +15,14 @@ internal object DynamicLocalDateFormats {
 
     private fun getPatterns(locale: Locale): DatePatterns = Resources.getDatePatterns(locale)
 
-    private fun getDayOfWeekNamesResource(locale: Locale): DayOfWeekNamesResource =
+    internal fun getDayOfWeekNamesResource(locale: Locale): DayOfWeekNamesResource =
         Resources.getDayOfWeekNamesResource(locale)
 
     /**
      * The month names for use inside a date: the locale's own table, with the full names swapped
      * for the in-date form where the language has one that differs.
      */
-    private fun getMonthNamesResource(locale: Locale): MonthNamesResource {
+    internal fun getMonthNamesResource(locale: Locale): MonthNamesResource {
         val names = Resources.getMonthNamesResource(locale)
         val inDate = localeFormatMonthNames[locale.languageCode] ?: return names
         return MonthNamesData(full = inDate, abbreviated = names.abbreviated)

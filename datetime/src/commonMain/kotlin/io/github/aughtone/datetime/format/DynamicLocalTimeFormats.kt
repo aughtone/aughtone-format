@@ -15,7 +15,7 @@ internal object DynamicLocalTimeFormats {
 
     private fun getAmPmStrings(locale: Locale): AmPmStrings = Resources.getAmPmStrings(locale)
 
-    private fun String.to12HourPattern(): String = this.replace("HH", "h").replace("H", "h")
+    internal fun String.to12HourPattern(): String = this.replace("HH", "h").replace("H", "h")
 
     /**
      * Appends the time and, on a 12-hour clock, the AM/PM marker on the side the language writes

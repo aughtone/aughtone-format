@@ -5,6 +5,8 @@ package io.github.aughtone.datetime.format.resources
 import io.github.aughtone.datetime.format.DynamicLocalDateFormats
 import io.github.aughtone.datetime.format.DynamicLocalTimeFormats
 import io.github.aughtone.datetime.format.resources.formats.AmPmStrings
+import io.github.aughtone.datetime.format.resources.formats.IntervalFormats
+import io.github.aughtone.datetime.format.resources.formats.localeIntervalFormats
 import io.github.aughtone.datetime.format.resources.formats.DatePatterns
 import io.github.aughtone.datetime.format.resources.formats.TimePatterns
 import io.github.aughtone.datetime.format.resources.values.ClockHoursResource
@@ -53,6 +55,7 @@ object Resources {
     @Volatile private var textResourceCache = emptyMap<String, TextResource>()
     @Volatile private var clockHoursCache = emptyMap<String, ClockHours>()
     @Volatile private var eraNamesCache = emptyMap<String, EraNamesResource>()
+    @Volatile private var intervalFormatsCache = emptyMap<String, IntervalFormats>()
 
     /**
      * Resolves a table entry: the exact `language-REGION`, then the language, then the bare region.
@@ -206,6 +209,10 @@ object Resources {
 
     fun getText(locale: Locale): TextResource =
         lookup(locale, { textResourceCache }, { textResourceCache = it }, TextResourceMap.map, defaultTextResourceKey)
+
+    /** The CLDR interval formats for [locale], resolved like its date patterns, or `null`. */
+    internal fun getIntervalFormats(locale: Locale): IntervalFormats? =
+        lookupOptional(locale, { intervalFormatsCache }, { intervalFormatsCache = it }, localeIntervalFormats)
 
     fun getClockHours(locale: Locale): ClockHours =
         lookupOptional(locale, { clockHoursCache }, { clockHoursCache = it }, localeClockHoursSource.mapValues { it.value.value })
