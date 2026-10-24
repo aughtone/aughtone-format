@@ -7,6 +7,8 @@ on:
     branches: [ "develop" ]
   pull_request:
     branches: [ "develop" ]
+  # The publish workflow runs these tests before it releases anything.
+  workflow_call:
 
 env:
   GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=512m -XX:+UseParallelGC"
