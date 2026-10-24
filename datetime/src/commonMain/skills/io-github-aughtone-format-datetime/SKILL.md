@@ -84,7 +84,7 @@ Month.MARCH.displayName(TextWidth.Abbreviated, localeFor("en")!!)   // "Mar"
 
 **A range is shortened only where CLDR has a pattern for it.** Time ranges are shortened at the `Short` style only; at `Medium`, `Long` and `Full` they are two complete times joined by the separator, each with its own seconds or zone name. Date ranges are shortened at every style. A `LocalDateTime` or `Instant` range on one day writes the date once and then the time range; across days it writes both ends in full. Equal ends are written once, and an end before the start is written in the order given, not swapped.
 
-**`Instant.format()` with no arguments appends a time-zone token.** Its `timeStyle` **defaults to `Long`**, and `Long`/`Full` time styles append a zone abbreviation or full name ("4:08:39 p.m. UTC"). Symptom: an unexpected zone token on the end — pass `timeStyle = DateTimeStyle.Short` (or `Medium`) to drop it. Likewise `DateTimeStyle.Full` on a date appends an era word ("… 1952 Common Era"). `Instant.format` and `LocalDateTime.format` take `eraNames = EraNames(bce = …, ce = …)` to change that wording; `LocalDate.format` has no such parameter.
+**`Instant.format()` with no arguments appends a time-zone token.** Its `timeStyle` **defaults to `Long`**, and `Long`/`Full` time styles append a zone abbreviation or full name ("4:08:39 p.m. UTC"). Symptom: an unexpected zone token on the end — pass `timeStyle = DateTimeStyle.Short` (or `Medium`) to drop it. **No style shows the era unless asked.** `DateTimeStyle.Full` is "Saturday, January 12, 1952"; pass `showEra = true` (on `LocalDate.format`, `LocalDateTime.format` and `Instant.format`) for the locale's abbreviation, "… 1952 CE", or `eraNames = EraNames(bce = …, ce = …)` for words of your own, which also shows it. A date before year 1 always shows its era, at every style, with the year counted from one ("January 1, 501 BCE"): without it the year would read as one of the common era. Symptom: an unexpected "BCE" on an ancient date, or a missing era you expected from `Full`.
 
 **Locales silently switch digit systems.** Even with `numberingSystem = null`, Arabic (`ar`), Persian/Urdu (`fa`/`ur`), Hindi (`hi`), Bengali (`bn`), and Thai (`th`) render localized digits. Symptom: non-ASCII digits in the output — force Western digits with `numberingSystem = NumberingSystem.LATN`.
 
@@ -92,7 +92,7 @@ Month.MARCH.displayName(TextWidth.Abbreviated, localeFor("en")!!)   // "Mar"
 
 **The AM/PM marker goes where the language writes it.** After the time for most languages (`4:08 PM`), before it for Korean, Hungarian and Turkish, and before it with no space for Japanese and Chinese.
 
-**Month names inside a date are not always the names `Month.displayName` returns.** Czech, Finnish, Polish, Russian and Ukrainian use a different form after a day number: a date reads `5 марта 2024 г.`, while `Month.MARCH.displayName(…)` is `Март`. Symptom: a hand-built date string that reads wrong to a native speaker — format the whole date instead of concatenating a month name.
+**Month and weekday names inside a date are not always the names `displayName` returns.** Inside a date they are CLDR's in-date form: lower case in Spanish, French, Italian, Portuguese, Czech, Kazakh, Uzbek and Vietnamese (`15 de marzo de 2024`, `viernes, 15 de marzo de 2024`), and a different grammatical form in Czech, Finnish, Polish, Russian and Ukrainian (`5 марта 2024 г.`). `Month.displayName` and `DayOfWeek.displayName` give the stand-alone name, which these languages capitalise (`Marzo`, `Март`). A date that opens a sentence is not capitalised for you. Symptom: a hand-built date string that reads wrong to a native speaker — format the whole date instead of concatenating a name.
 
 **These `Instant`s are `kotlin.time.Instant`, not `kotlinx.datetime.Instant`.** The `Instant` and `Pair<Instant?, Instant?>` APIs use the standard library's `kotlin.time.Instant`. Symptom: a type mismatch when you pass a `kotlinx.datetime.Instant`.
 
@@ -102,7 +102,11 @@ Month.MARCH.displayName(TextWidth.Abbreviated, localeFor("en")!!)   // "Mar"
 
 **New in 4.2.0: ranges.** `LocalTime.formatRange`, `LocalDate.formatRange`, `LocalDateTime.formatRange`, `Instant.formatRange` and `DayOfWeek.formatRange`, from bundled CLDR interval formats. An `Instant` range names each end's zone at its own moment, so a range across a daylight-saving change reads "EST" at one end and "EDT" at the other. Before 4.2.0 the only range API was `Pair.format`, which joins two full values with `" - "`.
 
-**Silent change in 4.2.0.** Abbreviated Chinese month names are CLDR's `3月`; earlier versions returned the full name `三月` for `Month.displayName(TextWidth.Abbreviated, zh)`.
+**Silent changes in 4.2.0 — same calls, different output:**
+
+- `Full` dates no longer end with the era: "Saturday, January 12, 1952", where 4.1 wrote "… 1952 Common Era". `showEra = true` brings it back, abbreviated ("CE"). A date before year 1 now shows "BCE" at every style, not only at `Full`. Passing `eraNames` still shows the era.
+- Month and weekday names inside a date are lower case where the language writes them so: Spanish `15 de marzo de 2024` (was `15 de Marzo de 2024`), French `15 mars 2024`, Italian, Portuguese, Czech, Kazakh, Uzbek, Vietnamese; abbreviations too, in those languages and in Russian, Ukrainian and Finnish (`15 мар. 2024 г.`, was `15 Мар 2024 г.`). `displayName` is unchanged.
+- Abbreviated Chinese month names are CLDR's `3月`; earlier versions returned the full name `三月` for `Month.displayName(TextWidth.Abbreviated, zh)`.
 
 **Silent changes in 4.1.1 — same calls, different output.** Code or tests written against 4.1.0 output will see these:
 

@@ -106,6 +106,15 @@ private fun buildFormatter(
     sep: String = " ",
     numberFirst: Boolean = true,
 ): DurationFormatter = { duration, _ ->
+    val (n, unitKey) = durationUnitFor(duration)
+    val category = pluralCategoryFor(locale, n)
+    val names = units[unitKey]!!
+    val label = names.get(category)
+    if (numberFirst) "$n$sep$label" else "$label$sep$n"
+}
+
+/** The unit [duration] is counted in, and the whole count of that unit, as [buildFormatter] describes. */
+private fun durationUnitFor(duration: Duration): Pair<Long, String> {
     val totalSeconds = abs(duration.toDouble(DurationUnit.SECONDS))
     val (value, unitKey) = when {
         totalSeconds >= 29808000 -> (totalSeconds / 31536000.0).coerceAtLeast(1.0) to "year"
@@ -116,11 +125,36 @@ private fun buildFormatter(
         totalSeconds >= 59.5    -> (totalSeconds / 60.0)      to "minute"
         else                    -> totalSeconds               to "second"
     }
-    val n = value.roundToLong()
-    val category = pluralCategoryFor(locale, n)
-    val names = units[unitKey]!!
-    val label = names.get(category)
-    if (numberFirst) "$n$sep$label" else "$label$sep$n"
+    return value.roundToLong() to unitKey
+}
+
+private val DURATION_UNITS = listOf("second", "minute", "hour", "day", "week", "month", "year")
+
+/**
+ * A formatter that takes each phrase whole from [patterns]: the pattern for the unit and the
+ * plural form of the count, with the count written into its `{0}`. The unit is chosen as
+ * [buildFormatter] chooses it.
+ */
+private fun patternFormatter(locale: Locale, patterns: DurationPatterns): DurationFormatter = { duration, _ ->
+    val (n, unitKey) = durationUnitFor(duration)
+    val byCategory = patterns.units[DURATION_UNITS.indexOf(unitKey)]
+    // A plural form the language only uses for fractions has no pattern of its own; the last
+    // entry is the general form.
+    val index = patterns.categories.indexOf(pluralCategoryFor(locale, n)).takeIf { it >= 0 } ?: byCategory.lastIndex
+    byCategory[index].replace("{0}", n.toString())
+}
+
+/** [formatter], with a duration under half a second — which would round to zero seconds — written as [now]. */
+private fun withNow(formatter: DurationFormatter, now: String): DurationFormatter = { duration, style ->
+    if (abs(duration.toDouble(DurationUnit.SECONDS)) < 0.5) now else formatter(duration, style)
+}
+
+/** The CLDR identifier the generated tables are keyed by, for a tag this file supports. */
+private fun cldrIdFor(tag: String): String = when (tag) {
+    "no" -> "nb"
+    "zh-Hans" -> "zh"
+    "zh-TW" -> "zh-Hant"
+    else -> tag
 }
 
 /** Builds a unit table from one row of seven words — second, minute, hour, day, week, month, year — per plural category. */
@@ -154,8 +188,17 @@ private fun isDurationTagSupported(tag: String): Boolean = when (tag) {
 }
 
 fun buildDurationFormatter(tag: String, locale: Locale, style: RelativeStyle = RelativeStyle.Long): DurationFormatter {
-    // Only English has abbreviated unit words ("5m"). Every other language keeps its full word in
-    // the Short style, and so keeps the space before it.
+    val now = cldrDurationNow[cldrIdFor(tag)] ?: cldrDurationNow.getValue("en")
+    // English writes its own short form ("5m"); every other language with CLDR data takes CLDR's
+    // short phrases ("5 Min."). A language whose long words come from CLDR takes those.
+    val cldr = (if (style == RelativeStyle.Short && tag != "en") cldrShortDurationPatterns[cldrIdFor(tag)] else null)
+        ?: cldrDurationPatterns[tag]
+    if (cldr != null) return withNow(patternFormatter(locale, cldr), now)
+    return withNow(buildWrittenDurationFormatter(tag, locale, style), now)
+}
+
+/** The hand-written duration formatter for [tag]. */
+private fun buildWrittenDurationFormatter(tag: String, locale: Locale, style: RelativeStyle): DurationFormatter {
     val sep = " "
     return when (tag) {
         "en" -> if (style == RelativeStyle.Short) buildFormatter(locale, ENGLISH_DURATION_UNITS_SHORT, "") else buildFormatter(locale, ENGLISH_DURATION_UNITS, sep)
@@ -269,9 +312,9 @@ fun buildDurationFormatter(tag: String, locale: Locale, style: RelativeStyle = R
                                    "秒","分","時間","日","週間","ヶ月","年"), "")
         "ko" -> buildFormatter(locale, u2("초","분","시간","일","주","달","년",
                                    "초","분","시간","일","주","달","년"), "")
-        "zh-TW", "zh-HK" -> buildFormatter(locale, u2("秒","分","小時","天","週","月","年",
+        "zh-Hant", "zh-TW", "zh-HK" -> buildFormatter(locale, u2("秒","分","小時","天","週","月","年",
                                                "秒","分","小時","天","週","月","年"), "")
-        "zh" -> buildFormatter(locale, u2("秒","分","小时","天","周","月","年",
+        "zh", "zh-Hans" -> buildFormatter(locale, u2("秒","分","小时","天","周","月","年",
                                    "秒","分","小时","天","周","月","年"), "")
         "th" -> buildFormatter(locale, u2("วินาที","นาที","ชั่วโมง","วัน","สัปดาห์","เดือน","ปี",
                                    "วินาที","นาที","ชั่วโมง","วัน","สัปดาห์","เดือน","ปี"), "")
@@ -324,7 +367,7 @@ fun buildDurationFormatter(tag: String, locale: Locale, style: RelativeStyle = R
         "ka" -> buildFormatter(locale, u2("წამი","წუთი","საათი","დღე","კვირა","თვე","წელი",
                                    "წამი","წუთი","საათი","დღე","კვირა","თვე","წელი"))
 
-        else -> if (tag == "en") buildFormatter(locale, ENGLISH_DURATION_UNITS) else buildDurationFormatter("en", locale)
+        else -> if (tag == "en") buildFormatter(locale, ENGLISH_DURATION_UNITS) else buildWrittenDurationFormatter("en", locale, style)
     }
 }
 

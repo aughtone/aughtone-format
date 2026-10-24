@@ -3,6 +3,7 @@
 package io.github.aughtone.readable.relative
 
 import io.github.aughtone.readable.Locales
+import io.github.aughtone.readable.duration.cldrDurationNow
 import io.github.aughtone.readable.PluralCategory
 import io.github.aughtone.readable.pluralCategoryFor
 import io.github.aughtone.types.locale.Locale
@@ -243,10 +244,23 @@ private fun isRelativeTimeTagSupported(tag: String): Boolean = when (tag) {
  */
 fun buildRelativeTimeConfig(tag: String, locale: Locale, style: RelativeStyle = RelativeStyle.Long): RelativeTimeConfig {
     val base = buildBaseRelativeTimeConfig(tag, locale, style)
-    val (today, tomorrow, yesterday) = cldrRelativeDayLabels[tag] ?: return base
+    // English writes its own short form ("5m"); every other language with CLDR data takes CLDR's
+    // short phrases ("vor 5 Min.").
+    val shortPatterns = if (style == RelativeStyle.Short && !tag.startsWith("en")) cldrShortRelativeTimePatterns[cldrIdFor(tag)] else null
+    val formatter = shortPatterns?.let { patternFormatter(locale, it) } ?: base.formatter
+    val (today, tomorrow, yesterday) = cldrRelativeDayLabels[tag]
+        ?: listOf(base.todayString, base.tomorrowString, base.yesterdayString)
     return RelativeTimeConfig(
-        base.formatter, base.nowString, today, tomorrow, yesterday, base.recentlyString, base.shortlyString
+        formatter, base.nowString, today, tomorrow, yesterday, base.recentlyString, base.shortlyString
     )
+}
+
+/** The CLDR identifier the generated tables are keyed by, for a tag this file supports. */
+private fun cldrIdFor(tag: String): String = when (tag) {
+    "no" -> "nb"
+    "zh-Hans" -> "zh"
+    "zh-TW" -> "zh-Hant"
+    else -> tag
 }
 
 /** The hand-written configuration for [tag], before the CLDR day labels are applied. */
@@ -475,6 +489,19 @@ private fun buildBaseRelativeTimeConfig(tag: String, locale: Locale, style: Rela
         "hy" -> patternConfig(tag, locale, "հենց հիմա", recentlyString = "վերջերս", shortlyString = "շուտով")
 
         "ka" -> patternConfig(tag, locale, "ახლავე", recentlyString = "ახლახან", shortlyString = "მალე")
+
+        // ── South Asian ───────────────────────────────────────────────────────
+        // Counted phrases and "now" come from CLDR; the "recently" and "shortly" labels, which
+        // CLDR does not have, are written here.
+        "bn" -> patternConfig(tag, locale, cldrDurationNow.getValue(tag), recentlyString = "সম্প্রতি", shortlyString = "শীঘ্রই")
+        "gu" -> patternConfig(tag, locale, cldrDurationNow.getValue(tag), recentlyString = "તાજેતરમાં", shortlyString = "ટૂંક સમયમાં")
+        "kn" -> patternConfig(tag, locale, cldrDurationNow.getValue(tag), recentlyString = "ಇತ್ತೀಚೆಗೆ", shortlyString = "ಶೀಘ್ರದಲ್ಲೇ")
+        "ml" -> patternConfig(tag, locale, cldrDurationNow.getValue(tag), recentlyString = "അടുത്തിടെ", shortlyString = "ഉടൻ")
+        "mr" -> patternConfig(tag, locale, cldrDurationNow.getValue(tag), recentlyString = "अलीकडे", shortlyString = "लवकरच")
+        "pa" -> patternConfig(tag, locale, cldrDurationNow.getValue(tag), recentlyString = "ਹਾਲ ਹੀ ਵਿੱਚ", shortlyString = "ਜਲਦੀ ਹੀ")
+        "ta" -> patternConfig(tag, locale, cldrDurationNow.getValue(tag), recentlyString = "சமீபத்தில்", shortlyString = "விரைவில்")
+        "te" -> patternConfig(tag, locale, cldrDurationNow.getValue(tag), recentlyString = "ఇటీవల", shortlyString = "త్వరలో")
+        "ur" -> patternConfig(tag, locale, cldrDurationNow.getValue(tag), recentlyString = "حال ہی میں", shortlyString = "جلد ہی")
 
         else -> enConfig(locale, style)
     }

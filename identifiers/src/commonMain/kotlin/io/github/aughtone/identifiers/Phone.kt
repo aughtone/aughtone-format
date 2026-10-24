@@ -35,17 +35,17 @@ enum class PhoneNotation {
 /**
  * Renders this canonical E.164 phone number in the given display [notation].
  *
- * The receiver must already be a **canonical** E.164 number — a leading `+`,
- * the country calling code, then the national number, `+16502530000`. Unlike the
+ * The receiver is an E.164 number — a leading `+`, the country calling code, then the national
+ * number, `+16502530000` — which may also be written with spaces, hyphens, dots or parentheses
+ * (`+1 (650) 253-0000`). The result is always [notation]'s own spelling. Unlike the
  * other formatters in this module, phone display is not a pure transform:
  * national and international grouping depend on per-country metadata, which comes
  * from `aughtone-phonenumber`. (That is the module's one dependency; its metadata
  * is dead-code-eliminated for callers that never format a phone.)
  *
- * The number is read by `aughtone-phonenumber`'s parser, which is lenient: a
- * number written with spaces, hyphens or parentheses is usually accepted too.
- * That is the parser's behaviour, not a promise of this function — pass E.164.
- * A calling code the metadata does not know is rejected (see the `@throws`).
+ * A number without its leading `+` and calling code cannot be read, because nothing says which
+ * country it belongs to, and is rejected, as is a calling code the metadata does not know (see
+ * the `@throws`).
  *
  * Example:
  * ```kotlin
@@ -57,8 +57,8 @@ enum class PhoneNotation {
  *
  * @param notation the display form to produce. Defaults to [PhoneNotation.International].
  * @return the number rendered in [notation].
- * @throws IllegalArgumentException if the receiver is not a parseable E.164
- *   phone number.
+ * @throws IllegalArgumentException if the receiver is not an international phone number: no
+ *   leading `+` and calling code, an unknown calling code, or text that is not a number.
  * @see PhoneNotation
  */
 fun String.formatPhone(notation: PhoneNotation = PhoneNotation.International): String {

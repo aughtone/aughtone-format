@@ -27,27 +27,27 @@ enum class IbanNotation {
 }
 
 /**
- * Renders this canonical IBAN in the given display [notation].
+ * Renders this IBAN in the given display [notation].
  *
- * The receiver must already be a **canonical** IBAN — the compact,
- * upper-case ISO 13616 form `GB82WEST12345698765432`: a two-letter country
- * code, two check digits, then the country's alphanumeric BBAN, 15–34
- * characters in all. This is a pure, lossless display transform; it does not
- * parse, validate the check digits, or normalize arbitrary input (spaced,
- * lower-case, or otherwise non-canonical strings are rejected).
+ * The receiver may be the compact electronic form (`GB82WEST12345698765432`) or the printed form
+ * with spaces (`GB82 WEST 1234 5698 7654 32`), in upper or lower case. Both are the same IBAN,
+ * so the result is always [notation]'s own spelling, in upper case as ISO 13616 writes it. This
+ * is a display transform: it does not verify the check digits, or that the country's BBAN has
+ * the right length.
  *
  * Example:
  * ```kotlin
  * val iban = "GB82WEST12345698765432"
- * iban.formatIban()                       // "GB82 WEST 1234 5698 7654 32"  (default: Grouped)
- * iban.formatIban(IbanNotation.Compact)   // "GB82WEST12345698765432"
+ * iban.formatIban()                                  // "GB82 WEST 1234 5698 7654 32"  (default: Grouped)
+ * iban.formatIban(IbanNotation.Compact)              // "GB82WEST12345698765432"
+ * "gb82 west 1234 5698 7654 32".formatIban(IbanNotation.Compact) // "GB82WEST12345698765432"
  * ```
  *
  * @param notation the display form to produce. Defaults to [IbanNotation.Grouped].
  * @return the IBAN rendered in [notation].
- * @throws IllegalArgumentException if the receiver is not a canonical IBAN —
- *   that is, not two upper-case letters, two digits, then upper-case
- *   alphanumerics, totalling 15–34 characters.
+ * @throws IllegalArgumentException if the receiver, without its spaces, is not an IBAN — that
+ *   is, not two letters, two digits, then letters and digits, totalling 15–34 characters. Any
+ *   separator other than a space, and any letter outside A–Z, is rejected.
  * @see IbanNotation
  */
 fun String.formatIban(notation: IbanNotation = IbanNotation.Grouped): String {
@@ -59,19 +59,20 @@ fun String.formatIban(notation: IbanNotation = IbanNotation.Grouped): String {
 }
 
 /**
- * Validates that [value] is a canonical IBAN and returns it unchanged.
+ * Reads [value], compact or spaced and in either case, and returns the compact upper-case IBAN.
  *
- * @param value the string to check — expected to be a compact, upper-case IBAN.
- * @return [value], unchanged, once validated.
- * @throws IllegalArgumentException if [value] is not a canonical IBAN.
+ * @param value an IBAN, with or without spaces.
+ * @return the compact, upper-case IBAN.
+ * @throws IllegalArgumentException if [value] is not an IBAN.
  */
 private fun canonicalIban(value: String): String {
-    val ok = value.length in 15..34 &&
-        value[0] in 'A'..'Z' && value[1] in 'A'..'Z' &&
-        value[2] in '0'..'9' && value[3] in '0'..'9' &&
-        value.all { it in '0'..'9' || it in 'A'..'Z' }
+    val iban = value.filterNot { it == ' ' }.uppercase()
+    val ok = iban.length in 15..34 &&
+        iban[0] in 'A'..'Z' && iban[1] in 'A'..'Z' &&
+        iban[2] in '0'..'9' && iban[3] in '0'..'9' &&
+        iban.all { it in '0'..'9' || it in 'A'..'Z' }
     require(ok) {
-        "Not a canonical IBAN (two letters, two check digits, then upper-case alphanumerics, 15–34 chars): \"$value\""
+        "Not an IBAN (two letters, two check digits, then letters and digits, 15–34 characters): \"$value\""
     }
-    return value
+    return iban
 }

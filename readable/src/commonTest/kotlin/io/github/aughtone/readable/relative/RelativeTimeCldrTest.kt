@@ -44,6 +44,33 @@ class RelativeTimeCldrTest {
     }
 
     @Test
+    fun everyLanguageButEnglishMatchesCldrsShortPhrases() {
+        assertTrue(shortRelativeTimeCldrFixture.isNotEmpty())
+        for ((language, cases) in shortRelativeTimeCldrFixture) {
+            val locale = Locale(languageCode = language.substringBefore('-'), regionCode = language.substringAfter('-', "").ifEmpty { null }, displayName = language)
+            val formatter = relativeTimeConfigFor(locale, RelativeStyle.Short).formatter
+            for (line in cases.trim().lines()) {
+                val (unit, count, past, future) = line.split('|')
+                val duration = durationOf(unit, count.toInt())
+                assertEquals(past, formatter(-duration, true), "$language short: $count $unit ago")
+                assertEquals(future, formatter(duration, true), "$language short: in $count $unit")
+            }
+        }
+        // English keeps its own short form.
+        assertEquals("5m", relativeTimeConfigFor(Locales.English, RelativeStyle.Short).formatter((-5).minutes, true))
+    }
+
+    @Test
+    fun southAsianLanguagesHaveTheirOwnLabels() {
+        for (language in listOf("bn", "gu", "kn", "ml", "mr", "pa", "ta", "te", "ur")) {
+            val config = relativeTimeConfigFor(Locale(languageCode = language, displayName = language))
+            for (label in listOf(config.nowString, config.recentlyString, config.shortlyString, config.todayString)) {
+                assertTrue(label.none { it in 'a'..'z' || it in 'A'..'Z' }, "$language: \"$label\"")
+            }
+        }
+    }
+
+    @Test
     fun theUnitTakesADifferentCaseAfterAgoThanAfterIn() {
         val czech = relativeTimeConfigFor(Locales.Czech).formatter
         assertEquals("před 5 minutami", czech((-5).minutes, true))

@@ -14,7 +14,8 @@ This document tracks technical debt, missing features, and pending refactors for
 ## 📖 Readable Module (`:readable`)
 
 ### Relative Time
-- [x] **Relative-time grammar.** Fourteen languages take whole phrases from CLDR; unit words corrected elsewhere.
+- [x] **Relative-time grammar.** Twenty-three languages take whole phrases from CLDR; unit words corrected elsewhere.
+- [x] **Short style and South Asian languages.** `RelativeStyle.Short` takes CLDR's short phrases outside English; Bengali, Gujarati, Kannada, Malayalam, Marathi, Punjabi, Tamil, Telugu and Urdu take relative times and durations from CLDR.
 - [ ] **Alternative wordings.** Compact-form languages whose wording differs from CLDR are kept as they are; see [gap/0002](gap/0002-relative-time-wording-differences-from-cldr.md) for the list and when to revisit it.
 
 ## 📖 General

@@ -57,9 +57,9 @@ fun LocalTime.formatRange(
  * What both ends share — the year, or the month and the year — is written once, and the
  * separator, spacing and order are the locale's own. The month and weekday names, and the widths
  * of the numbers, are the ones this library writes in a single date at the same [style], so a
- * range reads like the single dates beside it; at [DateTimeStyle.Full] the era follows once, as it
- * does after a single date. Equal dates are written as one date, and an end before the start is
- * written in the order given. This never throws.
+ * range reads like the single dates beside it. A range with a date before year 1 is written as
+ * two complete dates, each with its era. Equal dates are written as one date, and an end before
+ * the start is written in the order given. This never throws.
  *
  * ```kotlin
  * LocalDate(2024, 3, 3).formatRange(LocalDate(2024, 3, 5), DateTimeStyle.Long, localeFor("en-US")!!) // "March 3 – 5, 2024"

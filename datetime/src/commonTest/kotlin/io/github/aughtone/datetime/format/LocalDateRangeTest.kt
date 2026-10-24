@@ -50,9 +50,15 @@ class LocalDateRangeTest {
     }
 
     @Test
-    fun fullDatesNameBothWeekdaysAndTheEraOnce() {
+    fun fullDatesNameBothWeekdays() {
         val text = range(march3, march5, english, DateTimeStyle.Full)
-        assertEquals("Sunday, March 3${dash}Tuesday, March 5, 2024 Common Era", text)
+        assertEquals("Sunday, March 3${dash}Tuesday, March 5, 2024", text)
+    }
+
+    @Test
+    fun aRangeBeforeTheCommonEraWritesEachDateWithItsEra() {
+        val text = range(LocalDate(-43, 3, 13), LocalDate(-43, 3, 15), english)
+        assertEquals("March 13, 44 BCE${dash}March 15, 44 BCE", text)
     }
 
     @Test

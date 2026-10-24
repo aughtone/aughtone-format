@@ -24,6 +24,13 @@ import io.github.aughtone.datetime.format.resources.values.EraNames
  */
 object MultiplatformPostFormatter {
 
+    /**
+     * Finishes a formatted date: adds the era where one is shown, and writes the digits in the
+     * locale's numbering system (or [numberingSystem]).
+     *
+     * The era follows the date when [eraNames] is given, and always for a date before year 1,
+     * whose year would otherwise read as one of the common era.
+     */
     fun postFormatDate(
         dateStyle: DateTimeStyle,
         locale: Locale,
@@ -31,17 +38,31 @@ object MultiplatformPostFormatter {
         formattedDate: String?,
         eraNames: EraNames? = null,
         numberingSystem: NumberingSystem? = null,
+    ): String? = postFormatDate(dateStyle, locale, date, formattedDate, eraNames, numberingSystem, showEra = false)
+
+    /**
+     * As [postFormatDate], with [showEra] asking for the era on a date of the common era too. The
+     * era is the locale's abbreviation ("BCE", "CE") unless [eraNames] gives other words.
+     */
+    internal fun postFormatDate(
+        dateStyle: DateTimeStyle,
+        locale: Locale,
+        date: kotlinx.datetime.LocalDate,
+        formattedDate: String?,
+        eraNames: EraNames?,
+        numberingSystem: NumberingSystem?,
+        showEra: Boolean,
     ): String? {
         if (formattedDate == null) return null
-        
-        var result = when (dateStyle) {
-            DateTimeStyle.Full -> {
-                val eras = eraNames ?: io.github.aughtone.datetime.format.resources.Resources.getEraNames(locale, abbreviated = false)
-                // ISO year 0 is 1 BCE and year -500 is 501 BCE: beside an era name the year is
-                // counted from one and carries no sign.
-                if (date.year <= 0) "${formattedDate.withYearOfEra(date.year)} ${eras.bce}" else "$formattedDate ${eras.ce}"
-            }
-            else -> formattedDate
+
+        val beforeCommonEra = date.year <= 0
+        var result = if (dateStyle != DateTimeStyle.None && (showEra || eraNames != null || beforeCommonEra)) {
+            val eras = eraNames ?: io.github.aughtone.datetime.format.resources.Resources.getEraNames(locale, abbreviated = true)
+            // ISO year 0 is 1 BCE and year -500 is 501 BCE: beside an era name the year is
+            // counted from one and carries no sign.
+            if (beforeCommonEra) "${formattedDate.withYearOfEra(date.year)} ${eras.bce}" else "$formattedDate ${eras.ce}"
+        } else {
+            formattedDate
         }
 
         val resolvedNumberingSystem = resolveNumberingSystem(numberingSystem, locale)

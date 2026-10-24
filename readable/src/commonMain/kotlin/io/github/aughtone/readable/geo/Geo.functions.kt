@@ -12,12 +12,19 @@ import io.github.aughtone.types.units.UnitOfMeasure
 /**
  * Formats this [Altitude] into a localized human-readable metric string.
  *
- * Automatically scales the value to the most appropriate SI prefix (e.g., "1500 m" becomes "1.5 km").
+ * Deprecated: this is a copy of [io.github.aughtone.readable.quantitative.formatReadable] for
+ * [Altitude], and importing both packages makes every call ambiguous. Import the one in
+ * `io.github.aughtone.readable.quantitative`, the package of the [Altitude] type; this copy is
+ * removed in 5.0.0.
  *
  * @param locale The locale defining the formatting rules (defaults to [Locale.current]).
  * @param precision The number of decimal places to include (default is 1).
  * @return A localized human-readable altitude string.
  */
+@Deprecated(
+    message = "Duplicate of io.github.aughtone.readable.quantitative.formatReadable; import that one. Removed in 5.0.0.",
+    replaceWith = ReplaceWith("formatReadable(locale, precision)", "io.github.aughtone.readable.quantitative.formatReadable"),
+)
 fun Altitude.formatReadable(locale: Locale = Locale.current, precision: Int = 1): String {
     return meters.formatReadableMetric(UnitOfMeasure.Meter, locale, precision)
 }
@@ -25,13 +32,19 @@ fun Altitude.formatReadable(locale: Locale = Locale.current, precision: Int = 1)
 /**
  * Formats this [Azimuth] into a localized string with degrees and cardinal direction.
  *
- * For example, an azimuth of `90.0` degrees might be formatted as `"90° (E)"`.
- * The cardinal direction is automatically localized based on the provided [locale].
+ * Deprecated: this is a copy of [io.github.aughtone.readable.quantitative.formatReadable] for
+ * [Azimuth], and importing both packages makes every call ambiguous. Import the one in
+ * `io.github.aughtone.readable.quantitative`, the package of the [Azimuth] type; this copy is
+ * removed in 5.0.0.
  *
  * @param locale The locale defining the formatting rules and cardinal names (defaults to [Locale.current]).
  * @param precision The number of decimal places for the degree value (default is 0).
  * @return A localized human-readable azimuth string.
  */
+@Deprecated(
+    message = "Duplicate of io.github.aughtone.readable.quantitative.formatReadable; import that one. Removed in 5.0.0.",
+    replaceWith = ReplaceWith("formatReadable(locale, precision)", "io.github.aughtone.readable.quantitative.formatReadable"),
+)
 fun Azimuth.formatReadable(locale: Locale = Locale.current, precision: Int = 0): String =
     formatAzimuth(degrees, locale, precision)
 

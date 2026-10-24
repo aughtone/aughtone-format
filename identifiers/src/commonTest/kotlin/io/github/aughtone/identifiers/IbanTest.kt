@@ -19,9 +19,17 @@ class IbanTest {
 
     @Test
     fun malformed_input_throws() {
-        assertFailsWith<IllegalArgumentException> { "gb82west12345698765432".formatIban() } // lower-case
-        assertFailsWith<IllegalArgumentException> { "GB82 WEST 1234 5698 7654 32".formatIban() } // already spaced
         assertFailsWith<IllegalArgumentException> { "1234WEST12345698765432".formatIban() } // digits before letters
         assertFailsWith<IllegalArgumentException> { "GB82".formatIban() } // too short
+        assertFailsWith<IllegalArgumentException> { "GB82-WEST-1234-5698-7654-32".formatIban() } // not a space
+        assertFailsWith<IllegalArgumentException> { "GB82WEST1234569876543Ä".formatIban() } // not ASCII
+    }
+
+    @Test
+    fun lower_case_and_the_printed_form_read_as_the_same_iban() {
+        for (spelling in listOf("gb82west12345698765432", "Gb82West12345698765432", "GB82 WEST 1234 5698 7654 32", "gb82 west 1234 5698 7654 32", " GB82  WEST 1234 5698 7654 32 ")) {
+            assertEquals("GB82 WEST 1234 5698 7654 32", spelling.formatIban(), spelling)
+            assertEquals(compact, spelling.formatIban(IbanNotation.Compact), spelling)
+        }
     }
 }

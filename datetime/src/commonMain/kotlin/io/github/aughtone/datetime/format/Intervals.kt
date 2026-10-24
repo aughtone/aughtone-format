@@ -212,9 +212,9 @@ internal fun formatDateRange(
         else -> return single(start)
     }
     val fallback = { fillIntervalFallback(intervalFallbackFor(locale), single(start), single(end)) }
-    // The era is written once, after the range, as a single Full date writes it; a range that
-    // crosses into the common era names both eras, so it falls back.
-    if (style == DateTimeStyle.Full && (start.year <= 0) != (end.year <= 0)) return fallback()
+    // A date before year 1 carries its era, with its year counted from one; such a range is
+    // written as two complete dates, each with its own era.
+    if (start.year <= 0 || end.year <= 0) return fallback()
 
     val patterns = Resources.getDatePatterns(locale)
     val singlePattern = when (style) {
@@ -238,7 +238,7 @@ internal fun formatDateRange(
         return LocalDate.Format { appendDateTokens(tokens.withWidthsOf(singleTokens), dayNames, monthNames, base) }.format(date)
     }
     val text = render(halves.first, start) + render(halves.second, end)
-    // The post formatter adds the era at Full and writes the digits in the locale's system.
+    // The post formatter writes the digits in the locale's system.
     return MultiplatformPostFormatter.postFormatDate(
         dateStyle = style, locale = locale, date = start, formattedDate = text, numberingSystem = numberingSystem,
     ) ?: text
