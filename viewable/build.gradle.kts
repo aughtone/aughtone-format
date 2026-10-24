@@ -5,9 +5,6 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.multiplatformLibrary)
     alias(libs.plugins.vanniktech.mavenPublish)
-    alias(libs.plugins.kotlinSerialization)
-    alias(libs.plugins.composeMultiplatform)
-    alias(libs.plugins.composeCompiler)
 }
 
 group = libs.versions.namespace.get()
@@ -63,8 +60,6 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 api(project(":toolbox"))
-                implementation(libs.jetbrains.compose.ui)
-                implementation(libs.jetbrains.compose.resources)
             }
         }
         val commonTest by getting {
@@ -90,13 +85,6 @@ kotlin {
             }
         }
     }
-}
-
-// The Compose resources plugin registers an asset copy for the Android device-test variant but
-// gives it no output directory, which fails the build. The device tests use no Compose
-// resources, so the copy is skipped.
-tasks.matching { it.name == "copyAndroidDeviceTestComposeResourcesToAndroidAssets" }.configureEach {
-    enabled = false
 }
 
 mavenPublishing {

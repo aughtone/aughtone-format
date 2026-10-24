@@ -7,9 +7,6 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.multiplatformLibrary)
     alias(libs.plugins.vanniktech.mavenPublish)
-    alias(libs.plugins.kotlinSerialization)
-    alias(libs.plugins.composeMultiplatform)
-    alias(libs.plugins.composeCompiler)
 }
 
 group = libs.versions.namespace.get()
@@ -71,9 +68,6 @@ kotlin {
 
         val commonMain by getting {
             dependencies {
-                implementation(libs.jetbrains.compose.ui)
-                implementation(libs.jetbrains.compose.resources)
-                api(libs.kotlinx.serialization.json)
                 // XXX This might require additional libraries if you enable WASM or JS.
                 //  See: https://klibs.io/project/Kotlin/kotlinx-datetime#using-in-your-projects
                 api(libs.kotlinx.datetime)
@@ -84,7 +78,7 @@ kotlin {
         val commonTest by getting {
             dependencies {
                 implementation(libs.kotlin.test)
-                api(libs.kotlinx.serialization.json)
+                implementation(libs.kotlinx.serialization.json)
             }
         }
         val androidDeviceTest by getting {
@@ -113,19 +107,6 @@ kotlin {
             }
         }
     }
-}
-
-// The Compose resources plugin registers an asset copy for the Android device-test variant but
-// gives it no output directory, which fails the build. The device tests use no Compose
-// resources, so the copy is skipped.
-tasks.matching { it.name == "copyAndroidDeviceTestComposeResourcesToAndroidAssets" }.configureEach {
-    enabled = false
-}
-
-compose.resources {
-    publicResClass = true
-    packageOfResClass = "${libs.versions.namespace.get()}.format.datetime.resources"
-    generateResClass = always
 }
 
 mavenPublishing {

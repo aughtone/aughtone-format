@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+### Changed
+- **No Compose or JSON dependency** (`:datetime`, `:readable`, `:toolbox`, `:viewable`): none of them uses Compose or kotlinx-serialization, and they no longer pull in Compose UI, Compose resources or `kotlinx-serialization-json`; `:toolbox` and `:readable` also drop `androidx.startup`, which only `:datetime` uses. A project that used any of these without declaring it, relying on this library to bring it in, must now declare it itself. Compose is `:viewable-compose`'s alone.
+
 ## [4.2.1] - 2026-10-24
 
 ### Added
