@@ -91,6 +91,9 @@ Aughtone Format 3.1.0 focuses on relative-time expressiveness and completing loc
 - **Duration Scaling**: Human-friendly duration strings with perceptual rounding (e.g., "2 weeks" vs "14 days").
 - **Numeric Abbreviations**: Scaling large numbers into abbreviated forms (e.g., 1.5K, 1.2M).
 - **Geospatial Formatting**: Localized altitude, azimuth (with cardinal directions), and coordinates.
+- **Time-Zone Names**: A zone's name at a moment, the generic name it keeps all year ("Eastern Time"), and Windows zone names mapped to IANA identifiers.
+- **Sun and Moon**: Sunrise, sunset and twilight for a place and a day, new and full moons, the 24 solar terms, and crescent-visibility predictions, the same on every platform.
+- **Calendar Conversion**: Hebrew, Islamic, Persian, Chinese, Korean, Japanese, Ethiopic and the other `RSCALE` calendars, to and from `LocalDate`, with their leap months.
 
 ## 🌍 Universal Localization
 The library provides full BCP 47 subtag fallback (e.g., `en-ZA` → `en`) for 59 supported language and region combinations. Numbers, dates, durations, plural forms, day labels and relative phrases ("5 minutes ago") are localized for all of them:
@@ -153,6 +156,24 @@ println(alarm.formatReadableRelative(now = LocalTime(23, 0), direction = Relativ
 
 // Data Sizes
 println(1048576L.formatReadableDataSize()) // "1 MiB"
+```
+
+### Sun Times (`:astronomy`)
+```kotlin
+val toronto = TimeZone.of("America/Toronto")
+val times = SunTimes.of(43.6532, -79.3832, LocalDate(2024, 6, 21), toronto)
+when (val sunrise = times.sunrise) {
+    is SunEvent.At -> println(sunrise.instant.toLocalDateTime(toronto).time) // 05:36
+    SunEvent.AlwaysAbove -> println("midnight sun")
+    SunEvent.AlwaysBelow -> println("no sunrise")
+}
+```
+
+### Calendars (`:calendars`)
+```kotlin
+LocalDate(2024, 4, 23).toCalendarDate(CalendarSystem.Hebrew)     // Resolved: 15 Nisan 5784
+CalendarDate(CalendarSystem.Chinese, 2027, 1, 1).toLocalDate()     // 2027-02-06, Chinese New Year
+CalendarSystem.Hebrew.calendar()!!.leapMonth(5784)                // 5: Adar I follows Shevat
 ```
 
 ---

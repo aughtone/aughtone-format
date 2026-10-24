@@ -71,8 +71,10 @@ class SunTimesTest {
                 // agrees; above 60°, where the sun meets the horizon at a shallow angle, within three.
                 val polar = abs(first.latitude) > 60.0
                 val tolerance = if (polar) 180 else 60
+                // The events by local date, once per offset the rows use, rather than once per row.
+                val byDate = mutableMapOf<TimeZone, Map<LocalDate, List<kotlin.time.Instant>>>()
                 for (case in days) {
-                    val onThisDate = events.filter { it.toLocalDateTime(case.zone).date == case.date }
+                    val onThisDate = byDate.getOrPut(case.zone) { events.groupBy { it.toLocalDateTime(case.zone).date } }[case.date].orEmpty()
                     val expected = expectedOf(case)
                     if (expected != null) {
                         val want = LocalDateTime(case.date, expected).toInstant(case.zone)

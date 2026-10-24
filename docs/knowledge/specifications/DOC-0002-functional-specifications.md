@@ -127,10 +127,40 @@ Supports replacing Latin digits with localized digit sets (e.g., Arabic-Indic, D
 - **API**: `numberingSystem` parameter in `format()` extensions.
 - **Scope**: Applied to all numeric components of the formatted string.
 
+#### 4. Time-Zone Names
+A zone's name at a moment ("Eastern Daylight Time"), the generic name it keeps all year ("Eastern Time" / "ET"), and translation between Windows zone names and IANA identifiers.
+- **API**: `TimeZone.displayName`, `TimeZone.genericDisplayName`, `TimeZone.ianaIdForWindowsName` and `TimeZone.windowsNameForIanaId`.
+- **Sources**: Zone names come from the platform's CLDR; the Windows mapping is bundled from CLDR's `windowsZones`, so it is the same on every platform.
+
 ### Localization
 - **Language Support**: Consistent **65+ language** coverage, aligned with the `:readable` module.
 - **Resource Management**: Uses a thread-safe, bounded caching system for BCP 47 resource lookups.
 - **CLDR Compatibility**: Automatically sanitizes patterns to remove unsupported tokens while maintaining platform consistency.
+
+---
+
+## 🌅 Astronomy Module (`:astronomy`)
+
+The goal of this module is to answer when the sun and the moon do things at a place on a day, in common code, so every platform gives the same answer. See ADR-0006.
+
+### Features
+- **Sun times**: sunrise, sunset and civil, nautical and astronomical dawn and dusk for a latitude, longitude and date, in the place's own day (`SunTimes.of`) or a UTC day (`SunTimes.ofUtcDay`). Polar day and polar night are reported as such, never as a guessed time.
+- **Moon**: new and full moons in a range, and the moon's phase at an instant.
+- **Solar terms**: the 24 terms of a year, which the Chinese and Korean calendars reckon by.
+- **Crescent visibility**: whether the young crescent can be seen on an evening, by the Odeh criterion (default) or Yallop's.
+- **Accuracy**: sun times within a minute of NOAA's tables up to 60° of latitude; moon phases and solar terms within two minutes of NASA's and the Hong Kong Observatory's tables.
+
+---
+
+## 🗓️ Calendars Module (`:calendars`)
+
+The goal of this module is conversion and arithmetic for every calendar iCalendar's `RSCALE` (RFC 7529) names, identical on every platform. It depends on `:astronomy`. See ADR-0006 and ADR-0007.
+
+### Features
+- **Calendars**: Buddhist, Japanese, ROC, Hebrew, Islamic civil, tabular and Umm al-Qura, Persian, Coptic, Ethiopic (both eras), Indian, Chinese and Korean (Dangi).
+- **API**: `CalendarSystem.calendar()` gives `fromLocalDate`, `toLocalDate`, `monthsInYear`, `daysInMonth` and `leapMonth`. A leap month is the month it follows with `isLeapMonth` set (RFC 7529's `5L`).
+- **Chinese and Korean**: Chinese months follow the Hong Kong Observatory's published tables for 1901–2099 and are computed outside them; Korean months are computed at Seoul. ICU's data is not used, because it starts nine modern Chinese months on the wrong day (ADR-0007).
+- **Observation-based Islamic**: `ObservedIslamicCalendar` resolves dates only from month starts the caller supplies; `predictMonthStart` returns a separate prediction type from a crescent criterion.
 
 ---
 

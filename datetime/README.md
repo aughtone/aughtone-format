@@ -26,6 +26,12 @@ DayOfWeek.MONDAY.formatRange(DayOfWeek.FRIDAY, TextWidth.Abbreviated, us)       
 // Names on their own
 Month.MARCH.displayName(TextWidth.Full, localeFor("es")!!)                                // "Marzo"
 TimeZone.of("America/Toronto").displayName(Clock.System.now(), TextWidth.Abbreviated, us) // "EST" or "EDT"
+TimeZone.of("America/Toronto").genericDisplayName(TextWidth.Full, us)                     // "Eastern Time", all year
+
+// Windows zone names, as Outlook and Exchange write them, to and from IANA identifiers
+TimeZone.ianaIdForWindowsName("Eastern Standard Time")        // "America/New_York"
+TimeZone.ianaIdForWindowsName("Eastern Standard Time", "CA")  // "America/Toronto"
+TimeZone.windowsNameForIanaId("America/Toronto")              // "Eastern Standard Time"
 ```
 
 The spaces around a range's dash are thin spaces (U+2009), as CLDR writes them.
