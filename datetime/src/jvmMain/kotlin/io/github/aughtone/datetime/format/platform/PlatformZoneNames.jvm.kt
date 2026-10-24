@@ -34,3 +34,18 @@ internal actual fun platformZoneName(
     }.getOrNull()
     return name?.ifEmpty { null }
 }
+
+/**
+ * JVM actual for [platformGenericZoneName]: `ZoneId.getDisplayName` gives the generic name, full
+ * at [java.time.format.TextStyle.FULL] and abbreviated at [java.time.format.TextStyle.SHORT].
+ */
+internal actual fun platformGenericZoneName(
+    timeZone: TimeZone,
+    abbreviated: Boolean,
+    locale: Locale,
+): String? {
+    val zoneId = runCatching { ZoneId.of(timeZone.id) }.getOrNull() ?: return null
+    val style = if (abbreviated) java.time.format.TextStyle.SHORT else java.time.format.TextStyle.FULL
+    val name = runCatching { zoneId.getDisplayName(style, java.util.Locale.forLanguageTag(locale.languageTag)) }.getOrNull()
+    return name?.ifEmpty { null }
+}

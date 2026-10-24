@@ -27,6 +27,11 @@ kotlin {
         minSdk {
             version = release(libs.versions.android.minSdk.get().toInt())
         }
+        // The zone names on Android come from the platform's ICU, so they are checked on a device
+        // or emulator: ./gradlew :datetime:connectedAndroidDeviceTest
+        withDeviceTest {
+            instrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        }
     }
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs {
@@ -82,6 +87,12 @@ kotlin {
                 api(libs.kotlinx.serialization.json)
             }
         }
+        val androidDeviceTest by getting {
+            dependencies {
+                implementation(libs.androidx.runner)
+                implementation(libs.kotlin.test.junit)
+            }
+        }
     }
 
     compilerOptions {
@@ -102,6 +113,13 @@ kotlin {
             }
         }
     }
+}
+
+// The Compose resources plugin registers an asset copy for the Android device-test variant but
+// gives it no output directory, which fails the build. The device tests use no Compose
+// resources, so the copy is skipped.
+tasks.matching { it.name == "copyAndroidDeviceTestComposeResourcesToAndroidAssets" }.configureEach {
+    enabled = false
 }
 
 compose.resources {

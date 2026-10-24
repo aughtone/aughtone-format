@@ -32,3 +32,23 @@ internal actual fun platformZoneName(
     }.getOrNull()
     return name?.ifEmpty { null }
 }
+
+/**
+ * Android actual for [platformGenericZoneName]: ICU's `TimeZoneFormat` (API 24) in its generic
+ * styles, which apply CLDR's own fallback where a zone has no generic name. An identifier ICU
+ * does not know resolves to its unknown zone and gives `null`.
+ */
+internal actual fun platformGenericZoneName(
+    timeZone: TimeZone,
+    abbreviated: Boolean,
+    locale: Locale,
+): String? {
+    val icuZone = android.icu.util.TimeZone.getTimeZone(timeZone.id)
+    if (icuZone.id == android.icu.util.TimeZone.UNKNOWN_ZONE_ID) return null
+    val style = if (abbreviated) android.icu.text.TimeZoneFormat.Style.GENERIC_SHORT else android.icu.text.TimeZoneFormat.Style.GENERIC_LONG
+    val name = runCatching {
+        android.icu.text.TimeZoneFormat.getInstance(android.icu.util.ULocale.forLanguageTag(locale.languageTag))
+            .format(style, icuZone, System.currentTimeMillis())
+    }.getOrNull()
+    return name?.ifEmpty { null }
+}

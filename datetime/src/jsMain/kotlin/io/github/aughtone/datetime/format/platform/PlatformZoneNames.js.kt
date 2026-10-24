@@ -34,3 +34,16 @@ private fun intlZoneName(zoneId: String, epochMillis: Double, style: String, tag
     js(
         "(function(){try{var dtf=Reflect.construct(Intl.DateTimeFormat,[tag,{timeZone:zoneId,timeZoneName:style,hour:'numeric'}]);var d=Reflect.construct(Date,[epochMillis]);var parts=dtf.formatToParts(d);for(var i=0;i<parts.length;i++){if(parts[i].type==='timeZoneName')return parts[i].value;}return null;}catch(e){return null;}})()",
     )
+
+/**
+ * JS actual for [platformGenericZoneName]: `Intl.DateTimeFormat` with the
+ * `longGeneric` or `shortGeneric` zone name, which needs no instant to be right all year.
+ */
+internal actual fun platformGenericZoneName(
+    timeZone: TimeZone,
+    abbreviated: Boolean,
+    locale: Locale,
+): String? {
+    val name = intlZoneName(timeZone.id, 0.0, if (abbreviated) "shortGeneric" else "longGeneric", locale.languageTag)
+    return name?.ifEmpty { null }
+}

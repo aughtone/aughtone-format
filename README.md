@@ -2,6 +2,15 @@
 
 Aught One Format is a suite of Kotlin Multiplatform libraries designed to provide consistent, localized formatting for Dates, Times, Numbers, and other human-readable metrics across all platforms.
 
+## 🚀 Major Updates in 4.2.1
+
+New capabilities only; nothing existing changes.
+
+- **New `:astronomy` module**: sunrise, sunset and civil, nautical and astronomical twilight for a latitude, longitude and day — for opening hours such as `sunrise-sunset` or `dawn` — with polar day and polar night reported as such; new and full moons, the moon's phase, the 24 solar terms, and Odeh or Yallop crescent-visibility predictions.
+- **New `:calendars` module**: every calendar RFC 7529 `RSCALE` names, converted to and from `LocalDate` with their months and leap months (`5L`): Hebrew, Islamic (civil, tabular, Umm al-Qura, and observed month starts with separate predictions), Persian, Coptic, Ethiopic, Indian, Japanese, Buddhist, ROC, Chinese and Korean. The Chinese calendar follows the Hong Kong Observatory's published tables, not ICU's, which starts some months a day out ([ADR-0007](docs/knowledge/decisions/ADR-0007-chinese-calendar-not-from-icu.md)).
+- **Generic zone names** (`:datetime`): `TimeZone.genericDisplayName` — "Eastern Time", the same all year.
+- **Windows zone names** (`:datetime`): `TimeZone.ianaIdForWindowsName` and `windowsNameForIanaId`, for the `TZID`s Outlook and Exchange write.
+
 ## 🚀 Major Updates in 4.2.0
 
 New range formatting, and a set of output changes to know about; the [CHANGELOG](CHANGELOG.md) lists every change.
@@ -64,8 +73,8 @@ Aughtone Format 3.1.0 focuses on relative-time expressiveness and completing loc
 - **`:viewable`**: Platform-agnostic vector graphics representation, styling, and path conversion (GeoJSON, SVG, WKT).
 - **`:viewable-compose`**: Jetpack / Compose Multiplatform integration for rendering viewable vector graphics (Painters, ImageVectors).
 - **`:toolbox`**: Shared utilities and common formatting primitives.
-
-This project follows a specialized 5-sector documentation hierarchy.
+- **`:astronomy`**: Sunrise, sunset and twilight for a place and a day, new and full moons, the moon's phase, the 24 solar terms, and crescent-visibility predictions.
+- **`:calendars`**: Conversion and arithmetic for the non-Gregorian calendars iCalendar's `RSCALE` names — Hebrew, Islamic, Persian, Chinese, Korean, Japanese, Ethiopic and more.
 
 ## 📚 Documentation Sectors
 - 📐 [Architecture](docs/knowledge/specifications/DOC-0001-architecture.md): Engineering rules and design patterns.
