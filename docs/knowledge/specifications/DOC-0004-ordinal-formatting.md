@@ -1,4 +1,8 @@
-# Design: Ordinality Formatting
+# Ordinal Formatting
+
+DOC-0004 · 2026-04-22
+Keywords: 1st 2nd 3rd, ordinal suffix, 1er, 1.º, 第1, ordinals by language, ordinal plural
+          categories, Georgian ordinals, negative ordinals
 
 This document defines the design and implementation rules for converting numbers into their ordinal representations (e.g., 1 to "1st", 2 to "2nd").
 

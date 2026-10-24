@@ -1,6 +1,10 @@
-# Design & UI Rules
+# Human-Readable Formatting
 
-- [Ordinality Formatting](DESIGN_ORDINALITY.md)
+DOC-0003 · 2026-04-19
+Keywords: why 59.6 seconds is 1 minute, rounding thresholds, fuzzy durations, compass
+          directions, coordinate display, readable over precise
+
+See also [Ordinal Formatting](DOC-0004-ordinal-formatting.md).
 
 ## Human-Readable Philosophy
 The `:readable` module prioritizes human perception over mathematical precision.

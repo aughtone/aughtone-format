@@ -73,6 +73,16 @@ class OrdinalityTest {
     }
 
     @Test
+    fun georgianOrdinalsOfOneWordNumbersTakeThePrefix() {
+        // "მე-20 საუკუნე" (the 20th century) but "21-ე საუკუნე" (the 21st): a number whose name
+        // is one word takes the prefix, a compound number the suffix.
+        assertEquals(listOf("მე-2", "მე-5", "მე-11", "მე-20"), listOf(2, 5, 11, 20).map { it.formatReadableOrdinal(Locales.Georgian) })
+        assertEquals(listOf("მე-40", "მე-60", "მე-80", "მე-100", "მე-300", "მე-1000"), listOf(40, 60, 80, 100, 300, 1000).map { it.formatReadableOrdinal(Locales.Georgian) })
+        assertEquals(listOf("21-ე", "35-ე", "101-ე", "120-ე", "2024-ე"), listOf(21, 35, 101, 120, 2024).map { it.formatReadableOrdinal(Locales.Georgian) })
+        assertEquals("0-ე", 0.formatReadableOrdinal(Locales.Georgian))
+    }
+
+    @Test
     fun unsignedValuesBeyondTheSignedRangeKeepTheirDigits() {
         assertEquals("18446744073709551615th", ULong.MAX_VALUE.formatReadableOrdinal(Locales.English))
         assertEquals("9223372036854775811th", 9223372036854775811uL.formatReadableOrdinal(Locales.English))

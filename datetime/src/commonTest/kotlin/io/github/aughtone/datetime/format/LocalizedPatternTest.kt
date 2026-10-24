@@ -3,6 +3,7 @@ package io.github.aughtone.datetime.format
 import io.github.aughtone.types.locale.Locale
 import io.github.aughtone.types.locale.localeFor
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlin.test.Test
@@ -58,7 +59,7 @@ class LocalizedPatternTest {
 
     @Test
     fun spanishAndPortugueseLongDatesKeepTheirConnectingWords() {
-        assertEquals("15 de Marzo de 2024", date.format(DateTimeStyle.Long, locale = locale("es"), timeZone = TimeZone.UTC))
+        assertEquals("15 de marzo de 2024", date.format(DateTimeStyle.Long, locale = locale("es"), timeZone = TimeZone.UTC))
         assertTrue(date.format(DateTimeStyle.Long, locale = locale("pt"), timeZone = TimeZone.UTC).startsWith("15 de "))
     }
 
@@ -94,11 +95,29 @@ class LocalizedPatternTest {
     }
 
     @Test
-    fun yearsBeforeTheCommonEraAreCountedFromOne() {
+    fun yearsBeforeTheCommonEraAreCountedFromOneAndAlwaysNamed() {
         val english = locale("en")
-        assertTrue(LocalDate(-500, 1, 1).format(DateTimeStyle.Full, locale = english, timeZone = TimeZone.UTC).endsWith("January 1, 501 Before Common Era"))
-        assertTrue(LocalDate(0, 6, 15).format(DateTimeStyle.Full, locale = english, timeZone = TimeZone.UTC).endsWith("June 15, 1 Before Common Era"))
-        assertTrue(LocalDate(1, 6, 15).format(DateTimeStyle.Full, locale = english, timeZone = TimeZone.UTC).endsWith("June 15, 1 Common Era"))
+        assertTrue(LocalDate(-500, 1, 1).format(DateTimeStyle.Full, locale = english, timeZone = TimeZone.UTC).endsWith("January 1, 501 BCE"))
+        assertTrue(LocalDate(0, 6, 15).format(DateTimeStyle.Full, locale = english, timeZone = TimeZone.UTC).endsWith("June 15, 1 BCE"))
+        assertEquals("June 15, 1 BCE", LocalDate(0, 6, 15).format(DateTimeStyle.Long, locale = english, timeZone = TimeZone.UTC))
+        assertTrue(LocalDate(1, 6, 15).format(DateTimeStyle.Full, locale = english, timeZone = TimeZone.UTC).endsWith("June 15, 1"))
+    }
+
+    @Test
+    fun theEraIsShownOnlyWhenAskedFor() {
+        val english = locale("en")
+        val date = LocalDate(1952, 1, 12)
+        assertEquals("Saturday, January 12, 1952", date.format(DateTimeStyle.Full, locale = english, timeZone = TimeZone.UTC))
+        assertEquals("Saturday, January 12, 1952 CE", date.format(DateTimeStyle.Full, locale = english, timeZone = TimeZone.UTC, showEra = true))
+        assertEquals("January 12, 1952 CE", date.format(DateTimeStyle.Long, locale = english, timeZone = TimeZone.UTC, showEra = true))
+        val german = date.format(DateTimeStyle.Long, locale = locale("de"), timeZone = TimeZone.UTC, showEra = true)
+        assertTrue(german.startsWith("12. Januar 1952 ") && german.length > "12. Januar 1952 ".length, german)
+        val custom = io.github.aughtone.datetime.format.resources.values.EraNames(bce = "BC", ce = "AD")
+        assertEquals("January 12, 1952 AD", date.format(DateTimeStyle.Long, locale = english, timeZone = TimeZone.UTC, eraNames = custom))
+        assertEquals("Saturday, January 12, 1952 12:00 PM", LocalDateTime(1952, 1, 12, 12, 0)
+            .format(DateTimeStyle.Full, DateTimeStyle.Short, english, TimeZone.UTC, is24HourFormat = false))
+        assertEquals("Saturday, January 12, 1952 CE 12:00 PM", LocalDateTime(1952, 1, 12, 12, 0)
+            .format(DateTimeStyle.Full, DateTimeStyle.Short, english, TimeZone.UTC, is24HourFormat = false, showEra = true))
     }
 
     @Test
@@ -108,7 +127,7 @@ class LocalizedPatternTest {
             date.format(DateTimeStyle.Long, locale = locale("fr-CA"), timeZone = TimeZone.UTC),
         )
         val spanishUs = Locale(languageCode = "es", regionCode = "US", displayName = "Spanish (US)")
-        assertEquals("15 de Marzo de 2024", date.format(DateTimeStyle.Long, locale = spanishUs, timeZone = TimeZone.UTC))
+        assertEquals("15 de marzo de 2024", date.format(DateTimeStyle.Long, locale = spanishUs, timeZone = TimeZone.UTC))
     }
 
     @Test

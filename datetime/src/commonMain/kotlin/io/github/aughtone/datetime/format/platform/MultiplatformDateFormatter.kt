@@ -55,7 +55,8 @@ object MultiplatformDateFormatter : InternalDateFormatter {
      * A local date-time alone cannot say which side of a clock change it is on: 01:30 happens
      * twice on the night clocks go back. When [instant] is given, the zone name is resolved for
      * it, so the second 01:30 reads "EST" and not "EDT". When it is `null` the local date-time is
-     * resolved in [timeZone], which picks the earlier of the two.
+     * resolved in [timeZone], which picks the earlier of the two. [showEra] asks for the era
+     * after a date of the common era as well as before it.
      */
     internal fun formatDateTime(
         localDateTime: LocalDateTime,
@@ -67,6 +68,7 @@ object MultiplatformDateFormatter : InternalDateFormatter {
         eraNames: EraNames?,
         numberingSystem: NumberingSystem?,
         instant: Instant?,
+        showEra: Boolean = false,
     ): String? {
         val formattedDate = if (dateStyle != DateTimeStyle.None) {
             localDateTime.date.format(
@@ -83,7 +85,8 @@ object MultiplatformDateFormatter : InternalDateFormatter {
                     date = localDateTime.date,
                     formattedDate = it,
                     eraNames = eraNames,
-                    numberingSystem = numberingSystem
+                    numberingSystem = numberingSystem,
+                    showEra = showEra,
                 )
             }
         } else null

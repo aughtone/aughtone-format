@@ -14,7 +14,7 @@ description: >-
   Multiplatform dependency.
 license: Apache-2.0
 metadata:
-  version: "4.1.1"
+  version: "4.2.0"
   repository: https://github.com/aughtone/aughtone-format
 ---
 

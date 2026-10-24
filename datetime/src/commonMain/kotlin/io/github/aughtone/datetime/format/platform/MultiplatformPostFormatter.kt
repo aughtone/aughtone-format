@@ -24,6 +24,13 @@ import io.github.aughtone.datetime.format.resources.values.EraNames
  */
 object MultiplatformPostFormatter {
 
+    /**
+     * Finishes a formatted date: adds the era where one is shown, and writes the digits in the
+     * locale's numbering system (or [numberingSystem]).
+     *
+     * The era follows the date when [eraNames] is given, and always for a date before year 1,
+     * whose year would otherwise read as one of the common era.
+     */
     fun postFormatDate(
         dateStyle: DateTimeStyle,
         locale: Locale,
@@ -31,17 +38,31 @@ object MultiplatformPostFormatter {
         formattedDate: String?,
         eraNames: EraNames? = null,
         numberingSystem: NumberingSystem? = null,
+    ): String? = postFormatDate(dateStyle, locale, date, formattedDate, eraNames, numberingSystem, showEra = false)
+
+    /**
+     * As [postFormatDate], with [showEra] asking for the era on a date of the common era too. The
+     * era is the locale's abbreviation ("BCE", "CE") unless [eraNames] gives other words.
+     */
+    internal fun postFormatDate(
+        dateStyle: DateTimeStyle,
+        locale: Locale,
+        date: kotlinx.datetime.LocalDate,
+        formattedDate: String?,
+        eraNames: EraNames?,
+        numberingSystem: NumberingSystem?,
+        showEra: Boolean,
     ): String? {
         if (formattedDate == null) return null
-        
-        var result = when (dateStyle) {
-            DateTimeStyle.Full -> {
-                val eras = eraNames ?: io.github.aughtone.datetime.format.resources.Resources.getEraNames(locale, abbreviated = false)
-                // ISO year 0 is 1 BCE and year -500 is 501 BCE: beside an era name the year is
-                // counted from one and carries no sign.
-                if (date.year <= 0) "${formattedDate.withYearOfEra(date.year)} ${eras.bce}" else "$formattedDate ${eras.ce}"
-            }
-            else -> formattedDate
+
+        val beforeCommonEra = date.year <= 0
+        var result = if (dateStyle != DateTimeStyle.None && (showEra || eraNames != null || beforeCommonEra)) {
+            val eras = eraNames ?: io.github.aughtone.datetime.format.resources.Resources.getEraNames(locale, abbreviated = true)
+            // ISO year 0 is 1 BCE and year -500 is 501 BCE: beside an era name the year is
+            // counted from one and carries no sign.
+            if (beforeCommonEra) "${formattedDate.withYearOfEra(date.year)} ${eras.bce}" else "$formattedDate ${eras.ce}"
+        } else {
+            formattedDate
         }
 
         val resolvedNumberingSystem = resolveNumberingSystem(numberingSystem, locale)
@@ -119,16 +140,35 @@ object MultiplatformPostFormatter {
 
     private fun Char.isAsciiDigit(): Boolean = this in '0'..'9'
 
+    /** Writes [text]'s digits in [numberingSystem], or in [locale]'s own when it is `null`. */
+    internal fun applyNumberingSystem(text: String, locale: Locale, numberingSystem: NumberingSystem?): String =
+        resolveNumberingSystem(numberingSystem, locale)?.let { text.applyNumberingSystem(it) } ?: text
+
+    /**
+     * [numberingSystem], or the locale's default digits when it is `null`: Unicode CLDR's default
+     * numbering system for the locale (CLDR 48). That is Latin digits for most locales, including
+     * Hindi, Thai, Urdu in Pakistan and Arabic without a region; native digits for Persian,
+     * Bengali, Marathi and Nepali, Urdu in India, and Arabic in the regions that write them.
+     * `null` means Latin digits, written as the formatter produced them.
+     */
     private fun resolveNumberingSystem(numberingSystem: NumberingSystem?, locale: Locale): NumberingSystem? {
         if (numberingSystem != null) return numberingSystem
+        val region = locale.regionCode?.uppercase()
         return when (locale.languageCode) {
-            "ar" -> NumberingSystem.ARAB
-            "fa", "ur" -> NumberingSystem.ARABEXT
-            "hi" -> NumberingSystem.DEVA
+            "ar" -> if (region in ARABIC_INDIC_REGIONS) NumberingSystem.ARAB else null
+            "fa", "ps", "ks" -> NumberingSystem.ARABEXT
+            "ur" -> if (region == "IN") NumberingSystem.ARABEXT else null
+            "pa" -> if (region == "PK") NumberingSystem.ARABEXT else null
+            "sd" -> NumberingSystem.ARAB
             "bn" -> NumberingSystem.BENG
-            "th" -> NumberingSystem.THAI
+            "mr", "ne" -> NumberingSystem.DEVA
             else -> null
         }
     }
+
+    /** The regions whose Arabic CLDR writes with Arabic-Indic digits; the rest use Latin digits. */
+    private val ARABIC_INDIC_REGIONS = setOf(
+        "BH", "DJ", "EG", "ER", "IL", "IQ", "JO", "KM", "KW", "LB", "MR", "OM", "PS", "QA", "SA", "SD", "SO", "SS", "SY", "TD", "YE",
+    )
 }
 

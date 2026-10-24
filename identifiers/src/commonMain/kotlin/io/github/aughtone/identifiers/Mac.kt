@@ -1,21 +1,17 @@
 package io.github.aughtone.identifiers
 
 /**
- * Renders this canonical MAC address in the given display [notation].
+ * Renders this MAC address in the given display [notation].
  *
- * The receiver must already be a **canonical** MAC address — the lower-case,
- * colon-separated form `00:00:5e:00:53:01` that a normalizer (or any equivalent
- * source) produces. This function is a pure, lossless display transform: it
- * regroups and re-cases the same 48 bits into another notation and returns the
- * result.
+ * The receiver may be written in any of the notations this function produces — colon
+ * (`00:00:5e:00:53:01`), IEEE hyphenated (`00-00-5E-00-53-01`), Cisco dotted
+ * (`0000.5e00.5301`) or bare (`00005e005301`) — in upper or lower case. Every one of
+ * those is the same 48-bit value, so the result is always [notation]'s own spelling, with its
+ * own letter case, whatever the input looked like. This is a lossless display transform.
  *
- * It deliberately does **not** parse, validate, or normalize arbitrary input.
- * Accepting messy spellings or alternative separators is a normalization
- * concern and belongs upstream; a formatter's contract is "canonical value in,
- * chosen notation out". Passing anything that is not six colon-separated pairs
- * of hexadecimal digits is treated as a programming error (see the `@throws`).
- * The one latitude is letter case: the hex digits may be upper or lower case,
- * and each notation applies its own.
+ * Anything that cannot be read as one of those notations is treated as a programming error (see
+ * the `@throws`): this does not search messy text for an address, or accept separators other
+ * than the notation's own.
  *
  * Example:
  * ```kotlin
@@ -25,16 +21,16 @@ package io.github.aughtone.identifiers
  * mac.formatMac(MacNotation.CiscoDotted)    // "0000.5e00.5301"
  * mac.formatMac(MacNotation.Bare)           // "00005e005301"
  * mac.formatMac(MacNotation.UppercaseColon) // "00:00:5E:00:53:01"
+ * "00-00-5E-00-53-01".formatMac()           // "00:00:5e:00:53:01"
  * ```
  *
- * @param notation the display form to produce. Defaults to [MacNotation.Colon],
- *   which returns the canonical input unchanged.
+ * @param notation the display form to produce. Defaults to [MacNotation.Colon], the
+ *   canonical form.
  * @return the same address re-rendered in [notation].
- * @throws IllegalArgumentException if the receiver is not a canonical MAC
- *   address — that is, not exactly six colon-separated pairs of hexadecimal
- *   digits. For example `"00-00-5e-00-53-01"` (wrong separator),
- *   `"00:00:5e:00:53"` (too few octets), and `"00:00:5e:00:53:0g"`
- *   (`g` is not hex) all fail.
+ * @throws IllegalArgumentException if the receiver is not a MAC address in one of the
+ *   notations above — for example `"00:00:5e:00:53"` (five octets), `"00:00:5e:00:53:0g"`
+ *   (`g` is not hex), or `"00-00:5e-00:53-01"` (mixed separators). Only ASCII hex digits count:
+ *   fullwidth and other-script digits are rejected.
  * @see MacNotation
  */
 fun String.formatMac(notation: MacNotation = MacNotation.Colon): String {
@@ -49,22 +45,25 @@ fun String.formatMac(notation: MacNotation = MacNotation.Colon): String {
 }
 
 /**
- * Validates that [value] is a canonical colon-separated MAC address and returns
- * its twelve lower-case hexadecimal digits with the colons removed, ready for
- * regrouping by [formatMac].
+ * Reads [value] in any of the [MacNotation] spellings and returns its twelve lower-case
+ * hexadecimal digits, ready for regrouping by [formatMac].
  *
- * @param value the string to check — expected to be six colon-separated pairs
- *   of hexadecimal digits.
+ * @param value six colon- or hyphen-separated hex pairs, three dot-separated groups of four, or
+ *   twelve hex digits with no separator, in either case.
  * @return the twelve lower-case hex digits, separators stripped.
- * @throws IllegalArgumentException if [value] is not six colon-separated pairs
- *   of hexadecimal digits.
+ * @throws IllegalArgumentException if [value] is none of those.
  */
 private fun canonicalMacHex(value: String): String {
-    val octets = value.split(':')
-    require(octets.size == 6 && octets.all { o -> o.length == 2 && o.all { it.isAsciiHexDigit() } }) {
-        "Not a canonical MAC address (expected six colon-separated hex pairs): \"$value\""
+    val groups = when {
+        ':' in value -> value.split(':').takeIf { it.size == 6 && it.all { g -> g.length == 2 } }
+        '-' in value -> value.split('-').takeIf { it.size == 6 && it.all { g -> g.length == 2 } }
+        '.' in value -> value.split('.').takeIf { it.size == 3 && it.all { g -> g.length == 4 } }
+        else -> listOf(value).takeIf { value.length == 12 }
     }
-    return octets.joinToString("") { it.lowercase() }
+    require(groups != null && groups.all { group -> group.all { it.isAsciiHexDigit() } }) {
+        "Not a MAC address (expected colon, hyphen, dotted or bare hex notation): \"$value\""
+    }
+    return groups.joinToString("") { it.lowercase() }
 }
 
 

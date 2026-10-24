@@ -25,6 +25,11 @@ kotlin {
         minSdk {
             version = release(libs.versions.android.minSdk.get().toInt())
         }
+        // Raster output goes through the platform's own Bitmap encoders, so it is checked on a
+        // device or emulator: ./gradlew :viewable:connectedAndroidDeviceTest
+        withDeviceTest {
+            instrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        }
     }
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs {
@@ -67,6 +72,12 @@ kotlin {
                 implementation(libs.kotlin.test)
             }
         }
+        val androidDeviceTest by getting {
+            dependencies {
+                implementation(libs.androidx.runner)
+                implementation(libs.kotlin.test.junit)
+            }
+        }
     }
 
     metadata {
@@ -79,6 +90,13 @@ kotlin {
             }
         }
     }
+}
+
+// The Compose resources plugin registers an asset copy for the Android device-test variant but
+// gives it no output directory, which fails the build. The device tests use no Compose
+// resources, so the copy is skipped.
+tasks.matching { it.name == "copyAndroidDeviceTestComposeResourcesToAndroidAssets" }.configureEach {
+    enabled = false
 }
 
 mavenPublishing {

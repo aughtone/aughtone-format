@@ -22,7 +22,20 @@ internal fun DateTimeFormatBuilder.WithDate.appendPattern(
     monthNames: MonthNamesResource,
     twoDigitYearBase: Int = 2000,
 ) {
-    for (token in tokenizePattern(pattern).withoutFields { it.letter == 'G' }) {
+    appendDateTokens(tokenizePattern(pattern).withoutFields { it.letter == 'G' }, dayOfWeekNames, monthNames, twoDigitYearBase)
+}
+
+/**
+ * Appends date [tokens] as they stand, with no tidying of the literal text around them. The
+ * fields are those [appendPattern] accepts.
+ */
+internal fun DateTimeFormatBuilder.WithDate.appendDateTokens(
+    tokens: List<PatternToken>,
+    dayOfWeekNames: DayOfWeekNamesResource,
+    monthNames: MonthNamesResource,
+    twoDigitYearBase: Int = 2000,
+) {
+    for (token in tokens) {
         when (token) {
             is PatternToken.Literal -> chars(token.text)
             is PatternToken.Field -> when (token.letter) {
@@ -47,7 +60,7 @@ internal fun DateTimeFormatBuilder.WithDate.appendPattern(
                     1, 2, 3 -> dayOfWeek(dayOfWeekNames.abbreviated)
                     else -> dayOfWeek(dayOfWeekNames.full)
                 }
-                else -> throw IllegalArgumentException("Unrecognized pattern character: ${token.letter} in $pattern")
+                else -> throw IllegalArgumentException("Unrecognized pattern character: ${token.letter}")
             }
         }
     }

@@ -53,10 +53,9 @@ later than to remove one from a public history.
 
 
 ## 2. Governance Standards
-All AI agents MUST adhere to these skills from `docs/standards/`:
-- **Repository Structure**: Context mapping rules.
-- **KMP Development**: Build stability patterns.
-- **ViewModel & UDF Governance**: Redux purity and synchronization rules.
+All AI agents MUST adhere to these standards from `docs/standards/`:
+- **Repository Structure**: where work, knowledge and machinery live, and what to read before a change.
+- **KMP Development**: Kotlin/Native-safe test naming.
 
 ## 3. Core Development Principles
 - **Test-Driven Development (TDD)**: Whenever feasible, write a failing test before implementation.
@@ -65,9 +64,9 @@ All AI agents MUST adhere to these skills from `docs/standards/`:
 - **Consistency**: Adhere to existing patterns; consistency outweighs personal preference.
 
 ## 4. AI Interaction Guidelines
-- **Verification First**: Check the corresponding AcceptanceCriteria.md before implementation.
+- **Verification First**: Check the story's acceptance criteria, on its tracker issue, before implementation.
 - **Mandatory Approval**: ALWAYS present a detailed implementation plan and WAIT for explicit user approval before executing any code changes or tool calls that modify the repository state.
 - **No embedded skill files.** Do not add `*.ai-skill.md`,
   `META-INF/ai-skills/` or `META-INF/agents/skills/` to this repo, and do
   not scan dependencies for them.
-- **Update Docs**: Intelligently disperse context into the appropriate sector.
+- **Update Docs**: Keep `docs/knowledge/` current: file a new document in the section whose `README.md` describes it (see `docs/README.md`).

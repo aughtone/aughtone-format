@@ -25,7 +25,7 @@ class LocalDateExtTest {
     @Test
     fun testFormatFull() {
         // XXX Review this. Maybe we don't need to spell out the CE.
-        assertEquals("Saturday, January 12, 1952 Common Era", testDate1.format(DateTimeStyle.Full))
+        assertEquals("Saturday, January 12, 1952", testDate1.format(DateTimeStyle.Full))
     }
     @Test
     fun testFormatNone() {

@@ -1,5 +1,9 @@
 # Functional Specifications
 
+DOC-0002 · 2026-04-19
+Keywords: what the library does, which modules format what, supported features, localization
+          behaviour, regional variants, eras, numbering systems, default digits
+
 ## 🌍 Domain Context
 
 The Aughtone Format library provides a standardized, type-safe foundation for multiplatform applications to format data into human-readable strings.
@@ -114,9 +118,9 @@ Provides standard styles for `LocalDate`, `LocalTime`, `LocalDateTime`, and `Ins
 - **Styles**: `Short`, `Medium`, `Long`, `Full`.
 - **24-Hour Master Strategy**: All internal resource patterns are stored in 24-hour (`HH:mm`) format. The formatting logic dynamically converts these to 12-hour format at runtime based on the locale's default or explicit user preference, ensuring consistent localization of AM/PM markers.
 
-#### 2. Era Overrides
-Allows users to inject custom labels for Eras (BCE/CE), useful for historical research or specific regional naming conventions.
-- **API**: `eraNames` parameter in `format()` extensions.
+#### 2. Eras
+No style shows the era unless asked: `showEra = true` follows the date with the locale's abbreviation (BCE/CE), and `eraNames` supplies other words, which also shows it. A date before year 1 always shows its era, with the year counted from one.
+- **API**: `showEra` and `eraNames` parameters in the date `format()` extensions.
 
 #### 3. Numbering Systems
 Supports replacing Latin digits with localized digit sets (e.g., Arabic-Indic, Devanagari, Thai).

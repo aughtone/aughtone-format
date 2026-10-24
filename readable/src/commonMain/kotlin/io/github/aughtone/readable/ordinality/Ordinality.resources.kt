@@ -17,6 +17,22 @@ private fun buildFormatter(
     if (isPrefix) "$affix$n" else "$n$affix"
 }
 
+/**
+ * Georgian ordinals. First is "1-ლი". A number whose name is a single word — two to twenty, forty,
+ * sixty, eighty, a hundred, the hundreds and a thousand — takes the prefix "მე-" ("მე-20"), as
+ * its ordinal word does (მეოცე); a compound number such as 21 (ოცდაერთი) takes the suffix "-ე"
+ * ("21-ე"), as in ოცდამეერთე. Unicode CLDR has no Georgian ordinal rules, so these follow the
+ * language's own usage. Zero and negative numbers take the suffix.
+ */
+private val georgianOrdinal: OrdinalFormatter = { n ->
+    val oneWord = n in 2L..20L || n in setOf(40L, 60L, 80L, 100L, 1000L) || (n in 200L..900L && n % 100L == 0L)
+    when {
+        n == 1L -> "1-ლი"
+        oneWord -> "მე-$n"
+        else -> "$n-ე"
+    }
+}
+
 // ── On-demand locale factory ──────────────────────────────────────────────────
 
 private fun buildOrdinalFormatter(tag: String, locale: Locale): OrdinalFormatter? {
@@ -35,10 +51,7 @@ private fun buildOrdinalFormatter(tag: String, locale: Locale): OrdinalFormatter
             PluralCategory.One to "-ին",
             PluralCategory.Other to "-րդ"
         ))
-        "ka" -> buildFormatter(locale, mapOf(
-            PluralCategory.One to "-ლი",
-            PluralCategory.Other to "-ე"
-        ))
+        "ka" -> georgianOrdinal
         "sv", "da" -> buildFormatter(locale, mapOf(
             PluralCategory.One to ":a",
             PluralCategory.Other to ":e"

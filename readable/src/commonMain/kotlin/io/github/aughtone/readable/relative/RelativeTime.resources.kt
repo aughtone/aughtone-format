@@ -3,6 +3,7 @@
 package io.github.aughtone.readable.relative
 
 import io.github.aughtone.readable.Locales
+import io.github.aughtone.readable.duration.cldrDurationNow
 import io.github.aughtone.readable.PluralCategory
 import io.github.aughtone.readable.pluralCategoryFor
 import io.github.aughtone.types.locale.Locale
@@ -243,10 +244,34 @@ private fun isRelativeTimeTagSupported(tag: String): Boolean = when (tag) {
  */
 fun buildRelativeTimeConfig(tag: String, locale: Locale, style: RelativeStyle = RelativeStyle.Long): RelativeTimeConfig {
     val base = buildBaseRelativeTimeConfig(tag, locale, style)
-    val (today, tomorrow, yesterday) = cldrRelativeDayLabels[tag] ?: return base
+    // English writes its own short form ("5m"); every other language with CLDR data takes CLDR's
+    // short phrases ("vor 5 Min."), except where one is longer than the long phrase, which is what
+    // the base formatter writes for these languages: CLDR's Greek "πριν από 2 λεπ." is longer than
+    // "πριν 2 λεπτά", and a short style is never longer than the long one. Spaces do not count.
+    val shortPatterns = if (style == RelativeStyle.Short && !tag.startsWith("en")) cldrShortRelativeTimePatterns[cldrIdFor(tag)] else null
+    val formatter = shortPatterns?.let { patterns ->
+        val short = patternFormatter(locale, patterns)
+        val long = base.formatter
+        val shorter: RelativeTimeFormatter = { delta, allowDates ->
+            val shortText = short(delta, allowDates)
+            val longText = long(delta, allowDates)
+            if (io.github.aughtone.readable.duration.visibleLength(shortText) > io.github.aughtone.readable.duration.visibleLength(longText)) longText else shortText
+        }
+        shorter
+    } ?: base.formatter
+    val (today, tomorrow, yesterday) = cldrRelativeDayLabels[tag]
+        ?: listOf(base.todayString, base.tomorrowString, base.yesterdayString)
     return RelativeTimeConfig(
-        base.formatter, base.nowString, today, tomorrow, yesterday, base.recentlyString, base.shortlyString
+        formatter, base.nowString, today, tomorrow, yesterday, base.recentlyString, base.shortlyString
     )
+}
+
+/** The CLDR identifier the generated tables are keyed by, for a tag this file supports. */
+private fun cldrIdFor(tag: String): String = when (tag) {
+    "no" -> "nb"
+    "zh-Hans" -> "zh"
+    "zh-TW" -> "zh-Hant"
+    else -> tag
 }
 
 /** The hand-written configuration for [tag], before the CLDR day labels are applied. */
@@ -361,7 +386,7 @@ private fun buildBaseRelativeTimeConfig(tag: String, locale: Locale, style: Rela
 
         "mk" -> config(locale, "пред {0}", "за {0}", "токму сега",
             u2("секунда","минута","час","ден","недела","месец","година",
-               "секунди","минути","часови","дена","недели","месеци","години"), recentlyString = "неодамна", shortlyString = "наскоро")
+               "секунди","минути","часа","дена","недели","месеци","години"), recentlyString = "неодамна", shortlyString = "наскоро")
 
         "sl" -> patternConfig(tag, locale, "ravno zdaj", recentlyString = "pred kratkim", shortlyString = "kmalu")
 
@@ -378,15 +403,15 @@ private fun buildBaseRelativeTimeConfig(tag: String, locale: Locale, style: Rela
         // ── East Asian / SE Asian (no unit separator, single form) ───────────
         "ja" -> config(locale, "{0}前", "{0}後", "たった今",
             u2("秒","分","時間","日","週間","ヶ月","年",
-               "秒","分","時間","日","週間","ヶ月","年"), recentlyString = "最近", sep = "", shortlyString = "まもなく")
+               "秒","分","時間","日","週間","ヶ月","年"), recentlyString = "最近", sep = " ", shortlyString = "まもなく")
 
         "zh-TW", "zh-HK", "zh-Hant" -> config(locale, "{0}前", "{0}後", "剛剛",
-            u2("秒","分","小時","天","週","月","年",
-               "秒","分","小時","天","週","月","年"), recentlyString = "最近", sep = "", shortlyString = "即將")
+            u2("秒","分鐘","小時","天","週","個月","年",
+               "秒","分鐘","小時","天","週","個月","年"), recentlyString = "最近", sep = " ", shortlyString = "即將")
 
         "zh", "zh-Hans" -> config(locale, "{0}前", "{0}后", "刚刚",
-            u2("秒","分","小时","天","周","月","年",
-               "秒","分","小时","天","周","月","年"), recentlyString = "最近", sep = "", shortlyString = "即将")
+            u2("秒","分钟","小时","天","周","个月","年",
+               "秒","分钟","小时","天","周","个月","年"), recentlyString = "最近", sep = "", shortlyString = "即将")
 
         "ko" -> config(locale, "{0} 전", "{0} 후", "방금",
             u2("초","분","시간","일","주","달","년",
@@ -394,7 +419,7 @@ private fun buildBaseRelativeTimeConfig(tag: String, locale: Locale, style: Rela
 
         "th" -> config(locale, "{0}ที่แล้ว", "อีก {0}", "เมื่อกี้",
             u2("วินาที","นาที","ชั่วโมง","วัน","สัปดาห์","เดือน","ปี",
-               "วินาที","นาที","ชั่วโมง","วัน","สัปดาห์","เดือน","ปี"), recentlyString = "เมื่อเร็วๆ นี้", sep = "", shortlyString = "เร็วๆ นี้")
+               "วินาที","นาที","ชั่วโมง","วัน","สัปดาห์","เดือน","ปี"), recentlyString = "เมื่อเร็วๆ นี้", sep = " ", shortlyString = "เร็วๆ นี้")
 
         "vi" -> config(locale, "{0} trước", "{0} nữa", "vừa xong",
             u2("giây","phút","giờ","ngày","tuần","tháng","năm",
@@ -475,6 +500,19 @@ private fun buildBaseRelativeTimeConfig(tag: String, locale: Locale, style: Rela
         "hy" -> patternConfig(tag, locale, "հենց հիմա", recentlyString = "վերջերս", shortlyString = "շուտով")
 
         "ka" -> patternConfig(tag, locale, "ახლავე", recentlyString = "ახლახან", shortlyString = "მალე")
+
+        // ── South Asian ───────────────────────────────────────────────────────
+        // Counted phrases and "now" come from CLDR; the "recently" and "shortly" labels, which
+        // CLDR does not have, are written here.
+        "bn" -> patternConfig(tag, locale, cldrDurationNow.getValue(tag), recentlyString = "সম্প্রতি", shortlyString = "শীঘ্রই")
+        "gu" -> patternConfig(tag, locale, cldrDurationNow.getValue(tag), recentlyString = "તાજેતરમાં", shortlyString = "ટૂંક સમયમાં")
+        "kn" -> patternConfig(tag, locale, cldrDurationNow.getValue(tag), recentlyString = "ಇತ್ತೀಚೆಗೆ", shortlyString = "ಶೀಘ್ರದಲ್ಲೇ")
+        "ml" -> patternConfig(tag, locale, cldrDurationNow.getValue(tag), recentlyString = "അടുത്തിടെ", shortlyString = "ഉടൻ")
+        "mr" -> patternConfig(tag, locale, cldrDurationNow.getValue(tag), recentlyString = "अलीकडे", shortlyString = "लवकरच")
+        "pa" -> patternConfig(tag, locale, cldrDurationNow.getValue(tag), recentlyString = "ਹਾਲ ਹੀ ਵਿੱਚ", shortlyString = "ਜਲਦੀ ਹੀ")
+        "ta" -> patternConfig(tag, locale, cldrDurationNow.getValue(tag), recentlyString = "சமீபத்தில்", shortlyString = "விரைவில்")
+        "te" -> patternConfig(tag, locale, cldrDurationNow.getValue(tag), recentlyString = "ఇటీవల", shortlyString = "త్వరలో")
+        "ur" -> patternConfig(tag, locale, cldrDurationNow.getValue(tag), recentlyString = "حال ہی میں", shortlyString = "جلد ہی")
 
         else -> enConfig(locale, style)
     }

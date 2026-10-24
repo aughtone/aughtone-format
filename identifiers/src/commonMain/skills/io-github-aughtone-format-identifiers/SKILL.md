@@ -11,12 +11,13 @@ description: >-
   as a netmask, wildcard mask or first-to-last address range; decode a Punycode
   xn-- internationalized domain name (IDN) to Unicode; format an E.164 phone
   number in national, international or RFC 3966 tel URI form; prefix a social
-  handle with @. Input must already be canonical; it does not parse, validate or
-  clean up user input and defines no value types. For rounded human text such as
-  "1.5 MB" or "3 days ago" use io.github.aughtone:format-readable.
+  handle with @. Input must be the identifier, in one of its notations; it does
+  not search or clean up free text, and defines no value types. For rounded
+  human text such as "1.5 MB" or "3 days ago" use
+  io.github.aughtone:format-readable.
 license: Apache-2.0
 metadata:
-  version: "4.1.1"
+  version: "4.2.0"
   repository: https://github.com/aughtone/aughtone-format
 ---
 
@@ -56,7 +57,7 @@ Where a Kotlin-native type exists, an overload hangs off it: `kotlin.uuid.Uuid.f
 
 ## Invariants and traps
 
-**Canonical input only — most of these throw on anything else.** The MAC, UUID, IBAN, card, IPv4, IPv6 and network formatters expect the identifier already normalized (the colon MAC, the 8-4-4-4-12 UUID, the compact upper-case IBAN, bare card digits, dotted-decimal IPv4) and throw on anything else. `formatDomain`, `formatHandle` and `formatPhone` check far less: `formatDomain(DomainNotation.Ascii)` returns its input as it is, `formatDomain` decodes only `xn--` labels and passes the rest through, `formatHandle` rejects only an empty username, and `formatPhone` is as lenient as its parser (see below). Symptom: an `IllegalArgumentException` at the format call — non-canonical input is treated as a *programming error*, it is not "cleaned up". Do not point these at raw user input; normalize upstream first, then format. The one input latitude is hexadecimal letter case — a MAC address, a UUID and an IPv6 address are accepted in either case and emitted in the notation's own. Only the ASCII digits and letters count as hexadecimal: fullwidth or other-script digits are rejected. `formatHandle` collapses any leading `@` signs into one and rejects a value that is nothing but `@`.
+**Valid input only — most of these throw on anything else, but the output is always the requested notation.** The UUID, card, IPv4, IPv6 and network formatters expect the identifier already normalized (the 8-4-4-4-12 UUID, bare card digits, dotted-decimal IPv4) and throw on anything else. `formatMac` and `formatIban` read any of their own notations in either case — a MAC as colon, IEEE hyphen, Cisco dotted or bare hex; an IBAN compact or spaced — and always write the notation asked for, in its own case (`"00-00-5E-00-53-01".formatMac()` is `"00:00:5e:00:53:01"`; `"gb82 west 1234 5698 7654 32".formatIban(IbanNotation.Compact)` is `"GB82WEST12345698765432"`). `formatPhone` reads an E.164 number written plain or with spaces, hyphens, dots or parentheses (`"+1 (650) 253-0000"`), and needs the leading `+` and calling code. `formatDomain`, `formatHandle` check far less: `formatDomain(DomainNotation.Ascii)` returns its input as it is, `formatDomain` decodes only `xn--` labels and passes the rest through, and `formatHandle` rejects only an empty username. Symptom: an `IllegalArgumentException` at the format call — input that is not the identifier is treated as a *programming error*, it is not searched or "cleaned up". Do not point these at raw free text; normalize upstream first, then format. Hexadecimal letter case is accepted either way for a MAC address, a UUID and an IPv6 address. Only the ASCII digits and letters count as hexadecimal: fullwidth or other-script digits are rejected. `formatHandle` collapses any leading `@` signs into one and rejects a value that is nothing but `@`.
 
 **`CardNotation.Masked` is lossy by design.** It keeps only the last four digits behind a fixed `••••` group and does not preserve length. Symptom: you cannot recover the PAN from the output — use it for display only, never as a value you store or parse back.
 
@@ -64,9 +65,11 @@ Where a Kotlin-native type exists, an overload hangs off it: `kotlin.uuid.Uuid.f
 
 **`formatIpv6` rejects IPv4-embedded forms.** Symptom: an `IllegalArgumentException` on a trailing dotted-quad such as `::ffff:192.0.2.1`; more than one `::`, the wrong group count, or a group over four hex digits also throw.
 
-**`formatPhone` is the one impure formatter.** National and international grouping are not derivable from E.164 alone, so it uses per-country metadata from `io.github.aughtone:phonenumber` (the module's only dependency; the metadata is dead-code-eliminated for callers that never format a phone). Its parser is lenient, so a number written with spaces, hyphens or parentheses is usually accepted too — do not rely on that, pass E.164. Symptom: an `IllegalArgumentException` for a calling code the metadata does not know.
+**`formatPhone` is the one impure formatter.** National and international grouping are not derivable from E.164 alone, so it uses per-country metadata from `io.github.aughtone:phonenumber` (the module's only dependency; the metadata is dead-code-eliminated for callers that never format a phone). It reads a number with or without punctuation, and the output is always the notation's own grouping. Symptom: an `IllegalArgumentException` for a number without its leading `+` and calling code, or a calling code the metadata does not know.
 
 ## What moved, and what it used to be called
+
+**More lenient in 4.2.0.** `formatMac` accepts every `MacNotation` spelling (it accepted only the colon form) and `formatIban` accepts lower case and the spaced print form (it accepted only compact upper case); both threw `IllegalArgumentException` for those before. Output is unchanged for input that was accepted before. `formatPhone`'s acceptance of punctuated numbers, which 4.1 documented as an accident of its parser, is now part of its contract.
 
 **Stricter in 4.1.1.** Fullwidth and other-script digits are no longer accepted as hexadecimal by `formatMac`, `formatUuid` and `formatIpv6` — in 4.1.0 `"００:00:5e:00:53:01".formatMac()` passed them through, and `formatIpv6` silently converted Arabic-Indic digits. `formatHandle` rejects a value that is nothing but `@` (it returned `"@"`) and collapses repeated leading `@` signs (`"@@alice"` gives `"@alice"`, it gave `"@@alice"`). `formatDomain` rejects an empty `xn--` label and a Punycode label that starts with its delimiter. Each now throws `IllegalArgumentException`.
 

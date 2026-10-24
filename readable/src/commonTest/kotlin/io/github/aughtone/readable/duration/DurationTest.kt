@@ -3,6 +3,9 @@ package io.github.aughtone.readable.duration
 import io.github.aughtone.readable.Locales
 import io.github.aughtone.readable.relative.RelativeStyle
 import kotlin.test.Test
+import kotlin.test.assertTrue
+import io.github.aughtone.types.locale.Locale
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.test.assertEquals
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
@@ -43,8 +46,8 @@ class DurationTest {
     @Test
     fun testTraditionalChineseVariant() {
         // zh-TW uses Traditional characters (小時, 週) not Simplified (小时, 周)
-        assertEquals("1小時", 60.minutes.formatReadable(locale = Locales.TraditionalChinese))
-        assertEquals("1週", 7.days.formatReadable(locale = Locales.TraditionalChinese))
+        assertEquals("1 小時", 60.minutes.formatReadable(locale = Locales.TraditionalChinese))
+        assertEquals("1 週", 7.days.formatReadable(locale = Locales.TraditionalChinese))
 
         // zh (Simplified) uses different characters
         assertEquals("1小时", 60.minutes.formatReadable(locale = Locales.Chinese))
@@ -90,11 +93,67 @@ class DurationTest {
     }
 
     @Test
-    fun shortStyleAbbreviatesEnglishAndKeepsTheSpaceElsewhere() {
+    fun shortStyleAbbreviatesTheUnitInEveryLanguage() {
         assertEquals("5m", 5.minutes.formatReadable(RelativeStyle.Short, Locales.English))
-        assertEquals("5 Minuten", 5.minutes.formatReadable(RelativeStyle.Short, Locales.German))
-        assertEquals("5 minutes", 5.minutes.formatReadable(RelativeStyle.Short, Locales.French))
-        assertEquals("5分", 5.minutes.formatReadable(RelativeStyle.Short, Locales.Japanese))
+        assertEquals("5 Min.", 5.minutes.formatReadable(RelativeStyle.Short, Locales.German))
+        assertEquals("5\u00A0min", 5.minutes.formatReadable(RelativeStyle.Short, Locales.French))
+        assertEquals("5 分", 5.minutes.formatReadable(RelativeStyle.Short, Locales.Japanese))
+    }
+
+    @Test
+    fun underHalfASecondReadsAsNow() {
+        assertEquals("now", 200.milliseconds.formatReadable(locale = Locales.English))
+        assertEquals("now", 200.milliseconds.formatReadable(RelativeStyle.Short, Locales.English))
+        assertEquals("now", 0.milliseconds.formatReadable(locale = Locale(languageCode = "en", regionCode = "ZA", displayName = "en-ZA")))
+        assertEquals("jetzt", 0.milliseconds.formatReadable(locale = Locales.German))
+        assertEquals("maintenant", (-300).milliseconds.formatReadable(locale = Locales.French))
+        assertEquals("1 second", 500.milliseconds.formatReadable(locale = Locales.English))
+    }
+
+    @Test
+    fun chineseScriptTagsUseTheirScriptsWords() {
+        val simplified = Locale(languageCode = "zh", regionCode = "Hans", displayName = "zh-Hans")
+        val traditional = Locale(languageCode = "zh", regionCode = "Hant", displayName = "zh-Hant")
+        assertEquals("5小时", 5.hours.formatReadable(locale = simplified).replace(" ", ""))
+        assertEquals("5小時", 5.hours.formatReadable(locale = traditional).replace(" ", ""))
+    }
+
+    @Test
+    fun japaneseTraditionalChineseAndThaiSpaceTheUnit() {
+        assertEquals("5 分", 5.minutes.formatReadable(locale = Locales.Japanese))
+        assertEquals("5 小時", 5.hours.formatReadable(locale = Locale(languageCode = "zh", regionCode = "TW", displayName = "zh-TW")))
+        assertEquals("5 ชั่วโมง", 5.hours.formatReadable(locale = Locale(languageCode = "th", displayName = "th")))
+        assertEquals("5小时", 5.hours.formatReadable(locale = Locales.Chinese))
+    }
+
+    @Test
+    fun arabicNamesOneAndTwoWithoutADigit() {
+        val arabic = Locales.Arabic
+        assertEquals("دقيقة", 1.minutes.formatReadable(locale = arabic))
+        assertEquals("دقيقتان", 2.minutes.formatReadable(locale = arabic))
+        assertEquals("5 دقائق", 5.minutes.formatReadable(locale = arabic))
+    }
+
+    @Test
+    fun chineseCountsMonthsAndMinutesAsSpans() {
+        // A bare 月 after a count names a month of the year: "2月" is February.
+        assertEquals("2个月", 60.days.formatReadable(locale = Locales.Chinese))
+        assertEquals("5分钟", 5.minutes.formatReadable(locale = Locales.Chinese))
+        val traditional = Locale(languageCode = "zh", regionCode = "TW", displayName = "zh-TW")
+        assertEquals("2 個月", 60.days.formatReadable(locale = traditional))
+    }
+
+    @Test
+    fun macedonianUsesTheCountFormAfterANumber() {
+        assertEquals("2 часа", 2.hours.formatReadable(locale = Locale(languageCode = "mk", displayName = "mk")))
+    }
+
+    @Test
+    fun southAsianLanguagesUseTheirOwnWords() {
+        for (language in listOf("bn", "gu", "kn", "ml", "mr", "pa", "ta", "te", "ur")) {
+            val text = 5.minutes.formatReadable(locale = Locale(languageCode = language, displayName = language))
+            assertTrue(text.none { it in 'a'..'z' || it in 'A'..'Z' }, "$language: \"$text\"")
+        }
     }
 
     @Test

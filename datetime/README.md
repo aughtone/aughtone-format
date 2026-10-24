@@ -4,19 +4,34 @@ The `:datetime` module provides advanced, locale-aware formatting for `kotlinx-d
 
 ## 🚀 Usage
 
-### Formatting Instants
 ```kotlin
-val instant = Clock.System.now()
+import io.github.aughtone.datetime.format.*
+import io.github.aughtone.types.locale.localeFor
 
-// Standard styles
-instant.format(FormatStyle.SHORT, locale = Locale("en-US")) // 4/23/26, 4:15 PM
-instant.format(FormatStyle.SHORT, locale = Locale("en-CA")) // 2026-04-23, 4:15 p.m.
-instant.format(FormatStyle.MEDIUM, locale = Locale.current) // Apr 23, 2026, 4:15 PM
-instant.format(FormatStyle.LONG, locale = Locale.current)   // April 23, 2026 at 4:15:37 PM
+val us = localeFor("en-US")!!
+
+// Styles
+LocalDate(1952, 1, 12).format(DateTimeStyle.Medium, locale = us)            // "Jan 12, 1952"
+LocalDate(1952, 1, 12).format(DateTimeStyle.Full, locale = us)              // "Saturday, January 12, 1952"
+LocalDate(1952, 1, 12).format(DateTimeStyle.Full, locale = us, showEra = true) // "Saturday, January 12, 1952 CE"
+LocalTime(16, 8).format(DateTimeStyle.Short, locale = us, is24HourFormat = false) // "4:08 PM"
+Clock.System.now().format(DateTimeStyle.Short, DateTimeStyle.Short, locale = us)
+
+// Ranges, as the locale writes them: what both ends share is written once
+LocalDate(2024, 3, 3).formatRange(LocalDate(2024, 3, 5), DateTimeStyle.Long, us)          // "March 3 – 5, 2024"
+LocalDate(2024, 3, 3).formatRange(LocalDate(2024, 3, 5), DateTimeStyle.Long, localeFor("de")!!) // "3.–5. März 2024"
+LocalTime(9, 0).formatRange(LocalTime(11, 30), locale = us, is24HourFormat = false)      // "9:00 – 11:30 AM"
+DayOfWeek.MONDAY.formatRange(DayOfWeek.FRIDAY, TextWidth.Abbreviated, us)                  // "Mon – Fri"
+
+// Names on their own
+Month.MARCH.displayName(TextWidth.Full, localeFor("es")!!)                                // "Marzo"
+TimeZone.of("America/Toronto").displayName(Clock.System.now(), TextWidth.Abbreviated, us) // "EST" or "EDT"
 ```
 
-### Advanced Patterns
-This module supports 24-hour master strategies, localized AM/PM markers, and era naming overrides.
+The spaces around a range's dash are thin spaces (U+2009), as CLDR writes them.
+
+### What a locale controls
+Patterns, month and weekday names (in the form the language uses inside a date — "15 de marzo de 2024"), the 12/24-hour convention, the AM/PM marker and where it goes, and the default digits, which follow CLDR (Latin for Hindi and Thai, Arabic-Indic for Arabic in Egypt). The era appears only when asked for with `showEra`, or always for a date before year 1.
 
 > [!NOTE]
 > For natural language "time ago" formatting, use the `formatReadableRelative()` extensions from the [**:readable**](../readable) module.
