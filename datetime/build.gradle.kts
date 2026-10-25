@@ -90,6 +90,8 @@ kotlin {
     }
 
     compilerOptions {
+        // The modules of this library share code through declarations marked with this annotation.
+        optIn.add("io.github.aughtone.toolbox.InternalAughtoneFormatApi")
         // XXX Activate when this is resolved:
         //  https://youtrack.jetbrains.com/issue/KT-57847/Move-common-for-all-the-backends-module-name-compiler-option-to-the-KotlinCommonCompilerOptions
         // moduleName = "io.github.aughtone.datetime.format"

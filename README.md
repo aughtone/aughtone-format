@@ -91,6 +91,7 @@ Aughtone Format 3.1.0 focuses on relative-time expressiveness and completing loc
 - **Duration Scaling**: Human-friendly duration strings with perceptual rounding (e.g., "2 weeks" vs "14 days").
 - **Numeric Abbreviations**: Scaling large numbers into abbreviated forms (e.g., 1.5K, 1.2M).
 - **Geospatial Formatting**: Localized altitude, azimuth (with cardinal directions), and coordinates.
+- **Dates with Chosen Fields**: A month and a day ("Jun 1"), a weekday and an hour, a month and a year — only the fields you name, laid out as each locale does from CLDR (`formatReadableFields` in `:readable`).
 - **Time-Zone Names**: A zone's name at a moment, the generic name it keeps all year ("Eastern Time"), and Windows zone names mapped to IANA identifiers.
 - **Sun and Moon**: Sunrise, sunset and twilight for a place and a day, new and full moons, the 24 solar terms, and crescent-visibility predictions, the same on every platform.
 - **Calendar Conversion**: Hebrew, Islamic, Persian, Chinese, Korean, Japanese, Ethiopic and the other `RSCALE` calendars, to and from `LocalDate`, with their leap months.

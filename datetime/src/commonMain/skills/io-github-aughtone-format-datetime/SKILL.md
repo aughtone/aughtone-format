@@ -135,5 +135,5 @@ Source files were renamed to a `Type.extensions.kt` convention (e.g. `InstantExt
 ## What it is not for
 
 - **Not relative or humanized time.** "3 days ago", "Tomorrow", "in 5 minutes" belong to `io.github.aughtone:format-readable` (which builds on this module). This module renders absolute, styled date/time.
-- **Not custom pattern strings.** Formatting is by `DateTimeStyle` (`Short`, `Medium`, `Long`, `Full`, `None`) against the locale's own patterns; there is no public API to pass an arbitrary skeleton or `pattern` of your own.
+- **Not a chosen set of fields.** Formatting here is by `DateTimeStyle` (`Short`, `Medium`, `Long`, `Full`, `None`) against the locale's own patterns. A month and a day ("Jun 1"), a weekday and an hour, or a month and a year, laid out as the locale does, is `formatReadableFields` in `io.github.aughtone:format-readable`, package `io.github.aughtone.readable.fields`; it also takes a CLDR skeleton. Do not assemble one from `displayName` and a phrase of your own — that is right in one language. There is no API here for a `pattern` of your own; a layout fixed in every language is kotlinx-datetime's `Format { }`.
 - **Not a parser.** It formats values and converts epoch-millis `Long`s; parsing date/time *text* is `kotlinx-datetime`'s job (`LocalDate.parse`, etc.).

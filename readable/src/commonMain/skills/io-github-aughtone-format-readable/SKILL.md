@@ -3,18 +3,17 @@ name: io-github-aughtone-format-readable
 description: >-
   The human-readable-text member of the aughtone-format family, for Kotlin
   Multiplatform. Show how long ago something happened or how soon it will
-  ("8 minutes ago", "in 3 days", "yesterday", "tomorrow", time ago); a duration
-  in words ("2 hours", "1 week", "5m"); file sizes and byte counts (KB/MB/GB,
-  written as binary KiB/MiB/GiB); distances, speeds and other metric units with
-  SI prefixes ("1.5 km", "500 W"); numbers with thousands separators, or
-  abbreviated as compact numbers ("1.5k", "2.5G"); ordinals ("1st", "2nd"); money
-  and currency amounts ("$1,234.56", "1 234,56 €"); latitude/longitude as decimal
-  degrees or DMS; a compass bearing ("225° (SW)"); a time zone's name; and join a
-  list with commas and "and" or "or" ("Mon, Wed and Fri"). Localized with plural
-  rules. Output is rounded prose, never a value to parse back. For styled absolute
-  dates ("Jan 12, 1952") use io.github.aughtone:format-datetime; for exact
-  identifier notation (masked cards, IBAN, IP) use
-  io.github.aughtone:format-identifiers.
+  ("8 minutes ago", "in 3 days", "yesterday", time ago); a duration in words
+  ("2 hours", "1 week"); a date or time with only the fields you choose, laid out
+  as the locale does ("Jun 1", "1. Juni", "Sat 4 PM", "June 2024", a month and
+  day without the year); file sizes (KiB/MiB/GiB); distances, speeds and other
+  metric units ("1.5 km"); numbers with thousands separators or as compact
+  numbers ("1.5k"); ordinals ("1st"); money ("$1,234.56", "1 234,56 €");
+  latitude/longitude in decimal degrees or DMS; a compass bearing ("225° (SW)");
+  a time zone's name; and a list joined with "and" or "or". Localized with plural
+  rules. Output is prose, never a value to parse back. For styled dates
+  ("Jan 12, 1952") use io.github.aughtone:format-datetime; for exact identifier
+  notation (masked cards, IBAN, IP) use io.github.aughtone:format-identifiers.
 license: Apache-2.0
 metadata:
   version: "4.2.1"
@@ -43,7 +42,7 @@ Reach for it instead of assembling these strings by hand — the plural rules, u
 
 Almost everything is an extension named `formatReadable…`, and nearly every formatter takes `locale: Locale = Locale.current` (that is `io.github.aughtone.types.locale.Locale` — *not* `java.util.Locale`). Predefined locales live in `Locales` (e.g. `Locales.English`, `Locales.French`).
 
-**Each family lives in its own sub-package, and a star import of `io.github.aughtone.readable.*` reaches none of them** — it brings in only `Locales`, `PluralCategory`, `pluralCategoryFor` and `ordinalCategoryFor`. Import each formatter from its package: `duration`, `financial`, `geo`, `list`, `metrics`, `number`, `ordinality`, `quantitative`, `relative`, `time`. Symptom: `Unresolved reference: formatReadable…` although the dependency is present.
+**Each family lives in its own sub-package, and a star import of `io.github.aughtone.readable.*` reaches none of them** — it brings in only `Locales`, `PluralCategory`, `pluralCategoryFor` and `ordinalCategoryFor`. Import each formatter from its package: `duration`, `fields`, `financial`, `geo`, `list`, `metrics`, `number`, `ordinality`, `quantitative`, `relative`, `time`. Symptom: `Unresolved reference: formatReadable…` although the dependency is present.
 
 ```kotlin
 import io.github.aughtone.readable.Locales
@@ -82,6 +81,23 @@ val now = Clock.System.now()
 (now - 8.minutes).formatReadableRelative(now = now, locale = Locales.English)  // "8 minutes ago"
 ```
 
+A date or a time with only the fields you choose comes from `formatReadableFields`, in `io.github.aughtone.readable.fields`, on `LocalDate`, `LocalTime`, `LocalDateTime` and `Instant`. Name the fields — as a `ReadableFields` value, in a builder block, or as a CLDR skeleton — and the locale lays them out; the three forms give the same text:
+
+```kotlin
+import io.github.aughtone.datetime.format.TextWidth
+import io.github.aughtone.readable.fields.ReadableFields
+import io.github.aughtone.readable.fields.formatReadableFields
+import io.github.aughtone.types.locale.localeFor
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalDateTime
+
+val june1 = LocalDate(2024, 6, 1)
+june1.formatReadableFields(ReadableFields.MonthDay, localeFor("en-US")!!)              // "Jun 1"
+june1.formatReadableFields(localeFor("de")!!) { month(TextWidth.Abbreviated); day() }  // "1. Juni"
+june1.formatReadableFields("MMMd", localeFor("ja")!!)                                  // "6月1日"
+LocalDateTime(2024, 6, 1, 16, 5).formatReadableFields(ReadableFields.WeekdayHourMinute, localeFor("en-US")!!, is24HourFormat = false)  // "Sat 4:05 PM"
+```
+
 The `geo`/`quantitative` families split by package: `Coordinates` extensions are in `io.github.aughtone.readable.quantitative`, `GeoPoint` extensions in `io.github.aughtone.readable.geo`. **Import `Altitude.formatReadable` and `Azimuth.formatReadable` from `io.github.aughtone.readable.quantitative`**, the package of their types. Identical copies are still declared in `…readable.geo`, deprecated since 4.2.0 and removed in 5.0.0, so a star import of both packages is ambiguous until then. Symptom: `Overload resolution ambiguity` on `altitude.formatReadable()`, or a deprecation warning — import the `quantitative` one by name.
 
 **Some entry points have no default locale and must be given one:** `formatDecimalDegrees(locale)` and `formatDegreesMinutesSeconds(locale)` (on both `Coordinates` and `GeoPoint`), `pluralCategoryFor(locale, n)` / `ordinalCategoryFor(locale, n)`, `cardinalDirectionsFor(locale)`, and every lower-level `…For(locale)` factory (`numberFormatterFor`, `moneyFormatterFor`, `ordinalityFor`, `durationFormatterFor`, `relativeTimeConfigFor`). Use `formatReadable(format = …)` on a coordinate to get the defaulted locale.
@@ -92,7 +108,7 @@ The `geo`/`quantitative` families split by package: `Coordinates` extensions are
 
 **The default `Locale.current` makes output environment-dependent.** Grouping, symbols, and words all change with the ambient locale. Symptom: output that differs between machines or CI — pass an explicit `Locales.*` whenever the result must be reproducible.
 
-**Trailing zeros are trimmed and rounding is lossy — do not promise a fixed decimal count.** `precision` is a maximum: `1024L.formatReadableDataSize(...)` is `"1 KiB"`, not `"1.0 KiB"`; `Distance(500.0)` is `"500 m"`. Money is the one exception and always shows its currency's full minor-unit digits (`"$12.00"`). Units round to the nearest step (`29.days` → "29 days" but `30.days` → "1 month"; `10.days` → "1 week", `11.days` → "2 weeks"), the week unit only ever renders 1–3 before jumping to days/months, and a value that rounds up to a whole larger unit is shown as that unit (59.6 seconds → "1 minute", 999,999 → "1M", 1,048,575 bytes → "1 MiB"). A duration under half a second is "0 seconds". DMS truncates its seconds field (21.6″ reads 21″). Symptom: fewer decimals than you set, or a unit that "jumps" at a threshold.
+**Trailing zeros are trimmed and rounding is lossy — do not promise a fixed decimal count.** `precision` is a maximum: `1024L.formatReadableDataSize(...)` is `"1 KiB"`, not `"1.0 KiB"`; `Distance(500.0)` is `"500 m"`. Money is the one exception and always shows its currency's full minor-unit digits (`"$12.00"`). Units round to the nearest step (`29.days` → "29 days" but `30.days` → "1 month"; `10.days` → "1 week", `11.days` → "2 weeks"), the week unit only ever renders 1–3 before jumping to days/months, and a value that rounds up to a whole larger unit is shown as that unit (59.6 seconds → "1 minute", 999,999 → "1M", 1,048,575 bytes → "1 MiB"). DMS truncates its seconds field (21.6″ reads 21″). Symptom: fewer decimals than you set, or a unit that "jumps" at a threshold.
 
 **Numbers are always written out in full, and no formatter throws on a value.** There is no exponent notation however large or small the value; `Long` and `ULong` keep every digit. Not-a-number renders as `"NaN"` and the infinities as `"∞"` / `"-∞"` (with the bare unit, and no prefix, in the metric and data-size formatters). A negative number carries a leading `-`; for money it goes before an attached symbol (`"-$123.00"`) and otherwise on the number (`"-123,00 €"`). The one thing that can throw is the default `locale = Locale.current`, which throws `IllegalArgumentException` if the platform reports no locale at all.
 
@@ -103,6 +119,10 @@ The `geo`/`quantitative` families split by package: `Coordinates` extensions are
 **Relative phrases follow each language's grammar, but not every wording is CLDR's.** Plural categories follow the CLDR rules for whole numbers in every bundled language, and durations, relative phrases and the "Today"/"Tomorrow"/"Yesterday" labels are in the reader's language. Twenty-three languages take each "N units ago" / "in N units" phrase whole from CLDR: fourteen whose grammar needs it — Arabic, Czech, Finnish, Hungarian, Armenian, Icelandic, Georgian, Kazakh, Lithuanian, Slovak, Slovenian, Albanian, Serbian, Swahili — so the unit is in the right case for its direction ("před 5 minutami" but "za 5 minut"), Arabic names one and two without a digit, and Swahili writes the unit first; and Bengali, Gujarati, Kannada, Malayalam, Marathi, Punjabi, Tamil, Telugu and Urdu, whose durations also come from CLDR. The rest use a compact form and may word a phrase differently from CLDR or from the platform's own formatter (Spanish "en 2 horas" where CLDR has "dentro de 2 horas") — do not compare this output with another formatter's. Hebrew always shows the digit. Inuktitut keeps English day labels, an English "Shortly", and English "now" for a duration under half a second. A locale outside the bundled set falls back to English rather than throwing. Symptom: a phrase that differs from the platform's wording, or English words in an otherwise localized string.
 
 **`RelativeStyle.Short` drops "ago" in English only.** In English, five days in the past is `"5d"`, not `"5d ago"`, and in the future `"in 5d"`. Every other language takes CLDR's short form, which keeps its past and future words: `"vor 5 Min."` and `"in 5 Min."` in German, `"5 Min."` for a duration; Inuktitut has none and gives the same text as `Long`. A short phrase is never longer than the long one, spaces aside: where CLDR's is longer, the long phrase is used, phrase by phrase (Korean `"2달"`, not CLDR's `"2개월"`). Short forms carry the language's own spacing, often a no-break space (`"5\u00A0min"` in French). `RelativeStyle.None` suppresses that component entirely. Symptom: a bare `"5d"` with no "ago", or an exact-string test that fails on a no-break space.
+
+**`formatReadableFields` takes which fields, never their order — the locale decides.** The order a builder block names its fields in has no effect, and there is no way to put a separator between them: `{ month(TextWidth.Abbreviated); day() }` is "Jun 1" in American English, "1 Jun" in British English and "1. Juni" in German, from Unicode CLDR's pattern for that set of fields. It is not kotlinx-datetime's `LocalDate.Format { monthName(…); char(' '); day() }`, whose order and characters are the format; use that when a layout must be the same in every language. Do not assemble a month and a day from `displayName` and your own phrase — that is right in one language. A set CLDR has no pattern for is answered as CLDR does, from the nearest pattern ("2024 (day: 1)" for a year and a day); a date and a time are joined as the locale joins them ("June 1, 2024 at 4:05 PM"). Names, AM/PM markers and zone names are the library's, as `format-datetime`'s styles write them, so they can differ from the platform's (`"Sa"` where `Intl` writes `"Sa."`). Symptom: the same call reading in a different order per locale — that is the point.
+
+**`formatReadableFields` throws `IllegalArgumentException` for a set that shows nothing or a field the value lacks.** An empty block, a `ReadableFields()` with nothing switched on, an empty or blank skeleton, a weekday on a `LocalTime`, an hour on a `LocalDate`, or a zone on anything but an `Instant` throws; so do a skeleton letter or width that is not offered (`Q`, `yy`, `MMMMM`) and both `month` and `monthNumber`. The message names the field. A date before year 1 shows its era whether asked or not. In a skeleton the hour letter sets the clock (`h` or `K` 12-hour, `H` or `k` 24-hour); a `j` hour, a `ReadableFields` and a block use `is24HourFormat`.
 
 **A duration under half a second reads "now", not "0 seconds".** It is the language's own word ("jetzt", "maintenant", "now" in every English variant). Symptom: `"now"` where a count was expected — check for a zero duration first if the caller needs a number. The bare `LocalTime.formatReadableRelative` handles time units only and defaults `relativeThreshold = 3.hours` — for calendar-aware output ("Tomorrow") use the `Instant`-anchored overload.
 
@@ -141,6 +161,8 @@ The `geo`/`quantitative` families split by package: `Coordinates` extensions are
 
 **Silent change in 4.1.0: `TimeZone.formatReadable` wording.** The `Instant` overload now takes its name from the platform's own CLDR, so the wording can differ from 4.0.0 and between targets (UTC is "Coordinated Universal Time" on most, "Greenwich Mean Time" on Apple). The bare-`UtcOffset` overload cannot consult the platform, so it now returns the English name (or Inuktitut) — it no longer localizes into other languages. Pass an `Instant` to get the reader's language.
 
+**New in 4.3.0: `formatReadableFields`** on `LocalDate`, `LocalTime`, `LocalDateTime` and `Instant`, in `io.github.aughtone.readable.fields`, with `ReadableFields` and its builder — a date or time with only the fields you choose, laid out by the locale from CLDR. Before it there was no way to ask for a month and a day ("Jun 1") or a weekday and an hour: the only date formatting was `format-datetime`'s four styles, and callers assembled the rest from `displayName`, wrong outside their own language.
+
 **New in 4.1.0: `List<String>.formatReadableList(locale, type)`** — locale-correct list joining ("Monday, Wednesday, and Friday" / "lundi, mercredi et vendredi"), from CLDR list patterns, types `And`/`Or`/`Unit`. Covers ~55 bundled locales (English fallback beyond); wide forms only for now (no short/narrow).
 
 **`toReadable*` → `formatReadable*` (renamed in 3.0.0).** This is the single most likely stale call. Every human-formatting entry point was `toReadable…` and is now `formatReadable…`. The old names still exist as `@Deprecated` wrappers with `ReplaceWith`, so old code compiles with a warning — but write the new name:
@@ -164,5 +186,5 @@ The legacy `toReadableRelative` overloads carry a stronger warning: they never f
 ## What it is not for
 
 - **Not canonical or machine-parseable output.** Everything here rounds, trims, and localizes; you cannot parse it back to the original value. For exact, round-trippable identifier notation use `io.github.aughtone:format-identifiers`.
-- **Not raw date/time pattern formatting.** Styled `LocalDate`/`LocalDateTime`/`Instant` formatting (Short/Medium/Long/Full) lives in `io.github.aughtone:format-datetime`; this module builds *relative* phrasing on top of it.
+- **Not styled or fixed-layout date formatting.** The four styles (Short/Medium/Long/Full) are in `io.github.aughtone:format-datetime`; a layout fixed in every language is kotlinx-datetime's `Format { }`. This module writes relative phrasing, and dates with chosen fields laid out by the locale.
 - **Not a full CLDR/ICU localization engine.** The plural, ordinal, and unit rules are simplified and English-backstopped; do not rely on it for exhaustive per-language correctness.
