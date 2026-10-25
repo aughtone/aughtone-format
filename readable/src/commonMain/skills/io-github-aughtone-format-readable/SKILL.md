@@ -31,6 +31,7 @@ Turning a raw value into the short, localized phrase a person reads:
 - Numbers — grouped ("1,234.6"), abbreviated ("1.5k", "2.5G"), and ordinals ("1st", "1er").
 - Money — "$1,234.56", "1 234,56 €", "-$12.00".
 - Geo — coordinates as decimal degrees or DMS, azimuths "225° (SW)", altitudes.
+- Dates and times with only the fields you choose — "Jun 1", "1. Juni", "Sat 4:05 PM", "June 2024" — laid out as each locale lays out that set of fields.
 - Time zones — "Coordinated Universal Time".
 - Lists — locale-correct joining: "Monday, Wednesday, and Friday" / "lundi, mercredi et vendredi".
 

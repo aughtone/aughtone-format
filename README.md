@@ -159,6 +159,15 @@ println(alarm.formatReadableRelative(now = LocalTime(23, 0), direction = Relativ
 println(1048576L.formatReadableDataSize()) // "1 MiB"
 ```
 
+### Dates with Chosen Fields (`:readable`)
+Name the fields; the locale lays them out, from CLDR. The order you name them in has no effect.
+```kotlin
+val june1 = LocalDate(2024, 6, 1)
+june1.formatReadableFields(ReadableFields.MonthDay, localeFor("en-US")!!)              // "Jun 1"
+june1.formatReadableFields(localeFor("de")!!) { month(TextWidth.Abbreviated); day() }  // "1. Juni"
+june1.formatReadableFields("MMMd", localeFor("ja")!!)                                  // "6月1日"
+```
+
 ### Sun Times (`:astronomy`)
 ```kotlin
 val toronto = TimeZone.of("America/Toronto")
