@@ -19,3 +19,4 @@ removed automatically - issues already carry them.
 identifiers
 intervals
 formatting
+indigenous-languages
