@@ -1,7 +1,7 @@
 # Canadian Indigenous Languages
 
 RAD-0004 · 2026-11-07 · status: open
-Keywords: Cree Ojibwe Inupiaq Halkomelem Squamish Saanich Kwak'wala Nuu-chah-nulth Haida Secwepemctsín Okanagan St'át'imcets Blackfoot Michif Chipewyan Tłı̨chǫ Gwich'in Mohawk Cayuga Oneida Wendat Innu-aimun Atikamekw Mi'kmaq Wolastoqey, three-letter language tags, hur-CA formats as English, no CLDR data, fallback language for a locale with no data, macrolanguage, syllabics or Latin, who reviews Indigenous-language text
+Keywords: submit to CLDR, language authority, Cree Ojibwe Inupiaq Halkomelem Squamish Saanich Kwak'wala Nuu-chah-nulth Haida Secwepemctsín Okanagan St'át'imcets Blackfoot Michif Chipewyan Tłı̨chǫ Gwich'in Mohawk Cayuga Oneida Wendat Innu-aimun Atikamekw Mi'kmaq Wolastoqey, three-letter language tags, hur-CA formats as English, no CLDR data, fallback language for a locale with no data, macrolanguage, syllabics or Latin, who reviews Indigenous-language text
 
 ## Question
 
@@ -69,11 +69,13 @@ The structural parts — patterns, number symbols, the clock, digits — carry n
 
 **D. B now, C as each language is reviewed.** Structure and the fallback words from the declared language from the start; each language's own words added only once reviewed, a piece at a time — weekday and month names first, then relative time and durations. A language can be partly curated: names reviewed, phrases still falling back.
 
+**E. C, carried to CLDR with the language authority.** As C, with the review led by the language authority — the body or the people the language's community recognizes as speaking for it — and the reviewed data offered for submission to Unicode CLDR, with that authority asked to help submit it. CLDR is where this library's data for every other language comes from, and what it holds reaches ICU, Android, iOS and the browsers, so the language gains far more than this library's output. A submission needs a contributor committed to the language, which the authority is and this library is not. Once CLDR carries the data, the library imports it as it does every other language's, and only what CLDR does not hold — compass points, "Recently", "Shortly" — stays curated here. Slower again than C, and dependent on CLDR's submission cycle, but it is the only route by which the work outlives this library.
+
 **Not an option: generating the words.** aughtone/aughtone-types#32 tested machine-generated text in the one language where an answer could be checked, and found it reliable only where it reproduced published data. For these languages there is no published data to reproduce, so a generated word is an invention that no test can catch, in a language the maintainers cannot read. An honest fallback is better than a plausible wrong word.
 
 ## Leaning
 
-D, with B's fallback decided language by language and recorded, and nothing in a language's own words shipped before review. It is not a decision yet: the open questions below decide whether it holds.
+D, with B's fallback decided language by language and recorded, and nothing in a language's own words shipped before review — and each language's C done as E: the language authority consulted, named in the documentation as they agree, and asked to help submit the reviewed data to CLDR. It is not a decision yet: the open questions below decide whether it holds.
 
 ## Open questions
 
@@ -84,5 +86,8 @@ D, with B's fallback decided language by language and recorded, and nothing in a
 - **Plural rules:** CLDR has none for these languages. The library's fallback, one and other, counts the way English does; Algonquian languages mark animacy rather than number, and Inuit languages have a dual. Is one/other acceptable for counts, as RAD-0002 suggests?
 - **Polysynthetic phrasing:** relative times and durations in several of these languages are single inflected words, not a number and a unit. Does the library's "{0} hours ago" template hold, as it does for Inuktitut's prepositional form, or does a language need its own phrase shapes?
 - **Review:** who reviews each language, how corrections reach the library, and how reviewers are credited. #21 is the first attempt; its outcome should shape the rest.
+- **Authority:** which body or people each language's community recognizes as its authority — one per language, or one per variety or nation where a language spans several — and how they want to be named in the documentation.
+- **CLDR submission:** CLDR asks a new language to reach its Basic coverage level, and data is entered through its Survey Tool during an open submission period; confirm the current process and what Basic requires before asking an authority to take it on. Which of the library's terms map to CLDR data, and which stay here only.
+- **Worksheet:** `LanguageWorksheetTest` writes one worksheet per language to `docs/outbox/worksheets/` on every JVM test run: 141 terms, each in English and French (Canada) with a blank column for the language and whether CLDR holds it (131 do), and lines for the authority, its credit, the variety and writing system, and its agreement to help submit to CLDR. Open: whether 1 and 3 are enough count examples for a language with a dual or other counted forms, or the worksheet should ask for each form by name.
 - **Requested autonyms:** the names in types #44 came with the request and are unverified. They belong to the types library's display names, and need the same review.
 - **Reporting:** how does a caller learn that a language's text is falling back? A coverage table in the skills, a function that reports it, or both?

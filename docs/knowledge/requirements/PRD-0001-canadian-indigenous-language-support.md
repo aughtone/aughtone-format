@@ -12,6 +12,7 @@ The types library is adding locales for 25 Canadian Indigenous languages beside 
 - An application that shows Canadian place and heritage content in the language of its name, and dates or durations beside it.
 - A reader of one of these languages, who should see text in their language where it exists, and otherwise a deliberate, documented fallback — French where they would read French, English where they would read English — never an unannounced default.
 - The maintainers, who cannot read these languages and need a way to accept text from those who can.
+- The language authority for each language — the body or the people its community recognizes as speaking for it — whose guidance the text follows, and who can carry it into the international standard.
 
 ## Requirements
 
@@ -22,10 +23,12 @@ The types library is adding locales for 25 Canadian Indigenous languages beside 
 5. **Normalization follows the types library.** A language with a two-letter code is keyed by it, and its three-letter codes reach the same data; a language with only a three-letter code keeps it.
 6. **Coverage is visible.** A caller can see, for each language, what is the language's own text and what falls back: at least in the skills, with the decision recorded on whether an API reports it too.
 7. **Tested per language.** Each language has tests for its dates, times, durations, relative times and field formatting, pinning its own text and its fallback.
+8. **The authority is named.** For each language with its own text, the documentation — the skills' coverage table and the data's source comments — names the language authority consulted to develop it, in the way they agree to be named. A language whose text was reviewed without a recognized authority says so.
+9. **Offered to the standard.** For each language, the reviewed data that Unicode CLDR holds — month and weekday names, day periods, eras, date and time patterns, plural rules, relative-time and list phrases — is offered for submission to CLDR, and the language authority is asked to help submit it, since a community's own submission carries what this library's cannot. The outcome is recorded, including a decision not to submit. Text CLDR does not hold (compass points, "Recently", "Shortly") stays in this library.
 
 ## Out of scope
 
-Display names (a language's or a territory's name in another language) are the types library's. Script-keyed data (`cr-Latn` beside `cr-Cans`) is an open question in RAD-0004 and becomes a requirement only if it is decided to be one. Plural rules beyond one and other wait on RAD-0004's question.
+Display names (a language's or a territory's name in another language) are the types library's. Script-keyed data (`cr-Latn` beside `cr-Cans`) is an open question in RAD-0004 and becomes a requirement only if it is decided to be one. Plural rules beyond one and other wait on RAD-0004's question. Submitting to CLDR on a community's behalf, without its authority's agreement, is out of scope: the library prepares the data and asks.
 
 ## Stories
 
