@@ -16,7 +16,7 @@ description: >-
   number with issuer grouping use io.github.aughtone:format-identifiers.
 license: Apache-2.0
 metadata:
-  version: "4.2.1"
+  version: "4.3.0"
   repository: https://github.com/aughtone/aughtone-format
 ---
 
@@ -71,6 +71,8 @@ val identity = GeoProjection { lon, lat -> lon to lat }
 **Projections flip the Y axis and are screen-space, not geodesic.** Both projections return Y increasing *downward* (SVG/screen convention), so a higher latitude gives a smaller Y. `WebMercatorProjection` normalizes to degree scale (`180/π`), **not** EPSG:3857 meters, so both X and Y run from −180 to 180. A latitude beyond about ±85.0511° — the limit every web map uses — is projected as that limit, so a polygon that reaches a pole stays finite. Symptom: a shape mirrored top-to-bottom, wrongly scaled for meters, or flattened along the top or bottom edge near a pole. In 4.1.0 and earlier latitude −90 projected to infinity.
 
 ## What moved, and what it used to be called
+
+**Changed in 4.3.0: `kotlinx-serialization-json` no longer comes with this module.** It was an `api` dependency, so code could import `kotlinx.serialization.json` having declared only `io.github.aughtone:format-toolbox`; that import now fails to resolve unless the project declares `org.jetbrains.kotlinx:kotlinx-serialization-json` itself. Compose UI, Compose resources and, on Android, `androidx.startup` are gone from its runtime classpath too. So is the empty Compose resources class 4.2 published, `io.github.aughtone.format.toolbox.resources.Res`; nothing in it held data.
 
 **Silent changes in 4.1.1 — same calls, different output.**
 
