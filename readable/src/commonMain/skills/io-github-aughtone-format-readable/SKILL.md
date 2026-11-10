@@ -16,7 +16,7 @@ description: >-
   notation (masked cards, IBAN, IP) use io.github.aughtone:format-identifiers.
 license: Apache-2.0
 metadata:
-  version: "4.2.1"
+  version: "4.3.0"
   repository: https://github.com/aughtone/aughtone-format
 ---
 
@@ -128,6 +128,10 @@ The `geo`/`quantitative` families split by package: `Coordinates` extensions are
 **A duration under half a second reads "now", not "0 seconds".** It is the language's own word ("jetzt", "maintenant", "now" in every English variant). Symptom: `"now"` where a count was expected — check for a zero duration first if the caller needs a number. The bare `LocalTime.formatReadableRelative` handles time units only and defaults `relativeThreshold = 3.hours` — for calendar-aware output ("Tomorrow") use the `Instant`-anchored overload.
 
 ## What moved, and what it used to be called
+
+**New in 4.3.0: Canadian Indigenous locales are found, and written in English.** `localeFor` now returns locales for Cree, Ojibwe, Mi'kmaq, Mohawk and 21 more (`cr-CA`, `hur-CA`, `atj-CA`, …). This library has no text in those languages, so they format in English, the same text as before they were found — do not read a non-null locale as a sign its output is in that language. Inuktitut (`iu`) is the one with its own text.
+
+**Changed in 4.3.0: `kotlinx-serialization-json` no longer comes with this module.** It was an `api` dependency, so code could import `kotlinx.serialization.json` having declared only `io.github.aughtone:format-readable`; that import now fails to resolve unless the project declares `org.jetbrains.kotlinx:kotlinx-serialization-json` itself. Compose UI, Compose resources and, on Android, `androidx.startup` are gone from its runtime classpath too. So is the empty Compose resources class 4.2 published, `io.github.aughtone.format.readable.resources.Res`; nothing in it held data.
 
 **Output changed in 4.2.0.** Same calls, different text:
 

@@ -2,6 +2,14 @@
 
 Aught One Format is a suite of Kotlin Multiplatform libraries designed to provide consistent, localized formatting for Dates, Times, Numbers, and other human-readable metrics across all platforms.
 
+## 🚀 Major Updates in 4.3.0
+
+New field formatting, and lighter dependencies; the [CHANGELOG](CHANGELOG.md) lists every change.
+
+- **A date or time with the fields you choose** (`:readable`): `formatReadableFields` writes only the fields asked for — a month and a day, a weekday and an hour, a month and a year — laid out as the locale does, from the Unicode CLDR patterns: "Jun 1" in American English, "1 Jun" in British English, "1. Juni" in German, "6月1日" in Japanese. Name the fields as a `ReadableFields` value, in a builder block, or as a CLDR skeleton ("MMMd").
+- **No Compose or JSON dependency** (`:datetime`, `:readable`, `:toolbox`, `:viewable`): none of them brings Compose or `kotlinx-serialization-json` any more. A project that used either without declaring it must now declare it itself.
+- **Canadian Indigenous locales** (`aughtone-types` 4.2.0): Cree, Ojibwe, Mi'kmaq, Mohawk and 21 more are found by `localeFor`, and three-letter codes normalize to two-letter ones (`cre-CA` is `cr-CA`). They still format in English until reviewed text arrives ([PRD-0001](docs/knowledge/requirements/PRD-0001-canadian-indigenous-language-support.md)).
+
 ## 🚀 Major Updates in 4.2.1
 
 New capabilities only; nothing existing changes.

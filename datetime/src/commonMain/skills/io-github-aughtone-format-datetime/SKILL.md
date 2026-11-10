@@ -16,7 +16,7 @@ description: >-
   pattern strings such as "yyyy-MM-dd"; and not a parser.
 license: Apache-2.0
 metadata:
-  version: "4.2.1"
+  version: "4.3.0"
   repository: https://github.com/aughtone/aughtone-format
 ---
 
@@ -100,6 +100,10 @@ Month.MARCH.displayName(TextWidth.Abbreviated, localeFor("en")!!)   // "Mar"
 **No bundled pattern throws.** `None`/`None` yields `""`, and there are no `@Throws` and no deprecated symbols in this module. Two things outside the patterns can still throw: the default `locale = Locale.current` throws `IllegalArgumentException` if the platform reports no locale at all, and an `Instant` outside the range `LocalDateTime` can hold throws from kotlinx-datetime when it is converted.
 
 ## What moved, and what it used to be called
+
+**New in 4.3.0: Canadian Indigenous locales are found, and written in English.** `localeFor` now returns locales for Cree, Ojibwe, Mi'kmaq, Mohawk and 21 more (`cr-CA`, `hur-CA`, `atj-CA`, …). This library has no text in those languages, so they format in English, the same text as before they were found — do not read a non-null locale as a sign its output is in that language. Inuktitut (`iu`) is the one with its own text.
+
+**Changed in 4.3.0: `kotlinx-serialization-json` no longer comes with this module.** It was an `api` dependency, so code could import `kotlinx.serialization.json` having declared only `io.github.aughtone:format-datetime`; that import now fails to resolve unless the project declares `org.jetbrains.kotlinx:kotlinx-serialization-json` itself. Compose UI and Compose resources are gone from its runtime classpath too. So is the empty Compose resources class 4.2 published, `io.github.aughtone.format.datetime.resources.Res`; nothing in it held data.
 
 **New in 4.2.1: generic zone names and Windows zones.** `TimeZone.genericDisplayName(width, locale)` gives the name a zone keeps all year — "Eastern Time" / "ET" — for a weekly schedule or opening hours that span a daylight-saving change, where `displayName`'s "Eastern Standard Time" is wrong half the year; it comes from the platform's CLDR, like `displayName`. `TimeZone.ianaIdForWindowsName(name, territory)` turns a Windows zone name, as Outlook and Exchange write it in an iCalendar `TZID` ("Eastern Standard Time"), into an IANA identifier for `TimeZone.of` (`"America/New_York"`, or `"America/Toronto"` for territory `"CA"`), and `TimeZone.windowsNameForIanaId(id)` goes the other way. Both are from bundled CLDR data, the same on every platform, return `null` for a name CLDR does not list, and use current IANA names (`"Asia/Kolkata"`) while accepting older ones (`"Asia/Calcutta"`, `"US/Eastern"`).
 

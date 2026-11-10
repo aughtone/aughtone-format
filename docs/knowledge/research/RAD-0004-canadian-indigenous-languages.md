@@ -13,7 +13,7 @@ The types library is adding locales for 25 Canadian Indigenous languages beside 
 
 Measured on `develop`, 2026-11-07: a locale whose language this library has no data for resolves by its region. `hur-CA`, `cr-CA`, `mic-CA` and `atj-CA` all format as Canadian English — "Saturday, June 1, 2024", "4:05 p.m.", "2 hours", "Jun 1" — and a bare `hur` formats as American English. Nothing tells the caller a fallback happened. Only `iu` has its own text, curated and awaiting review (#21).
 
-Re-measured 2026-11-09 against types 4.2.0, which carries all 25: the output is unchanged. `cre-CA` and `cwd-CA` (Woods Cree) resolve to `cr-CA` and `iku-CA` to `iu-CA`, while a member code the types library keeps separate, such as Plains Cree `crk-CA`, finds no locale, and neither does `iu-Latn-CA`.
+Re-measured 2026-11-09 against types 4.2.0, which carries all 25: the output is unchanged, and not consistently Canadian — dates, durations and fields read as `en-CA` does, but a list joins as American English, "a, b, and c" where `en-CA` writes "a, b and c". `cre-CA` and `cwd-CA` (Woods Cree) resolve to `cr-CA` and `iku-CA` to `iu-CA`, while a member code the types library keeps separate, such as Plains Cree `crk-CA`, finds no locale, and neither does `iu-Latn-CA`.
 
 That is safe, in that nothing throws, but it is a fallback by accident: an Atikamekw or Innu reader in Quebec gets English, where French is the language they would read beside their own.
 
