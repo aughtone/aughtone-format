@@ -16,7 +16,7 @@ runner = "1.7.0"
 vanniktech = "0.37.0"
 androidx-startup = "1.2.0"
 
-aughtone-types = "4.1.0"
+aughtone-types = "4.2.0"
 aughtone-phonenumber = "0.0.4"
 
 [libraries]
