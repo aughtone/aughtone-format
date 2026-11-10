@@ -53,6 +53,21 @@ Translates `kotlin.time.Duration` into scannable language, scaling and pluralizi
 
 Values round to the nearest unit and trailing zeros are trimmed, so results are approximate, not fixed-precision (`30.days` → "1 month"; the week unit only ever renders 1–3 before it jumps to days or months).
 
+### 📅 Dates and times with the fields you choose
+
+`formatReadableFields` writes only the fields you name — a month and a day, a weekday and the hour, a month and a year — and the locale lays them out, from the Unicode CLDR pattern for that set of fields. Name them as a `ReadableFields` value, in a builder block, or as a CLDR skeleton; the three give the same text.
+
+```kotlin
+val june1 = LocalDate(2024, 6, 1)
+june1.formatReadableFields(ReadableFields.MonthDay, localeFor("en-US")!!)              // "Jun 1"
+june1.formatReadableFields(ReadableFields.MonthDay, localeFor("en-GB")!!)              // "1 Jun"
+june1.formatReadableFields(localeFor("de")!!) { month(TextWidth.Abbreviated); day() }  // "1. Juni"
+june1.formatReadableFields("MMMd", localeFor("ja")!!)                                  // "6月1日"
+june1.formatReadableFields(ReadableFields.YearMonth, localeFor("ru")!!)                // "июнь 2024 г."
+```
+
+The order you name the fields in has no effect, and there is no separator to choose: that is the locale's. This is not kotlinx-datetime's `LocalDate.Format { }`, whose order and characters are the format — use that for a layout that must be the same in every language.
+
 ### 🔢 Numbers and ordinality
 
 ```kotlin

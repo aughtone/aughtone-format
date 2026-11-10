@@ -15,7 +15,7 @@ description: >-
   and not for formatting times as text (use io.github.aughtone:format-datetime).
 license: Apache-2.0
 metadata:
-  version: "4.2.1"
+  version: "4.3.0"
   repository: https://github.com/aughtone/aughtone-format
 ---
 

@@ -32,7 +32,7 @@ Aughtone Format is a suite of Kotlin Multiplatform libraries published to **Mave
 ## 📐 Library Design Principles
 
 ### 1. Minimal Transitive Dependencies
-The core formatting modules (`datetime`, `readable`) are designed to be lightweight. Heavy dependencies are isolated into separate modules.
+The core formatting modules (`datetime`, `readable`) are designed to be lightweight. Heavy dependencies are isolated into separate modules. A module depends only on what its own code uses: Compose, in particular, belongs to `viewable-compose` and to any future module made for it, never to a formatting module, so a server or command-line consumer never receives a UI toolkit.
 
 ### 2. Pure KMP Resolution
 Formatting rules are implemented in `commonMain` using a **Functional Formatter Pattern** (`Formatter<T>`).

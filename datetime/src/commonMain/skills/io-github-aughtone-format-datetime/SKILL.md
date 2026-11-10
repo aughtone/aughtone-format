@@ -16,7 +16,7 @@ description: >-
   pattern strings such as "yyyy-MM-dd"; and not a parser.
 license: Apache-2.0
 metadata:
-  version: "4.2.1"
+  version: "4.3.0"
   repository: https://github.com/aughtone/aughtone-format
 ---
 
@@ -101,6 +101,10 @@ Month.MARCH.displayName(TextWidth.Abbreviated, localeFor("en")!!)   // "Mar"
 
 ## What moved, and what it used to be called
 
+**New in 4.3.0: Canadian Indigenous locales are found, and written in English.** `localeFor` now returns locales for Cree, Ojibwe, Mi'kmaq, Mohawk and 21 more (`cr-CA`, `hur-CA`, `atj-CA`, …). This library has no text in those languages, so they format in English, the same text as before they were found — do not read a non-null locale as a sign its output is in that language. Inuktitut (`iu`) is the one with its own text.
+
+**Changed in 4.3.0: `kotlinx-serialization-json` no longer comes with this module.** It was an `api` dependency, so code could import `kotlinx.serialization.json` having declared only `io.github.aughtone:format-datetime`; that import now fails to resolve unless the project declares `org.jetbrains.kotlinx:kotlinx-serialization-json` itself. Compose UI and Compose resources are gone from its runtime classpath too. So is the empty Compose resources class 4.2 published, `io.github.aughtone.format.datetime.resources.Res`; nothing in it held data.
+
 **New in 4.2.1: generic zone names and Windows zones.** `TimeZone.genericDisplayName(width, locale)` gives the name a zone keeps all year — "Eastern Time" / "ET" — for a weekly schedule or opening hours that span a daylight-saving change, where `displayName`'s "Eastern Standard Time" is wrong half the year; it comes from the platform's CLDR, like `displayName`. `TimeZone.ianaIdForWindowsName(name, territory)` turns a Windows zone name, as Outlook and Exchange write it in an iCalendar `TZID` ("Eastern Standard Time"), into an IANA identifier for `TimeZone.of` (`"America/New_York"`, or `"America/Toronto"` for territory `"CA"`), and `TimeZone.windowsNameForIanaId(id)` goes the other way. Both are from bundled CLDR data, the same on every platform, return `null` for a name CLDR does not list, and use current IANA names (`"Asia/Kolkata"`) while accepting older ones (`"Asia/Calcutta"`, `"US/Eastern"`).
 
 **New in 4.2.0: ranges.** `LocalTime.formatRange`, `LocalDate.formatRange`, `LocalDateTime.formatRange`, `Instant.formatRange` and `DayOfWeek.formatRange`, from bundled CLDR interval formats. An `Instant` range names each end's zone at its own moment, so a range across a daylight-saving change reads "EST" at one end and "EDT" at the other. Before 4.2.0 the only range API was `Pair.format`, which joins two full values with `" - "`.
@@ -135,5 +139,5 @@ Source files were renamed to a `Type.extensions.kt` convention (e.g. `InstantExt
 ## What it is not for
 
 - **Not relative or humanized time.** "3 days ago", "Tomorrow", "in 5 minutes" belong to `io.github.aughtone:format-readable` (which builds on this module). This module renders absolute, styled date/time.
-- **Not custom pattern strings.** Formatting is by `DateTimeStyle` (`Short`, `Medium`, `Long`, `Full`, `None`) against the locale's own patterns; there is no public API to pass an arbitrary skeleton or `pattern` of your own.
+- **Not a chosen set of fields.** Formatting here is by `DateTimeStyle` (`Short`, `Medium`, `Long`, `Full`, `None`) against the locale's own patterns. A month and a day ("Jun 1"), a weekday and an hour, or a month and a year, laid out as the locale does, is `formatReadableFields` in `io.github.aughtone:format-readable`, package `io.github.aughtone.readable.fields`; it also takes a CLDR skeleton. Do not assemble one from `displayName` and a phrase of your own — that is right in one language. There is no API here for a `pattern` of your own; a layout fixed in every language is kotlinx-datetime's `Format { }`.
 - **Not a parser.** It formats values and converts epoch-millis `Long`s; parsing date/time *text* is `kotlinx-datetime`'s job (`LocalDate.parse`, etc.).

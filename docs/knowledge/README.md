@@ -6,3 +6,4 @@ How the aughtone-format libraries are built and why: the choices behind them, ho
 - [Specifications](specifications/README.md): how the library works today.
 - [Developer Guides](guides/README.md): how to make a change, add a language or cut a release.
 - [Research](research/README.md): investigations, with what they found and what they recommend.
+- [Requirements](requirements/README.md): what a capability must do and who needs it, with the stories that deliver it.

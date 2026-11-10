@@ -2,6 +2,14 @@
 
 Aught One Format is a suite of Kotlin Multiplatform libraries designed to provide consistent, localized formatting for Dates, Times, Numbers, and other human-readable metrics across all platforms.
 
+## 🚀 Major Updates in 4.3.0
+
+New field formatting, and lighter dependencies; the [CHANGELOG](CHANGELOG.md) lists every change.
+
+- **A date or time with the fields you choose** (`:readable`): `formatReadableFields` writes only the fields asked for — a month and a day, a weekday and an hour, a month and a year — laid out as the locale does, from the Unicode CLDR patterns: "Jun 1" in American English, "1 Jun" in British English, "1. Juni" in German, "6月1日" in Japanese. Name the fields as a `ReadableFields` value, in a builder block, or as a CLDR skeleton ("MMMd").
+- **No Compose or JSON dependency** (`:datetime`, `:readable`, `:toolbox`, `:viewable`): none of them brings Compose or `kotlinx-serialization-json` any more. A project that used either without declaring it must now declare it itself.
+- **Canadian Indigenous locales** (`aughtone-types` 4.2.0): Cree, Ojibwe, Mi'kmaq, Mohawk and 21 more are found by `localeFor`, and three-letter codes normalize to two-letter ones (`cre-CA` is `cr-CA`). They still format in English until reviewed text arrives ([PRD-0001](docs/knowledge/requirements/PRD-0001-canadian-indigenous-language-support.md)).
+
 ## 🚀 Major Updates in 4.2.1
 
 New capabilities only; nothing existing changes.
@@ -91,6 +99,7 @@ Aughtone Format 3.1.0 focuses on relative-time expressiveness and completing loc
 - **Duration Scaling**: Human-friendly duration strings with perceptual rounding (e.g., "2 weeks" vs "14 days").
 - **Numeric Abbreviations**: Scaling large numbers into abbreviated forms (e.g., 1.5K, 1.2M).
 - **Geospatial Formatting**: Localized altitude, azimuth (with cardinal directions), and coordinates.
+- **Dates with Chosen Fields**: A month and a day ("Jun 1"), a weekday and an hour, a month and a year — only the fields you name, laid out as each locale does from CLDR (`formatReadableFields` in `:readable`).
 - **Time-Zone Names**: A zone's name at a moment, the generic name it keeps all year ("Eastern Time"), and Windows zone names mapped to IANA identifiers.
 - **Sun and Moon**: Sunrise, sunset and twilight for a place and a day, new and full moons, the 24 solar terms, and crescent-visibility predictions, the same on every platform.
 - **Calendar Conversion**: Hebrew, Islamic, Persian, Chinese, Korean, Japanese, Ethiopic and the other `RSCALE` calendars, to and from `LocalDate`, with their leap months.
@@ -156,6 +165,15 @@ println(alarm.formatReadableRelative(now = LocalTime(23, 0), direction = Relativ
 
 // Data Sizes
 println(1048576L.formatReadableDataSize()) // "1 MiB"
+```
+
+### Dates with Chosen Fields (`:readable`)
+Name the fields; the locale lays them out, from CLDR. The order you name them in has no effect.
+```kotlin
+val june1 = LocalDate(2024, 6, 1)
+june1.formatReadableFields(ReadableFields.MonthDay, localeFor("en-US")!!)              // "Jun 1"
+june1.formatReadableFields(localeFor("de")!!) { month(TextWidth.Abbreviated); day() }  // "1. Juni"
+june1.formatReadableFields("MMMd", localeFor("ja")!!)                                  // "6月1日"
 ```
 
 ### Sun Times (`:astronomy`)

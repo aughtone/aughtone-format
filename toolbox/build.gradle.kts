@@ -7,9 +7,6 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.multiplatformLibrary)
     alias(libs.plugins.vanniktech.mavenPublish)
-    alias(libs.plugins.kotlinSerialization)
-    alias(libs.plugins.composeMultiplatform)
-    alias(libs.plugins.composeCompiler)
 }
 
 group = libs.versions.namespace.get()
@@ -58,17 +55,8 @@ kotlin {
     }
 
     sourceSets {
-        val androidMain by getting {
-            dependencies {
-                implementation(libs.androidx.startup.runtime)
-            }
-        }
-
         val commonMain by getting {
             dependencies {
-                implementation(libs.jetbrains.compose.ui)
-                implementation(libs.jetbrains.compose.resources)
-                api(libs.kotlinx.serialization.json)
                 // XXX This might require additional libraries if you enable WASM or JS.
                 //  See: https://klibs.io/project/Kotlin/kotlinx-datetime#using-in-your-projects
                 api(libs.kotlinx.datetime)
@@ -78,7 +66,6 @@ kotlin {
         val commonTest by getting {
             dependencies {
                 implementation(libs.kotlin.test)
-                api(libs.kotlinx.serialization.json)
             }
         }
     }
@@ -102,12 +89,6 @@ kotlin {
             }
         }
     }
-}
-
-compose.resources {
-    publicResClass = true
-    packageOfResClass = "${libs.versions.namespace.get()}.format.toolbox.resources"
-    generateResClass = always
 }
 
 mavenPublishing {

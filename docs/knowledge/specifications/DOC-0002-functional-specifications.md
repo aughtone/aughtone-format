@@ -105,6 +105,9 @@ Some locales require overrides that differ from their base language. Only docume
 |---|---|---|
 | `en-ZA` | South African English | Uses `"now now"` as the threshold phrase instead of `"just now"`, which means "sometime later" in SA English |
 
+### Dates and times with chosen fields
+`formatReadableFields` on `LocalDate`, `LocalTime`, `LocalDateTime` and `Instant` writes only the fields the caller names — era, year, month (name or number), day, weekday, hour, minute, second, zone — laid out as the locale lays out that set, from Unicode CLDR's `availableFormats`. The fields are named as a `ReadableFields` value, in a builder block, or as a CLDR skeleton, and the three give the same text. The caller chooses which fields, never their order or separators. The skeleton matching follows ICU's DateTimePatternGenerator and lives in `:datetime`, which exposes it to `:readable` behind the opt-in `@InternalAughtoneFormatApi`.
+
 ---
 
 ## 📅 Datetime Module (`:datetime`)
