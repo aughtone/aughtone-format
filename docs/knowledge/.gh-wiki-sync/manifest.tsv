@@ -6,6 +6,7 @@ decisions/ADR-0004-keep-everyday-wordings-that-differ-from-cldr.md	Decisions-ADR
 decisions/ADR-0005-time-zone-names-from-the-platform.md	Decisions-ADR-0005-Time-Zone-Names-From-The-Platform
 decisions/ADR-0006-astronomy-and-calendar-modules.md	Decisions-ADR-0006-Astronomy-And-Calendar-Modules
 decisions/ADR-0007-chinese-calendar-not-from-icu.md	Decisions-ADR-0007-Chinese-Calendar-Not-From-Icu
+decisions/ADR-0008-number-and-money-formatting-stay-in-readable.md	Decisions-ADR-0008-Number-And-Money-Formatting-Stay-In-Readable
 decisions/README.md	Decisions
 guides/DOC-0005-developer-guide.md	Guides-DOC-0005-Developer-Guide
 guides/README.md	Guides
