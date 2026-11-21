@@ -2,6 +2,7 @@ package io.github.aughtone.readable.skill
 
 import io.github.aughtone.readable.Locales
 import io.github.aughtone.readable.duration.formatReadable
+import io.github.aughtone.readable.financial.CurrencySymbol
 import io.github.aughtone.readable.financial.formatReadable
 import io.github.aughtone.readable.list.formatReadableList
 import io.github.aughtone.readable.metrics.formatReadable
@@ -30,6 +31,7 @@ import kotlin.time.Instant
 class SkillExampleTest {
 
     private val usd = Currency(code = "USD", number = 840, digits = 2, name = "US Dollar", symbol = "$")
+    private val cad = Currency(code = "CAD", number = 124, digits = 2, name = "Canadian Dollar", symbol = "$")
 
     @Test
     fun theSkillExampleCompilesAndProducesTheOutputItClaims() {
@@ -39,6 +41,8 @@ class SkillExampleTest {
         assertEquals("1 MiB", 1048576L.formatReadableDataSize(UnitOfMeasure.Byte, Locales.English))
         assertEquals("1.5 km", Distance(1500.0).formatReadable(Locales.English))
         assertEquals("$1,234.56", Money(123456L, usd).formatReadable(Locales.English))
+        assertEquals("CA$5.00", Money(500L, cad).formatReadable(Locales.English))
+        assertEquals("$5.00", Money(500L, cad).formatReadable(Locales.English, symbol = CurrencySymbol.Narrow))
         assertEquals("1st", 1.formatReadableOrdinal(Locales.English))
 
         assertEquals(

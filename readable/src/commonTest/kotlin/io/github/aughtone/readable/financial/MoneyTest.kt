@@ -65,8 +65,8 @@ class MoneyTest {
     fun testJapaneseZeroDecimalFormatting() {
         val money = Money(1234L, jpy) // ¥1,234 (digits = 0)
 
-        // Japanese prefers Prefix, No Space
-        assertEquals("¥1,234", money.formatReadable(Locales.Japanese))
+        // Japanese puts the symbol first, unspaced, and writes the yen with the full-width U+FFE5.
+        assertEquals("\uFFE51,234", money.formatReadable(Locales.Japanese))
     }
 
 
@@ -94,14 +94,14 @@ class MoneyTest {
             "$123,456,789,012,345,678,901,234.56",
             Money(BigDecimal("123456789012345678901234.56"), usd).formatReadable(Locales.English)
         )
-        assertEquals("¥10,000,000", Money(10_000_000L, jpy).formatReadable(Locales.Japanese))
+        assertEquals("\uFFE510,000,000", Money(10_000_000L, jpy).formatReadable(Locales.Japanese))
     }
 
     @Test
     fun negativeAmountsPutTheSignBeforeAPrefixedSymbol() {
         assertEquals("-$123.00", Money(-12300L, usd).formatReadable(Locales.English))
         assertEquals("-$1,234.56", Money(-123456L, usd).formatReadable(Locales.English))
-        assertEquals("-¥1,234", Money(-1234L, jpy).formatReadable(Locales.Japanese))
+        assertEquals("-\uFFE51,234", Money(-1234L, jpy).formatReadable(Locales.Japanese))
         assertEquals("-123.00", Money(-12300L, usd).formatReadable(Locales.English, showSymbol = false))
     }
 
@@ -120,15 +120,16 @@ class MoneyTest {
     @Test
     fun symbolPlacementFollowsTheLanguage() {
         val money = Money(123456L, usd)
-        assertEquals("$1\u00A0234,56", money.formatReadable(Locales.Afrikaans))
+        // Afrikaans and Italian show a US dollar by its code: CLDR has no symbol for it there.
+        assertEquals("USD\u00A01\u00A0234,56", money.formatReadable(Locales.Afrikaans))
         assertEquals("1,234.56\u00A0$", money.formatReadable(Locales.Hebrew))
         assertEquals("$\u00A01,234.56", money.formatReadable(Locales.Swahili))
         assertEquals("$\u00A01'234.56", money.formatReadable(Locales.SwissGerman))
-        assertEquals("$\u00A01234.56", money.formatReadable(Locales.SwissItalian))
+        assertEquals("USD\u00A01234.56", money.formatReadable(Locales.SwissItalian))
         assertEquals("1.234,56\u00A0$", money.formatReadable(Locales.German))
         // Italian leaves a four-digit amount ungrouped.
-        assertEquals("1234,56\u00A0$", money.formatReadable(Locales.Italian))
-        assertEquals("12.345,60\u00A0$", Money(1234560L, usd).formatReadable(Locales.Italian))
+        assertEquals("1234,56\u00A0USD", money.formatReadable(Locales.Italian))
+        assertEquals("12.345,60\u00A0USD", Money(1234560L, usd).formatReadable(Locales.Italian))
     }
 
     @Suppress("DEPRECATION")

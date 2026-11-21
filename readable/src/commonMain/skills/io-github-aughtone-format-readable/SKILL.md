@@ -48,6 +48,7 @@ Almost everything is an extension named `formatReadable…`, and nearly every fo
 ```kotlin
 import io.github.aughtone.readable.Locales
 import io.github.aughtone.readable.duration.formatReadable
+import io.github.aughtone.readable.financial.CurrencySymbol
 import io.github.aughtone.readable.financial.formatReadable
 import io.github.aughtone.readable.list.formatReadableList
 import io.github.aughtone.readable.metrics.formatReadable
@@ -65,6 +66,7 @@ import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.minutes
 
 val usd = Currency(code = "USD", number = 840, digits = 2, name = "US Dollar", symbol = "$")
+val cad = Currency(code = "CAD", number = 124, digits = 2, name = "Canadian Dollar", symbol = "$")
 
 7.days.formatReadable(locale = Locales.English)                 // "1 week"
 1500.0.formatReadableAbbreviated(Locales.English)               // "1.5k"
@@ -72,6 +74,8 @@ val usd = Currency(code = "USD", number = 840, digits = 2, name = "US Dollar", s
 1048576L.formatReadableDataSize(UnitOfMeasure.Byte, Locales.English)  // "1 MiB"
 Distance(1500.0).formatReadable(Locales.English)                // "1.5 km"
 Money(123456L, usd).formatReadable(Locales.English)             // "$1,234.56"
+Money(500L, cad).formatReadable(Locales.English)                // "CA$5.00": the locale's symbol, not cad.symbol
+Money(500L, cad).formatReadable(Locales.English, symbol = CurrencySymbol.Narrow)  // "$5.00"
 1.formatReadableOrdinal(Locales.English)                        // "1st"
 
 // Locale-correct list joining
@@ -111,6 +115,8 @@ The `geo`/`quantitative` families split by package: `Coordinates` extensions are
 
 **Trailing zeros are trimmed and rounding is lossy — do not promise a fixed decimal count.** `precision` is a maximum: `1024L.formatReadableDataSize(...)` is `"1 KiB"`, not `"1.0 KiB"`; `Distance(500.0)` is `"500 m"`. Money is the one exception and always shows its currency's full minor-unit digits (`"$12.00"`). Units round to the nearest step (`29.days` → "29 days" but `30.days` → "1 month"; `10.days` → "1 week", `11.days` → "2 weeks"), the week unit only ever renders 1–3 before jumping to days/months, and a value that rounds up to a whole larger unit is shown as that unit (59.6 seconds → "1 minute", 999,999 → "1M", 1,048,575 bytes → "1 MiB"). DMS truncates its seconds field (21.6″ reads 21″). Symptom: fewer decimals than you set, or a unit that "jumps" at a threshold.
 
+**The currency symbol is the locale's, not `Currency.symbol`.** Money shows Unicode CLDR's standard symbol for the currency in the locale, which marks a currency that shares its sign with the locale's own: a Canadian dollar is `"CA$5.00"` in US English and `"$5.00"` in Canadian English. Where CLDR has no symbol for a currency in a locale, it shows the code (`"AED 5.00"` in English). A `Currency` built with a symbol of its own shows it only if CLDR has no symbol for its code at all. Symptom: a symbol you set on the `Currency` does not appear — pass `symbol = CurrencySymbol.Narrow` for the bare sign, or `CurrencySymbol.Code` for the code.
+
 **Numbers are always written out in full, and no formatter throws on a value.** There is no exponent notation however large or small the value; `Long` and `ULong` keep every digit. Not-a-number renders as `"NaN"` and the infinities as `"∞"` / `"-∞"` (with the bare unit, and no prefix, in the metric and data-size formatters). A negative number carries the locale's leading minus sign — the hyphen-minus in most languages, U+2212 in Swedish, Norwegian, Finnish, Estonian, Lithuanian, Croatian, Slovenian, Basque and Persian; for money it goes where Unicode CLDR puts it for the locale — before the symbol in English (`"-$123.00"`), between the symbol and the digits in Dutch (`"€ -123,00"`) and Swiss German (`"CHF-123.00"`), before the digits when the symbol trails (`"-123,00 €"`). The one thing that can throw is the default `locale = Locale.current`, which throws `IllegalArgumentException` if the platform reports no locale at all.
 
 **Data sizes are IEC/base-1024 only.** Symbols are always `KiB`, `MiB`, …; there is no `base`/decimal (`kB`) option. Symptom: `formatReadableDataSize(base = 1000)` does not compile.
@@ -137,6 +143,7 @@ The `geo`/`quantitative` families split by package: `Coordinates` extensions are
 - Swedish, Norwegian, Finnish, Estonian, Lithuanian, Croatian, Slovenian, Basque and Persian write negatives with U+2212 (`"−5"`).
 - Swiss Italian leaves a four-digit number whole (`"1234.56"`, was `"1'234.56"`), and regions CLDR writes differently from their language now follow CLDR: `de-AT` groups with a space, `es-BR` and `kk-CN` use a dot decimal, and English in most of Europe uses that country's separators (`en-DE` is `"1.234,5"`).
 - Money places its symbol and sign from CLDR's currency pattern for the locale, not a table of languages, and the space between an amount and its symbol is U+00A0: `"1 234,56 €"`, `"CHF-1'234.56"` in Swiss German (was `"CHF -1'234.56"`), `"$ 1,234.56"` in Persian (was after the number). A symbol ending in a letter is spaced from the digits (`"CHF 5.00"` in English). Where CLDR gives money its own separators they are used: Austrian German writes `"€ 1.234,56"` though it groups numbers with a space, and English in Switzerland, Sweden or Poland writes euros the English way and its own currency the local way.
+- Money shows CLDR's standard symbol for the currency in the locale, not `Currency.symbol`: `"CA$5.00"` in US English, `"US$5.00"` in Canadian English, the code where CLDR has no symbol (`"AED 5.00"` in English, `"1234,56 USD"` in Italian), `"￥"` for the yen in Japanese. `Currency.symbol` shows only for a currency CLDR has no symbol for. `symbol = CurrencySymbol.Narrow` gives the bare sign, `CurrencySymbol.Code` the ISO code.
 - `Separators.Ascii` gives the old characters back where a caller needs plain ASCII; `Money.formatReadable` and `moneyFormatterFor` take it too.
 
 **New in 4.3.0: Canadian Indigenous locales are found, and written in English.** `localeFor` now returns locales for Cree, Ojibwe, Mi'kmaq, Mohawk and 21 more (`cr-CA`, `hur-CA`, `atj-CA`, …). This library has no text in those languages, so they format in English, the same text as before they were found — do not read a non-null locale as a sign its output is in that language. Inuktitut (`iu`) is the one with its own text.

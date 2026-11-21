@@ -14,6 +14,13 @@ import io.github.aughtone.types.locale.Locale
  * spaces. A symbol that ends in a letter is spaced from the digits even where the locale writes
  * `"$"` against them (`"CHF 12.00"` in English), as CLDR does.
  *
+ * The symbol is CLDR's standard symbol for the currency in [locale], which marks a dollar that is
+ * not the locale's own: `"CA$5.00"` in US English, `"US$5.00"` in Canadian English, `"5,00 $ US"` in
+ * Canadian French. Pass [CurrencySymbol.Narrow] for the bare `"$"` where the context already says
+ * which currency it is, or [CurrencySymbol.Code] for `"CAD 5.00"`. A currency CLDR has no symbol
+ * for is written with its own `Currency.symbol`; the `symbol` of a currency CLDR does name is not
+ * used.
+ *
  * The amount always shows the currency's full minor-unit digits — two for US dollars, none for
  * yen — so twelve dollars is `"$12.00"`, not `"$12"`. An amount finer than the minor unit is
  * rounded half to even. The digits are exact however large the amount is.
@@ -28,10 +35,14 @@ import io.github.aughtone.types.locale.Locale
  * Money(123456L, eur).formatReadable(Locales.French)   // "1 234,56 €" (U+202F, then U+00A0)
  * Money(-12300L, usd).formatReadable(Locales.English)  // "-$123.00"
  * Money(-12300L, eur).formatReadable(Locales.Dutch)    // "€ -123,00"
+ * Money(500L, cad).formatReadable(Locales.English)     // "CA$5.00"
+ * Money(500L, cad).formatReadable(Locales.English, symbol = CurrencySymbol.Narrow)  // "$5.00"
  * ```
  *
  * @param locale The locale to use for formatting. Defaults to [Locale.current].
  * @param showSymbol Whether to include the currency symbol in the output. Defaults to true.
+ * @param symbol Which symbol to write: CLDR's standard symbol (the default), its narrow symbol, or
+ *   the ISO code. See [CurrencySymbol]. Ignored when [showSymbol] is false.
  * @param separators Whether spaces and signs are the typographic ones CLDR uses (the default), or
  *   plain ASCII. See [Separators].
  * @return A formatted monetary string.
@@ -39,15 +50,16 @@ import io.github.aughtone.types.locale.Locale
 fun Money.formatReadable(
     locale: Locale = Locale.current,
     showSymbol: Boolean = true,
+    symbol: CurrencySymbol = CurrencySymbol.Standard,
     separators: Separators = Separators.Typographic,
 ): String {
-    val formatter = moneyFormatterFor(locale, showSymbol, separators)
+    val formatter = moneyFormatterFor(locale, showSymbol, symbol, separators)
     return formatter(this)
 }
 
 @Deprecated("Kept for binary compatibility.", level = DeprecationLevel.HIDDEN)
 fun Money.formatReadable(locale: Locale = Locale.current, showSymbol: Boolean = true): String =
-    formatReadable(locale, showSymbol, Separators.Typographic)
+    formatReadable(locale, showSymbol, CurrencySymbol.Standard, Separators.Typographic)
 
 /**
  * Formats a [Money] object into a localized human-readable string.

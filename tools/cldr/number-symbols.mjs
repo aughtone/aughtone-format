@@ -3,7 +3,7 @@
 //
 //   node tools/cldr/number-symbols.mjs
 //
-// Run it from the repository root. It rewrites four files and prints what it wrote. The CLDR
+// Run it from the repository root. It rewrites five files and prints what it wrote. The CLDR
 // version it used is recorded in each. Do not edit the generated files by hand. The places where
 // the output departs from CLDR are listed in ADJUSTMENTS below, each with its reason.
 //
@@ -23,6 +23,10 @@
 // symbol character in every locale, so CLDR's currency-spacing rule — a no-break space between a
 // symbol that ends in a letter and the digits, as in "CHF 5.00" — does not leak into them; the
 // library applies that rule itself, to whatever symbol it shows.
+//
+// And it records the symbol each currency shows in each locale, standard ("CA$") and narrow
+// ("$"), the same way again: English in full, a language where it differs from English, a region
+// where it differs from its language.
 import { writeFileSync } from "node:fs";
 
 // Every bundled language, by the code the library looks it up with. The South Asian languages
@@ -213,6 +217,59 @@ for (const [tag, { positive, negative }] of [["en", englishCurrency], ...currenc
   }
 }
 
+// The symbol each currency shows in each locale, in CLDR's standard form ("CA$" in English, which
+// tells it from the US dollar) and its narrow form ("$", for where the context already says which
+// dollar). Every current currency ICU knows is recorded, so it covers each one aughtone-types
+// bundles; a code ICU does not know has no entry and the library falls back to Currency.symbol.
+// English is recorded in full; a language only where it differs from English, and a region only
+// where it differs from its language, form by form. Only regions that are locales of their own in
+// ICU can differ; every other region is checked to read as its language.
+const SYMBOL_CODES = Intl.supportedValuesOf("currency");
+const symbolIn = (tag, code, display) =>
+  clean(formatter(tag, { style: "currency", currency: code, currencyDisplay: display })
+    .formatToParts(1).filter((part) => part.type === "currency").map((part) => part.value).join(""));
+const symbolsTableOf = (tag) => new Map(SYMBOL_CODES.map((code) => [code, [symbolIn(tag, code, "symbol"), symbolIn(tag, code, "narrowSymbol")]]));
+const englishSymbols = symbolsTableOf("en");
+/** What [table] changes from [parent], as `[code, standard or null, narrow or null]`. */
+const symbolChanges = (table, parent) => SYMBOL_CODES.flatMap((code) => {
+  const [standard, narrow] = table.get(code);
+  const [parentStandard, parentNarrow] = parent.get(code);
+  if (standard === parentStandard && narrow === parentNarrow) return [];
+  return [[code, standard === parentStandard ? null : standard, narrow === parentNarrow ? null : narrow]];
+});
+const symbolEntries = [];
+for (const language of LANGUAGES) {
+  const own = symbolsTableOf(language);
+  const changes = symbolChanges(own, englishSymbols);
+  if (changes.length) symbolEntries.push([language, changes]);
+  for (const region of REGIONS) {
+    const tag = `${language}-${region}`;
+    if (new Intl.NumberFormat(tag).resolvedOptions().locale !== tag) {
+      for (const code of ["USD", "EUR", "CAD", "AUD", "GBP", "CHF"]) {
+        if (!same(own.get(code), [symbolIn(tag, code, "symbol"), symbolIn(tag, code, "narrowSymbol")])) {
+          throw new Error(`${tag}: not a locale of its own, but writes ${code} differently from ${language}`);
+        }
+      }
+      continue;
+    }
+    const regional = symbolChanges(symbolsTableOf(tag), own);
+    if (regional.length) symbolEntries.push([tag, regional]);
+  }
+}
+// The table is packed into one string per tag, "CODE|standard|narrow;…", with an empty form for one
+// that is inherited, so neither separator may appear in a symbol.
+for (const [, [standard, narrow]] of englishSymbols) {
+  for (const symbol of [standard, narrow]) if (!symbol || /[|;]/.test(symbol)) throw new Error(`unexpected symbol ${JSON.stringify(symbol)}`);
+}
+for (const [tag, changes] of symbolEntries) {
+  for (const [, standard, narrow] of changes) {
+    for (const symbol of [standard, narrow]) {
+      if (symbol === "" || /[|;]/.test(symbol ?? "")) throw new Error(`${tag}: unexpected symbol ${JSON.stringify(symbol)}`);
+    }
+  }
+}
+const symbolChangeCount = symbolEntries.reduce((n, [, changes]) => n + changes.length, 0);
+
 const kotlinString = (text) =>
   `"${[...text].map((c) => {
     const code = c.codePointAt(0);
@@ -319,30 +376,57 @@ ${[...overrides].map(([key, p]) => `    "${key}" to ${currencyPatternKotlin(p)},
 internal val englishCurrencyPattern: CurrencyPattern = ${currencyPatternKotlin(englishCurrency)}
 `;
 
+const packedSymbols = (changes) =>
+  kotlinString(changes.map(([code, standard, narrow]) => `${code}|${standard ?? ""}|${narrow ?? ""}`).join(";"));
+const symbolData = `package io.github.aughtone.readable.financial
+
+${header}
+
+/**
+ * The symbol each currency shows in English, and in any language CLDR has no symbols for, as
+ * \`"standard|narrow"\` keyed by ISO 4217 code: \`"CAD"\` is \`"CA$|$"\`. Every current currency
+ * ICU knows has an entry; one that has none falls back to its own \`Currency.symbol\`.
+ */
+internal val englishCurrencySymbols: Map<String, String> = mapOf(
+${[...englishSymbols].map(([code, [standard, narrow]]) => `    "${code}" to ${kotlinString(`${standard}|${narrow}`)},`).join("\n")}
+)
+
+/**
+ * Where each bundled language, and each region that does it differently, shows a currency with a
+ * different symbol, keyed by BCP 47 tag like [cldrCurrencyPatterns] and looked up the same way,
+ * ending at [englishCurrencySymbols]. Each value packs its currencies as
+ * \`"CODE|standard|narrow;…"\`; a form left empty is the one the tag's parent shows.
+ */
+internal val cldrCurrencySymbols: Map<String, String> = mapOf(
+${symbolEntries.map(([tag, changes]) => `    "${tag}" to ${packedSymbols(changes)},`).join("\n")}
+)
+`;
+
 // The money fixture: ICU's own text for a sample of amounts in a few currencies, per tag, one
-// case per line as `currency|digits|amount|symbol|text`, where `symbol` is the symbol ICU shows
-// for that currency in that locale. The library's own choice of symbol is a separate question, so
-// the test formats with ICU's symbol and checks only placement, spacing and the number.
-const CURRENCIES = [["EUR", 2], ["USD", 2], ["CHF", 2], ["JPY", 0], ["GBP", 2]];
+// case per line as `currency|digits|amount|standard|narrow|code`: the amount written with the
+// currency's standard symbol, its narrow symbol and its ISO code. The test builds each currency
+// with a symbol of its own that CLDR's must replace.
+const CURRENCIES = [["EUR", 2], ["USD", 2], ["CAD", 2], ["AUD", 2], ["CHF", 2], ["JPY", 0], ["GBP", 2]];
 const AMOUNTS = ["1234.5", "-1234.5", "0", "1234567.25", "-5"];
 const moneyCase = (tag, [code, digits], amount) => {
-  const f = formatter(tag, { style: "currency", currency: code, roundingMode: "halfEven" });
-  const parts = f.formatToParts(Number(amount));
-  const symbol = clean(parts.filter((part) => part.type === "currency").map((part) => part.value).join(""));
+  const text = (display) =>
+    clean(formatter(tag, { style: "currency", currency: code, currencyDisplay: display, roundingMode: "halfEven" }).format(Number(amount)));
   // A raw Kotlin string reads "$" as the start of a template, so it is written as ${'$'}.
   const raw = (text) => text.replaceAll("$", () => "${'$'}");
-  return raw(`${code}|${digits}|${amount}|${symbol}|${clean(f.format(Number(amount)))}`);
+  return raw(`${code}|${digits}|${amount}|${text("symbol")}|${text("narrowSymbol")}|${text("code")}`);
 };
+const moneyFixtureTags = [...new Set([...fixtureTags, ...symbolEntries.map(([tag]) => tag)])].sort();
 const moneyFixture = `package io.github.aughtone.readable.financial
 
 ${header}
 
 /**
  * What Unicode CLDR writes for a sample of amounts, per BCP 47 tag, one case per line as
- * \`currency|digits|amount|symbol|text\`. \`symbol\` is the symbol ICU shows in that locale.
+ * \`currency|digits|amount|standard|narrow|code\`: the text with the currency's standard symbol,
+ * with its narrow symbol, and with its ISO code.
  */
 internal val moneyCldrFixture: Map<String, String> = mapOf(
-${fixtureTags.map((tag) => `    "${tag}" to """
+${moneyFixtureTags.map((tag) => `    "${tag}" to """
 ${CURRENCIES.flatMap((currency) => AMOUNTS.map((amount) => moneyCase(tag, currency, amount))).join("\n")}
 """,`).join("\n")}
 )
@@ -353,7 +437,8 @@ const dataPath = `${base}/commonMain/kotlin/io/github/aughtone/readable/number/N
 const fixturePath = `${base}/commonTest/kotlin/io/github/aughtone/readable/number/NumberCldrFixture.kt`;
 const currencyDataPath = `${base}/commonMain/kotlin/io/github/aughtone/readable/financial/CurrencyPatterns.resources.kt`;
 const moneyFixturePath = `${base}/commonTest/kotlin/io/github/aughtone/readable/financial/MoneyCldrFixture.kt`;
-const outputs = [[dataPath, data], [fixturePath, fixture], [currencyDataPath, currencyData], [moneyFixturePath, moneyFixture]];
+const symbolDataPath = `${base}/commonMain/kotlin/io/github/aughtone/readable/financial/CurrencySymbols.resources.kt`;
+const outputs = [[dataPath, data], [fixturePath, fixture], [currencyDataPath, currencyData], [symbolDataPath, symbolData], [moneyFixturePath, moneyFixture]];
 for (const [path, text] of outputs) writeFileSync(path, text);
-console.log(`CLDR ${cldr}: ${entries.length} number styles, ${currencyEntries.length} currency patterns and ${overrides.size} currency overrides (${overrideCodes.join(", ")}) across ${LANGUAGES.length} languages, ${fixtureTags.length} fixture tags`);
+console.log(`CLDR ${cldr}: ${entries.length} number styles, ${currencyEntries.length} currency patterns and ${overrides.size} currency overrides (${overrideCodes.join(", ")}) and ${symbolChangeCount} currency symbols in ${symbolEntries.length} locales across ${LANGUAGES.length} languages, ${fixtureTags.length} number and ${moneyFixtureTags.length} money fixture tags`);
 for (const [path, text] of outputs) console.log(`wrote ${path} (${text.length} characters)`);

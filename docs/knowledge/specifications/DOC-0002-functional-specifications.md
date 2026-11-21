@@ -98,6 +98,17 @@ Generated from Unicode CLDR for every bundled language and every region that wri
 | `it-CH` | Swiss Italian | `.` | `'` (apostrophe), from five digits | `1234.56`, `12'345.67` |
 | `sv` | Swedish | `,` | U+00A0, minus U+2212 | `−1 234,56` |
 
+#### Money (`CurrencyPatterns.resources.kt`, `CurrencySymbols.resources.kt`)
+
+Where the symbol and minus sign go, and which symbol is shown, are generated from Unicode CLDR by the same tool, for every bundled language and every region that does it differently. The symbol is CLDR's standard symbol for the currency in the locale by default (`CurrencySymbol.Standard`); `CurrencySymbol.Narrow` gives the bare sign and `CurrencySymbol.Code` the ISO code. `Currency.symbol` is used only for a currency CLDR has no symbol for. Some examples:
+
+| Tag | Region | US dollar | Canadian dollar |
+|---|---|---|---|
+| `en-US` | United States | `$5.00` | `CA$5.00` |
+| `en-CA` | Canada | `US$5.00` | `$5.00` |
+| `fr-CA` | Canadian French | `5,00 $ US` | `5,00 $` |
+| `fr` | French | `5,00 $US` | `5,00 $CA` |
+
 #### Duration Formatting (`Duration.resources.kt`)
 
 | Tag | Region | Difference |

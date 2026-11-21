@@ -7,6 +7,7 @@ import io.github.aughtone.readable.number.Separators
 import io.github.aughtone.readable.number.numberStyleFor
 import io.github.aughtone.readable.number.formatDecimalText
 import io.github.aughtone.readable.number.toAscii
+import io.github.aughtone.types.financial.Currency
 import io.github.aughtone.types.financial.Money
 import io.github.aughtone.types.locale.Locale
 import io.github.aughtone.types.number.RoundingMode
@@ -114,33 +115,100 @@ private fun moneyStyleFor(numberStyle: NumberStyle, pattern: CurrencyPattern): N
         indian = pattern.indian ?: numberStyle.indian,
     )
 
-@Volatile private var moneyFormatterCache = emptyMap<Triple<String, Boolean, Separators>, MoneyFormatter>()
+/**
+ * The symbols a locale shows for currencies, from [cldrCurrencySymbols]: each layer is one tag of
+ * the locale's BCP 47 subtag chain, most specific first, ending at [englishCurrencySymbols]. Each
+ * maps an ISO 4217 code to its standard and narrow symbol, either `null` where the tag shows its
+ * parent's.
+ */
+internal class CurrencySymbols(private val layers: List<Map<String, Array<String?>>>) {
+
+    /**
+     * The symbol [currency] is written with in [form]: CLDR's for the locale, or the currency's own
+     * [Currency.symbol] where CLDR has none.
+     */
+    fun of(currency: Currency, form: CurrencySymbol): String {
+        val index = when (form) {
+            CurrencySymbol.Standard -> 0
+            CurrencySymbol.Narrow -> 1
+            CurrencySymbol.Code -> return currency.code
+        }
+        for (layer in layers) layer[currency.code]?.get(index)?.let { return it }
+        return currency.symbol
+    }
+}
+
+/** Reads one tag's packed symbols, `"CODE|standard|narrow;…"`, with an empty form left `null`. */
+private fun unpackSymbols(packed: String): Map<String, Array<String?>> =
+    packed.split(';').associate { entry ->
+        val (code, standard, narrow) = entry.split('|')
+        code to arrayOf(standard.ifEmpty { null }, narrow.ifEmpty { null })
+    }
+
+private val englishSymbolLayer: Map<String, Array<String?>> by lazy {
+    englishCurrencySymbols.mapValues { (_, symbols) ->
+        val (standard, narrow) = symbols.split('|')
+        arrayOf<String?>(standard, narrow)
+    }
+}
+
+/** The symbols [locale] shows for currencies: its own, then its language's, then English. */
+internal fun currencySymbolsFor(locale: Locale): CurrencySymbols {
+    val layers = mutableListOf<Map<String, Array<String?>>>()
+    var currentTag: String =
+        if (locale.regionCode != null) "${locale.languageCode}-${locale.regionCode}" else locale.languageCode
+    while (currentTag.isNotEmpty()) {
+        cldrCurrencySymbols[currentTag]?.let { layers += unpackSymbols(it) }
+        currentTag = currentTag.substringBeforeLast('-', "")
+    }
+    layers += englishSymbolLayer
+    return CurrencySymbols(layers)
+}
+
+private data class MoneyFormatterKey(
+    val tag: String,
+    val showSymbol: Boolean,
+    val symbol: CurrencySymbol,
+    val separators: Separators,
+)
+
+@Volatile private var moneyFormatterCache = emptyMap<MoneyFormatterKey, MoneyFormatter>()
 
 /**
  * Retrieves the [MoneyFormatter] for a given [Locale], building and caching it on first use.
  *
- * The separators, the minus sign, and where the symbol and sign go are the ones Unicode CLDR gives
- * the locale: `"$1,234.56"` and `"-$1,234.56"` in English, `"1 234,56 €"` in French, `"€ -1.234,56"`
- * in Dutch, `"CHF-1'234.56"` in Swiss German. Every space inside an amount is a no-break space, so
- * it never breaks across a line, unless [separators] is [Separators.Ascii].
+ * The separators, the minus sign, the currency symbol, and where the symbol and sign go are the
+ * ones Unicode CLDR gives the locale: `"$1,234.56"` and `"-$1,234.56"` in English, `"1 234,56 €"`
+ * in French, `"€ -1.234,56"` in Dutch, `"CHF-1'234.56"` in Swiss German. Every space inside an
+ * amount is a no-break space, so it never breaks across a line, unless [separators] is
+ * [Separators.Ascii].
  *
- * @param locale The locale dictating separators and symbol placement.
+ * The symbol is CLDR's standard symbol for the currency in the locale unless [symbol] says
+ * otherwise, so a dollar that is not the locale's own is marked: `"CA$5.00"` in US English,
+ * `"US$5.00"` in Canadian English. A currency CLDR has no symbol for is written with its own
+ * [Currency.symbol]; the `symbol` of a currency CLDR does name is not used.
+ *
+ * @param locale The locale dictating separators, the symbol and its placement.
  * @param showSymbol If true, the currency symbol is included.
+ * @param symbol Which symbol to write: CLDR's standard symbol (the default), its narrow symbol, or
+ *   the ISO code. See [CurrencySymbol]. Ignored when [showSymbol] is false.
  * @param separators Whether spaces and signs are the typographic ones CLDR uses (the default), or
  *   plain ASCII.
  */
 fun moneyFormatterFor(
     locale: Locale,
     showSymbol: Boolean = true,
+    symbol: CurrencySymbol = CurrencySymbol.Standard,
     separators: Separators = Separators.Typographic,
 ): MoneyFormatter {
     val fullTag = if (locale.regionCode != null) "${locale.languageCode}-${locale.regionCode}" else locale.languageCode
-    val cacheKey = Triple(fullTag, showSymbol, separators)
+    val cacheKey = MoneyFormatterKey(fullTag, showSymbol, symbol, separators)
 
     moneyFormatterCache[cacheKey]?.let { return it }
 
     val numberStyle = numberStyleFor(locale)
     val minus = numberStyle.minus
+    val symbols = currencySymbolsFor(locale)
 
     val formatter: MoneyFormatter = { money ->
         val currency = money.currency
@@ -156,7 +224,7 @@ fun moneyFormatterFor(
             // The number text carries the locale's minus sign only when the rounded amount is
             // below zero, so an amount that rounds to zero takes the positive layout.
             val negative = numberStr.startsWith(minus)
-            pattern.fill(numberStr.removePrefix(minus), negative, minus, currency.symbol)
+            pattern.fill(numberStr.removePrefix(minus), negative, minus, symbols.of(currency, symbol))
         } else {
             numberStr
         }
@@ -177,4 +245,4 @@ fun moneyFormatterFor(
 
 @Deprecated("Kept for binary compatibility.", level = DeprecationLevel.HIDDEN)
 fun moneyFormatterFor(locale: Locale, showSymbol: Boolean = true): MoneyFormatter =
-    moneyFormatterFor(locale, showSymbol, Separators.Typographic)
+    moneyFormatterFor(locale, showSymbol, CurrencySymbol.Standard, Separators.Typographic)
