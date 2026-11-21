@@ -74,11 +74,12 @@ SKILLS=("$REPO_DIR/skills/stories/story-workflow" "$REPO_DIR/skills/stories/stor
         "$REPO_DIR/skills/stories/to-issues" "$REPO_DIR/skills/stories/triage"
         "$REPO_DIR/skills/docs/project-docs" "$REPO_DIR/skills/docs/to-prd"
         "$REPO_DIR/skills/docs/to-adr" "$REPO_DIR/skills/docs/to-rad"
-        "$REPO_DIR/skills/docs/grill-with-docs" "$REPO_DIR/skills/docs/regulatory-compliance" "$REPO_DIR/skills/docs/to-wiring"
+        "$REPO_DIR/skills/docs/grill-with-docs" "$REPO_DIR/skills/docs/regulatory-compliance"
         "$REPO_DIR/skills/sessions/handoff" "$REPO_DIR/skills/sessions/housekeeping"
         "$REPO_DIR/skills/sessions/zoom-out" "$REPO_DIR/skills/engineering/tdd"
         "$REPO_DIR/skills/engineering/improve-codebase-architecture"
-        "$REPO_DIR/skills/engineering/to-ux")
+        "$REPO_DIR/skills/engineering/to-ux"
+        "$REPO_DIR/skills/authoring/write-a-skill")
 # worklog is NOT here on purpose. A developer's working day is personal -
 # it spans every project and belongs to the person, not to any repo - so
 # installing it into every bound project put a private record in front of
@@ -99,7 +100,7 @@ SKILLS=("$REPO_DIR/skills/stories/story-workflow" "$REPO_DIR/skills/stories/stor
 # never pruned, even if an older installer once shipped it: the developer
 # may want it, and it is not ours to remove. Same for anything the
 # project added itself.
-RETIRED_SKILLS=(grill-me to-ai-skill to-research to-design to-library-skill
+RETIRED_SKILLS=(grill-me to-ai-skill to-research to-design to-library-skill to-wiring
                 setup-project manage-docs manage-persona manage-skills
                 sync-tracking)
 
@@ -154,29 +155,29 @@ kv()    { printf '  %s%-24s%s %s\n' "$C_D" "$1" "$C_0" "$2"; }
 
 # A retired skill must not survive in the source tree. RETIRED_SKILLS is
 # what prunes it from bound projects, but a directory left behind under
-# skills/ or budget-skills/ is still readable, still copyable, and is what
-# anyone assembling a set from what is on disk will copy. That is not
+# anywhere in the source tree is still readable, still copyable, and is
+# what anyone assembling a set from what is on disk will copy. That is not
 # hypothetical: to-research was retired here, left in place, and then
-# copied wholesale into budget-skills by someone reading the tree rather
-# than this list. Only checked from the source clone - a shipped bundle
+# copied wholesale into the parallel light set by someone reading the tree
+# rather than this list. A skill is found by its SKILL.md, not by the name
+# of the tree holding it, so a new or renamed set is covered unchanged. Only checked from the source clone - a shipped bundle
 # has no skills tree to police.
 if [[ $SHIPPED -eq 0 ]]; then
   _stale=''
   for _r in "${RETIRED_SKILLS[@]}"; do
-    for _root in "$REPO_DIR/skills" "$REPO_DIR/budget-skills"; do
-      [[ -d "$_root" ]] || continue
-      while IFS= read -r _d; do
-        [[ -n "$_d" ]] || continue
-        _stale="$_stale${_stale:+ }${_d#"$REPO_DIR"/}"
-      done < <(find "$_root" -maxdepth 2 -type d -name "$_r" 2>/dev/null)
-    done
+    while IFS= read -r _f; do
+      [[ -n "$_f" ]] || continue
+      _d="$(dirname "$_f")"
+      _stale="$_stale${_stale:+ }${_d#"$REPO_DIR"/}"
+    done < <(find "$REPO_DIR" -path "$REPO_DIR/.git" -prune -o \
+               -type f -path "*/$_r/SKILL.md" -print 2>/dev/null)
   done
   if [[ -n "$_stale" ]]; then
     warn "retired skill(s) still in the source tree: $_stale"
     say  "    They are pruned from projects but remain here to be copied by mistake."
     say  "    Delete them, or take them off RETIRED_SKILLS if they are not retired."
   fi
-  unset _stale _r _root _d
+  unset _stale _r _f _d
 fi
 
 # one-time migration from older layouts
@@ -736,7 +737,7 @@ committed anywhere, so they drift from what your projects were tested
 against and nobody else sees them. A project copy of the same name
 overrides the one here.
 
-Remove them with \\`./install.sh --clean-user\\`.
+Remove them with \`./install.sh --clean-user\`.
 
 | Skill | Version |
 |---|---|
@@ -1455,6 +1456,12 @@ attach_project_github() {  # $1 dir, $2 owner/repo, $3 project number|"", $4 rea
   srv="$(gh_server_name "$conn")"
   copy_skills "$dir" "$mode"
   warn_user_level_overlap
+  # Read the prior choice BEFORE the pointer is deleted below. write_updates_config
+  # says it preserves what was chosen, and could not: every attach path regenerates
+  # the pointer from scratch, so by the time it reads, there is nothing to read.
+  # Harmless while the default matched the common value; silently flips everyone
+  # the moment it does not.
+  PRIOR_UPDATES_CHECK="$(read_pointer "$dir" check)"
   rm -f "$dir/.agents/youtrack.json" "$dir/.agents/config/youtrack.json" "$dir/.agents/config/story-tools.json"
   merge_json "$dir/.agents/config/story-tools.json" "tracker" '{
     "type": "github",
@@ -1511,6 +1518,12 @@ attach_project() {  # $1 dir, $2 yt_project, $3 readonly(true|""), $4 mode
   copy_skills "$dir" "$mode"
   warn_user_level_overlap
 
+  # Read the prior choice BEFORE the pointer is deleted below. write_updates_config
+  # says it preserves what was chosen, and could not: every attach path regenerates
+  # the pointer from scratch, so by the time it reads, there is nothing to read.
+  # Harmless while the default matched the common value; silently flips everyone
+  # the moment it does not.
+  PRIOR_UPDATES_CHECK="$(read_pointer "$dir" check)"
   rm -f "$dir/.agents/youtrack.json" "$dir/.agents/config/youtrack.json" "$dir/.agents/config/story-tools.json"   # regenerate cleanly
   merge_json "$dir/.agents/config/story-tools.json" "tracker" '{
     "type": "youtrack",
@@ -1546,11 +1559,34 @@ attach_project() {  # $1 dir, $2 yt_project, $3 readonly(true|""), $4 mode
 
 pick_project() {  # sets PROJECT_DIR/PROJECT_NAME (may be empty = user-level only)
   PROJECT_DIR=""; PROJECT_NAME=""
+  # Nobody arriving here knows what "user-level" means, and the word appears
+  # nowhere else until it has already happened. Say it before asking.
+  note "Two ways to install the skills:"
+  note "  Project - copied into that repo and committed, so everyone who clones"
+  note "            it gets the same versions. This is the one you usually want."
+  note "  User    - copied into your home directory instead. They follow you into"
+  note "            every project on this machine, are never committed, and"
+  note "            nobody else on the team sees them."
+  note "A project copy always overrides a user copy, and you can set up a project"
+  note "later with --project <dir>."
+  blank
+
   # default to the directory we're standing in when it looks like a project;
   # never prefill some OTHER project from history
   local here=""
   if [[ -d .git || -d .agents || -f AGENTS.md ]]; then here="$PWD"; fi
-  local dir; dir="$(ask "Project repo to set up (path; Enter for user-level setup only)" "$here")"
+  # The hint has to match what Enter actually does. With a path prefilled,
+  # Enter TAKES it - so "Enter for user-level only" was a lie in the common
+  # case, and there was no way to choose user-level at all without typing a
+  # path that fails. "-" is that answer.
+  local q dir
+  if [[ -n "$here" ]]; then
+    q="Project repo to set up (Enter accepts the path below; '-' for user-level only)"
+  else
+    q="Project repo to set up (full path, or Enter for user-level only)"
+  fi
+  dir="$(ask "$q" "$here")"
+  [[ "$dir" == "-" || "$dir" == "none" ]] && dir=""
   [[ -z "$dir" ]] && { say "  user-level setup only - bind a project later with --project <dir>"; return; }
   dir="${dir/#\~/$HOME}"
   [[ -d "$dir" ]] || { warn "$dir is not a directory - continuing with user-level setup only"; return; }
@@ -1684,6 +1720,12 @@ attach_project_none() {  # $1 dir, $2 mode (link|copy)
   # legacy pointers from before story-tools.json existed. The pointer itself
   # is merged, not replaced: it also carries snapshot, updates and roles, and
   # a refresh must not throw those away.
+  # Read the prior choice BEFORE the pointer is deleted below. write_updates_config
+  # says it preserves what was chosen, and could not: every attach path regenerates
+  # the pointer from scratch, so by the time it reads, there is nothing to read.
+  # Harmless while the default matched the common value; silently flips everyone
+  # the moment it does not.
+  PRIOR_UPDATES_CHECK="$(read_pointer "$dir" check)"
   rm -f "$dir/.agents/youtrack.json" "$dir/.agents/config/youtrack.json"
   merge_json "$dir/.agents/config/story-tools.json" "tracker" '{"type":"none"}'
   ok "pointer: tracker type 'none' - skills run tracker-less (offline mode)"
@@ -1747,7 +1789,7 @@ wizard() {
     say "                      \"that's done, check it off\" / \"is this story done?\""
     say ""
     say "     Also installed: to-adr, to-rad, to-prd, to-issues, triage,"
-    say "     grill-with-docs, to-wiring, regulatory-compliance, handoff, housekeeping."
+    say "     grill-with-docs, regulatory-compliance, handoff, housekeeping."
   else
     say "  1. Restart your agentic coding environment so it loads the '$MCP_SERVER' MCP server."
     say "  2. Bind a repo when ready: ./scripts/install.sh --project <dir>"
@@ -1829,9 +1871,32 @@ check_skill_updates() {  # $1 dir; honours the project's updates.check setting
   warn "newer skills published in $repo:"
   printf '%s\n' "$behind"
   [[ -t 0 ]] || { say "  run interactively to update"; return 0; }
-  local yn; read -rp "  Update this project's skills from $repo? [y/N] " yn
-  [[ "$yn" =~ ^[Yy] ]] || { say "  left as-is."; return 0; }
-  update_skills_from_repo "$dir" "$repo" "$branch"
+  # Turning the check off is offered HERE, as a keypress, because this is the
+  # moment somebody decides they do not want it - and the alternative was
+  # telling them to go and hand-edit a JSON file, which nobody does. A plain
+  # yes/no only defers: answer no and the same prompt returns next time.
+  blank
+  note "On a team, updating on each developer's own schedule puts different"
+  note "revisions in the tracked .agents/ tree and they conflict. One person"
+  note "updating for the repo avoids that."
+  blank
+  choice y "update now" "take these versions into this project"
+  choice n "not now"    "leave them; ask again next time"
+  choice d "disable"    "stop checking for this project"
+  blank
+  local yn; read -rp "  [y/n/d] " yn
+  case "${yn:-n}" in
+    [Yy]*) update_skills_from_repo "$dir" "$repo" "$branch";;
+    [Dd]*)
+      merge_json "$dir/.agents/config/story-tools.json" "updates" '{
+        "check": false,
+        "skillsRepo": "'"$repo"'",
+        "skillsBranch": "'"$branch"'"
+      }'
+      ok "update check: off for this project (set updates.check true to re-enable)"
+      ;;
+    *) say "  left as-is.";;
+  esac
 }
 
 update_skills_from_repo() {  # $1 dir, $2 owner/repo, $3 branch
@@ -1903,13 +1968,26 @@ TTEOF
 write_updates_config() {  # $1 dir - ask once, preserve thereafter
   local dir="$1" cur want
   cur="$(read_pointer "$dir" check)"
+  [[ -z "$cur" ]] && cur="${PRIOR_UPDATES_CHECK:-}"   # pointer already regenerated
   if [[ -n "$cur" ]]; then
     want="$cur"                                  # already decided; keep it
   elif [[ -t 0 ]]; then
-    local yn; read -rp "  Check for skill updates from $SKILLS_REPO on setup? [Y/n] " yn
-    [[ "${yn:-y}" =~ ^[Nn] ]] && want="false" || want="true"
+    # Asked, not assumed - the right answer depends on how many people work
+    # here, which the installer cannot see. The recommendation is stated with
+    # its reason, so the choice survives being made by whoever runs setup next.
+    blank
+    printf '  %sCheck for skill updates on setup?%s\n' "$C_B" "$C_0"
+    note "Working solo: yes. Fixes reach you as they land."
+    note "On a team: no, and this is the recommendation. Every developer's"
+    note "setup pulling independently lands a different revision at a different"
+    note "time, and those conflict in the tracked .agents/ tree. Let one person"
+    note "update the repo for everyone."
+    blank
+    local yn; read -rp "  Check for updates from $SKILLS_REPO? [y/N] " yn
+    [[ "${yn:-n}" =~ ^[Yy] ]] && want="true" || want="false"
+    blank
   else
-    want="true"
+    want="false"
   fi
   merge_json "$dir/.agents/config/story-tools.json" "updates" '{
     "check": '"$want"',
@@ -1918,7 +1996,7 @@ write_updates_config() {  # $1 dir - ask once, preserve thereafter
   }'
   [[ "$want" == "true" ]] \
     && ok "update check: on (set updates.check false in the pointer to disable)" \
-    || ok "update check: off"
+    || ok "update check: off (set updates.check true in the pointer to enable)"
 }
 
 ship_setup() {  # copy this installer into the project as .agents/setup.sh

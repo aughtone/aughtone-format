@@ -39,9 +39,9 @@ class NumbersTest {
         // German uses comma as decimal separator
         assertEquals("1,5k", 1500.0.formatReadableAbbreviated(Locales.German))
         
-        // French uses space as grouping separator
+        // French groups with a narrow no-break space
         val frenchFormatter = numberFormatterFor(Locales.French, 0)
-        assertEquals("1 000", frenchFormatter(1000.0))
+        assertEquals("1\u202F000", frenchFormatter(1000.0))
     }
 
     @Test
@@ -55,9 +55,9 @@ class NumbersTest {
 
     @Test
     fun testRegionalSeparators() {
-        // en-ZA: comma decimal, space grouping
+        // en-ZA: comma decimal, no-break space grouping
         val zaFormatter = numberFormatterFor(Locales.SouthAfricanEnglish, 2)
-        assertEquals("1 234,56", zaFormatter(1234.56))
+        assertEquals("1\u00A0234,56", zaFormatter(1234.56))
 
         // fr-CH: comma decimal, apostrophe grouping
         val frChFormatter = numberFormatterFor(Locales.SwissFrench, 2)
@@ -67,16 +67,17 @@ class NumbersTest {
         val deChFormatter = numberFormatterFor(Locales.SwissGerman, 2)
         assertEquals("1'234.56", deChFormatter(1234.56))
 
-        // it-CH: same as de-CH (Swiss convention)
+        // it-CH: apostrophe grouping like de-CH, but a four-digit number stays whole
         val itChFormatter = numberFormatterFor(Locales.SwissItalian, 2)
-        assertEquals("1'234.56", itChFormatter(1234.56))
+        assertEquals("1234.56", itChFormatter(1234.56))
+        assertEquals("12'345.67", itChFormatter(12345.67))
 
-        // fr-CA: no specific entry, falls back to fr (comma decimal, space grouping)
+        // fr-CA: groups with U+00A0, where French in France uses U+202F
         val frCaFormatter = numberFormatterFor(
             io.github.aughtone.types.locale.Locale(languageCode = "fr", regionCode = "CA", displayName = "French (Canada)"),
             2
         )
-        assertEquals("1 234,56", frCaFormatter(1234.56))
+        assertEquals("1\u00A0234,56", frCaFormatter(1234.56))
     }
 
     @Test
@@ -161,7 +162,7 @@ class NumbersTest {
             Locales.Georgian, Locales.Kazakh, Locales.Lithuanian, Locales.Latvian, Locales.Albanian,
             Locales.Ukrainian, Locales.Uzbek, Locales.Portuguese,
         )) {
-            assertEquals("1 234 567,89", 1234567.891.formatReadable(locale, 2), "separators for ${locale.languageCode}")
+            assertEquals("1\u00A0234\u00A0567,89", 1234567.891.formatReadable(locale, 2), "separators for ${locale.languageCode}")
         }
     }
 
@@ -184,13 +185,13 @@ class NumbersTest {
     fun someLanguagesLeaveAFourDigitNumberUngrouped() {
         assertEquals(listOf("1234,5", "12.345", "1.234.567"), listOf(1234.5, 12345.0, 1234567.0).map { it.formatReadable(Locales.Spanish) })
         assertEquals(listOf("1234", "12.345"), listOf(1234, 12345).map { it.formatReadable(Locales.Italian) })
-        assertEquals(listOf("1234", "12 345"), listOf(1234, 12345).map { it.formatReadable(Locales.Polish) })
-        assertEquals(listOf("1234", "12 345"), listOf(1234, 12345).map { it.formatReadable(Locales.Portuguese) })
-        assertEquals(listOf("1234", "12 345"), listOf(1234, 12345).map { it.formatReadable(Locales.Hungarian) })
+        assertEquals(listOf("1234", "12\u00A0345"), listOf(1234, 12345).map { it.formatReadable(Locales.Polish) })
+        assertEquals(listOf("1234", "12\u00A0345"), listOf(1234, 12345).map { it.formatReadable(Locales.Portuguese) })
+        assertEquals(listOf("1234", "12\u00A0345"), listOf(1234, 12345).map { it.formatReadable(Locales.Hungarian) })
         assertEquals("-1234", (-1234).formatReadable(Locales.Spanish))
         // Most languages group from four digits.
         assertEquals("1.234", 1234.formatReadable(Locales.German))
-        assertEquals("1 234", 1234.formatReadable(Locales.French))
+        assertEquals("1\u202F234", 1234.formatReadable(Locales.French))
         assertEquals("1.234", 1234.formatReadable(locale("pt", "BR")))
     }
 

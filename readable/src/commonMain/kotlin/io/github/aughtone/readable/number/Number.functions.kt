@@ -7,26 +7,43 @@ import kotlin.math.pow
 /**
  * Formats this [Double] into a localized string representation.
  *
- * Uses the specified [locale] to determine decimal and grouping separators. The value is rounded
- * half away from zero to [precision] decimal places and trailing zeros are trimmed, so [precision]
- * is a maximum, not a fixed width. Every digit is written out — there is no exponent notation,
- * however large or small the value.
+ * Uses the specified [locale] to determine the decimal and group separators and the minus sign,
+ * as Unicode CLDR writes them. Where a locale groups digits with a space it is a no-break space —
+ * U+202F in French, U+00A0 in Canadian French, Swedish or Polish — so a number never breaks
+ * across a line; pass [Separators.Ascii] for ordinary spaces and an ASCII minus. The value is
+ * rounded half away from zero to [precision] decimal places and trailing zeros are trimmed, so
+ * [precision] is a maximum, not a fixed width. Every digit is written out — there is no exponent
+ * notation, however large or small the value.
  *
- * This never throws. Not-a-number renders as `"NaN"`, and the infinities as `"∞"` and `"-∞"`.
+ * This never throws. Not-a-number renders as `"NaN"`, and the infinities as `"∞"` and `"-∞"`,
+ * with the locale's minus sign.
  *
  * Example:
  * ```kotlin
  * 1234.56.formatReadable(Locales.English, precision = 1) // "1,234.6"
  * 1234.56.formatReadable(Locales.German, precision = 1)  // "1.234,6"
+ * 1234.56.formatReadable(Locales.French, precision = 1)  // "1 234,6" (U+202F between groups)
  * (-1234.0).formatReadable(Locales.English)              // "-1,234"
+ * (-1234.0).formatReadable(Locales.Swedish)              // "−1 234" (U+2212, then U+00A0)
+ * (-1234.0).formatReadable(Locales.Swedish, separators = Separators.Ascii) // "-1 234"
  * 12345678.0.formatReadable(Locales.English)             // "12,345,678"
  * ```
  *
  * @param locale The locale defining the formatting rules (defaults to [Locale.current]).
  * @param precision The maximum number of decimal places to include (default is 1).
+ * @param separators Whether the separators and signs are the typographic ones Unicode CLDR uses
+ *   (the default), or plain ASCII. See [Separators].
  */
+fun Double.formatReadable(
+    locale: Locale = Locale.current,
+    precision: Int = 1,
+    separators: Separators = Separators.Typographic,
+): String =
+    numberFormatterFor(locale, precision, separators)(this)
+
+@Deprecated("Kept for binary compatibility.", level = DeprecationLevel.HIDDEN)
 fun Double.formatReadable(locale: Locale = Locale.current, precision: Int = 1): String =
-    numberFormatterFor(locale, precision)(this)
+    formatReadable(locale, precision, Separators.Typographic)
 
 @Deprecated(
     message = "Use formatReadable instead",
@@ -40,9 +57,19 @@ fun Double.toReadable(locale: Locale = Locale.current, precision: Int = 1): Stri
  *
  * @param locale The locale defining the formatting rules (defaults to [Locale.current]).
  * @param precision The number of decimal places to include (default is 1).
+ * @param separators Whether the separators and signs are the typographic ones Unicode CLDR uses
+ *   (the default), or plain ASCII. See [Separators].
  */
+fun Float.formatReadable(
+    locale: Locale = Locale.current,
+    precision: Int = 1,
+    separators: Separators = Separators.Typographic,
+): String =
+    toDouble().formatReadable(locale, precision, separators)
+
+@Deprecated("Kept for binary compatibility.", level = DeprecationLevel.HIDDEN)
 fun Float.formatReadable(locale: Locale = Locale.current, precision: Int = 1): String =
-    toDouble().formatReadable(locale, precision)
+    formatReadable(locale, precision, Separators.Typographic)
 
 @Deprecated(
     message = "Use formatReadable instead",
@@ -59,9 +86,19 @@ fun Float.toReadable(locale: Locale = Locale.current, precision: Int = 1): Strin
  * @param locale The locale defining the formatting rules (defaults to [Locale.current]).
  * @param precision The number of decimal places to include (default is 0). A whole number has no
  *   fraction, so this only matters when negative, which rounds to tens, hundreds, and so on.
+ * @param separators Whether the separators and signs are the typographic ones Unicode CLDR uses
+ *   (the default), or plain ASCII. See [Separators].
  */
+fun Long.formatReadable(
+    locale: Locale = Locale.current,
+    precision: Int = 0,
+    separators: Separators = Separators.Typographic,
+): String =
+    formatDecimalText(toString(), locale, precision, separators = separators)
+
+@Deprecated("Kept for binary compatibility.", level = DeprecationLevel.HIDDEN)
 fun Long.formatReadable(locale: Locale = Locale.current, precision: Int = 0): String =
-    formatDecimalText(toString(), locale, precision)
+    formatReadable(locale, precision, Separators.Typographic)
 
 @Deprecated(
     message = "Use formatReadable instead",
@@ -75,9 +112,19 @@ fun Long.toReadable(locale: Locale = Locale.current, precision: Int = 0): String
  *
  * @param locale The locale defining the formatting rules (defaults to [Locale.current]).
  * @param precision The number of decimal places to include (default is 0).
+ * @param separators Whether the separators and signs are the typographic ones Unicode CLDR uses
+ *   (the default), or plain ASCII. See [Separators].
  */
+fun Int.formatReadable(
+    locale: Locale = Locale.current,
+    precision: Int = 0,
+    separators: Separators = Separators.Typographic,
+): String =
+    toLong().formatReadable(locale, precision, separators)
+
+@Deprecated("Kept for binary compatibility.", level = DeprecationLevel.HIDDEN)
 fun Int.formatReadable(locale: Locale = Locale.current, precision: Int = 0): String =
-    toLong().formatReadable(locale, precision)
+    formatReadable(locale, precision, Separators.Typographic)
 
 @Deprecated(
     message = "Use formatReadable instead",
@@ -91,9 +138,19 @@ fun Int.toReadable(locale: Locale = Locale.current, precision: Int = 0): String 
  *
  * @param locale The locale defining the formatting rules (defaults to [Locale.current]).
  * @param precision The number of decimal places to include (default is 0).
+ * @param separators Whether the separators and signs are the typographic ones Unicode CLDR uses
+ *   (the default), or plain ASCII. See [Separators].
  */
+fun Short.formatReadable(
+    locale: Locale = Locale.current,
+    precision: Int = 0,
+    separators: Separators = Separators.Typographic,
+): String =
+    toLong().formatReadable(locale, precision, separators)
+
+@Deprecated("Kept for binary compatibility.", level = DeprecationLevel.HIDDEN)
 fun Short.formatReadable(locale: Locale = Locale.current, precision: Int = 0): String =
-    toLong().formatReadable(locale, precision)
+    formatReadable(locale, precision, Separators.Typographic)
 
 @Deprecated(
     message = "Use formatReadable instead",
@@ -107,9 +164,19 @@ fun Short.toReadable(locale: Locale = Locale.current, precision: Int = 0): Strin
  *
  * @param locale The locale defining the formatting rules (defaults to [Locale.current]).
  * @param precision The number of decimal places to include (default is 0).
+ * @param separators Whether the separators and signs are the typographic ones Unicode CLDR uses
+ *   (the default), or plain ASCII. See [Separators].
  */
+fun Byte.formatReadable(
+    locale: Locale = Locale.current,
+    precision: Int = 0,
+    separators: Separators = Separators.Typographic,
+): String =
+    toLong().formatReadable(locale, precision, separators)
+
+@Deprecated("Kept for binary compatibility.", level = DeprecationLevel.HIDDEN)
 fun Byte.formatReadable(locale: Locale = Locale.current, precision: Int = 0): String =
-    toLong().formatReadable(locale, precision)
+    formatReadable(locale, precision, Separators.Typographic)
 
 @Deprecated(
     message = "Use formatReadable instead",
@@ -125,9 +192,19 @@ fun Byte.toReadable(locale: Locale = Locale.current, precision: Int = 0): String
  *
  * @param locale The locale defining the formatting rules (defaults to [Locale.current]).
  * @param precision The number of decimal places to include (default is 0).
+ * @param separators Whether the separators and signs are the typographic ones Unicode CLDR uses
+ *   (the default), or plain ASCII. See [Separators].
  */
+fun ULong.formatReadable(
+    locale: Locale = Locale.current,
+    precision: Int = 0,
+    separators: Separators = Separators.Typographic,
+): String =
+    formatDecimalText(toString(), locale, precision, separators = separators)
+
+@Deprecated("Kept for binary compatibility.", level = DeprecationLevel.HIDDEN)
 fun ULong.formatReadable(locale: Locale = Locale.current, precision: Int = 0): String =
-    formatDecimalText(toString(), locale, precision)
+    formatReadable(locale, precision, Separators.Typographic)
 
 @Deprecated(
     message = "Use formatReadable instead",
@@ -141,9 +218,19 @@ fun ULong.toReadable(locale: Locale = Locale.current, precision: Int = 0): Strin
  *
  * @param locale The locale defining the formatting rules (defaults to [Locale.current]).
  * @param precision The number of decimal places to include (default is 0).
+ * @param separators Whether the separators and signs are the typographic ones Unicode CLDR uses
+ *   (the default), or plain ASCII. See [Separators].
  */
+fun UInt.formatReadable(
+    locale: Locale = Locale.current,
+    precision: Int = 0,
+    separators: Separators = Separators.Typographic,
+): String =
+    toLong().formatReadable(locale, precision, separators)
+
+@Deprecated("Kept for binary compatibility.", level = DeprecationLevel.HIDDEN)
 fun UInt.formatReadable(locale: Locale = Locale.current, precision: Int = 0): String =
-    toLong().formatReadable(locale, precision)
+    formatReadable(locale, precision, Separators.Typographic)
 
 @Deprecated(
     message = "Use formatReadable instead",
@@ -157,9 +244,19 @@ fun UInt.toReadable(locale: Locale = Locale.current, precision: Int = 0): String
  *
  * @param locale The locale defining the formatting rules (defaults to [Locale.current]).
  * @param precision The number of decimal places to include (default is 0).
+ * @param separators Whether the separators and signs are the typographic ones Unicode CLDR uses
+ *   (the default), or plain ASCII. See [Separators].
  */
+fun UShort.formatReadable(
+    locale: Locale = Locale.current,
+    precision: Int = 0,
+    separators: Separators = Separators.Typographic,
+): String =
+    toLong().formatReadable(locale, precision, separators)
+
+@Deprecated("Kept for binary compatibility.", level = DeprecationLevel.HIDDEN)
 fun UShort.formatReadable(locale: Locale = Locale.current, precision: Int = 0): String =
-    toLong().formatReadable(locale, precision)
+    formatReadable(locale, precision, Separators.Typographic)
 
 @Deprecated(
     message = "Use formatReadable instead",
@@ -173,9 +270,19 @@ fun UShort.toReadable(locale: Locale = Locale.current, precision: Int = 0): Stri
  *
  * @param locale The locale defining the formatting rules (defaults to [Locale.current]).
  * @param precision The number of decimal places to include (default is 0).
+ * @param separators Whether the separators and signs are the typographic ones Unicode CLDR uses
+ *   (the default), or plain ASCII. See [Separators].
  */
+fun UByte.formatReadable(
+    locale: Locale = Locale.current,
+    precision: Int = 0,
+    separators: Separators = Separators.Typographic,
+): String =
+    toLong().formatReadable(locale, precision, separators)
+
+@Deprecated("Kept for binary compatibility.", level = DeprecationLevel.HIDDEN)
 fun UByte.formatReadable(locale: Locale = Locale.current, precision: Int = 0): String =
-    toLong().formatReadable(locale, precision)
+    formatReadable(locale, precision, Separators.Typographic)
 
 @Deprecated(
     message = "Use formatReadable instead",
@@ -203,16 +310,23 @@ fun UByte.toReadable(locale: Locale = Locale.current, precision: Int = 0): Strin
  *
  * @param locale The locale to use for numeric formatting (defaults to [Locale.current]).
  * @param precision The number of decimal places for the scaled value (default is 1).
+ * @param separators Whether the separators and signs are the typographic ones Unicode CLDR uses
+ *   (the default), or plain ASCII. See [Separators].
  * @return A localized abbreviated string.
  */
 fun Double.formatReadableAbbreviated(
     locale: Locale = Locale.current,
-    precision: Int = 1
+    precision: Int = 1,
+    separators: Separators = Separators.Typographic,
 ): String {
     val (symbol, divisor) = prefixRungFor(this, precision, abbreviationLadder)
-        ?: return formatReadable(locale, precision)
-    return "${(this / divisor).formatReadable(locale, precision)}$symbol"
+        ?: return formatReadable(locale, precision, separators)
+    return "${(this / divisor).formatReadable(locale, precision, separators)}$symbol"
 }
+
+@Deprecated("Kept for binary compatibility.", level = DeprecationLevel.HIDDEN)
+fun Double.formatReadableAbbreviated(locale: Locale = Locale.current, precision: Int = 1): String =
+    formatReadableAbbreviated(locale, precision, Separators.Typographic)
 
 /** No prefix, then the standard SI thousands (k, M, G, T, …), smallest first. */
 private val abbreviationLadder: List<Pair<String, Double>> =
@@ -235,9 +349,19 @@ fun Double.toReadableAbbreviated(
  *
  * @param locale The locale to use for numeric formatting (defaults to [Locale.current]).
  * @param precision The number of decimal places for the scaled value (default is 1).
+ * @param separators Whether the separators and signs are the typographic ones Unicode CLDR uses
+ *   (the default), or plain ASCII. See [Separators].
  */
+fun Float.formatReadableAbbreviated(
+    locale: Locale = Locale.current,
+    precision: Int = 1,
+    separators: Separators = Separators.Typographic,
+): String =
+    toDouble().formatReadableAbbreviated(locale, precision, separators)
+
+@Deprecated("Kept for binary compatibility.", level = DeprecationLevel.HIDDEN)
 fun Float.formatReadableAbbreviated(locale: Locale = Locale.current, precision: Int = 1): String =
-    toDouble().formatReadableAbbreviated(locale, precision)
+    formatReadableAbbreviated(locale, precision, Separators.Typographic)
 
 @Deprecated(
     message = "Use formatReadableAbbreviated instead",
@@ -251,9 +375,19 @@ fun Float.toReadableAbbreviated(locale: Locale = Locale.current, precision: Int 
  *
  * @param locale The locale to use for numeric formatting (defaults to [Locale.current]).
  * @param precision The number of decimal places for the scaled value (default is 1).
+ * @param separators Whether the separators and signs are the typographic ones Unicode CLDR uses
+ *   (the default), or plain ASCII. See [Separators].
  */
+fun Long.formatReadableAbbreviated(
+    locale: Locale = Locale.current,
+    precision: Int = 1,
+    separators: Separators = Separators.Typographic,
+): String =
+    toDouble().formatReadableAbbreviated(locale, precision, separators)
+
+@Deprecated("Kept for binary compatibility.", level = DeprecationLevel.HIDDEN)
 fun Long.formatReadableAbbreviated(locale: Locale = Locale.current, precision: Int = 1): String =
-    toDouble().formatReadableAbbreviated(locale, precision)
+    formatReadableAbbreviated(locale, precision, Separators.Typographic)
 
 @Deprecated(
     message = "Use formatReadableAbbreviated instead",
@@ -267,9 +401,19 @@ fun Long.toReadableAbbreviated(locale: Locale = Locale.current, precision: Int =
  *
  * @param locale The locale to use for numeric formatting (defaults to [Locale.current]).
  * @param precision The number of decimal places for the scaled value (default is 1).
+ * @param separators Whether the separators and signs are the typographic ones Unicode CLDR uses
+ *   (the default), or plain ASCII. See [Separators].
  */
+fun Int.formatReadableAbbreviated(
+    locale: Locale = Locale.current,
+    precision: Int = 1,
+    separators: Separators = Separators.Typographic,
+): String =
+    toDouble().formatReadableAbbreviated(locale, precision, separators)
+
+@Deprecated("Kept for binary compatibility.", level = DeprecationLevel.HIDDEN)
 fun Int.formatReadableAbbreviated(locale: Locale = Locale.current, precision: Int = 1): String =
-    toDouble().formatReadableAbbreviated(locale, precision)
+    formatReadableAbbreviated(locale, precision, Separators.Typographic)
 
 @Deprecated(
     message = "Use formatReadableAbbreviated instead",
@@ -283,9 +427,19 @@ fun Int.toReadableAbbreviated(locale: Locale = Locale.current, precision: Int = 
  *
  * @param locale The locale to use for numeric formatting (defaults to [Locale.current]).
  * @param precision The number of decimal places for the scaled value (default is 1).
+ * @param separators Whether the separators and signs are the typographic ones Unicode CLDR uses
+ *   (the default), or plain ASCII. See [Separators].
  */
+fun Short.formatReadableAbbreviated(
+    locale: Locale = Locale.current,
+    precision: Int = 1,
+    separators: Separators = Separators.Typographic,
+): String =
+    toDouble().formatReadableAbbreviated(locale, precision, separators)
+
+@Deprecated("Kept for binary compatibility.", level = DeprecationLevel.HIDDEN)
 fun Short.formatReadableAbbreviated(locale: Locale = Locale.current, precision: Int = 1): String =
-    toDouble().formatReadableAbbreviated(locale, precision)
+    formatReadableAbbreviated(locale, precision, Separators.Typographic)
 
 @Deprecated(
     message = "Use formatReadableAbbreviated instead",
@@ -299,9 +453,19 @@ fun Short.toReadableAbbreviated(locale: Locale = Locale.current, precision: Int 
  *
  * @param locale The locale to use for numeric formatting (defaults to [Locale.current]).
  * @param precision The number of decimal places for the scaled value (default is 1).
+ * @param separators Whether the separators and signs are the typographic ones Unicode CLDR uses
+ *   (the default), or plain ASCII. See [Separators].
  */
+fun Byte.formatReadableAbbreviated(
+    locale: Locale = Locale.current,
+    precision: Int = 1,
+    separators: Separators = Separators.Typographic,
+): String =
+    toDouble().formatReadableAbbreviated(locale, precision, separators)
+
+@Deprecated("Kept for binary compatibility.", level = DeprecationLevel.HIDDEN)
 fun Byte.formatReadableAbbreviated(locale: Locale = Locale.current, precision: Int = 1): String =
-    toDouble().formatReadableAbbreviated(locale, precision)
+    formatReadableAbbreviated(locale, precision, Separators.Typographic)
 
 @Deprecated(
     message = "Use formatReadableAbbreviated instead",
@@ -315,9 +479,19 @@ fun Byte.toReadableAbbreviated(locale: Locale = Locale.current, precision: Int =
  *
  * @param locale The locale to use for numeric formatting (defaults to [Locale.current]).
  * @param precision The number of decimal places for the scaled value (default is 1).
+ * @param separators Whether the separators and signs are the typographic ones Unicode CLDR uses
+ *   (the default), or plain ASCII. See [Separators].
  */
+fun ULong.formatReadableAbbreviated(
+    locale: Locale = Locale.current,
+    precision: Int = 1,
+    separators: Separators = Separators.Typographic,
+): String =
+    toDouble().formatReadableAbbreviated(locale, precision, separators)
+
+@Deprecated("Kept for binary compatibility.", level = DeprecationLevel.HIDDEN)
 fun ULong.formatReadableAbbreviated(locale: Locale = Locale.current, precision: Int = 1): String =
-    toDouble().formatReadableAbbreviated(locale, precision)
+    formatReadableAbbreviated(locale, precision, Separators.Typographic)
 
 @Deprecated(
     message = "Use formatReadableAbbreviated instead",
@@ -331,9 +505,19 @@ fun ULong.toReadableAbbreviated(locale: Locale = Locale.current, precision: Int 
  *
  * @param locale The locale to use for numeric formatting (defaults to [Locale.current]).
  * @param precision The number of decimal places for the scaled value (default is 1).
+ * @param separators Whether the separators and signs are the typographic ones Unicode CLDR uses
+ *   (the default), or plain ASCII. See [Separators].
  */
+fun UInt.formatReadableAbbreviated(
+    locale: Locale = Locale.current,
+    precision: Int = 1,
+    separators: Separators = Separators.Typographic,
+): String =
+    toDouble().formatReadableAbbreviated(locale, precision, separators)
+
+@Deprecated("Kept for binary compatibility.", level = DeprecationLevel.HIDDEN)
 fun UInt.formatReadableAbbreviated(locale: Locale = Locale.current, precision: Int = 1): String =
-    toDouble().formatReadableAbbreviated(locale, precision)
+    formatReadableAbbreviated(locale, precision, Separators.Typographic)
 
 @Deprecated(
     message = "Use formatReadableAbbreviated instead",
@@ -347,9 +531,19 @@ fun UInt.toReadableAbbreviated(locale: Locale = Locale.current, precision: Int =
  *
  * @param locale The locale to use for numeric formatting (defaults to [Locale.current]).
  * @param precision The number of decimal places for the scaled value (default is 1).
+ * @param separators Whether the separators and signs are the typographic ones Unicode CLDR uses
+ *   (the default), or plain ASCII. See [Separators].
  */
+fun UShort.formatReadableAbbreviated(
+    locale: Locale = Locale.current,
+    precision: Int = 1,
+    separators: Separators = Separators.Typographic,
+): String =
+    toDouble().formatReadableAbbreviated(locale, precision, separators)
+
+@Deprecated("Kept for binary compatibility.", level = DeprecationLevel.HIDDEN)
 fun UShort.formatReadableAbbreviated(locale: Locale = Locale.current, precision: Int = 1): String =
-    toDouble().formatReadableAbbreviated(locale, precision)
+    formatReadableAbbreviated(locale, precision, Separators.Typographic)
 
 @Deprecated(
     message = "Use formatReadableAbbreviated instead",
@@ -363,9 +557,19 @@ fun UShort.toReadableAbbreviated(locale: Locale = Locale.current, precision: Int
  *
  * @param locale The locale to use for numeric formatting (defaults to [Locale.current]).
  * @param precision The number of decimal places for the scaled value (default is 1).
+ * @param separators Whether the separators and signs are the typographic ones Unicode CLDR uses
+ *   (the default), or plain ASCII. See [Separators].
  */
+fun UByte.formatReadableAbbreviated(
+    locale: Locale = Locale.current,
+    precision: Int = 1,
+    separators: Separators = Separators.Typographic,
+): String =
+    toDouble().formatReadableAbbreviated(locale, precision, separators)
+
+@Deprecated("Kept for binary compatibility.", level = DeprecationLevel.HIDDEN)
 fun UByte.formatReadableAbbreviated(locale: Locale = Locale.current, precision: Int = 1): String =
-    toDouble().formatReadableAbbreviated(locale, precision)
+    formatReadableAbbreviated(locale, precision, Separators.Typographic)
 
 @Deprecated(
     message = "Use formatReadableAbbreviated instead",

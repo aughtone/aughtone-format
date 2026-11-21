@@ -7,9 +7,10 @@
 # in YouTrack and the tree follows. The one exception: a NEW local file's
 # location chooses its parent article at birth.
 #
-# Files and section directories are ID-prefixed like the stories snapshot
-# (PROJ-A-12_title-slug.md); new local files are renamed to match once their
-# article exists.
+# Leaf files are ID-prefixed like the stories snapshot
+# (PROJ-A-12_title-slug.md) and are renamed to match once their article
+# exists. Section directories are NOT - they are named for the section, with
+# the id living in the README.md inside.
 #
 # Usage: yt-sync.sh [KB_DIR] [options]
 #   KB_DIR          sync domain (default ./docs/knowledge)
@@ -92,12 +93,26 @@ import json, os, re, shutil, subprocess, sys, tempfile, urllib.request, urllib.p
 URL = os.environ['YOUTRACK_URL'].rstrip('/')
 TOKEN = os.environ['YOUTRACK_TOKEN']
 PROJECT = os.environ['PROJECT']
-KB = os.environ['KB_DIR'].rstrip('/')
+KB = os.path.normpath(os.environ['KB_DIR'])
 ROOT = os.environ['ROOT']
 DRY = os.environ['DRY'] == '1'
 PULL_ONLY = os.environ['PULL_ONLY'] == '1'
 ALLOW_DELETE = os.environ['ALLOW_DELETE'] == '1'
 FORCE = os.environ['FORCE'] == '1'
+
+# One spelling per path. KB_DIR arrives as ./docs/knowledge, docs/knowledge or
+# an absolute path, and state recorded under one spelling has to match a tree
+# walked under another: compared as raw strings they never meet, an edited file
+# fails the content match that rescues an unedited one, and it is pushed to its
+# article AND created again as a new one. Every path is rebuilt on KB instead of
+# normpath-ed - with KB '.', a bare 'x.md' has dirname '' and a walk up to KB
+# never arrives. The comparison runs on resolved paths: cwd is always resolved,
+# and an absolute KB_DIR through a symlink otherwise lands outside itself.
+def canon_path(p):
+    r = os.path.relpath(os.path.realpath(p), os.path.realpath(KB))
+    if r == '.': return KB
+    if r == '..' or r.startswith('..' + os.sep): return os.path.normpath(p)
+    return os.path.join(KB, r)
 
 SYNC = os.path.join(KB, '.yt-sync')
 STATE_FILE = os.path.join(SYNC, 'state.json')
@@ -306,6 +321,15 @@ if os.path.isfile(STATE_FILE):
     with open(STATE_FILE, encoding='utf-8') as f:
         state = json.load(f)
 smap = state.setdefault('articles', {})
+owner = {}
+for aid, e in smap.items():
+    e['path'] = canon_path(e['path'])
+    if e['path'] in owner:
+        sys.exit(f'error: sync state records {owner[e["path"]]} and {aid} at the same path, '
+                 f'{e["path"]} - two articles cannot own one file.\n'
+                 f'Decide which article the file belongs to, remove the other entry from '
+                 f'{STATE_FILE} and its base file from {BASE_DIR}, then re-run with --dry-run.')
+    owner[e['path']] = aid
 
 def local_md():
     found = []
@@ -313,7 +337,7 @@ def local_md():
         dns[:] = [d for d in dns if d != '.yt-sync']
         for fn in fns:
             if fn.endswith('.md'):
-                found.append(os.path.join(dp, fn))
+                found.append(canon_path(os.path.join(dp, fn)))
     return found
 
 bootstrapping = not os.path.isfile(STATE_FILE)
@@ -556,15 +580,31 @@ def settle_name(aid):
     p = e['path']
     fake = {'id': aid, 'idReadable': e.get('idReadable'), 'summary': e.get('summary')}
     if os.path.basename(p) == 'README.md':
+        # A section's directory is named the way the pull side names it -
+        # dir_name, no id - or the very next sync moves it back and every
+        # file inside shows up as moved twice in git history.
         old_dir = os.path.dirname(p)
         if old_dir == KB: return
-        new_dir = os.path.join(os.path.dirname(old_dir), art_name(fake))
+        base = dir_name(fake)
+        new_dir = os.path.join(os.path.dirname(old_dir), base)
+        if new_dir != old_dir and os.path.exists(new_dir):
+            # Two sibling sections resolving to one directory name. Take the
+            # suffix rather than moving onto the existing directory, which
+            # would nest inside it. assign() decides the same collision by
+            # sorted summary, so where two sections share a TITLE this agrees
+            # with it - the newborn has the higher id and sorts last either
+            # way. Where two different titles collapse to one name through
+            # SECTION_DIRS, birth order and sort order can disagree, and that
+            # pair settles on the second sync instead of the first. Rare
+            # enough to leave; it is correct either way, just not immediate.
+            new_dir = os.path.join(os.path.dirname(old_dir),
+                                   f"{base}-{fake.get('idReadable') or fake['id']}")
         if new_dir == old_dir: return
         if not DRY: shutil.move(old_dir, new_dir)
         for e2 in smap.values():
             if e2['path'] == old_dir or e2['path'].startswith(old_dir + os.sep):
                 e2['path'] = new_dir + e2['path'][len(old_dir):]
-        report['Notes'].append(f'renamed {old_dir}/ -> {new_dir}/ (ID prefix)')
+        report['Notes'].append(f'renamed {old_dir}/ -> {new_dir}/ (section name)')
     else:
         newp = os.path.join(os.path.dirname(p), art_name(fake) + '.md')
         if newp == p: return
