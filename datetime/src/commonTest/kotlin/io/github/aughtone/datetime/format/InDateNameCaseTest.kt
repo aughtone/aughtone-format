@@ -33,12 +33,12 @@ class InDateNameCaseTest {
     @Test
     fun abbreviatedNamesInsideADateFollowTheLanguageToo() {
         assertEquals("15 mar 2024", date("es", DateTimeStyle.Medium))
-        assertEquals("15 мар. 2024 г.", date("ru", DateTimeStyle.Medium))
+        assertEquals("15 мар. 2024 г.", date("ru", DateTimeStyle.Medium))
     }
 
     @Test
     fun grammaticalFormsInsideADateAreKept() {
-        assertEquals("15 марта 2024 г.", date("ru", DateTimeStyle.Long))
+        assertEquals("15 марта 2024 г.", date("ru", DateTimeStyle.Long))
         assertEquals("15. března 2024", date("cs", DateTimeStyle.Long))
     }
 

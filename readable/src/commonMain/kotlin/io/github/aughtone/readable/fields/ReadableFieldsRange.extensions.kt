@@ -22,7 +22,7 @@ import kotlin.time.Instant
  *
  * Spacing: the space before the range's dash never breaks, so a line cannot start with it. The
  * space after it breaks unless noBreak is true. separators decides the spaces inside each end:
- * Ascii, the default, writes them as the locale's data gives them; Typographic makes them no-break,
+ * Ascii, the default, writes them as ordinary spaces; Typographic makes them no-break,
  * so that "Jun 1" never wraps between its month and its day.
  */
 
@@ -87,8 +87,8 @@ private fun formatFieldsRange(
  * the two ends are written in full and joined by its range separator.
  *
  * The space before the range's dash never breaks. The space after it does, unless [noBreak] is
- * `true`. [separators] decides the spaces inside each end: [Separators.Ascii] writes them as the
- * locale's data gives them, and [Separators.Typographic] makes them no-break.
+ * `true`. [separators] decides the spaces inside each end: [Separators.Ascii] writes them as
+ * ordinary spaces, and [Separators.Typographic] makes them no-break.
  *
  * @param end The last date of the range. It may be before this one; the range is written as given.
  * @param fields The fields to show; only date fields (era, year, month, day, weekday) apply.

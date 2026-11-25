@@ -2,6 +2,7 @@ package io.github.aughtone.readable.relative
 
 import io.github.aughtone.datetime.format.DateTimeStyle
 import io.github.aughtone.datetime.format.format
+import io.github.aughtone.toolbox.Separators
 import io.github.aughtone.types.locale.Locale
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
@@ -66,6 +67,9 @@ private fun relativeDayLabelFor(locale: Locale, daysDelta: Int): String? {
  * @param nowThreshold Values within this duration produce the "just now" string (defaults to 1 minute).
  * @param locale The locale for localization rules (defaults to [Locale.current]).
  * @param timeZone The timezone used for day boundary calculations (defaults to system default).
+ * @param separators The spaces inside the date or time written when [relativeThreshold] is
+ *   exceeded: [Separators.Ascii], the default, writes ordinary spaces; [Separators.Typographic]
+ *   no-break ones, so it never wraps. Relative phrases are not changed.
  * @return A localized relative or absolute time string.
  */
 fun Instant.formatReadableRelative(
@@ -78,10 +82,11 @@ fun Instant.formatReadableRelative(
     nowThreshold: Duration = 1.minutes,
     locale: Locale = Locale.current,
     timeZone: TimeZone = TimeZone.currentSystemDefault(),
+    separators: Separators = Separators.Ascii,
 ): String {
     val delta = this - now
     if (delta.absoluteValue > relativeThreshold) {
-        return this.format(dateStyle = dateStyle, timeStyle = timeStyle, locale = locale, timeZone = timeZone)
+        return this.format(dateStyle = dateStyle, timeStyle = timeStyle, locale = locale, timeZone = timeZone, separators = separators)
     }
 
     if (delta.absoluteValue < nowThreshold) {
@@ -162,6 +167,9 @@ fun Instant.toReadableRelative(
  * @param nowThreshold Values within this duration produce the "just now" string (defaults to 1 minute).
  * @param locale The locale for localization rules (defaults to [Locale.current]).
  * @param timeZone The timezone used to convert this [LocalDateTime] to an [Instant].
+ * @param separators The spaces inside the date or time written when [relativeThreshold] is
+ *   exceeded: [Separators.Ascii], the default, writes ordinary spaces; [Separators.Typographic]
+ *   no-break ones, so it never wraps. Relative phrases are not changed.
  * @return A localized relative or absolute time string.
  */
 fun LocalDateTime.formatReadableRelative(
@@ -174,6 +182,7 @@ fun LocalDateTime.formatReadableRelative(
     nowThreshold: Duration = 1.minutes,
     locale: Locale = Locale.current,
     timeZone: TimeZone = TimeZone.currentSystemDefault(),
+    separators: Separators = Separators.Ascii,
 ): String = toInstant(timeZone).formatReadableRelative(
     now = now,
     relativeDateStyle = relativeDateStyle,
@@ -183,7 +192,8 @@ fun LocalDateTime.formatReadableRelative(
     relativeThreshold = relativeThreshold,
     nowThreshold = nowThreshold,
     locale = locale,
-    timeZone = timeZone
+    timeZone = timeZone,
+    separators = separators,
 )
 
 @Deprecated(
@@ -230,6 +240,9 @@ fun LocalDateTime.toReadableRelative(
  *   "Recently" (past) or "Shortly" (future) string instead of an exact count like "3 days ago". The
  *   default of 1 day effectively disables it, since Today/Yesterday/Tomorrow already cover that range.
  * @param locale The locale for localization rules (defaults to [Locale.current]).
+ * @param separators The spaces inside the date or time written when [relativeThreshold] is
+ *   exceeded: [Separators.Ascii], the default, writes ordinary spaces; [Separators.Typographic]
+ *   no-break ones, so it never wraps. Relative phrases are not changed.
  * @return A localized relative or absolute date string.
  */
 fun LocalDate.formatReadableRelative(
@@ -239,11 +252,12 @@ fun LocalDate.formatReadableRelative(
     relativeThreshold: Duration = 3.days,
     nowThreshold: Duration = 1.days,
     locale: Locale = Locale.current,
+    separators: Separators = Separators.Ascii,
 ): String {
     val deltaDays = now.daysUntil(this)
     val absDeltaDays = deltaDays.days.absoluteValue
     if (absDeltaDays > relativeThreshold) {
-        return this.format(dateStyle = dateStyle, locale = locale)
+        return this.format(dateStyle = dateStyle, locale = locale, separators = separators)
     }
 
     val config = relativeTimeConfigFor(locale = locale, relativeStyle = relativeStyle)
@@ -305,6 +319,9 @@ fun LocalDate.toReadableRelative(
  * @param relativeThreshold The duration beyond which to use absolute formatting (defaults to 3 hours).
  * @param nowThreshold Times within this duration produce the "just now" string (defaults to 1 minute).
  * @param locale The locale for localization rules (defaults to [Locale.current]).
+ * @param separators The spaces inside the date or time written when [relativeThreshold] is
+ *   exceeded: [Separators.Ascii], the default, writes ordinary spaces; [Separators.Typographic]
+ *   no-break ones, so it never wraps. Relative phrases are not changed.
  * @return A localized relative or absolute time string.
  */
 fun LocalTime.formatReadableRelative(
@@ -315,10 +332,11 @@ fun LocalTime.formatReadableRelative(
     relativeThreshold: Duration = 3.hours,
     nowThreshold: Duration = 1.minutes,
     locale: Locale = Locale.current,
+    separators: Separators = Separators.Ascii,
 ): String {
     val deltaDuration = clockDelta(this, now, direction)
     if (deltaDuration.absoluteValue > relativeThreshold) {
-        return this.format(timeStyle = timeStyle, locale = locale)
+        return this.format(timeStyle = timeStyle, locale = locale, separators = separators)
     }
 
     if (deltaDuration.absoluteValue < nowThreshold) {
@@ -368,6 +386,9 @@ private fun clockDelta(target: LocalTime, now: LocalTime, direction: RelativeDir
  * @param relativeThreshold The duration beyond which to use absolute formatting (defaults to 3 days).
  * @param nowThreshold Values within this duration produce the "just now" string (defaults to 1 minute).
  * @param locale The locale for localization rules (defaults to [Locale.current]).
+ * @param separators The spaces inside the date or time written when [relativeThreshold] is
+ *   exceeded: [Separators.Ascii], the default, writes ordinary spaces; [Separators.Typographic]
+ *   no-break ones, so it never wraps. Relative phrases are not changed.
  * @return A localized relative or absolute time string.
  */
 fun LocalTime.formatReadableRelative(
@@ -381,6 +402,7 @@ fun LocalTime.formatReadableRelative(
     relativeThreshold: Duration = 3.days,
     nowThreshold: Duration = 1.minutes,
     locale: Locale = Locale.current,
+    separators: Separators = Separators.Ascii,
 ): String = resolveOccurrence(now, timeZone, direction).formatReadableRelative(
     now = now,
     relativeDateStyle = relativeDateStyle,
@@ -391,6 +413,7 @@ fun LocalTime.formatReadableRelative(
     nowThreshold = nowThreshold,
     locale = locale,
     timeZone = timeZone,
+    separators = separators,
 )
 
 /**
@@ -517,3 +540,71 @@ fun LocalTime.toReadableRelative(
     val deltaSeconds = this.toSecondOfDay() - now.toSecondOfDay()
     return relativeTimeConfigFor(locale, style).formatter(deltaSeconds.seconds, false)
 }
+
+// ── 4.3 signatures ──────────────────────────────────────────────────────────
+
+/** The 4.3 signature, kept so code compiled against it still links. */
+@Deprecated("Kept for binary compatibility.", level = DeprecationLevel.HIDDEN)
+fun Instant.formatReadableRelative(
+    now: Instant = Clock.System.now(),
+    relativeDateStyle: RelativeStyle = RelativeStyle.Long,
+    relativeTimeStyle: RelativeStyle = RelativeStyle.Long,
+    dateStyle: DateTimeStyle = DateTimeStyle.Medium,
+    timeStyle: DateTimeStyle = DateTimeStyle.Medium,
+    relativeThreshold: Duration = 3.days,
+    nowThreshold: Duration = 1.minutes,
+    locale: Locale = Locale.current,
+    timeZone: TimeZone = TimeZone.currentSystemDefault(),
+): String = formatReadableRelative(now = now, relativeDateStyle = relativeDateStyle, relativeTimeStyle = relativeTimeStyle, dateStyle = dateStyle, timeStyle = timeStyle, relativeThreshold = relativeThreshold, nowThreshold = nowThreshold, locale = locale, timeZone = timeZone, separators = Separators.Ascii)
+
+/** The 4.3 signature, kept so code compiled against it still links. */
+@Deprecated("Kept for binary compatibility.", level = DeprecationLevel.HIDDEN)
+fun LocalDateTime.formatReadableRelative(
+    now: Instant = Clock.System.now(),
+    relativeDateStyle: RelativeStyle = RelativeStyle.Long,
+    relativeTimeStyle: RelativeStyle = RelativeStyle.Long,
+    dateStyle: DateTimeStyle = DateTimeStyle.Medium,
+    timeStyle: DateTimeStyle = DateTimeStyle.Medium,
+    relativeThreshold: Duration = 3.days,
+    nowThreshold: Duration = 1.minutes,
+    locale: Locale = Locale.current,
+    timeZone: TimeZone = TimeZone.currentSystemDefault(),
+): String = formatReadableRelative(now = now, relativeDateStyle = relativeDateStyle, relativeTimeStyle = relativeTimeStyle, dateStyle = dateStyle, timeStyle = timeStyle, relativeThreshold = relativeThreshold, nowThreshold = nowThreshold, locale = locale, timeZone = timeZone, separators = Separators.Ascii)
+
+/** The 4.3 signature, kept so code compiled against it still links. */
+@Deprecated("Kept for binary compatibility.", level = DeprecationLevel.HIDDEN)
+fun LocalDate.formatReadableRelative(
+    now: LocalDate = Clock.System.todayIn(TimeZone.currentSystemDefault()),
+    relativeStyle: RelativeStyle = RelativeStyle.Long,
+    dateStyle: DateTimeStyle = DateTimeStyle.Medium,
+    relativeThreshold: Duration = 3.days,
+    nowThreshold: Duration = 1.days,
+    locale: Locale = Locale.current,
+): String = formatReadableRelative(now = now, relativeStyle = relativeStyle, dateStyle = dateStyle, relativeThreshold = relativeThreshold, nowThreshold = nowThreshold, locale = locale, separators = Separators.Ascii)
+
+/** The 4.3 signature, kept so code compiled against it still links. */
+@Deprecated("Kept for binary compatibility.", level = DeprecationLevel.HIDDEN)
+fun LocalTime.formatReadableRelative(
+    now: LocalTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).time,
+    direction: RelativeDirection = RelativeDirection.Nearest,
+    relativeStyle: RelativeStyle = RelativeStyle.Long,
+    timeStyle: DateTimeStyle = DateTimeStyle.Medium,
+    relativeThreshold: Duration = 3.hours,
+    nowThreshold: Duration = 1.minutes,
+    locale: Locale = Locale.current,
+): String = formatReadableRelative(now = now, direction = direction, relativeStyle = relativeStyle, timeStyle = timeStyle, relativeThreshold = relativeThreshold, nowThreshold = nowThreshold, locale = locale, separators = Separators.Ascii)
+
+/** The 4.3 signature, kept so code compiled against it still links. */
+@Deprecated("Kept for binary compatibility.", level = DeprecationLevel.HIDDEN)
+fun LocalTime.formatReadableRelative(
+    now: Instant,
+    timeZone: TimeZone = TimeZone.currentSystemDefault(),
+    direction: RelativeDirection = RelativeDirection.Nearest,
+    relativeDateStyle: RelativeStyle = RelativeStyle.Long,
+    relativeTimeStyle: RelativeStyle = RelativeStyle.Long,
+    dateStyle: DateTimeStyle = DateTimeStyle.Medium,
+    timeStyle: DateTimeStyle = DateTimeStyle.Medium,
+    relativeThreshold: Duration = 3.days,
+    nowThreshold: Duration = 1.minutes,
+    locale: Locale = Locale.current,
+): String = formatReadableRelative(now = now, timeZone = timeZone, direction = direction, relativeDateStyle = relativeDateStyle, relativeTimeStyle = relativeTimeStyle, dateStyle = dateStyle, timeStyle = timeStyle, relativeThreshold = relativeThreshold, nowThreshold = nowThreshold, locale = locale, separators = Separators.Ascii)

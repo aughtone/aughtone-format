@@ -144,6 +144,8 @@ Where the symbol and minus sign go, and which symbol is shown, are generated fro
 
 **Range spacing**, for these and for every `formatRange` in `:datetime`: the space before the range's dash is always no-break (U+202F for CLDR's thin space, U+00A0 for an ordinary one), so a line never starts with the dash. The space after it breaks unless `noBreak = true`. `separators` governs the spaces inside each end: `Separators.Ascii`, the default for dates, times and ranges, writes ordinary spaces; `Separators.Typographic` writes no-break ones. `formatRange(start: String, end: String)` joins two values already written with the locale's range separator, laying out only the separator.
 
+**Spaces inside a date or time**: every date and time formatter in `:datetime` and `:readable` — the styles, `Pair.format`, `formatReadableFields` and the date `formatReadableRelative` falls back to — takes `separators`. `Separators.Ascii`, the default, writes every space as U+0020, including the no-break spaces some CLDR patterns carry (before the Russian year marker "г."); `Separators.Typographic` writes U+00A0 for an ordinary space and U+202F for a thin or narrow one, so the value never wraps.
+
 ---
 
 ## 📅 Datetime Module (`:datetime`)

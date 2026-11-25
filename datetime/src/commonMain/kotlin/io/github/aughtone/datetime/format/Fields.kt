@@ -389,7 +389,8 @@ internal fun fieldPattern(skeleton: String, locale: Locale): String {
  *
  * Month and weekday names take the form the language uses inside a date, or the stand-alone form
  * where CLDR's pattern asks for it, in lower case where CLDR writes it so ("июнь 2024 г."); digits
- * follow [numberingSystem], or the locale's default.
+ * follow [numberingSystem], or the locale's default. [separators] decides the spaces: ordinary
+ * spaces for [Separators.Ascii], no-break ones for [Separators.Typographic].
  *
  * @throws IllegalArgumentException if [skeleton] is not a skeleton of those fields, or names a
  *   field whose value is not given: a date field without [date], a time field without [time], or a
@@ -404,6 +405,7 @@ fun formatFieldsSkeleton(
     timeZone: TimeZone? = null,
     instant: Instant? = null,
     numberingSystem: NumberingSystem? = null,
+    separators: Separators = Separators.Ascii,
 ): String {
     val request = parseRequest(skeleton)
     for (kind in request.keys) {
@@ -417,8 +419,21 @@ fun formatFieldsSkeleton(
     val withEra = if (date != null && date.year <= 0 && FieldKind.Year in request && FieldKind.Era !in request) "G$skeleton" else skeleton
     val pattern = fieldPattern(withEra, locale)
     val text = renderFieldPattern(pattern, locale, date, time, timeZone, instant)
-    return MultiplatformPostFormatter.applyNumberingSystem(text, locale, numberingSystem)
+    return MultiplatformPostFormatter.applyNumberingSystem(text, locale, numberingSystem).withSeparators(separators)
 }
+
+/** The 4.3 signature, kept so a 4.3 readable module still links against this one. */
+@InternalAughtoneFormatApi
+@Deprecated("Kept for binary compatibility.", level = DeprecationLevel.HIDDEN)
+fun formatFieldsSkeleton(
+    skeleton: String,
+    locale: Locale,
+    date: LocalDate? = null,
+    time: LocalTime? = null,
+    timeZone: TimeZone? = null,
+    instant: Instant? = null,
+    numberingSystem: NumberingSystem? = null,
+): String = formatFieldsSkeleton(skeleton, locale, date, time, timeZone, instant, numberingSystem, Separators.Ascii)
 
 /** Writes the fields of a CLDR [pattern] from these values, in Latin digits. */
 internal fun renderFieldPattern(

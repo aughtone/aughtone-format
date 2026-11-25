@@ -1,5 +1,6 @@
 package io.github.aughtone.datetime.format
 
+import io.github.aughtone.toolbox.Separators
 import io.github.aughtone.types.locale.Locale
 import io.github.aughtone.datetime.format.resources.is24HourFormat
 import kotlin.time.Instant
@@ -33,6 +34,9 @@ import kotlinx.datetime.TimeZone
  * @param locale The locale to use for formatting. Defaults to the current locale ([Locale.current]).
  * @param timeZone The time zone to use for formatting. Defaults to the system's default time zone ([TimeZone.currentSystemDefault()]).
  * @param placeholder The text rendered in place of a null element. Defaults to `"?"`.
+ * @param separators The spaces inside each side: [Separators.Ascii], the default, writes them as
+ *   ordinary spaces; [Separators.Typographic] as no-break spaces, so neither side wraps. The ` - `
+ *   between the sides is always ordinary spaces.
  * @return A formatted string in the form `[first] - [second]`, where each side is either the
  *         formatted date and time or [placeholder] when that element is null. If both elements
  *         are null the result is `"? - ?"` with the default placeholder.
@@ -43,6 +47,7 @@ fun Pair<Long?, Long?>.formatAsDateTime(
     locale: Locale = Locale.current,
     timeZone: TimeZone = TimeZone.currentSystemDefault(),
     placeholder: String = "?",
+    separators: Separators = Separators.Ascii,
 ): String = Pair(
     first = first?.let { Instant.fromEpochMilliseconds(it) },
     second = second?.let { Instant.fromEpochMilliseconds(it) }
@@ -52,7 +57,18 @@ fun Pair<Long?, Long?>.formatAsDateTime(
     locale = locale,
     timeZone = timeZone,
     placeholder = placeholder,
+    separators = separators,
 )
+
+/** The 4.3 signature, kept so code compiled against it still links. */
+@Deprecated("Kept for binary compatibility.", level = DeprecationLevel.HIDDEN)
+fun Pair<Long?, Long?>.formatAsDateTime(
+    dateStyle: DateTimeStyle = DateTimeStyle.Short,
+    timeStyle: DateTimeStyle = DateTimeStyle.Short,
+    locale: Locale = Locale.current,
+    timeZone: TimeZone = TimeZone.currentSystemDefault(),
+    placeholder: String = "?",
+): String = formatAsDateTime(dateStyle, timeStyle, locale, timeZone, placeholder, Separators.Ascii)
 
 /**
  * Format this pair of instants as a date range in the form `[first] - [second]`.
@@ -69,6 +85,9 @@ fun Pair<Long?, Long?>.formatAsDateTime(
  * @param timeZone [TimeZone] The time zone to use. Defaults to [TimeZone.currentSystemDefault].
  * @param placeholder [String] The text rendered in place of a null instant. Defaults to `"?"`.
  * @param is24HourFormat [Boolean] Whether to use the 24 hour clock. Defaults to [is24HourFormat].
+ * @param separators The spaces inside each side: [Separators.Ascii], the default, writes them as
+ *   ordinary spaces; [Separators.Typographic] as no-break spaces, so neither side wraps. The ` - `
+ *   between the sides is always ordinary spaces.
  * @return [String] The formatted range `[first] - [second]`, where each side is either the
  *   formatted instant or [placeholder] when that side is null.
  */
@@ -79,6 +98,7 @@ fun Pair<Instant?, Instant?>.format(
     timeZone: TimeZone = TimeZone.currentSystemDefault(),
     placeholder: String = "?",
     is24HourFormat: Boolean = is24HourFormat(locale = locale),
+    separators: Separators = Separators.Ascii,
 ): String = "${
     first?.format(
         dateStyle = dateStyle,
@@ -86,6 +106,7 @@ fun Pair<Instant?, Instant?>.format(
         locale = locale,
         timeZone = timeZone,
         is24HourFormat = is24HourFormat,
+        separators = separators,
     ) ?: placeholder
 } - ${
     second?.format(
@@ -94,5 +115,17 @@ fun Pair<Instant?, Instant?>.format(
         locale = locale,
         timeZone = timeZone,
         is24HourFormat = is24HourFormat,
+        separators = separators,
     ) ?: placeholder
 }"
+
+/** The 4.3 signature, kept so code compiled against it still links. */
+@Deprecated("Kept for binary compatibility.", level = DeprecationLevel.HIDDEN)
+fun Pair<Instant?, Instant?>.format(
+    dateStyle: DateTimeStyle = DateTimeStyle.Short,
+    timeStyle: DateTimeStyle = DateTimeStyle.Short,
+    locale: Locale = Locale.current,
+    timeZone: TimeZone = TimeZone.currentSystemDefault(),
+    placeholder: String = "?",
+    is24HourFormat: Boolean = is24HourFormat(locale = locale),
+): String = format(dateStyle, timeStyle, locale, timeZone, placeholder, is24HourFormat, Separators.Ascii)

@@ -163,6 +163,8 @@ The `geo`/`quantitative` families split by package: `Coordinates` extensions are
 
 **New in 4.4.0: `formatReadableFieldsRange`, in `io.github.aughtone.readable.fields`,** on `LocalDate`, `LocalTime`, `LocalDateTime` and `Instant`, in `formatReadableFields`' three forms: a range of the chosen fields with what both ends share written once, from CLDR's interval patterns. Code written for earlier versions formats both ends with `formatReadableFields` and joins them with `" – "`, which repeats the month and uses the wrong separator in most languages. Its spacing is `format-datetime`'s `formatRange`'s: the space before the dash never breaks, `noBreak` keeps the one after it, and `separators` (default `Separators.Ascii`) the ones inside each end.
 
+**New in 4.4.0: `separators` on `formatReadableFields`, and on the date `formatReadableRelative` falls back to.** The default, `Separators.Ascii`, writes every space in a date or time as U+0020; `Separators.Typographic` makes them no-break, so the value never wraps. Relative phrases ("3 days ago") are not changed by it. The default changed one thing: Russian and the other languages that put a no-break space before their year marker ("июнь 2024\u202Fг.") now write U+0020 there.
+
 **New in 4.4.0: `Separators` lives in `io.github.aughtone.toolbox`,** shared with `format-datetime`'s ranges. Numbers default to `Separators.Typographic`; dates, times and ranges to `Separators.Ascii`.
 
 **New in 4.4.0: `formatReadablePercent`, in `io.github.aughtone.readable.number`.** Earlier versions had no percent formatting, so code written for them appends `"%"` to a formatted number, which is wrong wherever the sign is spaced (French, German, Swedish) or comes first (Turkish, Basque).
