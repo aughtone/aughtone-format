@@ -3,7 +3,15 @@ package io.github.aughtone.readable
 import io.github.aughtone.types.locale.Locale
 
 /**
- * Common locale constants for formatting.
+ * Named locales for call sites, one for each language this library has text for:
+ * `Duration.formatReadable(locale = Locales.French)`.
+ *
+ * Each is equal to the locale `io.github.aughtone.types.locale.localeFor` returns for its tag, and
+ * names the script that locale names (`Chinese` is `zh-Hans-CN`, `TraditionalChinese` `zh-Hant-TW`),
+ * so it can be mixed with locales from anywhere else in a set or as a map key. Each language has
+ * one region, its most common one. This is not the list of locales the platform knows, or of those
+ * this library formats: any [Locale] can be passed, and `localeFor` or `Locale.current` reaches the
+ * rest.
  */
 object Locales {
     // ── Germanic ──────────────────────────────────────────────────────────────
@@ -47,8 +55,8 @@ object Locales {
 
     // ── East Asian & SE Asian ──────────────────────────────────────────────────
     val Japanese: Locale = Locale(languageCode = "ja", regionCode = "JP", displayName = "Japanese")
-    val Chinese: Locale = Locale(languageCode = "zh", regionCode = "CN", displayName = "Chinese (Simplified)")
-    val TraditionalChinese: Locale = Locale(languageCode = "zh", regionCode = "TW", displayName = "Chinese (Traditional)")
+    val Chinese: Locale = Locale(languageCode = "zh", scriptCode = "Hans", regionCode = "CN", displayName = "Chinese (Simplified)")
+    val TraditionalChinese: Locale = Locale(languageCode = "zh", scriptCode = "Hant", regionCode = "TW", displayName = "Chinese (Traditional)")
     val Korean: Locale = Locale(languageCode = "ko", regionCode = "KR", displayName = "Korean")
     val Thai: Locale = Locale(languageCode = "th", regionCode = "TH", displayName = "Thai")
     val Vietnamese: Locale = Locale(languageCode = "vi", regionCode = "VN", displayName = "Vietnamese")
@@ -60,7 +68,7 @@ object Locales {
     val Armenian: Locale = Locale(languageCode = "hy", regionCode = "AM", displayName = "Armenian")
     val Georgian: Locale = Locale(languageCode = "ka", regionCode = "GE", displayName = "Georgian")
     val Kazakh: Locale = Locale(languageCode = "kk", regionCode = "KZ", displayName = "Kazakh")
-    val Uzbek: Locale = Locale(languageCode = "uz", regionCode = "UZ", displayName = "Uzbek")
+    val Uzbek: Locale = Locale(languageCode = "uz", scriptCode = "Latn", regionCode = "UZ", displayName = "Uzbek")
 
     // ── Middle Eastern & African ──────────────────────────────────────────────
     val Arabic: Locale = Locale(languageCode = "ar", regionCode = "EG", displayName = "Arabic")
