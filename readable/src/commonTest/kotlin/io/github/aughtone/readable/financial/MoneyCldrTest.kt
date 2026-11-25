@@ -1,5 +1,6 @@
 package io.github.aughtone.readable.financial
 
+import io.github.aughtone.readable.localeOfTag
 import io.github.aughtone.readable.Locales
 import io.github.aughtone.readable.number.Separators
 import io.github.aughtone.types.financial.Currency
@@ -19,11 +20,7 @@ import kotlin.test.assertTrue
  */
 class MoneyCldrTest {
 
-    private fun localeOf(tag: String) = Locale(
-        languageCode = tag.substringBefore('-'),
-        regionCode = tag.substringAfter('-', "").ifEmpty { null },
-        displayName = tag,
-    )
+    private fun localeOf(tag: String) = localeOfTag(tag)
 
     private fun currency(code: String, digits: Int, symbol: String) =
         Currency(code = code, number = 0, digits = digits, name = code, symbol = symbol)

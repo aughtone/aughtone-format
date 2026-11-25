@@ -1,5 +1,6 @@
 package io.github.aughtone.readable.duration
 
+import io.github.aughtone.readable.localeOfTag
 import io.github.aughtone.readable.relative.RelativeStyle
 import io.github.aughtone.types.locale.Locale
 import kotlin.test.Test
@@ -28,7 +29,7 @@ class DurationCldrTest {
     /** A locale for a CLDR identifier, as the library would be given it. */
     private fun localeOf(id: String): Locale = when (id) {
         "nb" -> Locale(languageCode = "nb", displayName = id)
-        else -> Locale(languageCode = id.substringBefore('-'), regionCode = id.substringAfter('-', "").ifEmpty { null }, displayName = id)
+        else -> localeOfTag(id)
     }
 
     /**

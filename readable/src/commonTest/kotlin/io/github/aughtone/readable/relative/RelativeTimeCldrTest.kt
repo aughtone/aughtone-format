@@ -1,5 +1,6 @@
 package io.github.aughtone.readable.relative
 
+import io.github.aughtone.readable.localeOfTag
 import io.github.aughtone.readable.Locales
 import io.github.aughtone.types.locale.Locale
 import kotlin.test.Test
@@ -47,7 +48,7 @@ class RelativeTimeCldrTest {
     fun everyLanguageButEnglishMatchesCldrsShortPhrases() {
         assertTrue(shortRelativeTimeCldrFixture.isNotEmpty())
         for ((language, cases) in shortRelativeTimeCldrFixture) {
-            val locale = Locale(languageCode = language.substringBefore('-'), regionCode = language.substringAfter('-', "").ifEmpty { null }, displayName = language)
+            val locale = localeOfTag(language)
             val formatter = relativeTimeConfigFor(locale, RelativeStyle.Short).formatter
             val long = relativeTimeConfigFor(locale, RelativeStyle.Long).formatter
             // CLDR's short phrase, unless it is longer than the long phrase, which is then used.

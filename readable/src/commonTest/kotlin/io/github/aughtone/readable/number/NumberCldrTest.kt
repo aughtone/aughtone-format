@@ -1,5 +1,6 @@
 package io.github.aughtone.readable.number
 
+import io.github.aughtone.readable.localeOfTag
 import io.github.aughtone.readable.Locales
 import io.github.aughtone.types.locale.Locale
 import kotlin.test.Test
@@ -13,11 +14,7 @@ import kotlin.test.assertTrue
  */
 class NumberCldrTest {
 
-    private fun localeOf(tag: String) = Locale(
-        languageCode = tag.substringBefore('-'),
-        regionCode = tag.substringAfter('-', "").ifEmpty { null },
-        displayName = tag,
-    )
+    private fun localeOf(tag: String) = localeOfTag(tag)
 
     @Test
     fun everyLocaleMatchesCldrForEachSample() {

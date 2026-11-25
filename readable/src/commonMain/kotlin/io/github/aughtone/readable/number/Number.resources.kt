@@ -2,6 +2,8 @@
 
 package io.github.aughtone.readable.number
 
+import io.github.aughtone.readable.lookupTags
+import io.github.aughtone.readable.lookupKey
 import io.github.aughtone.types.locale.Locale
 import kotlin.math.abs
 import kotlin.concurrent.Volatile
@@ -217,15 +219,12 @@ internal fun prefixRungFor(
 
 /**
  * Resolves how [locale] writes a number, from the data generated from Unicode CLDR. Walks the
- * BCP 47 subtag chain ("fr-CA" → "fr") and ends at English, which is also how a language CLDR has
+ * locale's [lookupTags] ("fr-CA" → "fr") and ends at English, which is also how a language CLDR has
  * no number data for reads.
  */
 internal fun numberStyleFor(locale: Locale, separators: Separators = Separators.Typographic): NumberStyle {
-    var currentTag: String =
-        if (locale.regionCode != null) "${locale.languageCode}-${locale.regionCode}" else locale.languageCode
-    while (currentTag.isNotEmpty()) {
+    for (currentTag in lookupTags(locale)) {
         cldrNumberStyles[currentTag]?.let { return it.with(separators) }
-        currentTag = currentTag.substringBeforeLast('-', "")
     }
     return englishNumberStyle.with(separators)
 }
@@ -260,7 +259,7 @@ fun numberFormatterFor(
     precision: Int = 1,
     separators: Separators = Separators.Typographic,
 ): NumberFormatter {
-    val fullTag = if (locale.regionCode != null) "${locale.languageCode}-${locale.regionCode}" else locale.languageCode
+    val fullTag = lookupKey(locale)
     val cacheKey = Triple(fullTag, precision, separators)
     numberFormatterCache[cacheKey]?.let { return it }
 

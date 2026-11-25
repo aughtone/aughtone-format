@@ -1,5 +1,6 @@
 package io.github.aughtone.readable.number
 
+import io.github.aughtone.readable.lookupTags
 import io.github.aughtone.types.locale.Locale
 
 /**
@@ -40,15 +41,12 @@ internal fun PercentPattern.fill(digits: String, negative: Boolean, minus: Strin
     }
 
 /**
- * Resolves where [locale] puts the percent sign. Walks the BCP 47 subtag chain ("de-CH" → "de")
+ * Resolves where [locale] puts the percent sign. Walks the locale's [lookupTags] ("de-CH" → "de")
  * and ends at English.
  */
 internal fun percentPatternFor(locale: Locale): PercentPattern {
-    var currentTag: String =
-        if (locale.regionCode != null) "${locale.languageCode}-${locale.regionCode}" else locale.languageCode
-    while (currentTag.isNotEmpty()) {
+    for (currentTag in lookupTags(locale)) {
         cldrPercentPatterns[currentTag]?.let { return it }
-        currentTag = currentTag.substringBeforeLast('-', "")
     }
     return englishPercentPattern
 }

@@ -2,6 +2,7 @@
 
 package io.github.aughtone.readable.relative
 
+import io.github.aughtone.readable.lookupTags
 import io.github.aughtone.readable.Locales
 import io.github.aughtone.readable.duration.cldrDurationNow
 import io.github.aughtone.readable.PluralCategory
@@ -522,7 +523,10 @@ private fun buildBaseRelativeTimeConfig(tag: String, locale: Locale, style: Rela
 
 /**
  * Returns the [RelativeTimeConfig] for [locale], building and caching it on first use.
- * Supports full BCP 47 subtag fallback: e.g. "en-ZA" → "en" → "en" default.
+ * Falls back from the most specific data the locale's script and region have to its language, then
+ * to English: "en-ZA" → "en", "zh-Hant-US" → "zh-Hant". The script decides before the region, so a
+ * Traditional Chinese locale reads Traditional data whatever its region, and a locale that names no
+ * script reads the one its region implies ("zh-TW" is Traditional).
  *
  * Example:
  * ```kotlin
@@ -535,9 +539,7 @@ private fun buildBaseRelativeTimeConfig(tag: String, locale: Locale, style: Rela
  * @return a [RelativeTimeConfig] for the specified [locale] and [relativeStyle].
  */
 fun relativeTimeConfigFor(locale: Locale, relativeStyle: RelativeStyle = RelativeStyle.Long): RelativeTimeConfig {
-    val fullTag = if (locale.regionCode != null) "${locale.languageCode}-${locale.regionCode}" else locale.languageCode
-    var currentTag = fullTag
-    while (currentTag.isNotEmpty()) {
+    for (currentTag in lookupTags(locale)) {
         val key = currentTag to relativeStyle
         val cached = configCache[key]
         if (cached != null) return cached
@@ -554,7 +556,6 @@ fun relativeTimeConfigFor(locale: Locale, relativeStyle: RelativeStyle = Relativ
             }
             return built
         }
-        currentTag = currentTag.substringBeforeLast('-', "")
     }
     val defaultKey = "en" to relativeStyle
     configCache[defaultKey]?.let { return it }

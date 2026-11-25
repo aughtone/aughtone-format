@@ -2,6 +2,8 @@
 
 package io.github.aughtone.readable.financial
 
+import io.github.aughtone.readable.lookupTags
+import io.github.aughtone.readable.lookupKey
 import io.github.aughtone.readable.number.NumberStyle
 import io.github.aughtone.readable.number.Separators
 import io.github.aughtone.readable.number.numberStyleFor
@@ -87,16 +89,13 @@ private val symbolCategories = setOf(
 
 /**
  * Resolves where [locale] puts the symbol and sign of an amount in the currency [code]. Walks the
- * BCP 47 subtag chain ("de-CH" → "de") and ends at English; at each tag, a pattern CLDR gives
+ * locale's [lookupTags] ("de-CH" → "de", "zh-Hant-HK" → "zh-HK" → "zh-Hant") and ends at English; at each tag, a pattern CLDR gives
  * that currency in particular ([cldrCurrencyPatternOverrides]) comes before the locale's own.
  */
 internal fun currencyPatternFor(locale: Locale, code: String): CurrencyPattern {
-    var currentTag: String =
-        if (locale.regionCode != null) "${locale.languageCode}-${locale.regionCode}" else locale.languageCode
-    while (currentTag.isNotEmpty()) {
+    for (currentTag in lookupTags(locale)) {
         cldrCurrencyPatternOverrides["$currentTag:$code"]?.let { return it }
         cldrCurrencyPatterns[currentTag]?.let { return it }
-        currentTag = currentTag.substringBeforeLast('-', "")
     }
     return englishCurrencyPattern
 }
@@ -117,7 +116,7 @@ private fun moneyStyleFor(numberStyle: NumberStyle, pattern: CurrencyPattern): N
 
 /**
  * The symbols a locale shows for currencies, from [cldrCurrencySymbols]: each layer is one tag of
- * the locale's BCP 47 subtag chain, most specific first, ending at [englishCurrencySymbols]. Each
+ * the locale's [lookupTags], most specific first, ending at [englishCurrencySymbols]. Each
  * maps an ISO 4217 code to its standard and narrow symbol, either `null` where the tag shows its
  * parent's.
  */
@@ -152,14 +151,11 @@ private val englishSymbolLayer: Map<String, Array<String?>> by lazy {
     }
 }
 
-/** The symbols [locale] shows for currencies: its own, then its language's, then English. */
+/** The symbols [locale] shows for currencies: its own, then each of its [lookupTags]' in turn, then English. */
 internal fun currencySymbolsFor(locale: Locale): CurrencySymbols {
     val layers = mutableListOf<Map<String, Array<String?>>>()
-    var currentTag: String =
-        if (locale.regionCode != null) "${locale.languageCode}-${locale.regionCode}" else locale.languageCode
-    while (currentTag.isNotEmpty()) {
+    for (currentTag in lookupTags(locale)) {
         cldrCurrencySymbols[currentTag]?.let { layers += unpackSymbols(it) }
-        currentTag = currentTag.substringBeforeLast('-', "")
     }
     layers += englishSymbolLayer
     return CurrencySymbols(layers)
@@ -201,7 +197,7 @@ fun moneyFormatterFor(
     symbol: CurrencySymbol = CurrencySymbol.Standard,
     separators: Separators = Separators.Typographic,
 ): MoneyFormatter {
-    val fullTag = if (locale.regionCode != null) "${locale.languageCode}-${locale.regionCode}" else locale.languageCode
+    val fullTag = lookupKey(locale)
     val cacheKey = MoneyFormatterKey(fullTag, showSymbol, symbol, separators)
 
     moneyFormatterCache[cacheKey]?.let { return it }
