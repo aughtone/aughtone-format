@@ -9,6 +9,7 @@ import io.github.aughtone.readable.metrics.formatReadable
 import io.github.aughtone.readable.metrics.formatReadableDataSize
 import io.github.aughtone.readable.number.formatReadable
 import io.github.aughtone.readable.number.formatReadableAbbreviated
+import io.github.aughtone.readable.number.formatReadablePercent
 import io.github.aughtone.readable.ordinality.formatReadableOrdinal
 import io.github.aughtone.readable.relative.formatReadableRelative
 import io.github.aughtone.types.financial.Currency
@@ -38,6 +39,9 @@ class SkillExampleTest {
         assertEquals("1 week", 7.days.formatReadable(locale = Locales.English))
         assertEquals("1.5k", 1500.0.formatReadableAbbreviated(Locales.English))
         assertEquals("1,234.6", 1234.56.formatReadable(Locales.English, precision = 1))
+        assertEquals("26%", 0.256.formatReadablePercent(Locales.English))
+        assertEquals("25.6%", 0.256.formatReadablePercent(Locales.English, precision = 1))
+        assertEquals("25%", 25.formatReadablePercent(Locales.English, outOfHundred = true))
         assertEquals("1 MiB", 1048576L.formatReadableDataSize(UnitOfMeasure.Byte, Locales.English))
         assertEquals("1.5 km", Distance(1500.0).formatReadable(Locales.English))
         assertEquals("$1,234.56", Money(123456L, usd).formatReadable(Locales.English))

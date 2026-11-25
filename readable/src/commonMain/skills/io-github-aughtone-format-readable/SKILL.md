@@ -8,7 +8,7 @@ description: >-
   as the locale does ("Jun 1", "1. Juni", "Sat 4 PM", "June 2024", a month and
   day without the year); file sizes (KiB/MiB/GiB); distances, speeds and other
   metric units ("1.5 km"); numbers with thousands separators or as compact
-  numbers ("1.5k"); ordinals ("1st"); money ("$1,234.56", "1 234,56 €");
+  numbers ("1.5k"); percentages ("25%"); ordinals ("1st"); money ("$1,234.56", "1 234,56 €");
   latitude/longitude in decimal degrees or DMS; a compass bearing ("225° (SW)");
   a time zone's name; and a list joined with "and" or "or". Localized with plural
   rules. Output is prose, never a value to parse back. For styled dates
@@ -29,6 +29,7 @@ Turning a raw value into the short, localized phrase a person reads:
 - Relative time — "8 minutes ago", "Tomorrow", "in 3 days" — from an `Instant`, `LocalDateTime`, `LocalDate`, `LocalTime`, or `Duration`.
 - Scaled units — "1.5 km", "500 m", data sizes "1 KiB"/"1 MiB", SI metric quantities.
 - Numbers — grouped ("1,234.6"), abbreviated ("1.5k", "2.5G"), and ordinals ("1st", "1er").
+- Percentages — "25%", "25 %" in French, "%25" in Turkish.
 - Money — "$1,234.56", "1 234,56 €", "-$12.00".
 - Geo — coordinates as decimal degrees or DMS, azimuths "225° (SW)", altitudes.
 - Dates and times with only the fields you choose — "Jun 1", "1. Juni", "Sat 4:05 PM", "June 2024" — laid out as each locale lays out that set of fields.
@@ -55,6 +56,7 @@ import io.github.aughtone.readable.metrics.formatReadable
 import io.github.aughtone.readable.metrics.formatReadableDataSize
 import io.github.aughtone.readable.number.formatReadable
 import io.github.aughtone.readable.number.formatReadableAbbreviated
+import io.github.aughtone.readable.number.formatReadablePercent
 import io.github.aughtone.readable.ordinality.formatReadableOrdinal
 import io.github.aughtone.readable.relative.formatReadableRelative
 import io.github.aughtone.types.financial.Currency
@@ -71,6 +73,9 @@ val cad = Currency(code = "CAD", number = 124, digits = 2, name = "Canadian Doll
 7.days.formatReadable(locale = Locales.English)                 // "1 week"
 1500.0.formatReadableAbbreviated(Locales.English)               // "1.5k"
 1234.56.formatReadable(Locales.English, precision = 1)          // "1,234.6"
+0.256.formatReadablePercent(Locales.English)                     // "26%": a fraction, to no decimal places by default
+0.256.formatReadablePercent(Locales.English, precision = 1)      // "25.6%"
+25.formatReadablePercent(Locales.English, outOfHundred = true)   // "25%": already out of a hundred
 1048576L.formatReadableDataSize(UnitOfMeasure.Byte, Locales.English)  // "1 MiB"
 Distance(1500.0).formatReadable(Locales.English)                // "1.5 km"
 Money(123456L, usd).formatReadable(Locales.English)             // "$1,234.56"
@@ -115,6 +120,8 @@ The `geo`/`quantitative` families split by package: `Coordinates` extensions are
 
 **Trailing zeros are trimmed and rounding is lossy — do not promise a fixed decimal count.** `precision` is a maximum: `1024L.formatReadableDataSize(...)` is `"1 KiB"`, not `"1.0 KiB"`; `Distance(500.0)` is `"500 m"`. Money is the one exception and always shows its currency's full minor-unit digits (`"$12.00"`). Units round to the nearest step (`29.days` → "29 days" but `30.days` → "1 month"; `10.days` → "1 week", `11.days` → "2 weeks"), the week unit only ever renders 1–3 before jumping to days/months, and a value that rounds up to a whole larger unit is shown as that unit (59.6 seconds → "1 minute", 999,999 → "1M", 1,048,575 bytes → "1 MiB"). DMS truncates its seconds field (21.6″ reads 21″). Symptom: fewer decimals than you set, or a unit that "jumps" at a threshold.
 
+**A percentage is made from a fraction, whatever the number's type.** `0.25.formatReadablePercent()` is 25 percent and `25.formatReadablePercent()` is 2,500 percent: an integer is not read as a whole percentage. Pass `outOfHundred = true` for a number that is already out of a hundred, and never multiply by 100 or append `"%"` yourself, as the sign's place and spacing differ by language. `precision` counts the places of the percentage shown, not of the fraction, and defaults to `0`. Symptom: a value 100 times too large, or `"0%"` for a small share — pass `outOfHundred = true`, or a higher `precision`.
+
 **The currency symbol is the locale's, not `Currency.symbol`.** Money shows Unicode CLDR's standard symbol for the currency in the locale, which marks a currency that shares its sign with the locale's own: a Canadian dollar is `"CA$5.00"` in US English and `"$5.00"` in Canadian English. Where CLDR has no symbol for a currency in a locale, it shows the code (`"AED 5.00"` in English). A `Currency` built with a symbol of its own shows it only if CLDR has no symbol for its code at all. Symptom: a symbol you set on the `Currency` does not appear — pass `symbol = CurrencySymbol.Narrow` for the bare sign, or `CurrencySymbol.Code` for the code.
 
 **Numbers are always written out in full, and no formatter throws on a value.** There is no exponent notation however large or small the value; `Long` and `ULong` keep every digit. Not-a-number renders as `"NaN"` and the infinities as `"∞"` / `"-∞"` (with the bare unit, and no prefix, in the metric and data-size formatters). A negative number carries the locale's leading minus sign — the hyphen-minus in most languages, U+2212 in Swedish, Norwegian, Finnish, Estonian, Lithuanian, Croatian, Slovenian, Basque and Persian; for money it goes where Unicode CLDR puts it for the locale — before the symbol in English (`"-$123.00"`), between the symbol and the digits in Dutch (`"€ -123,00"`) and Swiss German (`"CHF-123.00"`), before the digits when the symbol trails (`"-123,00 €"`). The one thing that can throw is the default `locale = Locale.current`, which throws `IllegalArgumentException` if the platform reports no locale at all.
@@ -145,6 +152,8 @@ The `geo`/`quantitative` families split by package: `Coordinates` extensions are
 - Money places its symbol and sign from CLDR's currency pattern for the locale, not a table of languages, and the space between an amount and its symbol is U+00A0: `"1 234,56 €"`, `"CHF-1'234.56"` in Swiss German (was `"CHF -1'234.56"`), `"$ 1,234.56"` in Persian (was after the number). A symbol ending in a letter is spaced from the digits (`"CHF 5.00"` in English). Where CLDR gives money its own separators they are used: Austrian German writes `"€ 1.234,56"` though it groups numbers with a space, and English in Switzerland, Sweden or Poland writes euros the English way and its own currency the local way.
 - Money shows CLDR's standard symbol for the currency in the locale, not `Currency.symbol`: `"CA$5.00"` in US English, `"US$5.00"` in Canadian English, the code where CLDR has no symbol (`"AED 5.00"` in English, `"1234,56 USD"` in Italian), `"￥"` for the yen in Japanese. `Currency.symbol` shows only for a currency CLDR has no symbol for. `symbol = CurrencySymbol.Narrow` gives the bare sign, `CurrencySymbol.Code` the ISO code.
 - `Separators.Ascii` gives the old characters back where a caller needs plain ASCII; `Money.formatReadable` and `moneyFormatterFor` take it too.
+
+**New in 4.4.0: `formatReadablePercent`, in `io.github.aughtone.readable.number`.** Earlier versions had no percent formatting, so code written for them appends `"%"` to a formatted number, which is wrong wherever the sign is spaced (French, German, Swedish) or comes first (Turkish, Basque).
 
 **New in 4.3.0: Canadian Indigenous locales are found, and written in English.** `localeFor` now returns locales for Cree, Ojibwe, Mi'kmaq, Mohawk and 21 more (`cr-CA`, `hur-CA`, `atj-CA`, …). This library has no text in those languages, so they format in English, the same text as before they were found — do not read a non-null locale as a sign its output is in that language. Inuktitut (`iu`) is the one with its own text.
 

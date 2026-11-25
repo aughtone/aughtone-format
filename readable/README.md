@@ -79,7 +79,22 @@ The order you name the fields in has no effect, and there is no separator to cho
 1.formatReadableOrdinal(Locales.French)                  // "1er"
 ```
 
-`precision` defaults are not uniform: floating-point formatters default `1`, integer receivers default `0`.
+`precision` defaults are not uniform: floating-point formatters default `1`, integer receivers default `0`, and percentages `0` for every type.
+
+#### Percentages
+
+The number is a fraction, whatever its type, unless you say it is out of a hundred. The sign, its place and its spacing are the locale's, from Unicode CLDR; the space is a no-break space.
+
+```kotlin
+0.56.formatReadablePercent(Locales.English)                                      // "56%"
+0.56.formatReadablePercent(Locales.French)                                       // "56 %"
+0.56.formatReadablePercent(Locales.Turkish)                                      // "%56"
+0.1234.formatReadablePercent(Locales.English, precision = 1)                     // "12.3%"
+0.56.formatReadablePercent(Locales.English, precision = 2, outOfHundred = true)  // "0.56%"
+56.formatReadablePercent(Locales.English, outOfHundred = true)                   // "56%"
+```
+
+`precision` is the most decimal places the percentage shows.
 
 ### 💾 Data sizes
 

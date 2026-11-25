@@ -98,6 +98,19 @@ Generated from Unicode CLDR for every bundled language and every region that wri
 | `it-CH` | Swiss Italian | `.` | `'` (apostrophe), from five digits | `1234.56`, `12'345.67` |
 | `sv` | Swedish | `,` | U+00A0, minus U+2212 | `−1 234,56` |
 
+#### Percentages (`PercentPatterns.resources.kt`)
+
+`formatReadablePercent` formats any number type as a percentage. The number is a fraction (`0.25` is 25 percent) unless `outOfHundred = true`; the type never decides. `precision` is the most decimal places the percentage shows, `0` by default. Where the sign goes and the space beside it come from Unicode CLDR by the same tool, and so does grouping where it differs from the locale's numbers: Malayalam, Marathi and Telugu group numbers in lakhs and percentages in threes.
+
+| Tag | Region | `0.25` | `-0.25` |
+|---|---|---|---|
+| `en` | English | `25%` | `-25%` |
+| `fr` | French | `25 %` | `-25 %` |
+| `de-CH` | Swiss German | `25%` | `-25%` |
+| `sv` | Swedish | `25 %` | `−25 %` |
+| `tr` | Turkish | `%25` | `-%25` |
+| `eu` | Basque | `% 25` | `−% 25` |
+
 #### Money (`CurrencyPatterns.resources.kt`, `CurrencySymbols.resources.kt`)
 
 Where the symbol and minus sign go, and which symbol is shown, are generated from Unicode CLDR by the same tool, for every bundled language and every region that does it differently. The symbol is CLDR's standard symbol for the currency in the locale by default (`CurrencySymbol.Standard`); `CurrencySymbol.Narrow` gives the bare sign and `CurrencySymbol.Code` the ISO code. `Currency.symbol` is used only for a currency CLDR has no symbol for. Some examples:

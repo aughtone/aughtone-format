@@ -1,9 +1,10 @@
-// Generates the number symbols and currency placement that :readable bundles, and the fixtures
-// its tests check them against, from the Unicode CLDR data in this Node runtime's ICU.
+// Generates the number symbols, percent placement and currency formats that :readable bundles,
+// and the fixtures its tests check them against, from the Unicode CLDR data in this Node runtime's
+// ICU.
 //
 //   node tools/cldr/number-symbols.mjs
 //
-// Run it from the repository root. It rewrites five files and prints what it wrote. The CLDR
+// Run it from the repository root. It rewrites six files and prints what it wrote. The CLDR
 // version it used is recorded in each. Do not edit the generated files by hand. The places where
 // the output departs from CLDR are listed in ADJUSTMENTS below, each with its reason.
 //
@@ -15,6 +16,11 @@
 // only where it differs from English, so the table stays small and follows the same subtag
 // fallback the library looks it up with. A language CLDR has no number data for (Inuktitut, at
 // the time of writing) is not recorded and reads as English.
+//
+// It records, the same way, where a percentage's sign and minus sign go: CLDR's percent pattern for
+// a positive and a negative value, written as a template with "%" for the percent sign, "#" for
+// the digits, "-" for the minus sign, and the literal text between them, and whether percentages
+// are grouped the Indian way where that differs from the locale's numbers.
 //
 // It records, the same way, where an amount's currency symbol and minus sign go: CLDR's standard
 // currency pattern for a positive and a negative amount, written as a template with "¤" for the
@@ -154,6 +160,53 @@ function differing(of, root) {
 }
 const english = symbolsOf("en");
 const entries = differing(symbolsOf, english);
+
+/**
+ * Where [tag] puts the percent sign and the minus sign, as a positive and a negative template with
+ * "%" for the sign, "#" for the digits, "-" for the minus sign and the literal text between them.
+ * CLDR's percent pattern can group differently from its decimal one: Malayalam, Marathi and
+ * Telugu write numbers in lakhs and percentages in threes. That is recorded as "indian", and only
+ * where it differs; the separators and the minimum grouping are checked to be the number's own.
+ */
+function percentPatternOf(tag) {
+  const percent = formatter(tag, { style: "percent" });
+  const template = (value) =>
+    percent
+      .formatToParts(value)
+      .map((part) => {
+        if (part.type === "percentSign") return "%";
+        if (part.type === "minusSign") return "-";
+        if (["integer", "group", "decimal", "fraction"].includes(part.type)) return "#";
+        return clean(part.value);
+      })
+      .join("")
+      .replace(/#+/g, "#");
+  const digitParts = (parts) => parts.filter((part) => ["integer", "group", "decimal", "fraction"].includes(part.type));
+  const options = { maximumFractionDigits: 1 };
+  const percentDigits = formatter(tag, { ...options, style: "percent" });
+  const numberDigits = formatter(tag, options);
+  const textOf = (parts) => digitParts(parts).map((part) => part.value).join("");
+  for (const value of [1234.5, 12345.5]) {
+    const written = textOf(percentDigits.formatToParts(value / 100));
+    const number = textOf(numberDigits.formatToParts(value));
+    if (written !== number) throw new Error(`${tag}: a percentage's digits ${JSON.stringify(written)} are not its number's ${JSON.stringify(number)}`);
+  }
+  const isIndian = (parts) => parts.filter((part) => part.type === "integer").map((part) => part.value.length).join(",") === "2,2,3";
+  const indian = isIndian(percentDigits.formatToParts(12345.675));
+  return {
+    positive: template(0.25),
+    negative: template(-0.25),
+    indian: indian === isIndian(numberDigits.formatToParts(1234567.5)) ? null : indian,
+  };
+}
+const englishPercent = percentPatternOf("en");
+const percentEntries = differing(percentPatternOf, englishPercent);
+for (const [tag, { positive, negative }] of [["en", englishPercent], ...percentEntries]) {
+  for (const template of [positive, negative]) {
+    const once = ["%", "#", "-"].every((c) => template.split(c).length <= 2);
+    if (!once || !/^[%#\-\u00a0\u202f ]*$/.test(template)) throw new Error(`${tag}: unexpected percent template ${JSON.stringify(template)}`);
+  }
+}
 const englishCurrency = genericCurrencyPatternOf("en");
 const currencyEntries = differing(genericCurrencyPatternOf, englishCurrency);
 
@@ -312,32 +365,59 @@ internal val englishNumberStyle: NumberStyle = ${styleOf(english)}
 
 // The fixture: ICU's own output for a sample of numbers in every recorded locale and every
 // bundled language, one case per line as `kind|value|precision|text`. A kind of `d` is a Double,
-// `l` a Long. Values that ICU writes as a signed zero ("-0") are avoided: the library writes zero
+// `l` a Long, `p` a Double fraction written as a percentage, `q` a Long that is already one. Values that ICU writes as a signed zero ("-0") are avoided: the library writes zero
 // without a sign, deliberately.
 const SAMPLES = [
   ["d", "0.0", 1], ["d", "5.0", 1], ["d", "-5.0", 1], ["d", "0.25", 2], ["d", "1234.0", 1], ["d", "-1234.5", 1],
   ["d", "12345.678", 2], ["d", "-1234567.891", 2], ["d", "1234567.5", 0], ["l", "1234", 0], ["l", "-12345", 0],
   ["l", "1234567", 0], ["l", "-1234567890123", 0], ["l", "9223372036854775807", 0],
+  ["p", "0.25", 0], ["p", "-0.25", 0], ["p", "0.0", 0], ["p", "1.0", 0], ["p", "0.1234", 1], ["p", "-12.3456", 2],
+  ["p", "0.005", 1], ["p", "0.145", 0], ["p", "-0.125", 0], ["p", "0.123456", 3], ["p", "0.5", 2],
+  ["q", "25", 0], ["q", "-12345", 0],
 ];
 const sampleText = (tag, [kind, value, precision]) => {
   const options = { maximumFractionDigits: precision, roundingMode: "halfExpand" };
+  if (kind === "p" || kind === "q") {
+    const fraction = kind === "q" ? Number(value) / 100 : Number(value);
+    return `${kind}|${value}|${precision}|${clean(formatter(tag, { ...options, style: "percent" }).format(fraction))}`;
+  }
   const number = kind === "l" ? BigInt(value) : Number(value);
   return `${kind}|${value}|${precision}|${clean(formatter(tag, options).format(number))}`;
 };
-const fixtureTags = [...new Set([...LANGUAGES, ...entries.map(([tag]) => tag), ...currencyEntries.map(([tag]) => tag)])].sort();
+const fixtureTags = [...new Set([...LANGUAGES, ...entries.map(([tag]) => tag), ...currencyEntries.map(([tag]) => tag), ...percentEntries.map(([tag]) => tag)])].sort();
 const fixture = `package io.github.aughtone.readable.number
 
 ${header}
 
 /**
  * What Unicode CLDR writes for a sample of numbers, per BCP 47 tag, one case per line as
- * \`kind|value|precision|text\`: \`d\` for a Double, \`l\` for a Long.
+ * \`kind|value|precision|text\`: \`d\` for a Double, \`l\` for a Long, \`p\` for a Double fraction
+ * written as a percentage (\`0.25\` is 25 %), \`q\` for a Long that is already a percentage.
  */
 internal val numberCldrFixture: Map<String, String> = mapOf(
 ${fixtureTags.map((tag) => `    "${tag}" to """
 ${SAMPLES.map((sample) => sampleText(tag, sample)).join("\n")}
 """,`).join("\n")}
 )
+`;
+
+const percentPatternKotlin = (p) =>
+  `PercentPattern(${kotlinString(p.positive)}, ${kotlinString(p.negative)}${p.indian === null ? "" : `, indian = ${p.indian}`})`;
+const percentData = `package io.github.aughtone.readable.number
+
+${header}
+
+/**
+ * Where each bundled language, and each region that does it differently, puts the percent sign and
+ * the minus sign, from Unicode CLDR's percent pattern. Keyed by BCP 47 tag like [cldrNumberStyles]
+ * and looked up the same way, ending at [englishPercentPattern]. See [PercentPattern].
+ */
+internal val cldrPercentPatterns: Map<String, PercentPattern> = mapOf(
+${percentEntries.map(([tag, p]) => `    "${tag}" to ${percentPatternKotlin(p)},`).join("\n")}
+)
+
+/** Where English, and any language CLDR has no percent pattern for, puts the percent sign. */
+internal val englishPercentPattern: PercentPattern = ${percentPatternKotlin(englishPercent)}
 `;
 
 const currencyPatternKotlin = (p) => {
@@ -438,7 +518,8 @@ const fixturePath = `${base}/commonTest/kotlin/io/github/aughtone/readable/numbe
 const currencyDataPath = `${base}/commonMain/kotlin/io/github/aughtone/readable/financial/CurrencyPatterns.resources.kt`;
 const moneyFixturePath = `${base}/commonTest/kotlin/io/github/aughtone/readable/financial/MoneyCldrFixture.kt`;
 const symbolDataPath = `${base}/commonMain/kotlin/io/github/aughtone/readable/financial/CurrencySymbols.resources.kt`;
-const outputs = [[dataPath, data], [fixturePath, fixture], [currencyDataPath, currencyData], [symbolDataPath, symbolData], [moneyFixturePath, moneyFixture]];
+const percentDataPath = `${base}/commonMain/kotlin/io/github/aughtone/readable/number/PercentPatterns.resources.kt`;
+const outputs = [[dataPath, data], [percentDataPath, percentData], [fixturePath, fixture], [currencyDataPath, currencyData], [symbolDataPath, symbolData], [moneyFixturePath, moneyFixture]];
 for (const [path, text] of outputs) writeFileSync(path, text);
-console.log(`CLDR ${cldr}: ${entries.length} number styles, ${currencyEntries.length} currency patterns and ${overrides.size} currency overrides (${overrideCodes.join(", ")}) and ${symbolChangeCount} currency symbols in ${symbolEntries.length} locales across ${LANGUAGES.length} languages, ${fixtureTags.length} number and ${moneyFixtureTags.length} money fixture tags`);
+console.log(`CLDR ${cldr}: ${entries.length} number styles, ${percentEntries.length} percent patterns, ${currencyEntries.length} currency patterns and ${overrides.size} currency overrides (${overrideCodes.join(", ")}) and ${symbolChangeCount} currency symbols in ${symbolEntries.length} locales across ${LANGUAGES.length} languages, ${fixtureTags.length} number and ${moneyFixtureTags.length} money fixture tags`);
 for (const [path, text] of outputs) console.log(`wrote ${path} (${text.length} characters)`);

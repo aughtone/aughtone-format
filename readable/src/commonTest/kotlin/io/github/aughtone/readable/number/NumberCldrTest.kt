@@ -8,8 +8,8 @@ import kotlin.test.assertTrue
 
 /**
  * Number formatting in every bundled language, and every region that writes it differently,
- * checked against what Unicode CLDR writes for the same number. The fixture is generated with the
- * data by `tools/cldr/number-symbols.mjs`.
+ * checked against what Unicode CLDR writes for the same number, as a number and as a percentage.
+ * The fixture is generated with the data by `tools/cldr/number-symbols.mjs`.
  */
 class NumberCldrTest {
 
@@ -29,6 +29,8 @@ class NumberCldrTest {
                 val actual = when (kind) {
                     "d" -> value.toDouble().formatReadable(locale, precision.toInt())
                     "l" -> value.toLong().formatReadable(locale, precision.toInt())
+                    "p" -> value.toDouble().formatReadablePercent(locale, precision.toInt())
+                    "q" -> value.toLong().formatReadablePercent(locale, precision.toInt(), outOfHundred = true)
                     else -> error("unknown kind $kind")
                 }
                 assertEquals(expected, actual, "$tag: $value at precision $precision")
