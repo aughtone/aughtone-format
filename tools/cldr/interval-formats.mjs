@@ -7,10 +7,9 @@
 // version it used is recorded in it. Do not edit the generated file by hand.
 //
 // The locales are the ones :datetime bundles date patterns for, read from its pattern table, so
-// the two stay in step. For each, it keeps the interval patterns of the skeletons the library's
-// date and time styles resolve to — numeric and text dates with and without a weekday, and hours
-// and minutes on each clock — plus the locale's interval fallback, which joins two complete
-// values when no pattern applies.
+// the two stay in step. For each, it keeps the interval patterns of every skeleton CLDR publishes —
+// the date and time styles use some of them, and ranges of chosen fields the rest — plus the
+// locale's interval fallback, which joins two complete values when no pattern applies.
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
 
@@ -21,9 +20,10 @@ if (!main || !existsSync(main)) {
 }
 const version = JSON.parse(readFileSync(join(main, "..", "package.json"), "utf8")).version;
 
-// Times: hours and minutes on each clock. Dates: every skeleton with a year, a month and a day,
-// with or without a weekday, so a style can find its own skeleton or the nearest one.
-const isWanted = (skeleton) => skeleton === "hm" || skeleton === "Hm" || /^yM+(E+)?d$/.test(skeleton);
+// Every skeleton CLDR publishes an interval for: the date and time styles find their own or the
+// nearest among the year-month-day ones and the hours and minutes, and a range of chosen fields
+// (formatReadableFieldsRange in :readable) finds the nearest to its fields among all of them.
+const isWanted = (skeleton) => skeleton !== "intervalFormatFallback";
 const STYLES = ["short", "medium", "long", "full"];
 // Library pattern keys that are not CLDR locale identifiers.
 const CLDR_ID = { CA: "en-CA", US: "en", no: "nb" };
@@ -44,22 +44,27 @@ for (const key of keys) {
   const intervals = gregorian.dateTimeFormats.intervalFormats;
   const styles = STYLES.map((style) =>
     `            "${style}" to (${kotlinString(gregorian.dateSkeletons[style])} to ${kotlinString(gregorian.dateFormats[style])}),`);
-  const skeletons = Object.keys(intervals).filter(isWanted).map((s) => {
+  // Packed into one string: skeletons separated by U+001E, a skeleton and its patterns by U+001F,
+  // and its patterns by U+001D, each led by the letter of the field that differs. None of them
+  // appears in CLDR's patterns, which is checked.
+  const packed = Object.keys(intervals).filter(isWanted).map((s) => {
     // Keys such as "d-alt-variant" are alternatives CLDR offers beside the default; only the
     // default, one field letter, is kept.
     const byField = Object.entries(intervals[s])
       .filter(([field]) => field.length === 1)
-      .map(([field, pattern]) => `'${field}' to ${kotlinString(pattern)}`);
-    return `            "${s}" to mapOf(${byField.join(", ")}),`;
-  });
+      .map(([field, pattern]) => {
+        if (/[\u001c-\u001f]/.test(pattern)) throw new Error(`${key} ${s}: a separator in ${JSON.stringify(pattern)}`);
+        return field + pattern;
+      });
+    return `${s}\u001f${byField.join("\u001d")}`;
+  }).join("\u001e");
   entries.push(`    "${key}" to IntervalFormats(
         fallback = ${kotlinString(intervals.intervalFormatFallback)},
+        dateTimeJoin = ${kotlinString(gregorian.dateTimeFormats.medium)},
         dateStyles = mapOf(
 ${styles.join("\n")}
         ),
-        patterns = mapOf(
-${skeletons.join("\n")}
-        ),
+        packedPatterns = ${kotlinString(packed)},
     ),`);
 }
 
@@ -75,18 +80,32 @@ const out = `package io.github.aughtone.datetime.format.resources.formats
  *
  * @property fallback Joins two complete values when no pattern applies: \`{0}\` is the start and
  *   \`{1}\` the end ("{0} – {1}" in English).
+ * @property dateTimeJoin Joins a date (\`{1}\`) and a range of times (\`{0}\`) on one day: CLDR's
+ *   medium date-time pattern, as ICU's interval formatter uses it ("{1}, {0}" in English).
  * @property dateStyles For each date style ("short", "medium", "long", "full"), CLDR's skeleton
  *   for it and CLDR's own date pattern, so the library can tell whether its pattern for the style
  *   is CLDR's and, if it is, use CLDR's skeleton rather than guess one from the letters.
  * @property patterns Interval patterns by skeleton ("yMMMd", "hm", …) and then by the greatest
  *   field that differs between the two ends ('y', 'M', 'd', 'a', 'h', 'H', 'm'). A pattern
- *   repeats a field to mark where the end begins: "MMM d – d, y".
+ *   repeats a field to mark where the end begins: "MMM d – d, y". They are packed into one string
+ *   — skeletons separated by U+001E, a skeleton and its patterns by U+001F, its patterns by U+001D,
+ *   each led by its field letter — and read on first use, because a map literal of this size is
+ *   more than the JVM allows in one class initialiser.
  */
 internal class IntervalFormats(
     val fallback: String,
+    val dateTimeJoin: String,
     val dateStyles: Map<String, Pair<String, String>>,
-    val patterns: Map<String, Map<Char, String>>,
-)
+    private val packedPatterns: String,
+) {
+    val patterns: Map<String, Map<Char, String>> by lazy {
+        if (packedPatterns.isEmpty()) emptyMap()
+        else packedPatterns.split('\u001E').associate { entry ->
+            entry.substringBefore('\u001F') to entry.substringAfter('\u001F').split('\u001D')
+                .filter { it.isNotEmpty() }.associate { it[0] to it.substring(1) }
+        }
+    }
+}
 
 /** Interval formats keyed like the date patterns in [localeDatePatterns]. */
 internal val localeIntervalFormats: Map<String, IntervalFormats> = mapOf(

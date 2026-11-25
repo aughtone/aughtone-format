@@ -6,6 +6,7 @@ import io.github.aughtone.datetime.format.platform.MultiplatformPostFormatter
 import io.github.aughtone.datetime.format.resources.NumberingSystem
 import io.github.aughtone.datetime.format.resources.Resources
 import io.github.aughtone.datetime.format.resources.formats.IntervalFormats
+import io.github.aughtone.toolbox.Separators
 import io.github.aughtone.types.locale.Locale
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
@@ -84,15 +85,83 @@ internal fun List<PatternToken>.withPlainSpaceBeforeDayPeriod(): List<PatternTok
     if (token is PatternToken.Literal && nextToDayPeriod) PatternToken.Literal(token.text.replace('\u202F', ' ')) else token
 }
 
-/** Fills a CLDR fallback pattern's `{0}` and `{1}` in one pass, so neither value is scanned again. */
+/**
+ * Fills a CLDR fallback pattern's `{0}` and `{1}` in one pass, so neither value is scanned again.
+ * The text between the two is the range's own separator, and is marked for [finishRange].
+ */
 internal fun fillIntervalFallback(fallback: String, start: String, end: String): String = buildString {
     var index = 0
+    var placeholders = 0
     while (index < fallback.length) {
-        when {
-            fallback.startsWith("{0}", index) -> { append(start); index += 3 }
-            fallback.startsWith("{1}", index) -> { append(end); index += 3 }
-            else -> { append(fallback[index]); index++ }
+        val placeholder = when {
+            fallback.startsWith("{0}", index) -> start
+            fallback.startsWith("{1}", index) -> end
+            else -> null
         }
+        if (placeholder != null) {
+            if (placeholders == 1) append(RANGE_SEPARATOR_END)
+            append(placeholder)
+            placeholders++
+            if (placeholders == 1) append(RANGE_SEPARATOR_START)
+            index += 3
+        } else {
+            append(fallback[index])
+            index++
+        }
+    }
+}
+
+/*
+ * The range's own separator is marked while a range is built, with two private-use characters no
+ * CLDR data or formatter writes, so that [finishRange] can lay out its spaces after the digits and
+ * the era have been written, and tell them from the spaces inside each end.
+ */
+internal const val RANGE_SEPARATOR_START = '\uE000'
+internal const val RANGE_SEPARATOR_END = '\uE001'
+
+/** These interval tokens with their last literal, the range's separator, marked for [finishRange]. */
+internal fun List<PatternToken>.withMarkedSeparator(): List<PatternToken> {
+    val last = lastOrNull()
+    if (last !is PatternToken.Literal) return this
+    return dropLast(1) + PatternToken.Literal("$RANGE_SEPARATOR_START${last.text}$RANGE_SEPARATOR_END")
+}
+
+private const val NO_BREAK_SPACE = '\u00A0'
+private const val NARROW_NO_BREAK_SPACE = '\u202F'
+private const val THIN_SPACE = '\u2009'
+private fun Char.isRangeSpace() = this == ' ' || this == NO_BREAK_SPACE || this == NARROW_NO_BREAK_SPACE || this == THIN_SPACE
+private fun Char.unbreakable() = when (this) { ' ' -> NO_BREAK_SPACE; THIN_SPACE -> NARROW_NO_BREAK_SPACE; else -> this }
+private fun Char.breakable() = when (this) { NO_BREAK_SPACE -> ' '; NARROW_NO_BREAK_SPACE -> THIN_SPACE; else -> this }
+
+/** The spaces inside a value, written as [separators] asks: plain for [Separators.Ascii], no-break for [Separators.Typographic]. */
+internal fun String.withSeparators(separators: Separators): String = when (separators) {
+    Separators.Ascii -> map { if (it.isRangeSpace()) ' ' else it }.joinToString("")
+    Separators.Typographic -> map { it.unbreakable() }.joinToString("")
+}
+
+/**
+ * Lays out a range built with a marked separator. The spaces inside each end are written as
+ * [separators] asks. Of the separator, the space before its dash never breaks, so a line never
+ * starts with the dash, and the space after it breaks unless [noBreak] says otherwise. Text the
+ * marked literal holds before that space belongs to the start ("г." in Russian). A range with no
+ * mark, one written as a single value, is laid out as an end.
+ */
+internal fun finishRange(text: String, separators: Separators, noBreak: Boolean): String {
+    val open = text.indexOf(RANGE_SEPARATOR_START)
+    val close = text.indexOf(RANGE_SEPARATOR_END)
+    if (open < 0 || close < open) return text.filter { it != RANGE_SEPARATOR_START && it != RANGE_SEPARATOR_END }.withSeparators(separators)
+    val separator = text.substring(open + 1, close)
+    val trimmed = separator.trimEnd { it.isRangeSpace() }
+    val after = separator.substring(trimmed.length)
+    val dashAt = trimmed.indexOfLast { it.isRangeSpace() } + 1
+    val head = trimmed.substring(0, dashAt)
+    val before = head.takeLastWhile { it.isRangeSpace() }
+    return buildString {
+        append((text.substring(0, open) + head.dropLast(before.length)).withSeparators(separators))
+        before.forEach { append(it.unbreakable()) }
+        append(trimmed.substring(dashAt))
+        after.forEach { append(if (noBreak) it.unbreakable() else it.breakable()) }
+        append(text.substring(close + 1).withSeparators(separators))
     }
 }
 
@@ -131,7 +200,7 @@ internal fun formatTimeRange(
     val shortPattern = Resources.getTimePatterns(locale).short
     val singleTokens = tokenizePattern(if (twentyFourHour) shortPattern else shortPattern.to12HourPattern())
     val amPm = Resources.getAmPmStrings(locale)
-    val startText = LocalTime.Format { appendTimeTokens(halves.first.withWidthsOf(singleTokens).withPlainSpaceBeforeDayPeriod(), amPm) }.format(start)
+    val startText = LocalTime.Format { appendTimeTokens(halves.first.withWidthsOf(singleTokens).withPlainSpaceBeforeDayPeriod().withMarkedSeparator(), amPm) }.format(start)
     val endText = LocalTime.Format { appendTimeTokens(halves.second.withWidthsOf(singleTokens).withPlainSpaceBeforeDayPeriod(), amPm) }.format(end)
     return MultiplatformPostFormatter.applyNumberingSystem(startText + endText, locale, numberingSystem)
 }
@@ -237,7 +306,7 @@ internal fun formatDateRange(
         val base = if (date.year in 0..9999) date.year - date.year % 100 else 2000
         return LocalDate.Format { appendDateTokens(tokens.withWidthsOf(singleTokens), dayNames, monthNames, base) }.format(date)
     }
-    val text = render(halves.first, start) + render(halves.second, end)
+    val text = render(halves.first.withMarkedSeparator(), start) + render(halves.second, end)
     // The post formatter writes the digits in the locale's system.
     return MultiplatformPostFormatter.postFormatDate(
         dateStyle = style, locale = locale, date = start, formattedDate = text, numberingSystem = numberingSystem,

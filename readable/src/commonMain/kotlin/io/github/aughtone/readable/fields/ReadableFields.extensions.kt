@@ -21,6 +21,30 @@ import kotlin.time.Instant
  * difference from kotlinx-datetime's `Format { }` builder, which fixes both.
  */
 
+/**
+ * Fails unless a [typeName] value, which has a date if [hasDate], a time if [hasTime] and a zone
+ * if [hasZone], has every one of [fields], and there is at least one.
+ */
+internal fun requireFieldsOf(fields: ReadableFields, typeName: String, hasDate: Boolean, hasTime: Boolean, hasZone: Boolean) {
+    require(!fields.isEmpty) { "No fields to show: name at least one" }
+    val absent = buildList {
+        if (!hasDate) {
+            if (fields.era != null) add("era")
+            if (fields.year) add("year")
+            if (fields.month != null || fields.monthNumber) add("month")
+            if (fields.day) add("day")
+            if (fields.weekday != null) add("weekday")
+        }
+        if (!hasTime) {
+            if (fields.hour) add("hour")
+            if (fields.minute) add("minute")
+            if (fields.second) add("second")
+        }
+        if (!hasZone && fields.timeZone != null) add("time zone")
+    }
+    require(absent.isEmpty()) { "A $typeName has no ${absent.joinToString(", ")} to show" }
+}
+
 /** Writes the values by [fields]; [clock] is the clock a skeleton asked for, if any. */
 private fun formatFields(
     fields: ReadableFields,
@@ -34,23 +58,7 @@ private fun formatFields(
     is24HourFormat: Boolean,
     numberingSystem: NumberingSystem?,
 ): String {
-    require(!fields.isEmpty) { "No fields to show: name at least one" }
-    val absent = buildList {
-        if (date == null) {
-            if (fields.era != null) add("era")
-            if (fields.year) add("year")
-            if (fields.month != null || fields.monthNumber) add("month")
-            if (fields.day) add("day")
-            if (fields.weekday != null) add("weekday")
-        }
-        if (time == null) {
-            if (fields.hour) add("hour")
-            if (fields.minute) add("minute")
-            if (fields.second) add("second")
-        }
-        if (instant == null && fields.timeZone != null) add("time zone")
-    }
-    require(absent.isEmpty()) { "A $typeName has no ${absent.joinToString(", ")} to show" }
+    requireFieldsOf(fields, typeName, hasDate = date != null, hasTime = time != null, hasZone = instant != null)
     return formatFieldsSkeleton(
         skeleton = fields.skeleton(twentyFourHour = clock ?: is24HourFormat),
         locale = locale,

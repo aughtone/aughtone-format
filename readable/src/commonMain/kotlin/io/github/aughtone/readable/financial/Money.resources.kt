@@ -5,7 +5,7 @@ package io.github.aughtone.readable.financial
 import io.github.aughtone.readable.lookupTags
 import io.github.aughtone.readable.lookupKey
 import io.github.aughtone.readable.number.NumberStyle
-import io.github.aughtone.readable.number.Separators
+import io.github.aughtone.toolbox.Separators
 import io.github.aughtone.readable.number.numberStyleFor
 import io.github.aughtone.readable.number.formatDecimalText
 import io.github.aughtone.readable.number.toAscii

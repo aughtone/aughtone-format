@@ -17,7 +17,8 @@ class LocalDateTimeRangeTest {
         Locale(languageCode = language, regionCode = region, displayName = listOfNotNull(language, region).joinToString("-"))
 
     private val english = locale("en", "US")
-    private val dash = " – "
+    // CLDR's thin spaces, the one before the dash made no-break so a line never starts with it.
+    private val dash = "\u202F–\u2009"
     private val march5 = LocalDate(2024, 3, 5)
 
     private fun at(date: LocalDate, hour: Int, minute: Int = 0) = LocalDateTime(date.year, date.month, date.day, hour, minute)

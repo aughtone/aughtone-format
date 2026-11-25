@@ -1,5 +1,6 @@
 package io.github.aughtone.readable.number
 
+import io.github.aughtone.toolbox.Separators
 import io.github.aughtone.readable.PluralCategory
 import io.github.aughtone.readable.lookupTags
 import io.github.aughtone.readable.pluralCategoryFor

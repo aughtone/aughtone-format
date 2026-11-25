@@ -86,6 +86,12 @@ kotlin {
                 implementation(libs.kotlinx.serialization.json)
             }
         }
+        val jvmTest by getting {
+            dependencies {
+                // An oracle for the range tests, never shipped.
+                implementation(libs.icu4j)
+            }
+        }
         val androidDeviceTest by getting {
             dependencies {
                 implementation(libs.androidx.runner)

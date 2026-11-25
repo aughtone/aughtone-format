@@ -2,7 +2,7 @@ package io.github.aughtone.readable.financial
 
 import io.github.aughtone.readable.localeOfTag
 import io.github.aughtone.readable.Locales
-import io.github.aughtone.readable.number.Separators
+import io.github.aughtone.toolbox.Separators
 import io.github.aughtone.types.financial.Currency
 import io.github.aughtone.types.financial.Money
 import io.github.aughtone.types.locale.Locale
