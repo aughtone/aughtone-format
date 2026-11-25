@@ -108,6 +108,8 @@ It collapses **no** Unicode variants and encodes **no** provider-specific behavi
 | IPv6 / hostname (zero-compression canonical) | `:normalize` | no | planned |
 | Slug | `:normalize` | no | planned — adopt from `com.oddlyclever.identifiers.Slug`; note slugging often transliterates (lossy), so treat as its own policy family |
 
+**Since this was written (2026-11-25).** The roster moved to its own repository, [`aughtone-normalize`](https://github.com/aughtone/aughtone-normalize), and every row except Slug is built there. The planned modules shipped under other names: the common contract is `:common`; the table-free normalizers planned for `:normalize` — email, credit-card/PAN, IBAN, IPv4 and IPv6 with networks, MAC addresses, UUIDs and usernames — are `:quodlibet`; the Unicode forms (NFC, NFD, NFKC, NFKD) are `:unicode`; hostnames, domains with Punycode, and URLs, planned for `:normalize-unicode`, are `:ubilibet`; UTS-39 skeletons are `:confusables`; and `:normalize-phone` is `:phone`. Slug was declined: a slug is lossy, a display artifact rather than an identity, so it does not fit a suite whose policies exist so that two parties derive the same bytes from the same value ([aughtone/aughtone-normalize#5](https://github.com/aughtone/aughtone-normalize/issues/5)). The table above is the plan as it stood on 2026-09-07.
+
 ## Scope boundaries
 
 - **Geo encodings** (Open Location Code, geohash, GeoJson) are a different concern — coordinate *encoding*, not identity normalization. They keep their own homes (`aughtone-openlocationcode`, `aughtone-geohash`, the types GeoJson model); they are not forced into `:normalize`.
