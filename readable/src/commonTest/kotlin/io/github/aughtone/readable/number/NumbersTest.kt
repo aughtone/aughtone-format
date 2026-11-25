@@ -8,16 +8,16 @@ class NumbersTest {
 
     @Test
     fun testAbbreviation() {
-        assertEquals("1k", 1000.0.formatReadableAbbreviated(Locales.English))
-        assertEquals("1.5k", 1500.0.formatReadableAbbreviated(Locales.English))
-        assertEquals("1M", 1000000.0.formatReadableAbbreviated(Locales.English))
-        assertEquals("2.5G", 2500000000.0.formatReadableAbbreviated(Locales.English))
+        assertEquals("1k", 1000.0.formatReadableAbbreviated(Locales.English, abbreviation = Abbreviation.Si))
+        assertEquals("1.5k", 1500.0.formatReadableAbbreviated(Locales.English, abbreviation = Abbreviation.Si))
+        assertEquals("1M", 1000000.0.formatReadableAbbreviated(Locales.English, abbreviation = Abbreviation.Si))
+        assertEquals("2.5G", 2500000000.0.formatReadableAbbreviated(Locales.English, abbreviation = Abbreviation.Si))
 
-        assertEquals("1k", 1000L.formatReadableAbbreviated(Locales.English))
-        assertEquals("1.5k", 1500.0f.formatReadableAbbreviated(Locales.English))
-        assertEquals("2M", 2000000.formatReadableAbbreviated(Locales.English))
-        assertEquals("1.2k", 1234.toShort().formatReadableAbbreviated(Locales.English))
-        assertEquals("1k", 1000u.formatReadableAbbreviated(Locales.English))
+        assertEquals("1k", 1000L.formatReadableAbbreviated(Locales.English, abbreviation = Abbreviation.Si))
+        assertEquals("1.5k", 1500.0f.formatReadableAbbreviated(Locales.English, abbreviation = Abbreviation.Si))
+        assertEquals("2M", 2000000.formatReadableAbbreviated(Locales.English, abbreviation = Abbreviation.Si))
+        assertEquals("1.2k", 1234.toShort().formatReadableAbbreviated(Locales.English, abbreviation = Abbreviation.Si))
+        assertEquals("1k", 1000u.formatReadableAbbreviated(Locales.English, abbreviation = Abbreviation.Si))
     }
 
     @Test
@@ -37,7 +37,7 @@ class NumbersTest {
     @Test
     fun testLocaleFormatting() {
         // German uses comma as decimal separator
-        assertEquals("1,5k", 1500.0.formatReadableAbbreviated(Locales.German))
+        assertEquals("1,5k", 1500.0.formatReadableAbbreviated(Locales.German, abbreviation = Abbreviation.Si))
         
         // French groups with a narrow no-break space
         val frenchFormatter = numberFormatterFor(Locales.French, 0)
@@ -141,18 +141,18 @@ class NumbersTest {
 
     @Test
     fun abbreviationMovesUpAPrefixWhenRoundingReachesAThousand() {
-        assertEquals("1M", 999_999.formatReadableAbbreviated(Locales.English))
-        assertEquals("1k", 999.96.formatReadableAbbreviated(Locales.English))
-        assertEquals("999.9k", 999_940.formatReadableAbbreviated(Locales.English))
-        assertEquals("1G", 999_950_000.formatReadableAbbreviated(Locales.English))
+        assertEquals("1M", 999_999.formatReadableAbbreviated(Locales.English, abbreviation = Abbreviation.Si))
+        assertEquals("1k", 999.96.formatReadableAbbreviated(Locales.English, abbreviation = Abbreviation.Si))
+        assertEquals("999.9k", 999_940.formatReadableAbbreviated(Locales.English, abbreviation = Abbreviation.Si))
+        assertEquals("1G", 999_950_000.formatReadableAbbreviated(Locales.English, abbreviation = Abbreviation.Si))
     }
 
     @Test
     fun abbreviationHandlesNegativeAndNonFiniteValues() {
-        assertEquals("-1.5k", (-1500).formatReadableAbbreviated(Locales.English))
-        assertEquals("-500", (-500).formatReadableAbbreviated(Locales.English))
-        assertEquals("NaN", Double.NaN.formatReadableAbbreviated(Locales.English))
-        assertEquals("∞", Double.POSITIVE_INFINITY.formatReadableAbbreviated(Locales.English))
+        assertEquals("-1.5k", (-1500).formatReadableAbbreviated(Locales.English, abbreviation = Abbreviation.Si))
+        assertEquals("-500", (-500).formatReadableAbbreviated(Locales.English, abbreviation = Abbreviation.Si))
+        assertEquals("NaN", Double.NaN.formatReadableAbbreviated(Locales.English, abbreviation = Abbreviation.Si))
+        assertEquals("∞", Double.POSITIVE_INFINITY.formatReadableAbbreviated(Locales.English, abbreviation = Abbreviation.Si))
     }
 
     @Test
@@ -215,6 +215,6 @@ class NumbersTest {
     @Test
     fun testDeprecatedCompatibility() {
         assertEquals("1,234.6", 1234.56.toReadable(Locales.English, precision = 1))
-        assertEquals("1.5k", 1500.0.toReadableAbbreviated(Locales.English))
+        assertEquals("1.5K", 1500.0.toReadableAbbreviated(Locales.English))
     }
 }

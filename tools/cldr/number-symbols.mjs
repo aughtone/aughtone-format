@@ -4,7 +4,7 @@
 //
 //   node tools/cldr/number-symbols.mjs
 //
-// Run it from the repository root. It rewrites six files and prints what it wrote. The CLDR
+// Run it from the repository root. It rewrites seven files and prints what it wrote. The CLDR
 // version it used is recorded in each. Do not edit the generated files by hand. The places where
 // the output departs from CLDR are listed in ADJUSTMENTS below, each with its reason.
 //
@@ -29,6 +29,13 @@
 // symbol character in every locale, so CLDR's currency-spacing rule — a no-break space between a
 // symbol that ends in a letter and the digits, as in "CHF 5.00" — does not leak into them; the
 // library applies that rule itself, to whatever symbol it shows.
+//
+// It records each locale's short compact-number patterns, which abbreviate a large count the way
+// the locale does: "1.5K" in English, "1,5 Mio." in German, which leaves thousands whole, "150万"
+// in Japanese, which counts in ten-thousands. For each power of ten from 10^3 to 10^19 it records
+// the power the shown number is divided by and where the number goes in the pattern, per plural
+// category where the categories differ, or that the locale does not abbreviate at that magnitude.
+// Every space in them is CLDR's own no-break space.
 //
 // And it records the symbol each currency shows in each locale, standard ("CA$") and narrow
 // ("$"), the same way again: English in full, a language where it differs from English, a region
@@ -323,6 +330,90 @@ for (const [tag, changes] of symbolEntries) {
 }
 const symbolChangeCount = symbolEntries.reduce((n, [, changes]) => n + changes.length, 0);
 
+// Each locale's short compact-number patterns, one rung per power of ten from 10^3 to 10^14, read
+// back from ICU's own output; 10^19 is the last that has a word of its own anywhere (Japanese
+// "1000京"). A rung is null where the locale writes the number whole at that
+// magnitude (German thousands), or the power of ten its shown number is divided by and the
+// template it sits in, "#" for the number, with the template for any plural category that differs
+// from "other" (Arabic thousands, "آلاف" after three to ten). A shown number with a fraction takes
+// the "other" template, which is checked here for every rung.
+const COMPACT_MAGNITUDES = Array.from({ length: 17 }, (_, i) => i + 3);
+// A template is read from a negative value, so it shows where the minus sign goes, as "-": before
+// the word in Kenyan Swahili ("-elfu #"), after it in Tanzanian ("elfu -#").
+const compactTemplate = (compact, value) => {
+  const negative = compact.formatToParts(-value);
+  if (!negative.some((part) => part.type === "compact")) return null;
+  const template = (parts) => parts
+    .map((part) => {
+      if (part.type === "minusSign") return "-";
+      return ["integer", "group", "decimal", "fraction"].includes(part.type) ? "#" : clean(part.value);
+    })
+    .join("")
+    .replace(/#+/g, "#");
+  const signed = template(negative);
+  if (signed.replace("-", "") !== template(compact.formatToParts(value))) {
+    throw new Error(`a compact pattern whose negative is not its positive with a minus sign: ${JSON.stringify(signed)}`);
+  }
+  return signed;
+};
+// The plural rules are the language's, so the shown numbers that stand for each category are found
+// once per language: for each count of digits a shown number can have, the first of each category.
+const pluralSamples = new Map();
+const samplesFor = (tag) => {
+  const language = tag.split("-")[0];
+  if (!pluralSamples.has(language)) {
+    const plural = new Intl.PluralRules(language);
+    pluralSamples.set(language, Array.from({ length: 12 }, (_, i) => i + 1).map((digits) => {
+      const first = 10 ** (digits - 1);
+      const found = new Map();
+      for (let shown = first; shown < Math.min(10 ** digits, first + 200); shown++) {
+        const category = plural.select(shown);
+        if (!found.has(category)) found.set(category, shown);
+      }
+      return found;
+    }));
+  }
+  return pluralSamples.get(language);
+};
+function compactPatternsOf(tag) {
+  const whole = formatter(tag, { notation: "compact", compactDisplay: "short", maximumFractionDigits: 0 });
+  const tenths = formatter(tag, { notation: "compact", compactDisplay: "short", maximumFractionDigits: 1 });
+  const samples = samplesFor(tag);
+  return COMPACT_MAGNITUDES.map((magnitude) => {
+    const parts = whole.formatToParts(10 ** magnitude);
+    if (!parts.some((part) => part.type === "compact")) return null;
+    const digits = parts.filter((part) => part.type === "integer").map((part) => part.value).join("").length;
+    const exponent = magnitude - (digits - 1);
+    const byCategory = new Map();
+    for (const [category, shown] of samples[digits - 1]) {
+      const template = compactTemplate(whole, shown * 10 ** exponent);
+      if (template === null) throw new Error(`${tag} 1e${magnitude}: ${shown} is not abbreviated`);
+      byCategory.set(category, template);
+    }
+    const fraction = compactTemplate(tenths, (10 ** (digits - 1) + 0.5) * 10 ** exponent);
+    const other = byCategory.get("other") ?? fraction;
+    if (fraction !== other) throw new Error(`${tag} 1e${magnitude}: a shown fraction is not written as "other"`);
+    const plurals = [...byCategory].filter(([category, template]) => category !== "other" && template !== other).sort();
+    return { exponent, pattern: other, plurals };
+  });
+}
+const englishCompact = compactPatternsOf("en");
+const compactEntries = differing(compactPatternsOf, englishCompact);
+for (const [tag, rungs] of [["en", englishCompact], ...compactEntries]) {
+  for (const rung of rungs) {
+    if (rung === null) continue;
+    for (const template of [rung.pattern, ...rung.plurals.map(([, t]) => t)]) {
+      if (template.split("#").length !== 2 || template.split("-").length !== 2 || /[;|=]/.test(template)) throw new Error(`${tag}: unexpected compact template ${JSON.stringify(template)}`);
+      if (/[ \u202f]/.test(template)) throw new Error(`${tag}: a compact template with a space other than U+00A0 ${JSON.stringify(template)}`);
+    }
+  }
+}
+// Packed per tag as one rung per magnitude, separated by ";": empty where the number is written
+// whole, otherwise "exponent|template" and "|category=template" for each differing category. In a
+// template "#" is the number and "-" where the minus sign goes when it is negative.
+const packedCompact = (rungs) =>
+  rungs.map((rung) => (rung === null ? "" : [`${rung.exponent}|${rung.pattern}`, ...rung.plurals.map(([c, t]) => `${c}=${t}`)].join("|"))).join(";");
+
 const kotlinString = (text) =>
   `"${[...text].map((c) => {
     const code = c.codePointAt(0);
@@ -365,7 +456,8 @@ internal val englishNumberStyle: NumberStyle = ${styleOf(english)}
 
 // The fixture: ICU's own output for a sample of numbers in every recorded locale and every
 // bundled language, one case per line as `kind|value|precision|text`. A kind of `d` is a Double,
-// `l` a Long, `p` a Double fraction written as a percentage, `q` a Long that is already one. Values that ICU writes as a signed zero ("-0") are avoided: the library writes zero
+// `l` a Long, `p` a Double fraction written as a percentage, `q` a Long that is already one, `c` a
+// Double and `k` a Long written as a compact number. Values that ICU writes as a signed zero ("-0") are avoided: the library writes zero
 // without a sign, deliberately.
 const SAMPLES = [
   ["d", "0.0", 1], ["d", "5.0", 1], ["d", "-5.0", 1], ["d", "0.25", 2], ["d", "1234.0", 1], ["d", "-1234.5", 1],
@@ -374,9 +466,19 @@ const SAMPLES = [
   ["p", "0.25", 0], ["p", "-0.25", 0], ["p", "0.0", 0], ["p", "1.0", 0], ["p", "0.1234", 1], ["p", "-12.3456", 2],
   ["p", "0.005", 1], ["p", "0.145", 0], ["p", "-0.125", 0], ["p", "0.123456", 3], ["p", "0.5", 2],
   ["q", "25", 0], ["q", "-12345", 0],
+  ["c", "999.0", 1], ["c", "999.96", 1], ["c", "1000.0", 1], ["c", "1234.0", 1], ["c", "-1234.0", 1], ["c", "1500.0", 0],
+  ["c", "2000.0", 1], ["c", "3000.0", 1], ["c", "5000.0", 1], ["c", "11000.0", 1], ["c", "21000.0", 1], ["c", "15000.0", 2],
+  ["c", "999999.0", 1], ["c", "1000000.0", 1], ["c", "1500000.0", 1], ["c", "-2500000.0", 1], ["c", "3000000.0", 0],
+  ["c", "25000000.0", 1], ["c", "123456789.0", 2], ["c", "999999999.0", 1], ["c", "1.2E9", 1], ["c", "1.0E12", 1],
+  ["c", "1.5E14", 1], ["c", "1.0E15", 1], ["c", "1.0E17", 1], ["c", "1.0E21", 0], ["c", "0.0", 1], ["c", "12.5", 1],
+  ["k", "1234", 1], ["k", "-1500", 0], ["k", "120000", 0], ["k", "123456789", 2], ["k", "9223372036854775807", 1],
 ];
 const sampleText = (tag, [kind, value, precision]) => {
   const options = { maximumFractionDigits: precision, roundingMode: "halfExpand" };
+  if (kind === "c" || kind === "k") {
+    const number = kind === "k" ? BigInt(value) : Number(value);
+    return `${kind}|${value}|${precision}|${clean(formatter(tag, { ...options, notation: "compact", compactDisplay: "short" }).format(number))}`;
+  }
   if (kind === "p" || kind === "q") {
     const fraction = kind === "q" ? Number(value) / 100 : Number(value);
     return `${kind}|${value}|${precision}|${clean(formatter(tag, { ...options, style: "percent" }).format(fraction))}`;
@@ -384,7 +486,7 @@ const sampleText = (tag, [kind, value, precision]) => {
   const number = kind === "l" ? BigInt(value) : Number(value);
   return `${kind}|${value}|${precision}|${clean(formatter(tag, options).format(number))}`;
 };
-const fixtureTags = [...new Set([...LANGUAGES, ...entries.map(([tag]) => tag), ...currencyEntries.map(([tag]) => tag), ...percentEntries.map(([tag]) => tag)])].sort();
+const fixtureTags = [...new Set([...LANGUAGES, ...entries.map(([tag]) => tag), ...currencyEntries.map(([tag]) => tag), ...percentEntries.map(([tag]) => tag), ...compactEntries.map(([tag]) => tag)])].sort();
 const fixture = `package io.github.aughtone.readable.number
 
 ${header}
@@ -392,7 +494,8 @@ ${header}
 /**
  * What Unicode CLDR writes for a sample of numbers, per BCP 47 tag, one case per line as
  * \`kind|value|precision|text\`: \`d\` for a Double, \`l\` for a Long, \`p\` for a Double fraction
- * written as a percentage (\`0.25\` is 25 %), \`q\` for a Long that is already a percentage.
+ * written as a percentage (\`0.25\` is 25 %), \`q\` for a Long that is already a percentage, \`c\`
+ * for a Double and \`k\` for a Long written as a compact number (\`1.5K\`).
  */
 internal val numberCldrFixture: Map<String, String> = mapOf(
 ${fixtureTags.map((tag) => `    "${tag}" to """
@@ -418,6 +521,27 @@ ${percentEntries.map(([tag, p]) => `    "${tag}" to ${percentPatternKotlin(p)},`
 
 /** Where English, and any language CLDR has no percent pattern for, puts the percent sign. */
 internal val englishPercentPattern: PercentPattern = ${percentPatternKotlin(englishPercent)}
+`;
+
+const compactData = `package io.github.aughtone.readable.number
+
+${header}
+
+/**
+ * Each bundled language's, and each region's that does it differently, short compact-number
+ * patterns from Unicode CLDR, keyed by BCP 47 tag like [cldrNumberStyles] and looked up the same
+ * way, ending at [englishCompactPatterns]. Each packs one rung per power of ten from 10^3 to 10^19,
+ * separated by \`;\`: empty where the locale writes the number whole at that magnitude, otherwise
+ * \`exponent|template\`, the power of ten the shown number is divided by and the text it sits in
+ * (\`#\` for the number, \`-\` where a minus sign goes), then \`|category=template\` for each plural category written differently.
+ * See [CompactRung].
+ */
+internal val cldrCompactPatterns: Map<String, String> = mapOf(
+${compactEntries.map(([tag, rungs]) => `    "${tag}" to ${kotlinString(packedCompact(rungs))},`).join("\n")}
+)
+
+/** English's short compact-number patterns, and those of any language CLDR has none for. */
+internal val englishCompactPatterns: String = ${kotlinString(packedCompact(englishCompact))}
 `;
 
 const currencyPatternKotlin = (p) => {
@@ -519,7 +643,8 @@ const currencyDataPath = `${base}/commonMain/kotlin/io/github/aughtone/readable/
 const moneyFixturePath = `${base}/commonTest/kotlin/io/github/aughtone/readable/financial/MoneyCldrFixture.kt`;
 const symbolDataPath = `${base}/commonMain/kotlin/io/github/aughtone/readable/financial/CurrencySymbols.resources.kt`;
 const percentDataPath = `${base}/commonMain/kotlin/io/github/aughtone/readable/number/PercentPatterns.resources.kt`;
-const outputs = [[dataPath, data], [percentDataPath, percentData], [fixturePath, fixture], [currencyDataPath, currencyData], [symbolDataPath, symbolData], [moneyFixturePath, moneyFixture]];
+const compactDataPath = `${base}/commonMain/kotlin/io/github/aughtone/readable/number/CompactPatterns.resources.kt`;
+const outputs = [[dataPath, data], [percentDataPath, percentData], [compactDataPath, compactData], [fixturePath, fixture], [currencyDataPath, currencyData], [symbolDataPath, symbolData], [moneyFixturePath, moneyFixture]];
 for (const [path, text] of outputs) writeFileSync(path, text);
-console.log(`CLDR ${cldr}: ${entries.length} number styles, ${percentEntries.length} percent patterns, ${currencyEntries.length} currency patterns and ${overrides.size} currency overrides (${overrideCodes.join(", ")}) and ${symbolChangeCount} currency symbols in ${symbolEntries.length} locales across ${LANGUAGES.length} languages, ${fixtureTags.length} number and ${moneyFixtureTags.length} money fixture tags`);
+console.log(`CLDR ${cldr}: ${entries.length} number styles, ${percentEntries.length} percent patterns, ${compactEntries.length} compact pattern sets, ${currencyEntries.length} currency patterns and ${overrides.size} currency overrides (${overrideCodes.join(", ")}) and ${symbolChangeCount} currency symbols in ${symbolEntries.length} locales across ${LANGUAGES.length} languages, ${fixtureTags.length} number and ${moneyFixtureTags.length} money fixture tags`);
 for (const [path, text] of outputs) console.log(`wrote ${path} (${text.length} characters)`);

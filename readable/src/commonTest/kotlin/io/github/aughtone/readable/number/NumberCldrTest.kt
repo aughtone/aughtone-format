@@ -28,6 +28,8 @@ class NumberCldrTest {
                     "l" -> value.toLong().formatReadable(locale, precision.toInt())
                     "p" -> value.toDouble().formatReadablePercent(locale, precision.toInt())
                     "q" -> value.toLong().formatReadablePercent(locale, precision.toInt(), outOfHundred = true)
+                    "c" -> value.toDouble().formatReadableAbbreviated(locale, precision.toInt())
+                    "k" -> value.toLong().formatReadableAbbreviated(locale, precision.toInt())
                     else -> error("unknown kind $kind")
                 }
                 assertEquals(expected, actual, "$tag: $value at precision $precision")
@@ -52,7 +54,8 @@ class NumberCldrTest {
         assertEquals("1 234 567,89", 1234567.891.formatReadable(Locales.French, 2, Separators.Ascii))
         assertEquals("-1 234,5", (-1234.5).formatReadable(Locales.Swedish, separators = Separators.Ascii))
         assertEquals("-1 234 567", (-1234567L).formatReadable(localeOf("fr-CA"), separators = Separators.Ascii))
-        assertEquals("1.5k", 1500.formatReadableAbbreviated(Locales.English, separators = Separators.Ascii))
+        assertEquals("1,5 Mio.", 1500000.formatReadableAbbreviated(Locales.German, separators = Separators.Ascii))
+        assertEquals("1.5k", 1500.formatReadableAbbreviated(Locales.English, abbreviation = Abbreviation.Si, separators = Separators.Ascii))
         assertEquals("1,234.5", 1234.5.formatReadable(Locales.English, separators = Separators.Ascii))
         assertEquals("1 000", numberFormatterFor(Locales.French, 0, Separators.Ascii)(1000.0))
     }

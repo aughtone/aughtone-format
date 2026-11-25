@@ -37,7 +37,7 @@ class SkillExampleTest {
     @Test
     fun theSkillExampleCompilesAndProducesTheOutputItClaims() {
         assertEquals("1 week", 7.days.formatReadable(locale = Locales.English))
-        assertEquals("1.5k", 1500.0.formatReadableAbbreviated(Locales.English))
+        assertEquals("1.5K", 1500.0.formatReadableAbbreviated(Locales.English))
         assertEquals("1,234.6", 1234.56.formatReadable(Locales.English, precision = 1))
         assertEquals("26%", 0.256.formatReadablePercent(Locales.English))
         assertEquals("25.6%", 0.256.formatReadablePercent(Locales.English, precision = 1))

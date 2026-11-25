@@ -34,7 +34,7 @@ The low-level pieces the other `aughtone-format` modules (and their callers) reu
 
 It is a grab-bag of primitives, not a framework: reach here before writing decimal rounding, last-N masking, or projection/bbox arithmetic by hand.
 
-**Called from Kotlin only.** The library publishes Kotlin Multiplatform artifacts (common, JVM, Android, and iOS via Kotlin); there is no separate Swift or JavaScript API.
+**Called from Kotlin only.** The library publishes Kotlin Multiplatform artifacts (common, JVM, Android, iOS, macOS, Linux, JavaScript and Wasm); there is no separate Swift or JavaScript API.
 
 ## How it is meant to be used
 

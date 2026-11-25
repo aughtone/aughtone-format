@@ -71,12 +71,7 @@ private fun percentStyleFor(numberStyle: NumberStyle, pattern: PercentPattern): 
  * Multiplies the decimal number written in this text by a hundred by raising its exponent, so no
  * digit passes through arithmetic: `"0.07"` is exactly seven percent, which `0.07 * 100` is not.
  */
-private fun String.timesHundred(): String {
-    val exponentAt = indexOfFirst { it == 'e' || it == 'E' }
-    if (exponentAt < 0) return "${this}e2"
-    val exponent = substring(exponentAt + 1).removePrefix("+").toInt()
-    return "${substring(0, exponentAt)}e${exponent + 2}"
-}
+private fun String.timesHundred(): String = timesTenTo(2)
 
 /**
  * Renders [value] as a percentage. See [formatPercentText]. Not-a-number is written as `"NaN"` and

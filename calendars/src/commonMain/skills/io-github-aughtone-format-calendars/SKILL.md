@@ -9,7 +9,7 @@ description: >-
   month) or how many months and days a year has; predict when an Islamic month
   begins from the crescent; evaluate an iCalendar
   RSCALE recurrence rule (RFC 7529) such as "every year on 15 Nisan", including
-  its leap months written 5L. The same answer on JVM, Android, iOS, JS and Wasm,
+  its leap months written 5L. The same answer on JVM, Android, iOS, macOS, Linux, JS and Wasm,
   where java.time, ICU, NSCalendar and Intl would each disagree or do no
   arithmetic. Works on kotlinx-datetime LocalDate. Not for formatting a date in
   these calendars as text, and not for sunrise, sunset or moon phases (use

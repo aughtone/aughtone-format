@@ -72,8 +72,11 @@ The order you name the fields in has no effect, and there is no separator to cho
 
 ```kotlin
 1234.56.formatReadable(Locales.English, precision = 1)   // "1,234.6"
-1500.0.formatReadableAbbreviated(Locales.English)        // "1.5k"
-2500000000.0.formatReadableAbbreviated(Locales.English)  // "2.5G"
+1500.0.formatReadableAbbreviated(Locales.English)        // "1.5K"
+2500000000.0.formatReadableAbbreviated(Locales.English)  // "2.5B"
+1500000.0.formatReadableAbbreviated(Locales.German)      // "1,5 Mio." (U+00A0 before the word)
+1500000.0.formatReadableAbbreviated(Locales.Japanese)    // "150万"
+2500000000.0.formatReadableAbbreviated(Locales.English, abbreviation = Abbreviation.Si)  // "2.5G"
 
 1.formatReadableOrdinal(Locales.English)                 // "1st"
 1.formatReadableOrdinal(Locales.French)                  // "1er"

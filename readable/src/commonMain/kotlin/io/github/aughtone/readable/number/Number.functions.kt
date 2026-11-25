@@ -292,41 +292,65 @@ fun UByte.toReadable(locale: Locale = Locale.current, precision: Int = 0): Strin
     formatReadable(locale, precision)
 
 /**
- * Formats this [Double] into a localized human-readable abbreviated string.
+ * Formats this [Double] as a short count the way [locale] abbreviates one, or with SI prefixes.
  *
- * This function uses standard SI metric prefixes (k, M, G, T, etc.) for values 1000 or greater.
- * Small values (under 1000) are formatted using [formatReadable]. A value that rounds up to the
- * next thousand moves to the next prefix, so the number shown is always below 1,000 until the
- * largest prefix (Q, 10^30) is reached. Not-a-number and the infinities carry no prefix.
+ * With [Abbreviation.Compact], the default, the abbreviation is the locale's own, from Unicode
+ * CLDR's short compact-number patterns: `"1.5K"` in English, `"1,5 Mio."` in German, `"150万"` in
+ * Japanese and Chinese, which count in ten-thousands, and `"15 लाख"` in Hindi, which counts in
+ * lakhs. A locale that does not abbreviate a magnitude writes the number whole: German thousands
+ * stay `"1500"`, and Japanese and Chinese ones `"1234"`. The space
+ * between the number and its word is a no-break space (U+00A0), so they never wrap apart.
+ *
+ * With [Abbreviation.Si] the abbreviation is an SI prefix (k, M, G, T, … up to Q, 10^30), the
+ * same in every language, as it was before 4.4.0: use it for a quantity rather than a count.
+ *
+ * Either way, a value that rounds up to the next rung is shown on it, so 999,999 reads `"1M"` and
+ * never `"1,000K"`, while a locale with no rung to carry to writes it whole (`"999.999"` in German).
+ * Values below the first rung, not-a-number and the infinities are written as [formatReadable]
+ * writes them.
  *
  * Examples:
  * ```kotlin
- * 1500.0.formatReadableAbbreviated(Locales.English)    // "1.5k"
- * 1000000.0.formatReadableAbbreviated(Locales.English) // "1M"
- * 999999.0.formatReadableAbbreviated(Locales.English)  // "1M", not "1,000k"
- * 500.0.formatReadableAbbreviated(Locales.English)     // "500"
- * (-1500.0).formatReadableAbbreviated(Locales.English) // "-1.5k"
+ * 1500.0.formatReadableAbbreviated(Locales.English)                            // "1.5K"
+ * 999999.0.formatReadableAbbreviated(Locales.English)                          // "1M", not "1,000K"
+ * 1200000000.0.formatReadableAbbreviated(Locales.English)                      // "1.2B"
+ * 1500000.0.formatReadableAbbreviated(Locales.German)                          // "1,5 Mio." (U+00A0)
+ * 1500.0.formatReadableAbbreviated(Locales.German)                             // "1500"
+ * 1500000.0.formatReadableAbbreviated(Locales.Japanese)                        // "150万"
+ * 1500.0.formatReadableAbbreviated(Locales.English, abbreviation = Abbreviation.Si) // "1.5k"
+ * 500.0.formatReadableAbbreviated(Locales.English)                             // "500"
  * ```
  *
  * @param locale The locale to use for numeric formatting (defaults to [Locale.current]).
- * @param precision The number of decimal places for the scaled value (default is 1).
- * @param separators Whether the separators and signs are the typographic ones Unicode CLDR uses
- *   (the default), or plain ASCII. See [Separators].
+ * @param precision The most decimal places the shown number keeps (default 1); trailing zeros are
+ *   trimmed.
+ * @param abbreviation [Abbreviation.Compact], the locale's own short form (the default), or
+ *   [Abbreviation.Si] for SI prefixes in every language.
+ * @param separators Whether the separators, signs and the space before the locale's word are the
+ *   typographic ones Unicode CLDR uses (the default, no-break), or plain ASCII. See [Separators].
  * @return A localized abbreviated string.
  */
 fun Double.formatReadableAbbreviated(
     locale: Locale = Locale.current,
     precision: Int = 1,
+    abbreviation: Abbreviation = Abbreviation.Compact,
     separators: Separators = Separators.Typographic,
-): String {
-    val (symbol, divisor) = prefixRungFor(this, precision, abbreviationLadder)
-        ?: return formatReadable(locale, precision, separators)
-    return "${(this / divisor).formatReadable(locale, precision, separators)}$symbol"
+): String = when {
+    !isFinite() -> formatReadable(locale, precision, separators)
+    abbreviation == Abbreviation.Si -> siAbbreviated(this, locale, precision, separators)
+    else -> formatCompactText(toString(), locale, precision, separators)
+}
+
+/** [value] with the SI prefix of its magnitude, as `formatReadableAbbreviated` wrote it before 4.4.0. */
+private fun siAbbreviated(value: Double, locale: Locale, precision: Int, separators: Separators): String {
+    val (symbol, divisor) = prefixRungFor(value, precision, abbreviationLadder)
+        ?: return value.formatReadable(locale, precision, separators)
+    return "${(value / divisor).formatReadable(locale, precision, separators)}$symbol"
 }
 
 @Deprecated("Kept for binary compatibility.", level = DeprecationLevel.HIDDEN)
 fun Double.formatReadableAbbreviated(locale: Locale = Locale.current, precision: Int = 1): String =
-    formatReadableAbbreviated(locale, precision, Separators.Typographic)
+    formatReadableAbbreviated(locale, precision, Abbreviation.Compact, Separators.Typographic)
 
 /** No prefix, then the standard SI thousands (k, M, G, T, …), smallest first. */
 private val abbreviationLadder: List<Pair<String, Double>> =
@@ -345,23 +369,32 @@ fun Double.toReadableAbbreviated(
 ): String = formatReadableAbbreviated(locale, precision)
 
 /**
- * Formats this [Float] into a localized abbreviated string (e.g., 1500.0f -> "1.5k").
+ * Formats this [Float] as a short count the way [locale] abbreviates one, or with SI prefixes, as
+ * [Double.formatReadableAbbreviated] does: `1500.0f.formatReadableAbbreviated(Locales.English)` is
+ * `"1.5K"`.
+ *
+ * Widened to a [Double] first, as [Float.formatReadable] is.
  *
  * @param locale The locale to use for numeric formatting (defaults to [Locale.current]).
- * @param precision The number of decimal places for the scaled value (default is 1).
- * @param separators Whether the separators and signs are the typographic ones Unicode CLDR uses
- *   (the default), or plain ASCII. See [Separators].
+ * @param precision The most decimal places the shown number keeps (default 1); trailing zeros are
+ *   trimmed.
+ * @param abbreviation [Abbreviation.Compact], the locale's own short form (the default), or
+ *   [Abbreviation.Si] for SI prefixes in every language.
+ * @param separators Whether the separators, signs and the space before the locale's word are the
+ *   typographic ones Unicode CLDR uses (the default, no-break), or plain ASCII. See [Separators].
+ * @return A localized abbreviated string.
  */
 fun Float.formatReadableAbbreviated(
     locale: Locale = Locale.current,
     precision: Int = 1,
+    abbreviation: Abbreviation = Abbreviation.Compact,
     separators: Separators = Separators.Typographic,
 ): String =
-    toDouble().formatReadableAbbreviated(locale, precision, separators)
+    toDouble().formatReadableAbbreviated(locale, precision, abbreviation, separators)
 
 @Deprecated("Kept for binary compatibility.", level = DeprecationLevel.HIDDEN)
 fun Float.formatReadableAbbreviated(locale: Locale = Locale.current, precision: Int = 1): String =
-    formatReadableAbbreviated(locale, precision, Separators.Typographic)
+    formatReadableAbbreviated(locale, precision, Abbreviation.Compact, Separators.Typographic)
 
 @Deprecated(
     message = "Use formatReadableAbbreviated instead",
@@ -371,23 +404,35 @@ fun Float.toReadableAbbreviated(locale: Locale = Locale.current, precision: Int 
     formatReadableAbbreviated(locale, precision)
 
 /**
- * Formats this [Long] into a localized abbreviated string (e.g., 1000000L -> "1M").
+ * Formats this [Long] as a short count the way [locale] abbreviates one, or with SI prefixes, as
+ * [Double.formatReadableAbbreviated] does: `1500000L.formatReadableAbbreviated(Locales.English)` is
+ * `"1.5M"`.
+ *
+ * Written from its exact digits, never through a [Double], so the largest values round correctly.
  *
  * @param locale The locale to use for numeric formatting (defaults to [Locale.current]).
- * @param precision The number of decimal places for the scaled value (default is 1).
- * @param separators Whether the separators and signs are the typographic ones Unicode CLDR uses
- *   (the default), or plain ASCII. See [Separators].
+ * @param precision The most decimal places the shown number keeps (default 1); trailing zeros are
+ *   trimmed.
+ * @param abbreviation [Abbreviation.Compact], the locale's own short form (the default), or
+ *   [Abbreviation.Si] for SI prefixes in every language.
+ * @param separators Whether the separators, signs and the space before the locale's word are the
+ *   typographic ones Unicode CLDR uses (the default, no-break), or plain ASCII. See [Separators].
+ * @return A localized abbreviated string.
  */
 fun Long.formatReadableAbbreviated(
     locale: Locale = Locale.current,
     precision: Int = 1,
+    abbreviation: Abbreviation = Abbreviation.Compact,
     separators: Separators = Separators.Typographic,
 ): String =
-    toDouble().formatReadableAbbreviated(locale, precision, separators)
+    when (abbreviation) {
+        Abbreviation.Compact -> formatCompactText(toString(), locale, precision, separators)
+        Abbreviation.Si -> toDouble().formatReadableAbbreviated(locale, precision, abbreviation, separators)
+    }
 
 @Deprecated("Kept for binary compatibility.", level = DeprecationLevel.HIDDEN)
 fun Long.formatReadableAbbreviated(locale: Locale = Locale.current, precision: Int = 1): String =
-    formatReadableAbbreviated(locale, precision, Separators.Typographic)
+    formatReadableAbbreviated(locale, precision, Abbreviation.Compact, Separators.Typographic)
 
 @Deprecated(
     message = "Use formatReadableAbbreviated instead",
@@ -397,23 +442,33 @@ fun Long.toReadableAbbreviated(locale: Locale = Locale.current, precision: Int =
     formatReadableAbbreviated(locale, precision)
 
 /**
- * Formats this [Int] into a localized abbreviated string (e.g., 2500 -> "2.5k").
+ * Formats this [Int] as a short count the way [locale] abbreviates one, or with SI prefixes, as
+ * [Double.formatReadableAbbreviated] does: `2500.formatReadableAbbreviated(Locales.English)` is
+ * `"2.5K"`.
  *
  * @param locale The locale to use for numeric formatting (defaults to [Locale.current]).
- * @param precision The number of decimal places for the scaled value (default is 1).
- * @param separators Whether the separators and signs are the typographic ones Unicode CLDR uses
- *   (the default), or plain ASCII. See [Separators].
+ * @param precision The most decimal places the shown number keeps (default 1); trailing zeros are
+ *   trimmed.
+ * @param abbreviation [Abbreviation.Compact], the locale's own short form (the default), or
+ *   [Abbreviation.Si] for SI prefixes in every language.
+ * @param separators Whether the separators, signs and the space before the locale's word are the
+ *   typographic ones Unicode CLDR uses (the default, no-break), or plain ASCII. See [Separators].
+ * @return A localized abbreviated string.
  */
 fun Int.formatReadableAbbreviated(
     locale: Locale = Locale.current,
     precision: Int = 1,
+    abbreviation: Abbreviation = Abbreviation.Compact,
     separators: Separators = Separators.Typographic,
 ): String =
-    toDouble().formatReadableAbbreviated(locale, precision, separators)
+    when (abbreviation) {
+        Abbreviation.Compact -> formatCompactText(toString(), locale, precision, separators)
+        Abbreviation.Si -> toDouble().formatReadableAbbreviated(locale, precision, abbreviation, separators)
+    }
 
 @Deprecated("Kept for binary compatibility.", level = DeprecationLevel.HIDDEN)
 fun Int.formatReadableAbbreviated(locale: Locale = Locale.current, precision: Int = 1): String =
-    formatReadableAbbreviated(locale, precision, Separators.Typographic)
+    formatReadableAbbreviated(locale, precision, Abbreviation.Compact, Separators.Typographic)
 
 @Deprecated(
     message = "Use formatReadableAbbreviated instead",
@@ -423,23 +478,33 @@ fun Int.toReadableAbbreviated(locale: Locale = Locale.current, precision: Int = 
     formatReadableAbbreviated(locale, precision)
 
 /**
- * Formats this [Short] into a localized abbreviated string.
+ * Formats this [Short] as a short count the way [locale] abbreviates one, or with SI prefixes, as
+ * [Double.formatReadableAbbreviated] does: `1500.toShort().formatReadableAbbreviated(Locales.English)` is
+ * `"1.5K"`.
  *
  * @param locale The locale to use for numeric formatting (defaults to [Locale.current]).
- * @param precision The number of decimal places for the scaled value (default is 1).
- * @param separators Whether the separators and signs are the typographic ones Unicode CLDR uses
- *   (the default), or plain ASCII. See [Separators].
+ * @param precision The most decimal places the shown number keeps (default 1); trailing zeros are
+ *   trimmed.
+ * @param abbreviation [Abbreviation.Compact], the locale's own short form (the default), or
+ *   [Abbreviation.Si] for SI prefixes in every language.
+ * @param separators Whether the separators, signs and the space before the locale's word are the
+ *   typographic ones Unicode CLDR uses (the default, no-break), or plain ASCII. See [Separators].
+ * @return A localized abbreviated string.
  */
 fun Short.formatReadableAbbreviated(
     locale: Locale = Locale.current,
     precision: Int = 1,
+    abbreviation: Abbreviation = Abbreviation.Compact,
     separators: Separators = Separators.Typographic,
 ): String =
-    toDouble().formatReadableAbbreviated(locale, precision, separators)
+    when (abbreviation) {
+        Abbreviation.Compact -> formatCompactText(toString(), locale, precision, separators)
+        Abbreviation.Si -> toDouble().formatReadableAbbreviated(locale, precision, abbreviation, separators)
+    }
 
 @Deprecated("Kept for binary compatibility.", level = DeprecationLevel.HIDDEN)
 fun Short.formatReadableAbbreviated(locale: Locale = Locale.current, precision: Int = 1): String =
-    formatReadableAbbreviated(locale, precision, Separators.Typographic)
+    formatReadableAbbreviated(locale, precision, Abbreviation.Compact, Separators.Typographic)
 
 @Deprecated(
     message = "Use formatReadableAbbreviated instead",
@@ -449,23 +514,33 @@ fun Short.toReadableAbbreviated(locale: Locale = Locale.current, precision: Int 
     formatReadableAbbreviated(locale, precision)
 
 /**
- * Formats this [Byte] into a localized abbreviated string.
+ * Formats this [Byte] as a short count the way [locale] abbreviates one, or with SI prefixes, as
+ * [Double.formatReadableAbbreviated] does: `100.toByte().formatReadableAbbreviated(Locales.English)` is
+ * `"100"`.
  *
  * @param locale The locale to use for numeric formatting (defaults to [Locale.current]).
- * @param precision The number of decimal places for the scaled value (default is 1).
- * @param separators Whether the separators and signs are the typographic ones Unicode CLDR uses
- *   (the default), or plain ASCII. See [Separators].
+ * @param precision The most decimal places the shown number keeps (default 1); trailing zeros are
+ *   trimmed.
+ * @param abbreviation [Abbreviation.Compact], the locale's own short form (the default), or
+ *   [Abbreviation.Si] for SI prefixes in every language.
+ * @param separators Whether the separators, signs and the space before the locale's word are the
+ *   typographic ones Unicode CLDR uses (the default, no-break), or plain ASCII. See [Separators].
+ * @return A localized abbreviated string.
  */
 fun Byte.formatReadableAbbreviated(
     locale: Locale = Locale.current,
     precision: Int = 1,
+    abbreviation: Abbreviation = Abbreviation.Compact,
     separators: Separators = Separators.Typographic,
 ): String =
-    toDouble().formatReadableAbbreviated(locale, precision, separators)
+    when (abbreviation) {
+        Abbreviation.Compact -> formatCompactText(toString(), locale, precision, separators)
+        Abbreviation.Si -> toDouble().formatReadableAbbreviated(locale, precision, abbreviation, separators)
+    }
 
 @Deprecated("Kept for binary compatibility.", level = DeprecationLevel.HIDDEN)
 fun Byte.formatReadableAbbreviated(locale: Locale = Locale.current, precision: Int = 1): String =
-    formatReadableAbbreviated(locale, precision, Separators.Typographic)
+    formatReadableAbbreviated(locale, precision, Abbreviation.Compact, Separators.Typographic)
 
 @Deprecated(
     message = "Use formatReadableAbbreviated instead",
@@ -475,23 +550,35 @@ fun Byte.toReadableAbbreviated(locale: Locale = Locale.current, precision: Int =
     formatReadableAbbreviated(locale, precision)
 
 /**
- * Formats this [ULong] into a localized abbreviated string.
+ * Formats this [ULong] as a short count the way [locale] abbreviates one, or with SI prefixes, as
+ * [Double.formatReadableAbbreviated] does: `1500000uL.formatReadableAbbreviated(Locales.English)` is
+ * `"1.5M"`.
+ *
+ * Written from its exact digits, never through a [Double].
  *
  * @param locale The locale to use for numeric formatting (defaults to [Locale.current]).
- * @param precision The number of decimal places for the scaled value (default is 1).
- * @param separators Whether the separators and signs are the typographic ones Unicode CLDR uses
- *   (the default), or plain ASCII. See [Separators].
+ * @param precision The most decimal places the shown number keeps (default 1); trailing zeros are
+ *   trimmed.
+ * @param abbreviation [Abbreviation.Compact], the locale's own short form (the default), or
+ *   [Abbreviation.Si] for SI prefixes in every language.
+ * @param separators Whether the separators, signs and the space before the locale's word are the
+ *   typographic ones Unicode CLDR uses (the default, no-break), or plain ASCII. See [Separators].
+ * @return A localized abbreviated string.
  */
 fun ULong.formatReadableAbbreviated(
     locale: Locale = Locale.current,
     precision: Int = 1,
+    abbreviation: Abbreviation = Abbreviation.Compact,
     separators: Separators = Separators.Typographic,
 ): String =
-    toDouble().formatReadableAbbreviated(locale, precision, separators)
+    when (abbreviation) {
+        Abbreviation.Compact -> formatCompactText(toString(), locale, precision, separators)
+        Abbreviation.Si -> toDouble().formatReadableAbbreviated(locale, precision, abbreviation, separators)
+    }
 
 @Deprecated("Kept for binary compatibility.", level = DeprecationLevel.HIDDEN)
 fun ULong.formatReadableAbbreviated(locale: Locale = Locale.current, precision: Int = 1): String =
-    formatReadableAbbreviated(locale, precision, Separators.Typographic)
+    formatReadableAbbreviated(locale, precision, Abbreviation.Compact, Separators.Typographic)
 
 @Deprecated(
     message = "Use formatReadableAbbreviated instead",
@@ -501,23 +588,33 @@ fun ULong.toReadableAbbreviated(locale: Locale = Locale.current, precision: Int 
     formatReadableAbbreviated(locale, precision)
 
 /**
- * Formats this [UInt] into a localized abbreviated string.
+ * Formats this [UInt] as a short count the way [locale] abbreviates one, or with SI prefixes, as
+ * [Double.formatReadableAbbreviated] does: `2500u.formatReadableAbbreviated(Locales.English)` is
+ * `"2.5K"`.
  *
  * @param locale The locale to use for numeric formatting (defaults to [Locale.current]).
- * @param precision The number of decimal places for the scaled value (default is 1).
- * @param separators Whether the separators and signs are the typographic ones Unicode CLDR uses
- *   (the default), or plain ASCII. See [Separators].
+ * @param precision The most decimal places the shown number keeps (default 1); trailing zeros are
+ *   trimmed.
+ * @param abbreviation [Abbreviation.Compact], the locale's own short form (the default), or
+ *   [Abbreviation.Si] for SI prefixes in every language.
+ * @param separators Whether the separators, signs and the space before the locale's word are the
+ *   typographic ones Unicode CLDR uses (the default, no-break), or plain ASCII. See [Separators].
+ * @return A localized abbreviated string.
  */
 fun UInt.formatReadableAbbreviated(
     locale: Locale = Locale.current,
     precision: Int = 1,
+    abbreviation: Abbreviation = Abbreviation.Compact,
     separators: Separators = Separators.Typographic,
 ): String =
-    toDouble().formatReadableAbbreviated(locale, precision, separators)
+    when (abbreviation) {
+        Abbreviation.Compact -> formatCompactText(toString(), locale, precision, separators)
+        Abbreviation.Si -> toDouble().formatReadableAbbreviated(locale, precision, abbreviation, separators)
+    }
 
 @Deprecated("Kept for binary compatibility.", level = DeprecationLevel.HIDDEN)
 fun UInt.formatReadableAbbreviated(locale: Locale = Locale.current, precision: Int = 1): String =
-    formatReadableAbbreviated(locale, precision, Separators.Typographic)
+    formatReadableAbbreviated(locale, precision, Abbreviation.Compact, Separators.Typographic)
 
 @Deprecated(
     message = "Use formatReadableAbbreviated instead",
@@ -527,23 +624,33 @@ fun UInt.toReadableAbbreviated(locale: Locale = Locale.current, precision: Int =
     formatReadableAbbreviated(locale, precision)
 
 /**
- * Formats this [UShort] into a localized abbreviated string.
+ * Formats this [UShort] as a short count the way [locale] abbreviates one, or with SI prefixes, as
+ * [Double.formatReadableAbbreviated] does: `1500.toUShort().formatReadableAbbreviated(Locales.English)` is
+ * `"1.5K"`.
  *
  * @param locale The locale to use for numeric formatting (defaults to [Locale.current]).
- * @param precision The number of decimal places for the scaled value (default is 1).
- * @param separators Whether the separators and signs are the typographic ones Unicode CLDR uses
- *   (the default), or plain ASCII. See [Separators].
+ * @param precision The most decimal places the shown number keeps (default 1); trailing zeros are
+ *   trimmed.
+ * @param abbreviation [Abbreviation.Compact], the locale's own short form (the default), or
+ *   [Abbreviation.Si] for SI prefixes in every language.
+ * @param separators Whether the separators, signs and the space before the locale's word are the
+ *   typographic ones Unicode CLDR uses (the default, no-break), or plain ASCII. See [Separators].
+ * @return A localized abbreviated string.
  */
 fun UShort.formatReadableAbbreviated(
     locale: Locale = Locale.current,
     precision: Int = 1,
+    abbreviation: Abbreviation = Abbreviation.Compact,
     separators: Separators = Separators.Typographic,
 ): String =
-    toDouble().formatReadableAbbreviated(locale, precision, separators)
+    when (abbreviation) {
+        Abbreviation.Compact -> formatCompactText(toString(), locale, precision, separators)
+        Abbreviation.Si -> toDouble().formatReadableAbbreviated(locale, precision, abbreviation, separators)
+    }
 
 @Deprecated("Kept for binary compatibility.", level = DeprecationLevel.HIDDEN)
 fun UShort.formatReadableAbbreviated(locale: Locale = Locale.current, precision: Int = 1): String =
-    formatReadableAbbreviated(locale, precision, Separators.Typographic)
+    formatReadableAbbreviated(locale, precision, Abbreviation.Compact, Separators.Typographic)
 
 @Deprecated(
     message = "Use formatReadableAbbreviated instead",
@@ -553,23 +660,33 @@ fun UShort.toReadableAbbreviated(locale: Locale = Locale.current, precision: Int
     formatReadableAbbreviated(locale, precision)
 
 /**
- * Formats this [UByte] into a localized abbreviated string.
+ * Formats this [UByte] as a short count the way [locale] abbreviates one, or with SI prefixes, as
+ * [Double.formatReadableAbbreviated] does: `100.toUByte().formatReadableAbbreviated(Locales.English)` is
+ * `"100"`.
  *
  * @param locale The locale to use for numeric formatting (defaults to [Locale.current]).
- * @param precision The number of decimal places for the scaled value (default is 1).
- * @param separators Whether the separators and signs are the typographic ones Unicode CLDR uses
- *   (the default), or plain ASCII. See [Separators].
+ * @param precision The most decimal places the shown number keeps (default 1); trailing zeros are
+ *   trimmed.
+ * @param abbreviation [Abbreviation.Compact], the locale's own short form (the default), or
+ *   [Abbreviation.Si] for SI prefixes in every language.
+ * @param separators Whether the separators, signs and the space before the locale's word are the
+ *   typographic ones Unicode CLDR uses (the default, no-break), or plain ASCII. See [Separators].
+ * @return A localized abbreviated string.
  */
 fun UByte.formatReadableAbbreviated(
     locale: Locale = Locale.current,
     precision: Int = 1,
+    abbreviation: Abbreviation = Abbreviation.Compact,
     separators: Separators = Separators.Typographic,
 ): String =
-    toDouble().formatReadableAbbreviated(locale, precision, separators)
+    when (abbreviation) {
+        Abbreviation.Compact -> formatCompactText(toString(), locale, precision, separators)
+        Abbreviation.Si -> toDouble().formatReadableAbbreviated(locale, precision, abbreviation, separators)
+    }
 
 @Deprecated("Kept for binary compatibility.", level = DeprecationLevel.HIDDEN)
 fun UByte.formatReadableAbbreviated(locale: Locale = Locale.current, precision: Int = 1): String =
-    formatReadableAbbreviated(locale, precision, Separators.Typographic)
+    formatReadableAbbreviated(locale, precision, Abbreviation.Compact, Separators.Typographic)
 
 @Deprecated(
     message = "Use formatReadableAbbreviated instead",

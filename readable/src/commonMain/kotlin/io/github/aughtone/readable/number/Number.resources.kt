@@ -73,6 +73,15 @@ internal class NumberStyle(
             indian = indian,
         )
     }
+
+    /**
+     * This style grouping a number only once it has at least [digits] digits before the first
+     * separator, or this style unchanged where it already waits for more. Compact numbers group
+     * this way, from two: `"1500"` in German, where a number reads `"1.500"`.
+     */
+    fun groupingFrom(digits: Int): NumberStyle =
+        if (minimumGroupingDigits >= digits) this
+        else NumberStyle(decimal, grouping, minus, plus, percent, minimumGroupingDigits = digits, indian = indian)
 }
 
 /** Writes the no-break spaces, the minus sign and the Arabic percent sign as their ASCII forms. */
@@ -186,7 +195,7 @@ private fun roundedMagnitude(value: Double, precision: Int): Double =
     formatDecimal(abs(value), precision, plainStyle).toDouble()
 
 /** Dot decimal and no grouping: the form that parses back to a number. */
-private val plainStyle = NumberStyle(decimal = ".", grouping = "")
+internal val plainStyle = NumberStyle(decimal = ".", grouping = "")
 
 /**
  * Picks which rung of a unit-prefix ladder to display [value] on.

@@ -8,7 +8,7 @@ description: >-
   as the locale does ("Jun 1", "1. Juni", "Sat 4 PM", "June 2024", a month and
   day without the year); file sizes (KiB/MiB/GiB); distances, speeds and other
   metric units ("1.5 km"); numbers with thousands separators or as compact
-  numbers ("1.5k"); percentages ("25%"); ordinals ("1st"); money ("$1,234.56", "1 234,56 €");
+  numbers ("1.5K", "1,5 Mio.", "150万"); percentages ("25%"); ordinals ("1st"); money ("$1,234.56", "1 234,56 €");
   latitude/longitude in decimal degrees or DMS; a compass bearing ("225° (SW)");
   a time zone's name; and a list joined with "and" or "or". Localized with plural
   rules. Output is prose, never a value to parse back. For styled dates
@@ -28,7 +28,7 @@ Turning a raw value into the short, localized phrase a person reads:
 
 - Relative time — "8 minutes ago", "Tomorrow", "in 3 days" — from an `Instant`, `LocalDateTime`, `LocalDate`, `LocalTime`, or `Duration`.
 - Scaled units — "1.5 km", "500 m", data sizes "1 KiB"/"1 MiB", SI metric quantities.
-- Numbers — grouped ("1,234.6"), abbreviated ("1.5k", "2.5G"), and ordinals ("1st", "1er").
+- Numbers — grouped ("1,234.6"), abbreviated the locale's way ("1.5K", "1,5 Mio.", "150万") or with SI prefixes ("1.5k", "2.5G"), and ordinals ("1st", "1er").
 - Percentages — "25%", "25 %" in French, "%25" in Turkish.
 - Money — "$1,234.56", "1 234,56 €", "-$12.00".
 - Geo — coordinates as decimal degrees or DMS, azimuths "225° (SW)", altitudes.
@@ -38,7 +38,7 @@ Turning a raw value into the short, localized phrase a person reads:
 
 Reach for it instead of assembling these strings by hand — the plural rules, unit thresholds, and locale grouping are the whole point.
 
-**Called from Kotlin only.** The library publishes Kotlin Multiplatform artifacts (common, JVM, Android, and iOS via Kotlin); there is no separate Swift or JavaScript API.
+**Called from Kotlin only.** The library publishes Kotlin Multiplatform artifacts (common, JVM, Android, iOS, macOS, Linux, JavaScript and Wasm); there is no separate Swift or JavaScript API.
 
 ## How it is meant to be used
 
@@ -71,7 +71,7 @@ val usd = Currency(code = "USD", number = 840, digits = 2, name = "US Dollar", s
 val cad = Currency(code = "CAD", number = 124, digits = 2, name = "Canadian Dollar", symbol = "$")
 
 7.days.formatReadable(locale = Locales.English)                 // "1 week"
-1500.0.formatReadableAbbreviated(Locales.English)               // "1.5k"
+1500.0.formatReadableAbbreviated(Locales.English)               // "1.5K": the locale's compact form
 1234.56.formatReadable(Locales.English, precision = 1)          // "1,234.6"
 0.256.formatReadablePercent(Locales.English)                     // "26%": a fraction, to no decimal places by default
 0.256.formatReadablePercent(Locales.English, precision = 1)      // "25.6%"
@@ -154,6 +154,8 @@ The `geo`/`quantitative` families split by package: `Coordinates` extensions are
 - `Separators.Ascii` gives the old characters back where a caller needs plain ASCII; `Money.formatReadable` and `moneyFormatterFor` take it too.
 
 **Output changed in 4.4.0: a locale's script chooses its text, before its region.** `zh-Hant`, and Traditional Chinese with any region (`zh-Hant-US`, `zh-Hant-MO`), reads Traditional Chinese where it read Simplified (`"5 小時"`, was `"5小时"`), and `zh-Hans-HK` reads Simplified. A locale that names no script reads the one CLDR says its region writes: `zh-TW`, `zh-HK`, `zh-MO` and `zh-US` are Traditional, `zh-SG` Simplified. Build a script locale with `scriptCode = "Hant"`, never with the script in `regionCode`, which is read as a region and finds nothing. `Locales.Chinese`, `Locales.TraditionalChinese` and `Locales.Uzbek` now name theirs, `zh-Hans-CN`, `zh-Hant-TW` and `uz-Latn-UZ`, so code matching their `languageTag` against `"zh-CN"` misses; compare the locales instead.
+
+**Output changed in 4.4.0: `formatReadableAbbreviated` abbreviates the locale's way.** It writes Unicode CLDR's short compact form for the locale instead of SI prefixes: `"1.5K"`, `"1.2B"` (was `"1.5k"`, `"1.2G"`) in English, `"1,5 Mio."` in German, which writes thousands whole (`"1500"`, was `"1,5k"`), `"150万"` in Japanese and Chinese, `"15 लाख"` in Hindi. The space before a word is U+00A0. A four-digit number is not grouped (`"1500"`), as ICU writes compact numbers. Code that matched `"k"` or `"G"` in the output, or compared it with a literal, now misses; pass `abbreviation = Abbreviation.Si` for the old form, which is unchanged. `formatReadableDataSize` and the metric formatters keep their own unit prefixes.
 
 **New in 4.4.0: `formatReadablePercent`, in `io.github.aughtone.readable.number`.** Earlier versions had no percent formatting, so code written for them appends `"%"` to a formatted number, which is wrong wherever the sign is spaced (French, German, Swedish) or comes first (Turkish, Basque).
 

@@ -9,7 +9,7 @@ description: >-
   moons and the moon's phase; the 24 solar terms the Chinese and Korean calendars
   reckon by; and predict whether the young crescent moon will be seen on an
   evening, by the Odeh or Yallop criterion, as an Islamic month's start depends
-  on. The same answer on JVM, Android, iOS, JS and Wasm. Works on
+  on. The same answer on JVM, Android, iOS, macOS, Linux, JS and Wasm. Works on
   kotlinx-datetime LocalDate, TimeZone and kotlin.time.Instant. Not for
   converting dates between calendars (use io.github.aughtone:format-calendars)
   and not for formatting times as text (use io.github.aughtone:format-datetime).
