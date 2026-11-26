@@ -4,7 +4,7 @@ Aught One Format is a suite of Kotlin Multiplatform libraries designed to provid
 
 ## 🚀 Major Updates in 4.4.0
 
-Numbers and money from Unicode CLDR, native desktop targets, and control over which spaces wrap. **Output bytes change for most non-English numbers, for every range and for phone numbers**; the [CHANGELOG](CHANGELOG.md) lists every change.
+Numbers and money from Unicode CLDR, native desktop targets, control over which spaces wrap, and durations read from text. **Output bytes change for most non-English numbers, for every range, for phone numbers, and for weekday names on their own in five languages**; the [CHANGELOG](CHANGELOG.md) lists every change.
 
 - **Numbers and money follow CLDR** (`:readable`): separators, signs, grouping, and where a currency symbol sits come from CLDR for every bundled language and region. A space between digit groups is a no-break space, so a number never wraps; a dollar that is not the locale's own is marked ("CA$5.00" in US English).
 - **Large numbers abbreviate the locale's way** (`:readable`): `formatReadableAbbreviated` writes "1.5K" and "1.2B" in English, "1,5 Mio." in German, "150万" in Japanese. Pass `abbreviation = Abbreviation.Si` for the SI prefixes it wrote before.
