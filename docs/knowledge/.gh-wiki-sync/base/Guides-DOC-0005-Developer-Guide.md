@@ -2,7 +2,8 @@
 
 DOC-0005 · 2026-04-19
 Keywords: how to add a language, adding a formatting rule, plural factories u2 u3 u4 u6,
-          24-hour master patterns, publishing to Maven Central, release steps
+          24-hour master patterns, publishing to Maven Central, release steps,
+          running the tests, Android device tests, connectedAndroidDeviceTest
 
 ## AI Contribution Workflow
 
@@ -41,12 +42,35 @@ The `:readable` module uses a custom pluralization system to ensure grammatical 
 - **Time-zone names** come from the platform's own CLDR at runtime (see [ADR-0005](Decisions-ADR-0005-Time-Zone-Names-From-The-Platform)). Only languages no platform ships, chiefly Inuktitut, are bundled, in `TimeZoneNameSupplement.kt`.
 - **Generated data**: CLDR-derived tables are written by the scripts in `tools/cldr/` and say so at the top. Change the script and run it again; never edit a generated file by hand.
 
+## 🧪 Running the Tests
+
+The shared suites run on every target with one command; the two Linux targets are linked, not run, on a Mac:
+
+```bash
+./gradlew allTests linkDebugTestLinuxX64 linkDebugTestLinuxArm64 --continue
+```
+
+**That run compiles Android but does not test it.** The shared code is covered by the JVM run, and the notice "android host tests are not enabled" is expected: a host test runs against a stub `android.jar`, where Android's ICU and settings throw "not mocked", so it cannot reach the code that is Android's alone. That code has device tests in `src/androidDeviceTest`, which need a connected device or a running emulator:
+
+```bash
+./gradlew :datetime:connectedAndroidDeviceTest :viewable:connectedAndroidDeviceTest
+```
+
+- `:datetime` checks zone names from the device's ICU (`ZoneNamesAndroidTest`), and that the app `Context` is captured at startup and the device's 12/24-hour setting decides `is24HourFormat` (`ClockSettingAndroidTest`).
+- `:viewable` checks the raster encoders (`ViewableImageAndroidTest`).
+- `:readable` and the other modules have no Android-specific code and no device tests.
+
+The clock test reads the device's setting and never changes it, so one run checks one value. To check both, run with a 12-hour device and a 24-hour device connected at once (Gradle runs the tests on every connected device), or change the setting on the device and run again.
+
+CI has no emulator, so **the device tests are run by hand before every release**.
+
 ## 🚀 Publishing to Maven Central
 
 ### Release Steps
 1.  **Release branch**: Cut a release branch from `develop` and set the version in `gradle/libs.versions.toml`.
 2.  **Check**: Run `./gradlew check` so every target compiles and passes.
-3.  **Merge to `main`**: CI publishes to Maven Central when `main` is pushed. Releases are not published from a local machine.
+3.  **Device tests**: Run the Android device tests on a device or an emulator (see [Running the Tests](#-running-the-tests)); CI does not run them.
+4.  **Merge to `main`**: CI publishes to Maven Central when `main` is pushed. Releases are not published from a local machine.
 
 To test a publication locally, publish to Maven Local with signing skipped:
 

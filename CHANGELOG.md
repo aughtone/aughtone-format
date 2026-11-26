@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [4.4.0] - 2026-11-25
+
 ### Added
 - **`Separators`** (`:toolbox`, `io.github.aughtone.toolbox`, re-exported by `:datetime` and `:readable`): every number `formatReadable` and `formatReadableAbbreviated`, and `numberFormatterFor`, take `separators = Separators.Ascii`, as do `Money.formatReadable` and `moneyFormatterFor`, to write ordinary spaces and an ASCII minus sign where text is processed as bytes — a CSV column, a log line, a test fixture. The default is `Separators.Typographic`.
 - **`CurrencySymbol`** (`:readable`, `io.github.aughtone.readable.financial`): `Money.formatReadable` and `moneyFormatterFor` take `symbol = CurrencySymbol.Narrow` for the bare sign (`"$5.00"` for any dollar) where the context already says which currency it is, or `CurrencySymbol.Code` for the ISO code placed as a symbol (`"CAD 5.00"`). The default is `CurrencySymbol.Standard`.

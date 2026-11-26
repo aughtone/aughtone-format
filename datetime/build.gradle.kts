@@ -24,8 +24,9 @@ kotlin {
         minSdk {
             version = release(libs.versions.android.minSdk.get().toInt())
         }
-        // The zone names on Android come from the platform's ICU, so they are checked on a device
-        // or emulator: ./gradlew :datetime:connectedAndroidDeviceTest
+        // The zone names on Android come from the platform's ICU, and the 12/24-hour setting from
+        // the app Context, so both are checked on a device or emulator:
+        // ./gradlew :datetime:connectedAndroidDeviceTest
         withDeviceTest {
             instrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         }
