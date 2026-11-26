@@ -16,7 +16,7 @@ description: >-
   pattern strings such as "yyyy-MM-dd"; and not a parser.
 license: Apache-2.0
 metadata:
-  version: "4.3.0"
+  version: "4.4.0"
   repository: https://github.com/aughtone/aughtone-format
 ---
 
@@ -28,7 +28,7 @@ Formatting a date or time for display, by *style* rather than by pattern string,
 
 It formats `kotlinx.datetime` `LocalDate`/`LocalTime`/`LocalDateTime`, `kotlin.time.Instant`, and nullable `Pair` ranges, and offers `Long`-epoch-millis conversions into those types.
 
-**Called from Kotlin only.** The library publishes Kotlin Multiplatform artifacts (common, JVM, Android, and iOS via Kotlin); there is no separate Swift or JavaScript API.
+**Called from Kotlin only.** The library publishes Kotlin Multiplatform artifacts (common, JVM, Android, iOS, macOS, Linux, JavaScript and Wasm); there is no separate Swift or JavaScript API.
 
 ## How it is meant to be used
 
@@ -58,6 +58,7 @@ LocalTime(9, 0).formatRange(LocalTime(11, 30), locale = localeFor("en-US")!!, is
 LocalDateTime(2024, 3, 5, 9, 0).formatRange(LocalDateTime(2024, 3, 5, 17, 0),
     DateTimeStyle.Long, DateTimeStyle.Short, localeFor("en-US")!!, is24HourFormat = false) // "March 5, 2024 9:00 AM – 5:00 PM"
 DayOfWeek.MONDAY.formatRange(DayOfWeek.FRIDAY, TextWidth.Abbreviated, localeFor("en-US")!!)     // "Mon – Fri"
+formatRange("Jun 1", "a date to be announced", localeFor("en-US")!!)                           // "Jun 1 – a date to be announced"
 
 // Nullable range with a placeholder for the missing end
 val start: Instant = Instant.parse("2023-03-15T13:20:00Z")
@@ -67,7 +68,7 @@ Pair<Instant?, Instant?>(start, null).format(placeholder = "#")     // "… - #"
 val date = 1_700_000_000_000L.toLocalDate()
 
 // Standalone localized weekday / month names
-DayOfWeek.MONDAY.displayName(locale = localeFor("fr")!!)            // "lundi"
+DayOfWeek.MONDAY.displayName(locale = localeFor("fr")!!)            // "Lundi"
 Month.MARCH.displayName(TextWidth.Abbreviated, localeFor("en")!!)   // "Mar"
 ```
 
@@ -79,7 +80,7 @@ Month.MARCH.displayName(TextWidth.Abbreviated, localeFor("en")!!)   // "Mar"
 
 **`formatRange` and `Pair.format` are different tools.** `formatRange` writes a complete range as the locale does — the shared parts once, the locale's own separator and spacing. `Pair.format` joins two independently formatted values with `" - "` and exists for a range with a missing end. Use `formatRange` whenever both ends are known.
 
-**Range separators are not plain spaces.** CLDR writes a thin space (U+2009) around the en dash ("3\u2009–\u20095"), and some languages use no space or another mark ("3.–5. März 2024", "9:00～11:30", "09:00 ~ 17:00"). Symptom: an `assertEquals` against `"March 3 – 5, 2024"` typed with ordinary spaces fails although the text looks identical — build the expectation with `"\u2009–\u2009"`, or compare after normalising spaces.
+**Range separators are not plain spaces, and the two sides differ.** The space before the range's dash is always no-break — U+202F where CLDR has a thin space, U+00A0 where it has an ordinary one — so a line never starts with the dash; the space after it is CLDR's own and can break (`"3\u202F–\u20095"`). Some languages use no space or another mark ("3.–5. März 2024", "9:00～11:30", "09:00\u00A0~ 17:00"). Symptom: an `assertEquals` against `"March 3 – 5, 2024"` typed with ordinary spaces, or built from `"\u2009–\u2009"` as 4.2 and 4.3 wrote it, fails although the text looks identical — build it from `"\u202F–\u2009"`, or compare after normalising spaces. `noBreak = true` makes the space after the dash no-break too. Spaces inside each end are ordinary spaces unless `separators = Separators.Typographic` (from `io.github.aughtone.toolbox`), which makes them no-break.
 
 **A range is shortened only where CLDR has a pattern for it.** Time ranges are shortened at the `Short` style only; at `Medium`, `Long` and `Full` they are two complete times joined by the separator, each with its own seconds or zone name. Date ranges are shortened at every style. A `LocalDateTime` or `Instant` range on one day writes the date once and then the time range; across days it writes both ends in full. Equal ends are written once, and an end before the start is written in the order given, not swapped.
 
@@ -93,7 +94,7 @@ Month.MARCH.displayName(TextWidth.Abbreviated, localeFor("en")!!)   // "Mar"
 
 **The AM/PM marker goes where the language writes it.** After the time for most languages (`4:08 PM`), before it for Korean, Hungarian and Turkish, and before it with no space for Japanese and Chinese.
 
-**Month and weekday names inside a date are not always the names `displayName` returns.** Inside a date they are CLDR's in-date form: lower case in Spanish, French, Italian, Portuguese, Czech, Kazakh, Uzbek and Vietnamese (`15 de marzo de 2024`, `viernes, 15 de marzo de 2024`), and a different grammatical form in Czech, Finnish, Polish, Russian and Ukrainian (`5 марта 2024 г.`). `Month.displayName` and `DayOfWeek.displayName` give the stand-alone name, which these languages capitalise (`Marzo`, `Март`). A date that opens a sentence is not capitalised for you. Symptom: a hand-built date string that reads wrong to a native speaker — format the whole date instead of concatenating a name.
+**Month and weekday names inside a date are not always the names `displayName` returns.** Inside a date they are CLDR's in-date form: lower case in Spanish, French, Italian, Portuguese, Czech, Kazakh, Uzbek and Vietnamese (`15 de marzo de 2024`, `viernes, 15 de marzo de 2024`), and a different grammatical form in Czech, Finnish, Polish, Russian and Ukrainian (`5 марта 2024 г.`). `Month.displayName` and `DayOfWeek.displayName` give the stand-alone name, which these languages capitalise (`Marzo`, `Март`, `Lundi`). A date that opens a sentence is not capitalised for you. Symptom: a hand-built date string that reads wrong to a native speaker — format the whole date instead of concatenating a name.
 
 **These `Instant`s are `kotlin.time.Instant`, not `kotlinx.datetime.Instant`.** The `Instant` and `Pair<Instant?, Instant?>` APIs use the standard library's `kotlin.time.Instant`. Symptom: a type mismatch when you pass a `kotlinx.datetime.Instant`.
 
@@ -104,6 +105,12 @@ Month.MARCH.displayName(TextWidth.Abbreviated, localeFor("en")!!)   // "Mar"
 **New in 4.3.0: Canadian Indigenous locales are found, and written in English.** `localeFor` now returns locales for Cree, Ojibwe, Mi'kmaq, Mohawk and 21 more (`cr-CA`, `hur-CA`, `atj-CA`, …). This library has no text in those languages, so they format in English, the same text as before they were found — do not read a non-null locale as a sign its output is in that language. Inuktitut (`iu`) is the one with its own text.
 
 **Changed in 4.3.0: `kotlinx-serialization-json` no longer comes with this module.** It was an `api` dependency, so code could import `kotlinx.serialization.json` having declared only `io.github.aughtone:format-datetime`; that import now fails to resolve unless the project declares `org.jetbrains.kotlinx:kotlinx-serialization-json` itself. Compose UI and Compose resources are gone from its runtime classpath too. So is the empty Compose resources class 4.2 published, `io.github.aughtone.format.datetime.resources.Res`; nothing in it held data.
+
+**Changed in 4.4.0: `DayOfWeek.displayName` is capitalised in French, Portuguese, Finnish, Russian and Ukrainian.** It returns `"Lundi"` and `"Lun."` where it returned `"lundi"` and `"lun."`, to match `Month.displayName` (`"Mars"`), which those languages already capitalised. A weekday inside a formatted date stays lower case (`"lundi 3 mars 2025"`). Three in-date forms changed with it, to CLDR's: a Finnish range of dates writes its full weekdays as `"lauantaina 1. – maanantaina 3. kesäkuuta"` (was `"lauantai 1. – maanantai 3. kesäkuuta"`; a single date still reads `"lauantai 1. kesäkuuta"`), an abbreviated Portuguese weekday ends in a period (`"sáb., 1 de jun."`, was `"sáb, 1 de jun."`), and the Ukrainian Friday is written with U+02BC (`"пʼятниця"`). Symptom: a test or a comparison that expected the lower-case stand-alone name — lower-case it yourself if a sentence needs it.
+
+**New in 4.4.0: `separators` on every date and time formatter.** `format` on `LocalDate`, `LocalTime`, `LocalDateTime`, `Instant` and the `Pair`s takes `separators: Separators = Separators.Ascii` (from `io.github.aughtone.toolbox`). The default writes every space as U+0020, which a line can break at; `Separators.Typographic` makes them all no-break, so "Jun 1" never wraps between its month and its day — use it in a table cell, a chat bubble or a label. The default changed the bytes in one place: Belarusian, Bulgarian, Kazakh, Macedonian, Russian and Ukrainian wrote a no-break space before their year marker ("2024\u202Fг."), and now write U+0020 unless `Typographic` is passed.
+
+**Changed in 4.4.0: range spacing, and two new parameters.** Every `formatRange` takes `separators: Separators = Separators.Ascii` and `noBreak: Boolean = false`. The space before the dash is now no-break, where 4.2 and 4.3 wrote CLDR's thin space (U+2009) on both sides, and the U+202F CLDR puts inside an end (before AM, before the Russian "г.") is now an ordinary space unless `Separators.Typographic` is passed. The calls compile unchanged. `formatRange(start: String, end: String, locale, noBreak)` is new: it joins two values already written, for ends of different kinds. A range of chosen fields ("Jun 1 – 3") is `formatReadableFieldsRange`, in `io.github.aughtone:format-readable`, package `io.github.aughtone.readable.fields`.
 
 **New in 4.2.1: generic zone names and Windows zones.** `TimeZone.genericDisplayName(width, locale)` gives the name a zone keeps all year — "Eastern Time" / "ET" — for a weekly schedule or opening hours that span a daylight-saving change, where `displayName`'s "Eastern Standard Time" is wrong half the year; it comes from the platform's CLDR, like `displayName`. `TimeZone.ianaIdForWindowsName(name, territory)` turns a Windows zone name, as Outlook and Exchange write it in an iCalendar `TZID` ("Eastern Standard Time"), into an IANA identifier for `TimeZone.of` (`"America/New_York"`, or `"America/Toronto"` for territory `"CA"`), and `TimeZone.windowsNameForIanaId(id)` goes the other way. Both are from bundled CLDR data, the same on every platform, return `null` for a name CLDR does not list, and use current IANA names (`"Asia/Kolkata"`) while accepting older ones (`"Asia/Calcutta"`, `"US/Eastern"`).
 

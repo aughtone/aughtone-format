@@ -11,7 +11,8 @@ import kotlin.io.encoding.ExperimentalEncodingApi
 expect class ViewableImage
 
 /**
- * Indicates if the current platform supports bitmap/image rendering.
+ * Indicates if the current platform supports bitmap/image rendering: true on the JVM, Android and
+ * iOS, false on JS, Wasm, macOS and Linux, where the `toImage` and `toByteArray` calls throw.
  */
 expect val isImageSupported: Boolean
 
@@ -23,7 +24,7 @@ expect val isImageSupported: Boolean
  * @param fillColor The ARGB fill color applied to the path. Defaults to opaque black.
  * @return The rendered [ViewableImage].
  * @throws IllegalArgumentException if the width or the height is not positive.
- * @throws IllegalStateException on JS and Wasm, where bitmap generation is
+ * @throws IllegalStateException on JS, Wasm, macOS and Linux, where bitmap generation is
  *   unsupported. Guard with [isImageSupported] before calling on those targets.
  */
 expect fun ViewablePath.toImage(
@@ -39,7 +40,7 @@ expect fun ViewablePath.toImage(
  * @param height The height of the rendered image in pixels.
  * @return The rendered [ViewableImage].
  * @throws IllegalArgumentException if the width or the height is not positive.
- * @throws IllegalStateException on JS and Wasm, where bitmap generation is
+ * @throws IllegalStateException on JS, Wasm, macOS and Linux, where bitmap generation is
  *   unsupported. Guard with [isImageSupported] before calling on those targets.
  */
 expect fun ViewableGraphic.toImage(
@@ -52,7 +53,7 @@ expect fun ViewableGraphic.toImage(
  *
  * @param format The [ImageFormat] to encode. Defaults to [ImageFormat.PNG].
  * @return The encoded image bytes. Never empty.
- * @throws IllegalStateException on JS and Wasm, where bitmap generation is
+ * @throws IllegalStateException on JS, Wasm, macOS and Linux, where bitmap generation is
  *   unsupported — guard with [isImageSupported] before calling on those targets —
  *   and on any platform if the image cannot be encoded.
  */
@@ -92,3 +93,10 @@ enum class ImageFormat {
     PNG,
     JPEG
 }
+
+/**
+ * Thrown by the image calls on a platform with no bitmap type ([isImageSupported] is false), naming
+ * the [platform] and pointing at the SVG output, which every platform has.
+ */
+internal fun imageUnsupported(platform: String): Nothing =
+    error("Bitmap generation is not supported on $platform yet. Use SVG strings instead.")

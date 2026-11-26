@@ -106,12 +106,14 @@ It collapses **no** Unicode variants and encodes **no** provider-specific behavi
 | Username / handle | `:normalize` (+ optional unicode confusable-fold) | optional | planned |
 | IBAN / bank account | `:normalize` | no | planned |
 | IPv6 / hostname (zero-compression canonical) | `:normalize` | no | planned |
-| Slug | `:normalize` | no | planned — adopt from `com.oddlyclever.identifiers.Slug`; note slugging often transliterates (lossy), so treat as its own policy family |
+| Slug | `:normalize` | no | planned — adopt an existing implementation; note slugging often transliterates (lossy), so treat as its own policy family |
+
+**Note added 2026-11-25.** The roster moved to its own repository, [`aughtone-normalize`](https://github.com/aughtone/aughtone-normalize), and every row except Slug is built there. The planned modules shipped under other names: the common contract is `:common`; the table-free normalizers planned for `:normalize` — email, credit-card/PAN, IBAN, IPv4 and IPv6 with networks, MAC addresses, UUIDs and usernames — are `:quodlibet`; of what was planned for `:normalize-unicode`, the Unicode forms (NFC, NFD, NFKC, NFKD) are `:unicode`, domains with Punycode and URLs are `:ubilibet`, together with hostnames, and UTS-39 skeletons are `:confusables`; and `:normalize-phone` is `:phone`. Slug *generation* was declined there: a generated slug is lossy, a display artifact rather than an identity, and its separators, length limits and transliteration are editorial choices a frozen policy cannot hold ([aughtone/aughtone-normalize#5](https://github.com/aughtone/aughtone-normalize/issues/5), and its Reference record *Slug Normalization*). A narrower, character-level canonical form — which code points survive, composition, Latin diacritic folding and case, under a frozen policy — was accepted there on 2026-11-25 ([aughtone/aughtone-normalize#43](https://github.com/aughtone/aughtone-normalize/issues/43)), and shipped in 0.0.6 as three text rules in `:unicode`: `removeMarks()`, `keepAlnum()` and `keepAlnumSpaced()`, which reduce text to its letters and digits. Assembling a slug from that — separators, length limits, uniqueness — stays with the caller; neither is in scope for this repository. The table above is the plan as it stood on 2026-09-07.
 
 ## Scope boundaries
 
 - **Geo encodings** (Open Location Code, geohash, GeoJson) are a different concern — coordinate *encoding*, not identity normalization. They keep their own homes (`aughtone-openlocationcode`, `aughtone-geohash`, the types GeoJson model); they are not forced into `:normalize`.
-- **evolyn `:capabilities` formatters** (`addressinput`, `geoformat`) are app-coupled and stay put for now. `addressinput` is a port of Google's libaddressinput and is a future extraction candidate (like `libphonenumber` → `aughtone-phonenumber`), but out of scope here.
+- **App-coupled formatters** (an address-input port and geographic formatting) stay in the apps that own them for now. The address-input one is a port of Google's libaddressinput and is a future extraction candidate (like `libphonenumber` → `aughtone-phonenumber`), but out of scope here.
 - A deliberate inventory-and-consolidation pass over scattered formatters is worthwhile later, gated by the inclusion criterion above — not a boil-the-ocean sweep now.
 
 ## Open questions

@@ -14,7 +14,7 @@ description: >-
   Multiplatform dependency.
 license: Apache-2.0
 metadata:
-  version: "4.3.0"
+  version: "4.4.0"
   repository: https://github.com/aughtone/aughtone-format
 ---
 
@@ -30,7 +30,7 @@ The Compose Multiplatform bridge for `io.github.aughtone:format-viewable`. It ta
 
 That is the whole module: three extension functions and one `Painter` subclass, all in `io.github.aughtone.viewable.compose`.
 
-**Called from Kotlin only.** The library publishes Kotlin Multiplatform artifacts (common, JVM, Android, and iOS via Kotlin) — here, against Compose Multiplatform; there is no separate Swift or JavaScript API.
+**Called from Kotlin only.** The library publishes Kotlin Multiplatform artifacts (common, JVM, Android, iOS, macOS, JavaScript and Wasm; no Linux, which Compose Multiplatform has no native UI for) — here, against Compose Multiplatform; there is no separate Swift or JavaScript API.
 
 ## How it is meant to be used
 

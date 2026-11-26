@@ -2,6 +2,23 @@
 
 Aught One Format is a suite of Kotlin Multiplatform libraries designed to provide consistent, localized formatting for Dates, Times, Numbers, and other human-readable metrics across all platforms.
 
+## 🚀 Major Updates in 4.4.0
+
+Numbers and money from Unicode CLDR, native desktop targets, control over which spaces wrap, and durations read from text. **Output bytes change for most non-English numbers, for every range, for phone numbers, and for weekday names on their own in five languages**; the [CHANGELOG](CHANGELOG.md) lists every change.
+
+- **Numbers and money follow CLDR** (`:readable`): separators, signs, grouping, and where a currency symbol sits come from CLDR for every bundled language and region. A space between digit groups is a no-break space, so a number never wraps; a dollar that is not the locale's own is marked ("CA$5.00" in US English).
+- **Large numbers abbreviate the locale's way** (`:readable`): `formatReadableAbbreviated` writes "1.5K" and "1.2B" in English, "1,5 Mio." in German, "150万" in Japanese. Pass `abbreviation = Abbreviation.Si` for the SI prefixes it wrote before.
+- **Percentages** (`:readable`): `formatReadablePercent` — "25%" in English, "25 %" in French and German, "%25" in Turkish.
+- **Ranges of chosen fields** (`:readable`): `formatReadableFieldsRange` writes what both ends share once — "Jun 1 – 3", "1.–3. Juni", "Jun 1, 2024 – Jun 1, 2025" — from CLDR's interval patterns.
+- **`Separators`** (`:toolbox`): every number, money, date, time and range formatter takes `separators`. `Typographic` keeps a value on one line with no-break spaces; `Ascii` writes plain spaces for a CSV column, a log line or a test fixture. Numbers default to `Typographic`; dates, times and ranges to `Ascii`.
+- **A range never breaks before its dash** (`:datetime`): the space before the dash is no-break, and `noBreak = true` holds the one after it too. `formatRange(start: String, end: String, locale)` joins two values already written.
+- **Phone numbers do not wrap** (`:identifiers`): `formatPhone` groups with a no-break space and a non-breaking hyphen; `PhoneSeparators.Ascii` gives the plain characters.
+- **Native desktop targets** (every module): `macosArm64`, `linuxX64` and `linuxArm64`; `:viewable-compose` has `macosArm64` only.
+- **A locale's script chooses its text** (`:readable`): `zh-Hant` with any region reads Traditional Chinese, and a locale with no script reads the one its region writes.
+- **Durations read from text** (`:readable`): `Duration.parseReadable("1h 30m")`, with `parseReadableOrNull`, `parseReadableOrElse` and `parseReadableWithOutcome` — "10s", "250ms", "5 minutes", for a configuration value or a command-line option.
+- **Weekday names on their own are capitalised** (`:datetime`): `DayOfWeek.displayName` gives "Lundi" in French, as `Month.displayName` gives "Mars"; the same in Portuguese, Finnish, Russian and Ukrainian. Inside a date they stay lower case.
+- **Dependencies**: `aughtone-types` 4.3.0.
+
 ## 🚀 Major Updates in 4.3.0
 
 New field formatting, and lighter dependencies; the [CHANGELOG](CHANGELOG.md) lists every change.
@@ -47,7 +64,7 @@ A correctness release: no new API, many fixes to output. Code that pinned the ol
 
 ## 🚀 Major Updates in 4.1.0
 
-- **Standalone weekday & month names** (`:datetime`): `DayOfWeek.displayName(width, locale)` and `Month.displayName(width, locale)` (with a `TextWidth { Full, Abbreviated }` enum) expose the locale's day and month names — "Monday"/"Mon", "lundi", "mars" — without formatting a whole date.
+- **Standalone weekday & month names** (`:datetime`): `DayOfWeek.displayName(width, locale)` and `Month.displayName(width, locale)` (with a `TextWidth { Full, Abbreviated }` enum) expose the locale's day and month names — "Monday"/"Mon", "Lundi", "Mars" — without formatting a whole date.
 - **Localized time-zone names** (`:datetime`): `TimeZone.displayName(instant, width, locale)` gives the zone's daylight-aware *specific* name ("Eastern Standard Time" / "EST").
 - **Locale-correct list joining** (`:readable`): `List<String>.formatReadableList(locale, type)` — "Monday, Wednesday, and Friday" / "lundi, mercredi et vendredi" — from CLDR list patterns, ~55 locales.
 - **Zone names now delegate to the platform's CLDR** (java.time / Android ICU / Apple / Intl) with a small bundled Inuktitut supplement, replacing a ~500 KB bundled table — see [Coverage over consistency](#coverage-over-consistency). Wording follows the reader's OS and can differ across platforms.
@@ -97,9 +114,12 @@ Aughtone Format 3.1.0 focuses on relative-time expressiveness and completing loc
 - **Automatic Fallback**: Smartly switches from relative to absolute formatting based on configurable thresholds.
 - **Ordinal Numbers**: Localized ordinal suffix support (e.g., 1st, 2nd, 3.º, 第1).
 - **Duration Scaling**: Human-friendly duration strings with perceptual rounding (e.g., "2 weeks" vs "14 days").
+- **Duration Parsing**: A `Duration` read from text such as "10s", "5 minutes" or "1h 30m" (`Duration.parseReadable` in `:readable`), English units only.
 - **Numeric Abbreviations**: Scaling large numbers into abbreviated forms (e.g., 1.5K, 1.2M).
 - **Geospatial Formatting**: Localized altitude, azimuth (with cardinal directions), and coordinates.
 - **Dates with Chosen Fields**: A month and a day ("Jun 1"), a weekday and an hour, a month and a year — only the fields you name, laid out as each locale does from CLDR (`formatReadableFields` in `:readable`).
+- **Ranges**: A date or time range with what both ends share written once ("March 3 – 5, 2024", "Jun 1 – 3"), in the locale's own separator and order (`formatRange` in `:datetime`, `formatReadableFieldsRange` in `:readable`).
+- **Percentages**: The sign, its place and its spacing as each locale writes them (`formatReadablePercent` in `:readable`).
 - **Time-Zone Names**: A zone's name at a moment, the generic name it keeps all year ("Eastern Time"), and Windows zone names mapped to IANA identifiers.
 - **Sun and Moon**: Sunrise, sunset and twilight for a place and a day, new and full moons, the 24 solar terms, and crescent-visibility predictions, the same on every platform.
 - **Calendar Conversion**: Hebrew, Islamic, Persian, Chinese, Korean, Japanese, Ethiopic and the other `RSCALE` calendars, to and from `LocalDate`, with their leap months.
@@ -151,6 +171,11 @@ println(123L.formatReadableOrdinal(Locales.French))  // "123e"
 println(90.minutes.formatReadable(locale = Locales.English)) // "2 hours"
 println(90.minutes.formatReadable(locale = Locales.Spanish)) // "2 horas"
 
+// Durations read from text — English units, for a config value or a command-line option
+println(Duration.parseReadable("1h 30m"))          // 1h 30m
+println(Duration.parseReadableOrNull("5 minutes")) // 5m
+println(Duration.parseReadableOrNull("soon"))      // null
+
 // Numbers and money
 println(1234567.891.formatReadable(Locales.German, precision = 2)) // "1.234.567,89"
 println(Money(123456L, usd).formatReadable(Locales.English))       // "$1,234.56"
@@ -174,6 +199,10 @@ val june1 = LocalDate(2024, 6, 1)
 june1.formatReadableFields(ReadableFields.MonthDay, localeFor("en-US")!!)              // "Jun 1"
 june1.formatReadableFields(localeFor("de")!!) { month(TextWidth.Abbreviated); day() }  // "1. Juni"
 june1.formatReadableFields("MMMd", localeFor("ja")!!)                                  // "6月1日"
+
+// A range of the same fields: what both ends share is written once
+june1.formatReadableFieldsRange(LocalDate(2024, 6, 3), ReadableFields.MonthDay, localeFor("en-US")!!) // "Jun 1 – 3"
+june1.formatReadableFieldsRange(LocalDate(2024, 6, 3), ReadableFields.MonthDay, localeFor("de")!!)    // "1.–3. Juni"
 ```
 
 ### Sun Times (`:astronomy`)

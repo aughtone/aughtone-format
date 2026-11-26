@@ -1,5 +1,6 @@
 package io.github.aughtone.datetime.format
 
+import io.github.aughtone.toolbox.Separators
 import io.github.aughtone.types.locale.Locale
 import io.github.aughtone.types.locale.localeFor
 import kotlinx.datetime.LocalDate
@@ -66,8 +67,11 @@ class LocalizedPatternTest {
     @Test
     fun russianLongDateEndsWithTheYearMarkerWithoutQuotes() {
         val text = date.format(DateTimeStyle.Long, locale = locale("ru"), timeZone = TimeZone.UTC)
-        // The pattern joins the year and its marker with a narrow no-break space.
-        assertTrue(text.endsWith("2024\u202Fг."), text)
+        // CLDR joins the year and its marker with a narrow no-break space; Ascii, the default,
+        // writes it as an ordinary space, and Typographic keeps it.
+        assertTrue(text.endsWith("2024 г."), text)
+        val typographic = date.format(DateTimeStyle.Long, locale = locale("ru"), timeZone = TimeZone.UTC, separators = Separators.Typographic)
+        assertTrue(typographic.endsWith("2024\u202Fг."), typographic)
     }
 
     @Test
@@ -159,8 +163,8 @@ class LocalizedPatternTest {
     fun monthsInsideADateTakeTheFormTheLanguageUsesAfterADayNumber() {
         val fifthOfMarch = LocalDate(2024, 3, 5)
         fun long(tag: String) = fifthOfMarch.format(DateTimeStyle.Long, locale = locale(tag), timeZone = TimeZone.UTC)
-        assertEquals("5 марта 2024\u202Fг.", long("ru"))
-        assertEquals("5 березня 2024\u202Fр.", long("uk"))
+        assertEquals("5 марта 2024 г.", long("ru"))
+        assertEquals("5 березня 2024 р.", long("uk"))
         assertEquals("5 marca 2024", long("pl"))
         assertEquals("5. března 2024", long("cs"))
         assertEquals("5. maaliskuuta 2024", long("fi"))

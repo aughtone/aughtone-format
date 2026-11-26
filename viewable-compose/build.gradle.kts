@@ -50,6 +50,9 @@ kotlin {
         }
     }
 
+    // Native macOS. Compose Multiplatform publishes no Linux native UI, so there is no Linux target here.
+    macosArm64()
+
     sourceSets {
         val commonMain by getting {
             dependencies {

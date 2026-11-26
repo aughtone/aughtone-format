@@ -2,21 +2,22 @@
 name: io-github-aughtone-format-readable
 description: >-
   The human-readable-text member of the aughtone-format family, for Kotlin
-  Multiplatform. Show how long ago something happened or how soon it will
-  ("8 minutes ago", "in 3 days", "yesterday", time ago); a duration in words
-  ("2 hours", "1 week"); a date or time with only the fields you choose, laid out
-  as the locale does ("Jun 1", "1. Juni", "Sat 4 PM", "June 2024", a month and
-  day without the year); file sizes (KiB/MiB/GiB); distances, speeds and other
-  metric units ("1.5 km"); numbers with thousands separators or as compact
-  numbers ("1.5k"); ordinals ("1st"); money ("$1,234.56", "1 234,56 €");
-  latitude/longitude in decimal degrees or DMS; a compass bearing ("225° (SW)");
-  a time zone's name; and a list joined with "and" or "or". Localized with plural
-  rules. Output is prose, never a value to parse back. For styled dates
-  ("Jan 12, 1952") use io.github.aughtone:format-datetime; for exact identifier
-  notation (masked cards, IBAN, IP) use io.github.aughtone:format-identifiers.
+  Multiplatform. Show how long ago something happened or how soon it will ("8
+  minutes ago", "in 3 days", "yesterday"); a duration in words ("2 hours", "1
+  week"), or read one from text ("10s", "1h 30m"); a date or time with only the
+  fields you choose, laid out as the locale does ("Jun 1", "1. Juni", "June
+  2024", a month and day without the year); file sizes (KiB/MiB); distances,
+  speeds and metric units ("1.5 km"); numbers with thousands separators or as
+  compact numbers ("1.5K", "150万"); percentages ("25%"); ordinals ("1st"); money
+  ("$1,234.56", "1 234,56 €"); latitude/longitude in decimal degrees or DMS; a
+  compass bearing ("225° (SW)"); a time zone's name; and a list joined with
+  "and" or "or". Localized with plural rules. Output is prose, never a value to
+  parse back. For styled dates ("Jan 12, 1952") use
+  io.github.aughtone:format-datetime; for exact identifier notation (masked
+  cards, IBAN, IP) use io.github.aughtone:format-identifiers.
 license: Apache-2.0
 metadata:
-  version: "4.3.0"
+  version: "4.4.0"
   repository: https://github.com/aughtone/aughtone-format
 ---
 
@@ -28,7 +29,8 @@ Turning a raw value into the short, localized phrase a person reads:
 
 - Relative time — "8 minutes ago", "Tomorrow", "in 3 days" — from an `Instant`, `LocalDateTime`, `LocalDate`, `LocalTime`, or `Duration`.
 - Scaled units — "1.5 km", "500 m", data sizes "1 KiB"/"1 MiB", SI metric quantities.
-- Numbers — grouped ("1,234.6"), abbreviated ("1.5k", "2.5G"), and ordinals ("1st", "1er").
+- Numbers — grouped ("1,234.6"), abbreviated the locale's way ("1.5K", "1,5 Mio.", "150万") or with SI prefixes ("1.5k", "2.5G"), and ordinals ("1st", "1er").
+- Percentages — "25%", "25 %" in French, "%25" in Turkish.
 - Money — "$1,234.56", "1 234,56 €", "-$12.00".
 - Geo — coordinates as decimal degrees or DMS, azimuths "225° (SW)", altitudes.
 - Dates and times with only the fields you choose — "Jun 1", "1. Juni", "Sat 4:05 PM", "June 2024" — laid out as each locale lays out that set of fields.
@@ -37,7 +39,7 @@ Turning a raw value into the short, localized phrase a person reads:
 
 Reach for it instead of assembling these strings by hand — the plural rules, unit thresholds, and locale grouping are the whole point.
 
-**Called from Kotlin only.** The library publishes Kotlin Multiplatform artifacts (common, JVM, Android, and iOS via Kotlin); there is no separate Swift or JavaScript API.
+**Called from Kotlin only.** The library publishes Kotlin Multiplatform artifacts (common, JVM, Android, iOS, macOS, Linux, JavaScript and Wasm); there is no separate Swift or JavaScript API.
 
 ## How it is meant to be used
 
@@ -48,12 +50,15 @@ Almost everything is an extension named `formatReadable…`, and nearly every fo
 ```kotlin
 import io.github.aughtone.readable.Locales
 import io.github.aughtone.readable.duration.formatReadable
+import io.github.aughtone.readable.duration.parseReadableOrNull
+import io.github.aughtone.readable.financial.CurrencySymbol
 import io.github.aughtone.readable.financial.formatReadable
 import io.github.aughtone.readable.list.formatReadableList
 import io.github.aughtone.readable.metrics.formatReadable
 import io.github.aughtone.readable.metrics.formatReadableDataSize
 import io.github.aughtone.readable.number.formatReadable
 import io.github.aughtone.readable.number.formatReadableAbbreviated
+import io.github.aughtone.readable.number.formatReadablePercent
 import io.github.aughtone.readable.ordinality.formatReadableOrdinal
 import io.github.aughtone.readable.relative.formatReadableRelative
 import io.github.aughtone.types.financial.Currency
@@ -61,17 +66,25 @@ import io.github.aughtone.types.financial.Money
 import io.github.aughtone.types.quantitative.Distance
 import io.github.aughtone.types.units.UnitOfMeasure
 import kotlin.time.Clock
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.minutes
 
 val usd = Currency(code = "USD", number = 840, digits = 2, name = "US Dollar", symbol = "$")
+val cad = Currency(code = "CAD", number = 124, digits = 2, name = "Canadian Dollar", symbol = "$")
 
 7.days.formatReadable(locale = Locales.English)                 // "1 week"
-1500.0.formatReadableAbbreviated(Locales.English)               // "1.5k"
+Duration.parseReadableOrNull("1h 30m")                          // 90 minutes; null for text it cannot read
+1500.0.formatReadableAbbreviated(Locales.English)               // "1.5K": the locale's compact form
 1234.56.formatReadable(Locales.English, precision = 1)          // "1,234.6"
+0.256.formatReadablePercent(Locales.English)                     // "26%": a fraction, to no decimal places by default
+0.256.formatReadablePercent(Locales.English, precision = 1)      // "25.6%"
+25.formatReadablePercent(Locales.English, outOfHundred = true)   // "25%": already out of a hundred
 1048576L.formatReadableDataSize(UnitOfMeasure.Byte, Locales.English)  // "1 MiB"
 Distance(1500.0).formatReadable(Locales.English)                // "1.5 km"
 Money(123456L, usd).formatReadable(Locales.English)             // "$1,234.56"
+Money(500L, cad).formatReadable(Locales.English)                // "CA$5.00": the locale's symbol, not cad.symbol
+Money(500L, cad).formatReadable(Locales.English, symbol = CurrencySymbol.Narrow)  // "$5.00"
 1.formatReadableOrdinal(Locales.English)                        // "1st"
 
 // Locale-correct list joining
@@ -97,6 +110,10 @@ june1.formatReadableFields(ReadableFields.MonthDay, localeFor("en-US")!!)       
 june1.formatReadableFields(localeFor("de")!!) { month(TextWidth.Abbreviated); day() }  // "1. Juni"
 june1.formatReadableFields("MMMd", localeFor("ja")!!)                                  // "6月1日"
 LocalDateTime(2024, 6, 1, 16, 5).formatReadableFields(ReadableFields.WeekdayHourMinute, localeFor("en-US")!!, is24HourFormat = false)  // "Sat 4:05 PM"
+
+// A range of the same fields: what both ends share is written once
+june1.formatReadableFieldsRange(LocalDate(2024, 6, 3), ReadableFields.MonthDay, localeFor("en-US")!!)   // "Jun 1 – 3"
+june1.formatReadableFieldsRange(LocalDate(2024, 9, 30), "MMMd", localeFor("de")!!)                      // "1. Juni – 30. Sept."
 ```
 
 The `geo`/`quantitative` families split by package: `Coordinates` extensions are in `io.github.aughtone.readable.quantitative`, `GeoPoint` extensions in `io.github.aughtone.readable.geo`. **Import `Altitude.formatReadable` and `Azimuth.formatReadable` from `io.github.aughtone.readable.quantitative`**, the package of their types. Identical copies are still declared in `…readable.geo`, deprecated since 4.2.0 and removed in 5.0.0, so a star import of both packages is ambiguous until then. Symptom: `Overload resolution ambiguity` on `altitude.formatReadable()`, or a deprecation warning — import the `quantitative` one by name.
@@ -111,9 +128,15 @@ The `geo`/`quantitative` families split by package: `Coordinates` extensions are
 
 **Trailing zeros are trimmed and rounding is lossy — do not promise a fixed decimal count.** `precision` is a maximum: `1024L.formatReadableDataSize(...)` is `"1 KiB"`, not `"1.0 KiB"`; `Distance(500.0)` is `"500 m"`. Money is the one exception and always shows its currency's full minor-unit digits (`"$12.00"`). Units round to the nearest step (`29.days` → "29 days" but `30.days` → "1 month"; `10.days` → "1 week", `11.days` → "2 weeks"), the week unit only ever renders 1–3 before jumping to days/months, and a value that rounds up to a whole larger unit is shown as that unit (59.6 seconds → "1 minute", 999,999 → "1M", 1,048,575 bytes → "1 MiB"). DMS truncates its seconds field (21.6″ reads 21″). Symptom: fewer decimals than you set, or a unit that "jumps" at a threshold.
 
-**Numbers are always written out in full, and no formatter throws on a value.** There is no exponent notation however large or small the value; `Long` and `ULong` keep every digit. Not-a-number renders as `"NaN"` and the infinities as `"∞"` / `"-∞"` (with the bare unit, and no prefix, in the metric and data-size formatters). A negative number carries a leading `-`; for money it goes before an attached symbol (`"-$123.00"`) and otherwise on the number (`"-123,00 €"`). The one thing that can throw is the default `locale = Locale.current`, which throws `IllegalArgumentException` if the platform reports no locale at all.
+**A percentage is made from a fraction, whatever the number's type.** `0.25.formatReadablePercent()` is 25 percent and `25.formatReadablePercent()` is 2,500 percent: an integer is not read as a whole percentage. Pass `outOfHundred = true` for a number that is already out of a hundred, and never multiply by 100 or append `"%"` yourself, as the sign's place and spacing differ by language. `precision` counts the places of the percentage shown, not of the fraction, and defaults to `0`. Symptom: a value 100 times too large, or `"0%"` for a small share — pass `outOfHundred = true`, or a higher `precision`.
+
+**The currency symbol is the locale's, not `Currency.symbol`.** Money shows Unicode CLDR's standard symbol for the currency in the locale, which marks a currency that shares its sign with the locale's own: a Canadian dollar is `"CA$5.00"` in US English and `"$5.00"` in Canadian English. Where CLDR has no symbol for a currency in a locale, it shows the code (`"AED 5.00"` in English). A `Currency` built with a symbol of its own shows it only if CLDR has no symbol for its code at all. Symptom: a symbol you set on the `Currency` does not appear — pass `symbol = CurrencySymbol.Narrow` for the bare sign, or `CurrencySymbol.Code` for the code.
+
+**Numbers are always written out in full, and no formatter throws on a value.** There is no exponent notation however large or small the value; `Long` and `ULong` keep every digit. Not-a-number renders as `"NaN"` and the infinities as `"∞"` / `"-∞"` (with the bare unit, and no prefix, in the metric and data-size formatters). A negative number carries the locale's leading minus sign — the hyphen-minus in most languages, U+2212 in Swedish, Norwegian, Finnish, Estonian, Lithuanian, Croatian, Slovenian, Basque and Persian; for money it goes where Unicode CLDR puts it for the locale — before the symbol in English (`"-$123.00"`), between the symbol and the digits in Dutch (`"€ -123,00"`) and Swiss German (`"CHF-123.00"`), before the digits when the symbol trails (`"-123,00 €"`). The one thing that can throw is the default `locale = Locale.current`, which throws `IllegalArgumentException` if the platform reports no locale at all.
 
 **Data sizes are IEC/base-1024 only.** Symbols are always `KiB`, `MiB`, …; there is no `base`/decimal (`kB`) option. Symptom: `formatReadableDataSize(base = 1000)` does not compile.
+
+**A space inside a number is never U+0020.** Where a locale groups digits with a space it is a no-break space, as Unicode CLDR writes it: U+202F in French (`"1 234,5"`), U+00A0 in Canadian French, Swedish, Polish, Russian and others. That is what keeps a number on one line, so do not replace it, and do not compare the output with a literal typed with an ordinary space — it will not match. Pass `separators = Separators.Ascii` (in `io.github.aughtone.toolbox`) when the text is processed as bytes, such as a CSV column or a log line: it writes U+0020 and an ASCII `-`. Symptom: `assertEquals("1 234", …)` failing on two strings that look identical.
 
 **`precision` defaults are not uniform, and integer-vs-float is not the axis.** The plain number `formatReadable` defaults `precision = 1` on `Double` but `0` on `Int`/`Long`. The metric formatters default `1` on *every* receiver — including `Int`/`Long` (`formatReadableMetric`) and `Distance`/`Speed`/`Altitude`. `Azimuth` defaults `0`. Symptom: an integer that keeps no decimals, or a metric value that keeps one you did not ask for — set it explicitly.
 
@@ -128,6 +151,29 @@ The `geo`/`quantitative` families split by package: `Coordinates` extensions are
 **A duration under half a second reads "now", not "0 seconds".** It is the language's own word ("jetzt", "maintenant", "now" in every English variant). Symptom: `"now"` where a count was expected — check for a zero duration first if the caller needs a number. The bare `LocalTime.formatReadableRelative` handles time units only and defaults `relativeThreshold = 3.hours` — for calendar-aware output ("Tomorrow") use the `Instant`-anchored overload.
 
 ## What moved, and what it used to be called
+
+**Output changed in 4.4.0: number separators and signs come from Unicode CLDR.** Same calls, different bytes:
+
+- A space between digit groups is a no-break space, not U+0020: U+202F in French (`"1 234"`), U+00A0 in Canadian French, South African English, Swedish, Polish, Russian, Ukrainian and the other languages that group with a space. Money and every formatter built on numbers (data sizes, metrics, quantities) carry it too.
+- Swedish, Norwegian, Finnish, Estonian, Lithuanian, Croatian, Slovenian, Basque and Persian write negatives with U+2212 (`"−5"`).
+- Swiss Italian leaves a four-digit number whole (`"1234.56"`, was `"1'234.56"`), and regions CLDR writes differently from their language now follow CLDR: `de-AT` groups with a space, `es-BR` and `kk-CN` use a dot decimal, and English in most of Europe uses that country's separators (`en-DE` is `"1.234,5"`).
+- Money places its symbol and sign from CLDR's currency pattern for the locale, not a table of languages, and the space between an amount and its symbol is U+00A0: `"1 234,56 €"`, `"CHF-1'234.56"` in Swiss German (was `"CHF -1'234.56"`), `"$ 1,234.56"` in Persian (was after the number). A symbol ending in a letter is spaced from the digits (`"CHF 5.00"` in English). Where CLDR gives money its own separators they are used: Austrian German writes `"€ 1.234,56"` though it groups numbers with a space, and English in Switzerland, Sweden or Poland writes euros the English way and its own currency the local way.
+- Money shows CLDR's standard symbol for the currency in the locale, not `Currency.symbol`: `"CA$5.00"` in US English, `"US$5.00"` in Canadian English, the code where CLDR has no symbol (`"AED 5.00"` in English, `"1234,56 USD"` in Italian), `"￥"` for the yen in Japanese. `Currency.symbol` shows only for a currency CLDR has no symbol for. `symbol = CurrencySymbol.Narrow` gives the bare sign, `CurrencySymbol.Code` the ISO code.
+- `Separators.Ascii` gives the old characters back where a caller needs plain ASCII; `Money.formatReadable` and `moneyFormatterFor` take it too.
+
+**Output changed in 4.4.0: a locale's script chooses its text, before its region.** `zh-Hant`, and Traditional Chinese with any region (`zh-Hant-US`, `zh-Hant-MO`), reads Traditional Chinese where it read Simplified (`"5 小時"`, was `"5小时"`), and `zh-Hans-HK` reads Simplified. A locale that names no script reads the one CLDR says its region writes: `zh-TW`, `zh-HK`, `zh-MO` and `zh-US` are Traditional, `zh-SG` Simplified. Build a script locale with `scriptCode = "Hant"`, never with the script in `regionCode`, which is read as a region and finds nothing. `Locales.Chinese`, `Locales.TraditionalChinese` and `Locales.Uzbek` now name theirs, `zh-Hans-CN`, `zh-Hant-TW` and `uz-Latn-UZ`, so code matching their `languageTag` against `"zh-CN"` misses; compare the locales instead.
+
+**Output changed in 4.4.0: `formatReadableAbbreviated` abbreviates the locale's way.** It writes Unicode CLDR's short compact form for the locale instead of SI prefixes: `"1.5K"`, `"1.2B"` (was `"1.5k"`, `"1.2G"`) in English, `"1,5 Mio."` in German, which writes thousands whole (`"1500"`, was `"1,5k"`), `"150万"` in Japanese and Chinese, `"15 लाख"` in Hindi. The space before a word is U+00A0. A four-digit number is not grouped (`"1500"`), as ICU writes compact numbers. Code that matched `"k"` or `"G"` in the output, or compared it with a literal, now misses; pass `abbreviation = Abbreviation.Si` for the old form, which is unchanged. `formatReadableDataSize` and the metric formatters keep their own unit prefixes.
+
+**New in 4.4.0: `formatReadableFieldsRange`, in `io.github.aughtone.readable.fields`,** on `LocalDate`, `LocalTime`, `LocalDateTime` and `Instant`, in `formatReadableFields`' three forms: a range of the chosen fields with what both ends share written once, from CLDR's interval patterns. Code written for earlier versions formats both ends with `formatReadableFields` and joins them with `" – "`, which repeats the month and uses the wrong separator in most languages. Its spacing is `format-datetime`'s `formatRange`'s: the space before the dash never breaks, `noBreak` keeps the one after it, and `separators` (default `Separators.Ascii`) the ones inside each end.
+
+**New in 4.4.0: `separators` on `formatReadableFields`, and on the date `formatReadableRelative` falls back to.** The default, `Separators.Ascii`, writes every space in a date or time as U+0020; `Separators.Typographic` makes them no-break, so the value never wraps. Relative phrases ("3 days ago") are not changed by it. The default changed one thing: Russian and the other languages that put a no-break space before their year marker ("июнь 2024\u202Fг.") now write U+0020 there.
+
+**New in 4.4.0: `Separators` lives in `io.github.aughtone.toolbox`,** shared with `format-datetime`'s ranges. Numbers default to `Separators.Typographic`; dates, times and ranges to `Separators.Ascii`.
+
+**New in 4.4.0: `Duration.parseReadable`, in `io.github.aughtone.readable.duration`,** the one thing here that reads text. It reads a number and a unit, or several — `"10s"`, `"250ms"`, `"5 minutes"`, `"1h 30m"`, `"1.5h"`, `"-5s"` — into a `kotlin.time.Duration`, for a configuration value, a command-line option or a settings field. Four entry points, all extensions on `Duration.Companion`, so each needs its own import: `Duration.parseReadable(text)` throws `IllegalArgumentException`, `parseReadableOrNull(text)` returns `null`, `parseReadableOrElse(text) { failure -> … }` returns the fallback, and `parseReadableWithOutcome(text)` returns `DurationParseOutcome.Parsed(duration)` or `Failed(reason, position)` with a `DurationParseFailure` (`Empty`, `MissingNumber`, `MissingUnit`, `UnknownUnit`, `RepeatedUnit`, `OutOfRange`). The units are English words and abbreviations in any letter case, from `ns` to `years`; `m` is a minute and `mo` a month; a week is 7 days, a month 30 and a year 365, the lengths `formatReadable` scales by. **It is not locale-aware,** so it reads what `formatReadable` writes in English and nothing it writes in another language, and a bare number such as `"10"` is a failure, not seconds or milliseconds. What it reads back is the rounded value the text shows: `90.minutes.formatReadable()` is `"2 hours"`, which reads as two hours. Symptom of using stdlib `Duration.parse` for this: `"5 minutes"` and `"10 secs"` are refused, because it takes only Kotlin's own short units and ISO-8601.
+
+**New in 4.4.0: `formatReadablePercent`, in `io.github.aughtone.readable.number`.** Earlier versions had no percent formatting, so code written for them appends `"%"` to a formatted number, which is wrong wherever the sign is spaced (French, German, Swedish) or comes first (Turkish, Basque).
 
 **New in 4.3.0: Canadian Indigenous locales are found, and written in English.** `localeFor` now returns locales for Cree, Ojibwe, Mi'kmaq, Mohawk and 21 more (`cr-CA`, `hur-CA`, `atj-CA`, …). This library has no text in those languages, so they format in English, the same text as before they were found — do not read a non-null locale as a sign its output is in that language. Inuktitut (`iu`) is the one with its own text.
 
@@ -190,6 +236,6 @@ The legacy `toReadableRelative` overloads carry a stronger warning: they never f
 
 ## What it is not for
 
-- **Not canonical or machine-parseable output.** Everything here rounds, trims, and localizes; you cannot parse it back to the original value. For exact, round-trippable identifier notation use `io.github.aughtone:format-identifiers`.
+- **Not canonical or machine-parseable output.** Everything here rounds, trims, and localizes; you cannot parse it back to the original value. `Duration.parseReadable` reads duration text in English only, and gives the rounded value the text shows. For exact, round-trippable identifier notation use `io.github.aughtone:format-identifiers`.
 - **Not styled or fixed-layout date formatting.** The four styles (Short/Medium/Long/Full) are in `io.github.aughtone:format-datetime`; a layout fixed in every language is kotlinx-datetime's `Format { }`. This module writes relative phrasing, and dates with chosen fields laid out by the locale.
 - **Not a full CLDR/ICU localization engine.** The plural, ordinal, and unit rules are simplified and English-backstopped; do not rely on it for exhaustive per-language correctness.

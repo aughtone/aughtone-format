@@ -2,6 +2,7 @@
 
 package io.github.aughtone.readable.ordinality
 
+import io.github.aughtone.readable.lookupTags
 import io.github.aughtone.readable.PluralCategory
 import io.github.aughtone.readable.ordinalCategoryFor
 import io.github.aughtone.types.locale.Locale
@@ -83,12 +84,12 @@ private fun buildOrdinalFormatter(tag: String, locale: Locale): OrdinalFormatter
 
 /**
  * Retrieves the [OrdinalFormatter] for a given [Locale], building and caching it on first use.
- * Falls back through language subtags (e.g. "fr-CA" → "fr") before defaulting to English.
+ * Falls back from the most specific data the locale's script and region have to its language
+ * (e.g. "fr-CA" → "fr") before defaulting to English. The script decides before the region, and a
+ * locale that names no script reads the one its region implies.
  */
 fun ordinalityFor(locale: Locale): OrdinalFormatter {
-    val fullTag = if (locale.regionCode != null) "${locale.languageCode}-${locale.regionCode}" else locale.languageCode
-    var currentTag = fullTag
-    while (currentTag.isNotEmpty()) {
+    for (currentTag in lookupTags(locale)) {
         val cached = ordinalityCache[currentTag]
         if (cached != null) return cached
         val built = buildOrdinalFormatter(currentTag, locale)
@@ -104,7 +105,6 @@ fun ordinalityFor(locale: Locale): OrdinalFormatter {
             }
             return built
         }
-        currentTag = currentTag.substringBeforeLast('-', "")
     }
     val defaultKey = "en"
     ordinalityCache[defaultKey]?.let { return it }

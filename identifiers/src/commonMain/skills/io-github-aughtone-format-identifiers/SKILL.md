@@ -10,14 +10,14 @@ description: >-
   IP address as its reverse DNS name, or an IPv4 as an integer; show a CIDR subnet
   as a netmask, wildcard mask or first-to-last address range; decode a Punycode
   xn-- internationalized domain name (IDN) to Unicode; format an E.164 phone
-  number in national, international or RFC 3966 tel URI form; prefix a social
-  handle with @. Input must be the identifier, in one of its notations; it does
+  number in national, international or RFC 3966 tel URI form, kept on one line;
+  prefix a social handle with @. Input must already be the identifier; it does
   not search or clean up free text, and defines no value types. For rounded
   human text such as "1.5 MB" or "3 days ago" use
   io.github.aughtone:format-readable.
 license: Apache-2.0
 metadata:
-  version: "4.3.0"
+  version: "4.4.0"
   repository: https://github.com/aughtone/aughtone-format
 ---
 
@@ -29,7 +29,7 @@ You hold an identifier that is already valid and canonical, and you need it to *
 
 This is the "I already have the value, I just need the right spelling" layer — the fiddly string work you would otherwise hand-roll and get subtly wrong (IPv6 longest-zero-run compression, Amex `4-6-5` grouping, Punycode's bias adaptation).
 
-**Called from Kotlin only.** The library publishes Kotlin Multiplatform artifacts (common, JVM, Android, and iOS via Kotlin); there is no separate Swift or JavaScript API.
+**Called from Kotlin only.** The library publishes Kotlin Multiplatform artifacts (common, JVM, Android, iOS, macOS, Linux, JavaScript and Wasm); there is no separate Swift or JavaScript API.
 
 ## How it is meant to be used
 
@@ -48,7 +48,7 @@ import io.github.aughtone.identifiers.*
 "4111111111111111".formatCardNumber(CardNotation.Masked)  // "•••• 1111"
 "192.0.2.0/24".formatIpNetwork(IpNetworkNotation.Range)   // "192.0.2.0 - 192.0.2.255"
 "xn--caf-dma.example".formatDomain()               // "café.example"        (default: Unicode)
-"+16502530000".formatPhone()                       // "+1 650-253-0000"     (default: International)
+"+16502530000".formatPhone()                       // "+1 650-253-0000"     (default: International, U+00A0 and U+2011)
 ```
 
 The full set: `formatMac`, `formatUuid` (+ `Uuid.format`), `formatHandle`, `formatIban`, `formatCardNumber`, `formatIpv4`, `formatIpv6`, `formatIpNetwork`, `formatDomain`, `formatPhone`. Each notation enum documents its own forms.
@@ -67,7 +67,11 @@ Where a Kotlin-native type exists, an overload hangs off it: `kotlin.uuid.Uuid.f
 
 **`formatPhone` is the one impure formatter.** National and international grouping are not derivable from E.164 alone, so it uses per-country metadata from `io.github.aughtone:phonenumber` (the module's only dependency; the metadata is dead-code-eliminated for callers that never format a phone). It reads a number with or without punctuation, and the output is always the notation's own grouping. Symptom: an `IllegalArgumentException` for a number without its leading `+` and calling code, or a calling code the metadata does not know.
 
+**`formatPhone` groups with no-break characters by default.** `National` and `International` write U+00A0 where the grouping has a space and U+2011 (non-breaking hyphen) where it has a hyphen, so the number never wraps across a line; they look the same. Symptom: `assertEquals("+1 650-253-0000", e164.formatPhone())` fails with two strings that print identically. Pass `separators = PhoneSeparators.Ascii` for the plain characters where text is compared or processed as bytes (a CSV column, a log, a test fixture). `Rfc3966` is a URI and always keeps ASCII hyphens. `formatPhone` reads its own no-break output back.
+
 ## What moved, and what it used to be called
+
+**Output changed in 4.4.0: `formatPhone` writes no-break spaces and hyphens.** Same call, different bytes: `"+16502530000".formatPhone()` is `"+1 650-253-0000"` written with U+00A0 and U+2011, not U+0020 and U+002D, in `National` and `International`. Code comparing the result with a typed literal, or splitting it on `' '` or `'-'`, now misses; pass `separators = PhoneSeparators.Ascii` for the 4.3 characters. `Rfc3966` output is unchanged.
 
 **More lenient in 4.2.0.** `formatMac` accepts every `MacNotation` spelling (it accepted only the colon form) and `formatIban` accepts lower case and the spaced print form (it accepted only compact upper case); both threw `IllegalArgumentException` for those before. Output is unchanged for input that was accepted before. `formatPhone`'s acceptance of punctuated numbers, which 4.1 documented as an accident of its parser, is now part of its contract.
 

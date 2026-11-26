@@ -17,7 +17,8 @@ class LocalTimeRangeTest {
     private val english = locale("en", "US")
 
     /** CLDR's English interval separator: an en dash between thin spaces. */
-    private val dash = "\u2009–\u2009"
+    // CLDR's thin spaces, the one before the dash made no-break so a line never starts with it.
+    private val dash = "\u202F–\u2009"
     private val nine = LocalTime(9, 0)
     private val elevenThirty = LocalTime(11, 30)
     private val five = LocalTime(17, 0)
@@ -42,7 +43,7 @@ class LocalTimeRangeTest {
         assertEquals("09:00${dash}17:00", range(nine, five, english, twentyFourHour = true))
         assertEquals("09:00–17:00 Uhr", range(nine, five, locale("de"), twentyFourHour = true))
         assertEquals("09:00${dash}17:00", range(nine, five, locale("fr"), twentyFourHour = true))
-        assertEquals("09:00 ~ 17:00", range(nine, five, locale("ko"), twentyFourHour = true))
+        assertEquals("09:00\u00A0~ 17:00", range(nine, five, locale("ko"), twentyFourHour = true))
     }
 
     @Test

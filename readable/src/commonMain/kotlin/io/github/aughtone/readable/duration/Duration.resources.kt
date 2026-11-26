@@ -2,6 +2,7 @@
 
 package io.github.aughtone.readable.duration
 
+import io.github.aughtone.readable.lookupTags
 import io.github.aughtone.readable.PluralCategory
 import io.github.aughtone.readable.pluralCategoryFor
 import io.github.aughtone.toolbox.Formatter
@@ -394,12 +395,13 @@ private fun buildWrittenDurationFormatter(tag: String, locale: Locale, style: Re
 
 /**
  * Retrieves the [DurationFormatter] for a given [Locale], building and caching it on first use.
- * Supports full BCP 47 subtag lookup (e.g. "zh-TW") before falling back to the base language.
+ * Falls back from the most specific data the locale's script and region have to its language, then
+ * to English: "de-CH" → "de", "zh-Hant-US" → "zh-Hant". The script decides before the region, so
+ * `zh-Hant` reads Traditional Chinese whatever its region, and a locale that names no script reads
+ * the one its region implies ("zh-TW" and "zh-MO" are Traditional, "zh-SG" Simplified).
  */
 fun durationFormatterFor(locale: Locale, style: RelativeStyle = RelativeStyle.Long): DurationFormatter {
-    val fullTag = if (locale.regionCode != null) "${locale.languageCode}-${locale.regionCode}" else locale.languageCode
-    var currentTag = fullTag
-    while (currentTag.isNotEmpty()) {
+    for (currentTag in lookupTags(locale)) {
         val key = currentTag to style
         val cached = durationCache[key]
         if (cached != null) return cached
@@ -416,7 +418,6 @@ fun durationFormatterFor(locale: Locale, style: RelativeStyle = RelativeStyle.Lo
             }
             return built
         }
-        currentTag = currentTag.substringBeforeLast('-', "")
     }
     val defaultKey = "en" to style
     durationCache[defaultKey]?.let { return it }

@@ -3,6 +3,7 @@ package io.github.aughtone.readable.fields
 import io.github.aughtone.datetime.format.formatFieldsSkeleton
 import io.github.aughtone.datetime.format.resources.NumberingSystem
 import io.github.aughtone.datetime.format.resources.is24HourFormat as platformIs24HourFormat
+import io.github.aughtone.toolbox.Separators
 import io.github.aughtone.types.locale.Locale
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
@@ -21,6 +22,30 @@ import kotlin.time.Instant
  * difference from kotlinx-datetime's `Format { }` builder, which fixes both.
  */
 
+/**
+ * Fails unless a [typeName] value, which has a date if [hasDate], a time if [hasTime] and a zone
+ * if [hasZone], has every one of [fields], and there is at least one.
+ */
+internal fun requireFieldsOf(fields: ReadableFields, typeName: String, hasDate: Boolean, hasTime: Boolean, hasZone: Boolean) {
+    require(!fields.isEmpty) { "No fields to show: name at least one" }
+    val absent = buildList {
+        if (!hasDate) {
+            if (fields.era != null) add("era")
+            if (fields.year) add("year")
+            if (fields.month != null || fields.monthNumber) add("month")
+            if (fields.day) add("day")
+            if (fields.weekday != null) add("weekday")
+        }
+        if (!hasTime) {
+            if (fields.hour) add("hour")
+            if (fields.minute) add("minute")
+            if (fields.second) add("second")
+        }
+        if (!hasZone && fields.timeZone != null) add("time zone")
+    }
+    require(absent.isEmpty()) { "A $typeName has no ${absent.joinToString(", ")} to show" }
+}
+
 /** Writes the values by [fields]; [clock] is the clock a skeleton asked for, if any. */
 private fun formatFields(
     fields: ReadableFields,
@@ -33,24 +58,9 @@ private fun formatFields(
     locale: Locale,
     is24HourFormat: Boolean,
     numberingSystem: NumberingSystem?,
+    separators: Separators,
 ): String {
-    require(!fields.isEmpty) { "No fields to show: name at least one" }
-    val absent = buildList {
-        if (date == null) {
-            if (fields.era != null) add("era")
-            if (fields.year) add("year")
-            if (fields.month != null || fields.monthNumber) add("month")
-            if (fields.day) add("day")
-            if (fields.weekday != null) add("weekday")
-        }
-        if (time == null) {
-            if (fields.hour) add("hour")
-            if (fields.minute) add("minute")
-            if (fields.second) add("second")
-        }
-        if (instant == null && fields.timeZone != null) add("time zone")
-    }
-    require(absent.isEmpty()) { "A $typeName has no ${absent.joinToString(", ")} to show" }
+    requireFieldsOf(fields, typeName, hasDate = date != null, hasTime = time != null, hasZone = instant != null)
     return formatFieldsSkeleton(
         skeleton = fields.skeleton(twentyFourHour = clock ?: is24HourFormat),
         locale = locale,
@@ -59,6 +69,7 @@ private fun formatFields(
         timeZone = timeZone,
         instant = instant,
         numberingSystem = numberingSystem,
+        separators = separators,
     )
 }
 
@@ -79,6 +90,9 @@ private fun formatFields(
  * @param fields The fields to show; only date fields — era, year, month, day, weekday — apply.
  * @param locale The locale whose layout, names and digits to use (defaults to [Locale.current]).
  * @param numberingSystem The digits to write, or `null` for the locale's default.
+ * @param separators The spaces inside the value: [Separators.Ascii], the default, writes them as
+ *   ordinary spaces (U+0020), which a line can break at; [Separators.Typographic] writes no-break
+ *   spaces, so the value never wraps.
  * @return The date written with those fields.
  * @throws IllegalArgumentException if [fields] is empty, or names a time field or the zone.
  */
@@ -86,7 +100,8 @@ fun LocalDate.formatReadableFields(
     fields: ReadableFields,
     locale: Locale = Locale.current,
     numberingSystem: NumberingSystem? = null,
-): String = formatFields(fields, null, "LocalDate", this, null, null, null, locale, false, numberingSystem)
+    separators: Separators = Separators.Ascii,
+): String = formatFields(fields, null, "LocalDate", this, null, null, null, locale, false, numberingSystem, separators)
 
 /**
  * Writes this date with the fields the [block] names, laid out as [locale] lays out that set of
@@ -98,14 +113,18 @@ fun LocalDate.formatReadableFields(
  * @param locale The locale whose layout, names and digits to use (defaults to [Locale.current]).
  * @param numberingSystem The digits to write, or `null` for the locale's default.
  * @param block Names the fields to show; only date fields apply.
+ * @param separators The spaces inside the value: [Separators.Ascii], the default, writes them as
+ *   ordinary spaces (U+0020), which a line can break at; [Separators.Typographic] writes no-break
+ *   spaces, so the value never wraps.
  * @return The date written with those fields.
  * @throws IllegalArgumentException if the block names no field, or a time field or the zone.
  */
 fun LocalDate.formatReadableFields(
     locale: Locale = Locale.current,
     numberingSystem: NumberingSystem? = null,
+    separators: Separators = Separators.Ascii,
     block: ReadableFieldsBuilder.() -> Unit,
-): String = formatReadableFields(ReadableFields(block), locale, numberingSystem)
+): String = formatReadableFields(ReadableFields(block), locale, numberingSystem, separators)
 
 /**
  * Writes this date with the fields of a CLDR [skeleton], such as "MMMd" or "yMMMEd", laid out as
@@ -120,6 +139,9 @@ fun LocalDate.formatReadableFields(
  * @param skeleton The fields to show, as a CLDR skeleton.
  * @param locale The locale whose layout, names and digits to use (defaults to [Locale.current]).
  * @param numberingSystem The digits to write, or `null` for the locale's default.
+ * @param separators The spaces inside the value: [Separators.Ascii], the default, writes them as
+ *   ordinary spaces (U+0020), which a line can break at; [Separators.Typographic] writes no-break
+ *   spaces, so the value never wraps.
  * @return The date written with those fields.
  * @throws IllegalArgumentException if [skeleton] is empty or blank, has a letter or width not
  *   offered, or names a time field or the zone; the message names it.
@@ -128,9 +150,10 @@ fun LocalDate.formatReadableFields(
     skeleton: String,
     locale: Locale = Locale.current,
     numberingSystem: NumberingSystem? = null,
+    separators: Separators = Separators.Ascii,
 ): String {
     val (fields, clock) = ReadableFields.fromSkeleton(skeleton)
-    return formatFields(fields, clock, "LocalDate", this, null, null, null, locale, false, numberingSystem)
+    return formatFields(fields, clock, "LocalDate", this, null, null, null, locale, false, numberingSystem, separators)
 }
 
 // ── LocalTime ────────────────────────────────────────────────────────────────
@@ -147,6 +170,9 @@ fun LocalDate.formatReadableFields(
  * @param is24HourFormat Whether the hour is on a 24-hour clock (defaults to the platform's setting
  *   for [locale]).
  * @param numberingSystem The digits to write, or `null` for the locale's default.
+ * @param separators The spaces inside the value: [Separators.Ascii], the default, writes them as
+ *   ordinary spaces (U+0020), which a line can break at; [Separators.Typographic] writes no-break
+ *   spaces, so the value never wraps.
  * @return The time written with those fields.
  * @throws IllegalArgumentException if [fields] is empty, or names a date field or the zone.
  */
@@ -155,7 +181,8 @@ fun LocalTime.formatReadableFields(
     locale: Locale = Locale.current,
     is24HourFormat: Boolean = platformIs24HourFormat(locale),
     numberingSystem: NumberingSystem? = null,
-): String = formatFields(fields, null, "LocalTime", null, this, null, null, locale, is24HourFormat, numberingSystem)
+    separators: Separators = Separators.Ascii,
+): String = formatFields(fields, null, "LocalTime", null, this, null, null, locale, is24HourFormat, numberingSystem, separators)
 
 /**
  * Writes this time with the fields the [block] names, laid out as [locale] lays out that set of
@@ -169,6 +196,9 @@ fun LocalTime.formatReadableFields(
  *   for [locale]).
  * @param numberingSystem The digits to write, or `null` for the locale's default.
  * @param block Names the fields to show; only the hour, minute and second apply.
+ * @param separators The spaces inside the value: [Separators.Ascii], the default, writes them as
+ *   ordinary spaces (U+0020), which a line can break at; [Separators.Typographic] writes no-break
+ *   spaces, so the value never wraps.
  * @return The time written with those fields.
  * @throws IllegalArgumentException if the block names no field, or a date field or the zone.
  */
@@ -176,8 +206,9 @@ fun LocalTime.formatReadableFields(
     locale: Locale = Locale.current,
     is24HourFormat: Boolean = platformIs24HourFormat(locale),
     numberingSystem: NumberingSystem? = null,
+    separators: Separators = Separators.Ascii,
     block: ReadableFieldsBuilder.() -> Unit,
-): String = formatReadableFields(ReadableFields(block), locale, is24HourFormat, numberingSystem)
+): String = formatReadableFields(ReadableFields(block), locale, is24HourFormat, numberingSystem, separators)
 
 /**
  * Writes this time with the fields of a CLDR [skeleton], such as "hm" or "Hms", laid out as
@@ -191,6 +222,9 @@ fun LocalTime.formatReadableFields(
  * @param locale The locale whose layout, names and digits to use (defaults to [Locale.current]).
  * @param is24HourFormat The clock for a `j` hour (defaults to the platform's setting for [locale]).
  * @param numberingSystem The digits to write, or `null` for the locale's default.
+ * @param separators The spaces inside the value: [Separators.Ascii], the default, writes them as
+ *   ordinary spaces (U+0020), which a line can break at; [Separators.Typographic] writes no-break
+ *   spaces, so the value never wraps.
  * @return The time written with those fields.
  * @throws IllegalArgumentException if [skeleton] is empty or blank, has a letter or width not
  *   offered, or names a date field or the zone; the message names it.
@@ -200,9 +234,10 @@ fun LocalTime.formatReadableFields(
     locale: Locale = Locale.current,
     is24HourFormat: Boolean = platformIs24HourFormat(locale),
     numberingSystem: NumberingSystem? = null,
+    separators: Separators = Separators.Ascii,
 ): String {
     val (fields, clock) = ReadableFields.fromSkeleton(skeleton)
-    return formatFields(fields, clock, "LocalTime", null, this, null, null, locale, is24HourFormat, numberingSystem)
+    return formatFields(fields, clock, "LocalTime", null, this, null, null, locale, is24HourFormat, numberingSystem, separators)
 }
 
 // ── LocalDateTime ────────────────────────────────────────────────────────────
@@ -220,6 +255,9 @@ fun LocalTime.formatReadableFields(
  * @param is24HourFormat Whether the hour is on a 24-hour clock (defaults to the platform's setting
  *   for [locale]).
  * @param numberingSystem The digits to write, or `null` for the locale's default.
+ * @param separators The spaces inside the value: [Separators.Ascii], the default, writes them as
+ *   ordinary spaces (U+0020), which a line can break at; [Separators.Typographic] writes no-break
+ *   spaces, so the value never wraps.
  * @return The date-time written with those fields.
  * @throws IllegalArgumentException if [fields] is empty, or names the zone, which a local
  *   date-time does not have; format an [Instant] to show it.
@@ -229,7 +267,8 @@ fun LocalDateTime.formatReadableFields(
     locale: Locale = Locale.current,
     is24HourFormat: Boolean = platformIs24HourFormat(locale),
     numberingSystem: NumberingSystem? = null,
-): String = formatFields(fields, null, "LocalDateTime", date, time, null, null, locale, is24HourFormat, numberingSystem)
+    separators: Separators = Separators.Ascii,
+): String = formatFields(fields, null, "LocalDateTime", date, time, null, null, locale, is24HourFormat, numberingSystem, separators)
 
 /**
  * Writes this date-time with the fields the [block] names, laid out as [locale] lays out that set
@@ -243,6 +282,9 @@ fun LocalDateTime.formatReadableFields(
  *   for [locale]).
  * @param numberingSystem The digits to write, or `null` for the locale's default.
  * @param block Names the fields to show; every field but the zone applies.
+ * @param separators The spaces inside the value: [Separators.Ascii], the default, writes them as
+ *   ordinary spaces (U+0020), which a line can break at; [Separators.Typographic] writes no-break
+ *   spaces, so the value never wraps.
  * @return The date-time written with those fields.
  * @throws IllegalArgumentException if the block names no field, or the zone.
  */
@@ -250,8 +292,9 @@ fun LocalDateTime.formatReadableFields(
     locale: Locale = Locale.current,
     is24HourFormat: Boolean = platformIs24HourFormat(locale),
     numberingSystem: NumberingSystem? = null,
+    separators: Separators = Separators.Ascii,
     block: ReadableFieldsBuilder.() -> Unit,
-): String = formatReadableFields(ReadableFields(block), locale, is24HourFormat, numberingSystem)
+): String = formatReadableFields(ReadableFields(block), locale, is24HourFormat, numberingSystem, separators)
 
 /**
  * Writes this date-time with the fields of a CLDR [skeleton], such as "MMMEdhm", laid out as
@@ -265,6 +308,9 @@ fun LocalDateTime.formatReadableFields(
  * @param locale The locale whose layout, names and digits to use (defaults to [Locale.current]).
  * @param is24HourFormat The clock for a `j` hour (defaults to the platform's setting for [locale]).
  * @param numberingSystem The digits to write, or `null` for the locale's default.
+ * @param separators The spaces inside the value: [Separators.Ascii], the default, writes them as
+ *   ordinary spaces (U+0020), which a line can break at; [Separators.Typographic] writes no-break
+ *   spaces, so the value never wraps.
  * @return The date-time written with those fields.
  * @throws IllegalArgumentException if [skeleton] is empty or blank, has a letter or width not
  *   offered, or names the zone; the message names it.
@@ -274,9 +320,10 @@ fun LocalDateTime.formatReadableFields(
     locale: Locale = Locale.current,
     is24HourFormat: Boolean = platformIs24HourFormat(locale),
     numberingSystem: NumberingSystem? = null,
+    separators: Separators = Separators.Ascii,
 ): String {
     val (fields, clock) = ReadableFields.fromSkeleton(skeleton)
-    return formatFields(fields, clock, "LocalDateTime", date, time, null, null, locale, is24HourFormat, numberingSystem)
+    return formatFields(fields, clock, "LocalDateTime", date, time, null, null, locale, is24HourFormat, numberingSystem, separators)
 }
 
 // ── Instant ──────────────────────────────────────────────────────────────────
@@ -295,6 +342,9 @@ fun LocalDateTime.formatReadableFields(
  * @param is24HourFormat Whether the hour is on a 24-hour clock (defaults to the platform's setting
  *   for [locale]).
  * @param numberingSystem The digits to write, or `null` for the locale's default.
+ * @param separators The spaces inside the value: [Separators.Ascii], the default, writes them as
+ *   ordinary spaces (U+0020), which a line can break at; [Separators.Typographic] writes no-break
+ *   spaces, so the value never wraps.
  * @return The instant written with those fields.
  * @throws IllegalArgumentException if [fields] is empty.
  */
@@ -304,9 +354,10 @@ fun Instant.formatReadableFields(
     timeZone: TimeZone = TimeZone.currentSystemDefault(),
     is24HourFormat: Boolean = platformIs24HourFormat(locale),
     numberingSystem: NumberingSystem? = null,
+    separators: Separators = Separators.Ascii,
 ): String {
     val local = toLocalDateTime(timeZone)
-    return formatFields(fields, null, "Instant", local.date, local.time, timeZone, this, locale, is24HourFormat, numberingSystem)
+    return formatFields(fields, null, "Instant", local.date, local.time, timeZone, this, locale, is24HourFormat, numberingSystem, separators)
 }
 
 /**
@@ -322,6 +373,9 @@ fun Instant.formatReadableFields(
  *   for [locale]).
  * @param numberingSystem The digits to write, or `null` for the locale's default.
  * @param block Names the fields to show; every field applies.
+ * @param separators The spaces inside the value: [Separators.Ascii], the default, writes them as
+ *   ordinary spaces (U+0020), which a line can break at; [Separators.Typographic] writes no-break
+ *   spaces, so the value never wraps.
  * @return The instant written with those fields.
  * @throws IllegalArgumentException if the block names no field.
  */
@@ -330,8 +384,9 @@ fun Instant.formatReadableFields(
     timeZone: TimeZone = TimeZone.currentSystemDefault(),
     is24HourFormat: Boolean = platformIs24HourFormat(locale),
     numberingSystem: NumberingSystem? = null,
+    separators: Separators = Separators.Ascii,
     block: ReadableFieldsBuilder.() -> Unit,
-): String = formatReadableFields(ReadableFields(block), locale, timeZone, is24HourFormat, numberingSystem)
+): String = formatReadableFields(ReadableFields(block), locale, timeZone, is24HourFormat, numberingSystem, separators)
 
 /**
  * Writes this instant, as it reads in [timeZone], with the fields of a CLDR [skeleton], such as
@@ -346,6 +401,9 @@ fun Instant.formatReadableFields(
  * @param timeZone The zone the instant is read in (defaults to the system's).
  * @param is24HourFormat The clock for a `j` hour (defaults to the platform's setting for [locale]).
  * @param numberingSystem The digits to write, or `null` for the locale's default.
+ * @param separators The spaces inside the value: [Separators.Ascii], the default, writes them as
+ *   ordinary spaces (U+0020), which a line can break at; [Separators.Typographic] writes no-break
+ *   spaces, so the value never wraps.
  * @return The instant written with those fields.
  * @throws IllegalArgumentException if [skeleton] is empty or blank, or has a letter or width not
  *   offered; the message names it.
@@ -356,8 +414,119 @@ fun Instant.formatReadableFields(
     timeZone: TimeZone = TimeZone.currentSystemDefault(),
     is24HourFormat: Boolean = platformIs24HourFormat(locale),
     numberingSystem: NumberingSystem? = null,
+    separators: Separators = Separators.Ascii,
 ): String {
     val (fields, clock) = ReadableFields.fromSkeleton(skeleton)
     val local = toLocalDateTime(timeZone)
-    return formatFields(fields, clock, "Instant", local.date, local.time, timeZone, this, locale, is24HourFormat, numberingSystem)
+    return formatFields(fields, clock, "Instant", local.date, local.time, timeZone, this, locale, is24HourFormat, numberingSystem, separators)
 }
+
+// ── 4.3 signatures ──────────────────────────────────────────────────────────
+
+/** The 4.3 signature, kept so code compiled against it still links. */
+@Deprecated("Kept for binary compatibility.", level = DeprecationLevel.HIDDEN)
+fun LocalDate.formatReadableFields(
+    fields: ReadableFields,
+    locale: Locale = Locale.current,
+    numberingSystem: NumberingSystem? = null,
+): String = formatReadableFields(fields, locale, numberingSystem, Separators.Ascii)
+
+/** The 4.3 signature, kept so code compiled against it still links. */
+@Deprecated("Kept for binary compatibility.", level = DeprecationLevel.HIDDEN)
+fun LocalDate.formatReadableFields(
+    locale: Locale = Locale.current,
+    numberingSystem: NumberingSystem? = null,
+    block: ReadableFieldsBuilder.() -> Unit,
+): String = formatReadableFields(locale, numberingSystem, Separators.Ascii, block)
+
+/** The 4.3 signature, kept so code compiled against it still links. */
+@Deprecated("Kept for binary compatibility.", level = DeprecationLevel.HIDDEN)
+fun LocalDate.formatReadableFields(
+    skeleton: String,
+    locale: Locale = Locale.current,
+    numberingSystem: NumberingSystem? = null,
+): String = formatReadableFields(skeleton, locale, numberingSystem, Separators.Ascii)
+
+/** The 4.3 signature, kept so code compiled against it still links. */
+@Deprecated("Kept for binary compatibility.", level = DeprecationLevel.HIDDEN)
+fun LocalTime.formatReadableFields(
+    fields: ReadableFields,
+    locale: Locale = Locale.current,
+    is24HourFormat: Boolean = platformIs24HourFormat(locale),
+    numberingSystem: NumberingSystem? = null,
+): String = formatReadableFields(fields, locale, is24HourFormat, numberingSystem, Separators.Ascii)
+
+/** The 4.3 signature, kept so code compiled against it still links. */
+@Deprecated("Kept for binary compatibility.", level = DeprecationLevel.HIDDEN)
+fun LocalTime.formatReadableFields(
+    locale: Locale = Locale.current,
+    is24HourFormat: Boolean = platformIs24HourFormat(locale),
+    numberingSystem: NumberingSystem? = null,
+    block: ReadableFieldsBuilder.() -> Unit,
+): String = formatReadableFields(locale, is24HourFormat, numberingSystem, Separators.Ascii, block)
+
+/** The 4.3 signature, kept so code compiled against it still links. */
+@Deprecated("Kept for binary compatibility.", level = DeprecationLevel.HIDDEN)
+fun LocalTime.formatReadableFields(
+    skeleton: String,
+    locale: Locale = Locale.current,
+    is24HourFormat: Boolean = platformIs24HourFormat(locale),
+    numberingSystem: NumberingSystem? = null,
+): String = formatReadableFields(skeleton, locale, is24HourFormat, numberingSystem, Separators.Ascii)
+
+/** The 4.3 signature, kept so code compiled against it still links. */
+@Deprecated("Kept for binary compatibility.", level = DeprecationLevel.HIDDEN)
+fun LocalDateTime.formatReadableFields(
+    fields: ReadableFields,
+    locale: Locale = Locale.current,
+    is24HourFormat: Boolean = platformIs24HourFormat(locale),
+    numberingSystem: NumberingSystem? = null,
+): String = formatReadableFields(fields, locale, is24HourFormat, numberingSystem, Separators.Ascii)
+
+/** The 4.3 signature, kept so code compiled against it still links. */
+@Deprecated("Kept for binary compatibility.", level = DeprecationLevel.HIDDEN)
+fun LocalDateTime.formatReadableFields(
+    locale: Locale = Locale.current,
+    is24HourFormat: Boolean = platformIs24HourFormat(locale),
+    numberingSystem: NumberingSystem? = null,
+    block: ReadableFieldsBuilder.() -> Unit,
+): String = formatReadableFields(locale, is24HourFormat, numberingSystem, Separators.Ascii, block)
+
+/** The 4.3 signature, kept so code compiled against it still links. */
+@Deprecated("Kept for binary compatibility.", level = DeprecationLevel.HIDDEN)
+fun LocalDateTime.formatReadableFields(
+    skeleton: String,
+    locale: Locale = Locale.current,
+    is24HourFormat: Boolean = platformIs24HourFormat(locale),
+    numberingSystem: NumberingSystem? = null,
+): String = formatReadableFields(skeleton, locale, is24HourFormat, numberingSystem, Separators.Ascii)
+
+/** The 4.3 signature, kept so code compiled against it still links. */
+@Deprecated("Kept for binary compatibility.", level = DeprecationLevel.HIDDEN)
+fun Instant.formatReadableFields(
+    fields: ReadableFields,
+    locale: Locale = Locale.current,
+    timeZone: TimeZone = TimeZone.currentSystemDefault(),
+    is24HourFormat: Boolean = platformIs24HourFormat(locale),
+    numberingSystem: NumberingSystem? = null,
+): String = formatReadableFields(fields, locale, timeZone, is24HourFormat, numberingSystem, Separators.Ascii)
+
+/** The 4.3 signature, kept so code compiled against it still links. */
+@Deprecated("Kept for binary compatibility.", level = DeprecationLevel.HIDDEN)
+fun Instant.formatReadableFields(
+    locale: Locale = Locale.current,
+    timeZone: TimeZone = TimeZone.currentSystemDefault(),
+    is24HourFormat: Boolean = platformIs24HourFormat(locale),
+    numberingSystem: NumberingSystem? = null,
+    block: ReadableFieldsBuilder.() -> Unit,
+): String = formatReadableFields(locale, timeZone, is24HourFormat, numberingSystem, Separators.Ascii, block)
+
+/** The 4.3 signature, kept so code compiled against it still links. */
+@Deprecated("Kept for binary compatibility.", level = DeprecationLevel.HIDDEN)
+fun Instant.formatReadableFields(
+    skeleton: String,
+    locale: Locale = Locale.current,
+    timeZone: TimeZone = TimeZone.currentSystemDefault(),
+    is24HourFormat: Boolean = platformIs24HourFormat(locale),
+    numberingSystem: NumberingSystem? = null,
+): String = formatReadableFields(skeleton, locale, timeZone, is24HourFormat, numberingSystem, Separators.Ascii)

@@ -8,23 +8,23 @@ lost, silently, at the next run.
 
 | Skill | Version |
 |---|---|
-| story-workflow | 1.24 |
-| story-reconcile | 0.30 |
-| to-issues | 1.16 |
-| triage | 1.27 |
-| project-docs | 1.25 |
-| to-prd | 1.5 |
-| to-adr | 1.3 |
-| to-rad | 1.4 |
+| story-workflow | 1.30 |
+| story-reconcile | 0.31 |
+| to-issues | 1.19 |
+| triage | 1.29 |
+| project-docs | 1.44 |
+| to-prd | 1.6 |
+| to-adr | 1.5 |
+| to-rad | 1.5 |
 | grill-with-docs | 2.1 |
-| regulatory-compliance | 1.2 |
-| to-wiring | 1.2 |
-| handoff | 1.1 |
-| housekeeping | 1.5 |
-| zoom-out | 1.0 |
-| tdd | 1.0 |
-| improve-codebase-architecture | 1.1 |
+| regulatory-compliance | 1.3 |
+| handoff | 1.3 |
+| housekeeping | 1.7 |
+| zoom-out | 1.1 |
+| tdd | 1.1 |
+| improve-codebase-architecture | 1.3 |
 | to-ux | 2.2 |
+| write-a-skill | 2.0 |
 
 **Improving a managed skill is discovered work.** Do not edit these
 files: capture the improvement as an issue (or tell the user) so it

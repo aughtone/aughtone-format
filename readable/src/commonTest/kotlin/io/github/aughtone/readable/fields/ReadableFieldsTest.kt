@@ -2,6 +2,7 @@ package io.github.aughtone.readable.fields
 
 import io.github.aughtone.datetime.format.TextWidth
 import io.github.aughtone.datetime.format.resources.NumberingSystem
+import io.github.aughtone.toolbox.Separators
 import io.github.aughtone.types.locale.Locale
 import io.github.aughtone.types.locale.localeFor
 import kotlinx.datetime.LocalDate
@@ -37,8 +38,10 @@ class ReadableFieldsTest {
         // Inside a date the Russian month is genitive; beside a year CLDR asks for the
         // stand-alone form, in lower case.
         assertEquals("1 июня", date.formatReadableFields("MMMMd", locale("ru")))
-        // CLDR keeps "г." on the year's line with a narrow no-break space.
-        assertEquals("июнь 2024\u202Fг.", date.formatReadableFields(ReadableFields.YearMonth, locale("ru")))
+        // CLDR keeps "г." on the year's line with a narrow no-break space; Ascii, the default,
+        // writes an ordinary one, and Typographic keeps it.
+        assertEquals("июнь 2024 г.", date.formatReadableFields(ReadableFields.YearMonth, locale("ru")))
+        assertEquals("июнь\u00A02024\u202Fг.", date.formatReadableFields(ReadableFields.YearMonth, locale("ru"), separators = Separators.Typographic))
         assertEquals("1 de junio", date.formatReadableFields("MMMMd", locale("es")))
         assertEquals("junio de 2024", date.formatReadableFields(ReadableFields.YearMonth, locale("es")))
         assertEquals("Juni 2024", date.formatReadableFields(ReadableFields.YearMonth, locale("de")))

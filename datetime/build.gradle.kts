@@ -24,8 +24,9 @@ kotlin {
         minSdk {
             version = release(libs.versions.android.minSdk.get().toInt())
         }
-        // The zone names on Android come from the platform's ICU, so they are checked on a device
-        // or emulator: ./gradlew :datetime:connectedAndroidDeviceTest
+        // The zone names on Android come from the platform's ICU, and the 12/24-hour setting from
+        // the app Context, so both are checked on a device or emulator:
+        // ./gradlew :datetime:connectedAndroidDeviceTest
         withDeviceTest {
             instrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         }
@@ -59,6 +60,11 @@ kotlin {
         }
     }
 
+    // Native desktop, for command-line tools and native apps. macOS shares the Apple code with iOS.
+    macosArm64()
+    linuxX64()
+    linuxArm64()
+
     sourceSets {
         val androidMain by getting {
             dependencies {
@@ -79,6 +85,12 @@ kotlin {
             dependencies {
                 implementation(libs.kotlin.test)
                 implementation(libs.kotlinx.serialization.json)
+            }
+        }
+        val jvmTest by getting {
+            dependencies {
+                // An oracle for the range tests, never shipped.
+                implementation(libs.icu4j)
             }
         }
         val androidDeviceTest by getting {

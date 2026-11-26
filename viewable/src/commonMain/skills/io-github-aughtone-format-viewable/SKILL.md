@@ -6,8 +6,8 @@ description: >-
   into something you can draw or store without a map SDK. Convert GeoJSON to an
   SVG path d attribute or a complete SVG document; export an EPS file; convert to
   WKT (Well-Known Text) for PostGIS and other spatial databases; render a PNG or
-  JPEG image as bytes or a data URI on Android, iOS and desktop (not in the
-  browser); get a neutral vector path of move, line and close commands with its
+  JPEG image as bytes or a data URI on Android, iOS and the JVM (not in the
+  browser or native macOS and Linux); get a neutral vector path of move, line and close commands with its
   bounds; style fill, stroke and stroke width on layered graphics. Coordinates
   are projected for you, Web Mercator by default or equirectangular. Good for map
   thumbnails, shape previews and outline icons. Not an interactive map, tile
@@ -16,7 +16,7 @@ description: >-
   io.github.aughtone:format-toolbox.
 license: Apache-2.0
 metadata:
-  version: "4.3.0"
+  version: "4.4.0"
   repository: https://github.com/aughtone/aughtone-format
 ---
 
@@ -34,7 +34,7 @@ You have GeoJSON (or a bare `GeoGeometry`) and need to *render* it, without pull
 
 `ViewablePath` / `ViewableGraphic` are the neutral currency; a companion module, `io.github.aughtone:format-viewable-compose`, renders them in Compose.
 
-**Called from Kotlin only.** The library publishes Kotlin Multiplatform artifacts (common, JVM, Android, and iOS via Kotlin); there is no separate Swift or JavaScript API.
+**Called from Kotlin only.** The library publishes Kotlin Multiplatform artifacts (common, JVM, Android, iOS, macOS, Linux, JavaScript and Wasm); there is no separate Swift or JavaScript API.
 
 ## How it is meant to be used
 
@@ -56,7 +56,7 @@ val wkt = geometry.toWkt()                            // precision defaults to 6
 // Build a path by hand
 val p = ViewablePath(listOf(PathCommand.MoveTo(0.0, 0.0), PathCommand.LineTo(10.0, 10.0), PathCommand.Close))
 
-// Raster only where supported (not JS/Wasm) — always gate on isImageSupported
+// Raster only where supported (not JS, Wasm, macOS or Linux) — always gate on isImageSupported
 if (isImageSupported) {
     val png = path.toImage(width = 200, height = 200).toByteArray(ImageFormat.PNG)
 }
@@ -70,7 +70,7 @@ Pass a `GeoProjection` argument to override the projection; `WebMercatorProjecti
 
 **EPS output matches the SVG and raster output: same way up, fill and stroke both drawn.** A layer with both a fill and a stroke gets both, and the drawing is not mirrored. EPS has no transparency, so a colour's alpha is ignored there; `ViewableGraphic.toSvgDocument` carries it as `fill-opacity` / `stroke-opacity`.
 
-**Bitmap generation throws on JS/Wasm.** `toImage` and `ViewableImage.toByteArray` are implemented on JVM, Android and iOS, but on JS and Wasm they raise `IllegalStateException` ("Bitmap generation is not supported"). Symptom: an `IllegalStateException` in a browser build — gate on `isImageSupported` (false on JS/Wasm) and use the SVG string output there instead.
+**Bitmap generation throws on JS, Wasm, macOS and Linux.** `toImage` and `ViewableImage.toByteArray` are implemented on JVM, Android and iOS, but on JS, Wasm, macOS and Linux they raise `IllegalStateException` ("Bitmap generation is not supported"). Symptom: an `IllegalStateException` in a browser or native desktop build — gate on `isImageSupported` (false on those four) and use the SVG string output there instead.
 
 **`toImage` needs a positive width and height**, and throws `IllegalArgumentException` otherwise on every platform that renders. An image that cannot be encoded throws `IllegalStateException` from `toByteArray`; it never returns empty bytes. JPEG has no transparency, so transparent areas are flattened onto white on JVM, Android and iOS alike — use PNG to keep them. Strokes end flush with the line (butt caps) on every platform.
 

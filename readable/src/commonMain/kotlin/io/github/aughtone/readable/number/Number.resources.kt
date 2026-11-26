@@ -2,6 +2,9 @@
 
 package io.github.aughtone.readable.number
 
+import io.github.aughtone.toolbox.Separators
+import io.github.aughtone.readable.lookupTags
+import io.github.aughtone.readable.lookupKey
 import io.github.aughtone.types.locale.Locale
 import kotlin.math.abs
 import kotlin.concurrent.Volatile
@@ -16,7 +19,8 @@ private fun createSimpleFormatter(style: NumberStyle, precision: Int): NumberFor
 /**
  * Renders [value] as grouped decimal text, rounded half away from zero to [precision] decimal places.
  *
- * Not-a-number renders as `"NaN"` and the infinities as `"∞"` and `"-∞"`; nothing here throws.
+ * Not-a-number renders as `"NaN"` and the infinities as `"∞"` and `"-∞"`, with the style's minus
+ * sign; nothing here throws.
  *
  * @param fixedFraction When `true` the fraction is padded with zeros to exactly [precision] digits;
  *   when `false` trailing zeros are trimmed and a whole number has no decimal separator.
@@ -28,15 +32,20 @@ internal fun formatDecimal(
     fixedFraction: Boolean = false,
 ): String = when {
     value.isNaN() -> "NaN"
-    value.isInfinite() -> if (value > 0) "∞" else "-∞"
+    value.isInfinite() -> if (value > 0) "∞" else "${style.minus}∞"
     else -> formatDecimalText(value.toString(), precision, style, fixedFraction)
 }
 
 /**
- * How a locale writes a number.
+ * How a locale writes a number. The values for each locale are generated from Unicode CLDR into
+ * [cldrNumberStyles]; see `tools/cldr/number-symbols.mjs`.
  *
  * @property decimal The decimal separator.
  * @property grouping The separator between groups of digits; empty for no grouping.
+ * @property minus The minus sign: the hyphen-minus in most locales, U+2212 in Swedish, Finnish and
+ *   others.
+ * @property plus The plus sign.
+ * @property percent The percent sign.
  * @property minimumGroupingDigits How many digits must stand before the first separator for a
  *   number to be grouped at all. With `2`, as in Spanish or Polish, "1234" stays whole and
  *   grouping starts at "12 345".
@@ -46,9 +55,49 @@ internal fun formatDecimal(
 internal class NumberStyle(
     val decimal: String,
     val grouping: String,
+    val minus: String = "-",
+    val plus: String = "+",
+    val percent: String = "%",
     val minimumGroupingDigits: Int = 1,
     val indian: Boolean = false,
-)
+) {
+    /** This style with its separators and signs written as [Separators] asks. */
+    fun with(separators: Separators): NumberStyle = when (separators) {
+        Separators.Typographic -> this
+        Separators.Ascii -> NumberStyle(
+            decimal = decimal.toAscii(),
+            grouping = grouping.toAscii(),
+            minus = minus.toAscii(),
+            plus = plus.toAscii(),
+            percent = percent.toAscii(),
+            minimumGroupingDigits = minimumGroupingDigits,
+            indian = indian,
+        )
+    }
+
+    /**
+     * This style grouping a number only once it has at least [digits] digits before the first
+     * separator, or this style unchanged where it already waits for more. Compact numbers group
+     * this way, from two: `"1500"` in German, where a number reads `"1.500"`.
+     */
+    fun groupingFrom(digits: Int): NumberStyle =
+        if (minimumGroupingDigits >= digits) this
+        else NumberStyle(decimal, grouping, minus, plus, percent, minimumGroupingDigits = digits, indian = indian)
+}
+
+/** Writes the no-break spaces, the minus sign and the Arabic percent sign as their ASCII forms. */
+internal fun String.toAscii(): String = buildString(length) {
+    for (c in this@toAscii) {
+        append(
+            when (c) {
+                '\u00A0', '\u202F' -> ' '
+                '\u2212' -> '-'
+                '\u066A' -> '%'
+                else -> c
+            },
+        )
+    }
+}
 
 /**
  * Renders the decimal number written in [text] as grouped decimal text. See [formatDecimal].
@@ -112,7 +161,7 @@ internal fun formatDecimalText(
     val isZero = whole == "0" && fraction.all { it == '0' }
     return buildString {
         // Zero carries no sign, so a small negative that rounds away does not read as "-0".
-        if (negative && !isZero) append('-')
+        if (negative && !isZero) append(style.minus)
         val grouped = whole.length >= 3 + style.minimumGroupingDigits
         whole.forEachIndexed { index, digit ->
             val remaining = whole.length - index
@@ -147,7 +196,7 @@ private fun roundedMagnitude(value: Double, precision: Int): Double =
     formatDecimal(abs(value), precision, plainStyle).toDouble()
 
 /** Dot decimal and no grouping: the form that parses back to a number. */
-private val plainStyle = NumberStyle(decimal = ".", grouping = "")
+internal val plainStyle = NumberStyle(decimal = ".", grouping = "")
 
 /**
  * Picks which rung of a unit-prefix ladder to display [value] on.
@@ -176,62 +225,18 @@ internal fun prefixRungFor(
     return ladder[index]
 }
 
-// ── On-demand locale factory ──────────────────────────────────────────────────
-
-private fun numberStyleFor(tag: String): NumberStyle? = when (tag) {
-    // ── Region-specific overrides (checked before language fallback) ──────────
-    // South Africa: comma decimal, space grouping (ISO 31-0) e.g. "1 234,56"
-    "en-ZA"          -> NumberStyle(",", " ")
-    // India groups in lakhs and crores: "12,34,567.89"
-    "en-IN"          -> NumberStyle(".", ",", indian = true)
-    // Switzerland: all variants use apostrophe grouping
-    "fr-CH"          -> NumberStyle(",", "'")   // Swiss French:  "1'234,56"
-    "de-CH", "it-CH" -> NumberStyle(".", "'")   // Swiss German/Italian: "1'234.56"
-    // Portugal groups with a space and leaves four digits whole; Brazil, the "pt" default below,
-    // groups with a dot from four digits.
-    "pt-PT"          -> NumberStyle(",", " ", minimumGroupingDigits = 2)
-    // Spanish in the Americas: dot decimal in Mexico, Central America, the Caribbean, Peru and
-    // the United States; comma decimal, grouped from four digits, in most of South America.
-    "es-CU", "es-DO", "es-GT", "es-HN", "es-MX", "es-NI", "es-PA", "es-PE", "es-PR", "es-SV", "es-US" ->
-        NumberStyle(".", ",")
-    "es-AR", "es-BO", "es-CL", "es-CO", "es-EC", "es-PY", "es-UY", "es-VE" -> NumberStyle(",", ".")
-    "es-CR"          -> NumberStyle(",", " ")
-
-    // ── Language-level rules ──────────────────────────────────────────────────
-    // Comma decimal, Space grouping
-    "fr", "sv", "ru", "cs", "sk", "fi", "no", "nb", "nn",
-    "af", "kk", "lt", "uk", "uz" -> NumberStyle(",", " ")
-    // Comma decimal, Space grouping, four digits left whole
-    "pl", "hy", "be", "bg", "et", "hu", "ka", "lv", "sq" -> NumberStyle(",", " ", minimumGroupingDigits = 2)
-    // Comma decimal, Dot grouping
-    "de", "pt", "nl", "tr", "el", "ro",
-    "hr", "sr", "mk", "az",
-    "is", "gl", "ca", "da", "eu", "id", "vi" -> NumberStyle(",", ".")
-    // Comma decimal, Dot grouping, four digits left whole
-    "es", "it", "sl" -> NumberStyle(",", ".", minimumGroupingDigits = 2)
-    // Dot decimal, Indian grouping
-    "hi" -> NumberStyle(".", ",", indian = true)
-    // Dot decimal, Comma grouping (en, zh, ja, ko, th, ms, ar, fa, sw, …)
-    else -> null  // null = use dot/comma default at call site
-}
-
-/** Dot decimal, comma grouping: the style of English and of any language not listed. */
-private val defaultStyle = NumberStyle(decimal = ".", grouping = ",")
-
-@Volatile private var numberFormatterCache = emptyMap<Pair<String, Int>, NumberFormatter>()
+@Volatile private var numberFormatterCache = emptyMap<Triple<String, Int, Separators>, NumberFormatter>()
 
 /**
- * Resolves how [locale] writes a number. Walks the BCP 47 subtag chain ("en-ZA" → "en") and ends
- * at dot-decimal / comma-grouping.
+ * Resolves how [locale] writes a number, from the data generated from Unicode CLDR. Walks the
+ * locale's [lookupTags] ("fr-CA" → "fr") and ends at English, which is also how a language CLDR has
+ * no number data for reads.
  */
-internal fun numberStyleFor(locale: Locale): NumberStyle {
-    var currentTag: String =
-        if (locale.regionCode != null) "${locale.languageCode}-${locale.regionCode}" else locale.languageCode
-    while (currentTag.isNotEmpty()) {
-        numberStyleFor(currentTag)?.let { return it }
-        currentTag = currentTag.substringBeforeLast('-', "")
+internal fun numberStyleFor(locale: Locale, separators: Separators = Separators.Typographic): NumberStyle {
+    for (currentTag in lookupTags(locale)) {
+        cldrNumberStyles[currentTag]?.let { return it.with(separators) }
     }
-    return defaultStyle
+    return englishNumberStyle.with(separators)
 }
 
 /**
@@ -243,12 +248,14 @@ internal fun formatDecimalText(
     locale: Locale,
     precision: Int,
     fixedFraction: Boolean = false,
-): String = formatDecimalText(text, precision, numberStyleFor(locale), fixedFraction)
+    separators: Separators = Separators.Typographic,
+): String = formatDecimalText(text, precision, numberStyleFor(locale, separators), fixedFraction)
 
 /**
  * Retrieves the [NumberFormatter] for a given [Locale], building and caching it on first use.
- * Supports full BCP 47 subtag lookup (e.g. "en-ZA", "de-CH") before falling back to
- * the base language code, then to dot-decimal / comma-grouping as a final default.
+ * The separators and minus sign are those Unicode CLDR gives the locale, looked up by its full
+ * BCP 47 tag (e.g. "en-ZA", "de-CH"), then its language, then English as a final default. Spaces
+ * between groups are no-break spaces unless [separators] asks for [Separators.Ascii].
  *
  * The formatter rounds half away from zero to [precision] decimal places, trims trailing zeros,
  * and groups the whole part the way the locale does — in threes for most, from five digits up in
@@ -257,12 +264,16 @@ internal fun formatDecimalText(
  * digit out however large or small the value is, and it never throws: not-a-number renders as
  * `"NaN"` and the infinities as `"∞"` and `"-∞"`.
  */
-fun numberFormatterFor(locale: Locale, precision: Int = 1): NumberFormatter {
-    val fullTag = if (locale.regionCode != null) "${locale.languageCode}-${locale.regionCode}" else locale.languageCode
-    val cacheKey = fullTag to precision
+fun numberFormatterFor(
+    locale: Locale,
+    precision: Int = 1,
+    separators: Separators = Separators.Typographic,
+): NumberFormatter {
+    val fullTag = lookupKey(locale)
+    val cacheKey = Triple(fullTag, precision, separators)
     numberFormatterCache[cacheKey]?.let { return it }
 
-    val built = createSimpleFormatter(numberStyleFor(locale), precision)
+    val built = createSimpleFormatter(numberStyleFor(locale, separators), precision)
 
     val oldCache = numberFormatterCache
     if (!oldCache.containsKey(cacheKey)) {
@@ -275,3 +286,7 @@ fun numberFormatterFor(locale: Locale, precision: Int = 1): NumberFormatter {
     }
     return built
 }
+
+@Deprecated("Kept for binary compatibility.", level = DeprecationLevel.HIDDEN)
+fun numberFormatterFor(locale: Locale, precision: Int = 1): NumberFormatter =
+    numberFormatterFor(locale, precision, Separators.Typographic)

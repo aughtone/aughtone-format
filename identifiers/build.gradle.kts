@@ -44,6 +44,11 @@ kotlin {
         }
     }
 
+    // Native desktop, for command-line tools and native apps. macOS shares the Apple code with iOS.
+    macosArm64()
+    linuxX64()
+    linuxArm64()
+
     sourceSets {
         val commonMain by getting {
             dependencies {

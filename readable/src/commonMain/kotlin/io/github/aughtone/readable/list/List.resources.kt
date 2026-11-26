@@ -1,5 +1,6 @@
 package io.github.aughtone.readable.list
 
+import io.github.aughtone.readable.lookupTags
 import io.github.aughtone.types.locale.Locale
 
 /**
@@ -184,20 +185,14 @@ private val listPatterns: Map<String, Map<ListType, ListPatterns>> = mapOf(
     "zh" to mapOf(ListType.And to P87, ListType.Or to P88, ListType.Unit to P89),
 )
 /**
- * The [ListPatterns] for [locale] and [type], resolved with the same BCP-47
- * fallback the rest of the module uses: a region variant falls back to its
- * language, and anything without a bundled entry for the requested [type] falls
- * back to English. English carries every [ListType], so this always resolves.
+ * The [ListPatterns] for [locale] and [type], resolved through the locale's
+ * [lookupTags] as the rest of the module is: a region variant falls back to its
+ * language, a script decides before a region, and anything without a bundled entry
+ * for the requested [type] falls back to English. English carries every [ListType], so this always resolves.
  */
 internal fun listPatternsFor(locale: Locale, type: ListType): ListPatterns {
-    var tag = if (locale.regionCode != null) {
-        "${locale.languageCode}-${locale.regionCode}"
-    } else {
-        locale.languageCode
-    }
-    while (tag.isNotEmpty()) {
+    for (tag in lookupTags(locale)) {
         listPatterns[tag]?.get(type)?.let { return it }
-        tag = tag.substringBeforeLast('-', "")
     }
     return listPatterns.getValue("en").getValue(type)
 }

@@ -1,0 +1,19 @@
+# Human-Readable Formatting
+
+DOC-0003 · 2026-04-19
+Keywords: why 59.6 seconds is 1 minute, rounding thresholds, fuzzy durations, compass
+          directions, coordinate display, readable over precise
+
+See also [Ordinal Formatting](Specifications-DOC-0004-Ordinal-Formatting).
+
+## Human-Readable Philosophy
+The `:readable` module prioritizes human perception over mathematical precision.
+
+### 1. Duration Scaling & "Fuzzy" Thresholds
+- **Perceptual Grouping**: We scale to weeks between 7 and 21 days because "3 weeks" is more meaningful than "21 days".
+- **The Month Boundary**: We stay in "days" for values like **29 days** to avoid rounding to "4 weeks", which often feels like an "almost month" in human context.
+- **Immediate Precision**: We use exact thresholds (e.g., 60s -> 1m) but round fractional values to the nearest whole unit for clean UI display.
+
+### 2. Geospatial Clarity
+- **Visual Context**: Azimuths include **localized cardinal directions** (e.g., `(NW)`, `(SO)`, `(СЗ)`) because raw degrees are difficult for non-navigators to visualize. Support is maintained across 65+ core languages.
+- **Coordinate Simplicity**: We provide DD and DMS formats to balance modern GPS needs with traditional navigational standards.

@@ -5,6 +5,7 @@ import io.github.aughtone.types.locale.Locale
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
+import io.github.aughtone.toolbox.Separators
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -16,7 +17,8 @@ class LocalDateRangeTest {
         Locale(languageCode = language, regionCode = region, displayName = listOfNotNull(language, region).joinToString("-"))
 
     private val english = locale("en", "US")
-    private val dash = " – "
+    // CLDR's thin spaces, the one before the dash made no-break so a line never starts with it.
+    private val dash = "\u202F–\u2009"
     private val march3 = LocalDate(2024, 3, 3)
     private val march5 = LocalDate(2024, 3, 5)
     private val april2 = LocalDate(2024, 4, 2)
@@ -41,7 +43,9 @@ class LocalDateRangeTest {
         assertEquals("2024年3月3日${dash}4月2日", range(march3, april2, locale("zh")))
         assertEquals("2024년 3월 3일~5일", range(march3, march5, locale("ko")))
         assertEquals("3.–5. 3. 2024", range(march3, march5, locale("cs")))
-        assertEquals("3–5 марта 2024 г.", range(march3, march5, locale("ru")))
+        // Separators.Ascii, the default, writes CLDR's narrow no-break space before "г." as a plain space.
+        assertEquals("3–5 марта 2024 г.", range(march3, march5, locale("ru")))
+        assertEquals("3–5\u00A0марта\u00A02024\u202Fг.", march3.formatRange(march5, DateTimeStyle.Long, locale("ru"), separators = Separators.Typographic))
     }
 
     @Test

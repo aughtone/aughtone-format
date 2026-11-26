@@ -112,8 +112,8 @@ class DurationTest {
 
     @Test
     fun chineseScriptTagsUseTheirScriptsWords() {
-        val simplified = Locale(languageCode = "zh", regionCode = "Hans", displayName = "zh-Hans")
-        val traditional = Locale(languageCode = "zh", regionCode = "Hant", displayName = "zh-Hant")
+        val simplified = Locale(languageCode = "zh", scriptCode = "Hans", displayName = "zh-Hans")
+        val traditional = Locale(languageCode = "zh", scriptCode = "Hant", displayName = "zh-Hant")
         assertEquals("5小时", 5.hours.formatReadable(locale = simplified).replace(" ", ""))
         assertEquals("5小時", 5.hours.formatReadable(locale = traditional).replace(" ", ""))
     }

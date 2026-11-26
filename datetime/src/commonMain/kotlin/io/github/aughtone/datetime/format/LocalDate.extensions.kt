@@ -2,6 +2,7 @@
 
 package io.github.aughtone.datetime.format
 
+import io.github.aughtone.toolbox.Separators
 import io.github.aughtone.types.locale.Locale
 import io.github.aughtone.datetime.format.platform.MultiplatformDateFormatter
 import io.github.aughtone.datetime.format.resources.is24HourFormat
@@ -32,6 +33,9 @@ import io.github.aughtone.datetime.format.resources.values.EraNames
  * @param showEra [Boolean] Whether to follow the date with its era, the locale's abbreviation
  *   ("CE", "BCE") unless [eraNames] gives other words. Defaults to `false`.
  * @param eraNames [EraNames] Optional words for the eras; giving them also shows the era.
+ * @param separators [Separators] The spaces inside the value: [Separators.Ascii], the default,
+ *   writes every space as an ordinary one, U+0020, which a line can break at; [Separators.Typographic]
+ *   writes them as no-break spaces (U+00A0, and U+202F for a narrow one), so the value never wraps.
  * @return [String] The formatted date.
  */
 fun LocalDate.format(
@@ -42,7 +46,8 @@ fun LocalDate.format(
     numberingSystem: NumberingSystem? = null,
     showEra: Boolean = false,
     eraNames: EraNames? = null,
-): String = MultiplatformDateFormatter.formatDateTime(
+    separators: Separators = Separators.Ascii,
+): String = (MultiplatformDateFormatter.formatDateTime(
     // The date itself, at midnight: no trip through the zone, which would land on the next day
     // wherever local midnight does not exist (a skipped day, or a clock change at midnight).
     localDateTime = LocalDateTime(this, LocalTime(0, 0)),
@@ -55,7 +60,28 @@ fun LocalDate.format(
     numberingSystem = numberingSystem,
     instant = null,
     showEra = showEra,
-) ?: toString()
+) ?: toString()).withSeparators(separators)
+
+/** The 4.3 signature, kept so code compiled against it still links. */
+@Deprecated("Kept for binary compatibility.", level = DeprecationLevel.HIDDEN)
+fun LocalDate.format(
+    dateStyle: DateTimeStyle,
+    locale: Locale = Locale.current,
+    timeZone: TimeZone = TimeZone.currentSystemDefault(),
+    is24HourFormat: Boolean = is24HourFormat(locale = locale),
+    numberingSystem: NumberingSystem? = null,
+    showEra: Boolean = false,
+    eraNames: EraNames? = null,
+): String = format(
+    dateStyle = dateStyle,
+    locale = locale,
+    timeZone = timeZone,
+    is24HourFormat = is24HourFormat,
+    numberingSystem = numberingSystem,
+    showEra = showEra,
+    eraNames = eraNames,
+    separators = Separators.Ascii,
+)
 
 /** The 4.1 signature, kept so code compiled against it still links. */
 @Deprecated("Kept for binary compatibility.", level = DeprecationLevel.HIDDEN)

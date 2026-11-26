@@ -1,5 +1,6 @@
 package io.github.aughtone.readable.quantitative
 
+import io.github.aughtone.readable.lookupTags
 import io.github.aughtone.types.locale.Locale
 
 private val directionsMap = mapOf(
@@ -61,13 +62,9 @@ private val directionsMap = mapOf(
 )
 
 fun cardinalDirectionsFor(locale: Locale): List<String> {
-    val fullTag =
-        if (locale.regionCode != null) "${locale.languageCode}-${locale.regionCode}" else locale.languageCode
-    var currentTag = fullTag
-    while (currentTag.isNotEmpty()) {
+    for (currentTag in lookupTags(locale)) {
         val res = directionsMap[currentTag]
         if (res != null) return res
-        currentTag = currentTag.substringBeforeLast('-', "")
     }
     return directionsMap["en"]!!
 }

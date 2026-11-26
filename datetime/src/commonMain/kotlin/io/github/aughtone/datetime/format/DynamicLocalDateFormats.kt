@@ -47,12 +47,24 @@ internal object DynamicLocalDateFormats {
         )
     }
 
+    /**
+     * The weekday names for a pattern's stand-alone field (`c`): the locale's own table, which
+     * holds each name as a heading shows it, in lower case where CLDR writes the stand-alone name
+     * so ("perjantai" in a Finnish full date, where the table has "Perjantai").
+     */
+    internal fun getStandAloneDayOfWeekNamesResource(locale: Locale): DayOfWeekNamesResource {
+        val names = Resources.getDayOfWeekNamesResource(locale)
+        if (!Resources.getFieldFormats(locale).standAloneDaysLowerCase) return names
+        fun lowered(set: DayOfWeekNames) = DayOfWeekNames(set.names.map { name -> name.replaceFirstChar { it.lowercaseChar() } })
+        return DayOfWeekNamesData(full = lowered(names.full), abbreviated = lowered(names.abbreviated))
+    }
+
     fun short(locale: Locale, timeZone: TimeZone, twoDigitYearBase: Int = 2000): DateTimeFormat<LocalDate> {
         val patterns = getPatterns(locale)
         val dayOfWeekNames = getDayOfWeekNamesResource(locale)
         val monthNames = getMonthNamesResource(locale)
         return LocalDate.Format {
-            appendPattern(patterns.short, dayOfWeekNames, monthNames, twoDigitYearBase)
+            appendPattern(patterns.short, dayOfWeekNames, monthNames, twoDigitYearBase, getStandAloneDayOfWeekNamesResource(locale))
         }
     }
 
@@ -61,7 +73,7 @@ internal object DynamicLocalDateFormats {
         val dayOfWeekNames = getDayOfWeekNamesResource(locale)
         val monthNames = getMonthNamesResource(locale)
         return LocalDate.Format {
-            appendPattern(patterns.medium, dayOfWeekNames, monthNames, twoDigitYearBase)
+            appendPattern(patterns.medium, dayOfWeekNames, monthNames, twoDigitYearBase, getStandAloneDayOfWeekNamesResource(locale))
         }
     }
 
@@ -70,7 +82,7 @@ internal object DynamicLocalDateFormats {
         val dayOfWeekNames = getDayOfWeekNamesResource(locale)
         val monthNames = getMonthNamesResource(locale)
         return LocalDate.Format {
-            appendPattern(patterns.long, dayOfWeekNames, monthNames, twoDigitYearBase)
+            appendPattern(patterns.long, dayOfWeekNames, monthNames, twoDigitYearBase, getStandAloneDayOfWeekNamesResource(locale))
         }
     }
 
@@ -79,7 +91,7 @@ internal object DynamicLocalDateFormats {
         val dayOfWeekNames = getDayOfWeekNamesResource(locale)
         val monthNames = getMonthNamesResource(locale)
         return LocalDate.Format {
-            appendPattern(patterns.full, dayOfWeekNames, monthNames, twoDigitYearBase)
+            appendPattern(patterns.full, dayOfWeekNames, monthNames, twoDigitYearBase, getStandAloneDayOfWeekNamesResource(locale))
         }
     }
 }

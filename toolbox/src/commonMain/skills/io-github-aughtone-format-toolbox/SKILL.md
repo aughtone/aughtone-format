@@ -16,7 +16,7 @@ description: >-
   number with issuer grouping use io.github.aughtone:format-identifiers.
 license: Apache-2.0
 metadata:
-  version: "4.3.0"
+  version: "4.4.0"
   repository: https://github.com/aughtone/aughtone-format
 ---
 
@@ -31,10 +31,11 @@ The low-level pieces the other `aughtone-format` modules (and their callers) reu
 - Mask the trailing characters of a string for display — `"+1 (555) 123-4567".obfuscateLast(digitsOnly = true)` → `"•••••••4567"`.
 - Compute the bounding box of a GeoJSON geometry or feature, and merge boxes — `geometry.calculateBoundingBox()`, `boxA.merge(boxB)`.
 - Turn longitude/latitude into projected screen/SVG coordinates through the `GeoProjection` functional interface, with `WebMercatorProjection` and `EquirectangularProjection` provided.
+- Name which spaces and signs a formatter writes — `Separators.Typographic` or `Separators.Ascii` — the type the family's number, money, date, time and range formatters take as `separators`.
 
 It is a grab-bag of primitives, not a framework: reach here before writing decimal rounding, last-N masking, or projection/bbox arithmetic by hand.
 
-**Called from Kotlin only.** The library publishes Kotlin Multiplatform artifacts (common, JVM, Android, and iOS via Kotlin); there is no separate Swift or JavaScript API.
+**Called from Kotlin only.** The library publishes Kotlin Multiplatform artifacts (common, JVM, Android, iOS, macOS, Linux, JavaScript and Wasm); there is no separate Swift or JavaScript API.
 
 ## How it is meant to be used
 
@@ -71,6 +72,8 @@ val identity = GeoProjection { lon, lat -> lon to lat }
 **Projections flip the Y axis and are screen-space, not geodesic.** Both projections return Y increasing *downward* (SVG/screen convention), so a higher latitude gives a smaller Y. `WebMercatorProjection` normalizes to degree scale (`180/π`), **not** EPSG:3857 meters, so both X and Y run from −180 to 180. A latitude beyond about ±85.0511° — the limit every web map uses — is projected as that limit, so a polygon that reaches a pole stays finite. Symptom: a shape mirrored top-to-bottom, wrongly scaled for meters, or flattened along the top or bottom edge near a pole. In 4.1.0 and earlier latitude −90 projected to infinity.
 
 ## What moved, and what it used to be called
+
+**New in 4.4.0: `Separators`, in `io.github.aughtone.toolbox`.** An enum of `Typographic` and `Ascii`. No function in this module takes it: it is the type the formatters in `io.github.aughtone:format-readable` and `io.github.aughtone:format-datetime` take as `separators`, kept here so both share one. `Typographic` writes no-break spaces (U+00A0, U+202F) and the locale's own minus sign, so a value never wraps; `Ascii` writes U+0020 and `-`, for text a line may break at or that is compared as bytes. The default is the formatter's, not this type's: numbers, money and percentages default to `Typographic`, and dates, times and ranges to `Ascii`. Import it as `io.github.aughtone.toolbox.Separators`: it is not in the formatters' own packages.
 
 **Changed in 4.3.0: `kotlinx-serialization-json` no longer comes with this module.** It was an `api` dependency, so code could import `kotlinx.serialization.json` having declared only `io.github.aughtone:format-toolbox`; that import now fails to resolve unless the project declares `org.jetbrains.kotlinx:kotlinx-serialization-json` itself. Compose UI, Compose resources and, on Android, `androidx.startup` are gone from its runtime classpath too. So is the empty Compose resources class 4.2 published, `io.github.aughtone.format.toolbox.resources.Res`; nothing in it held data.
 

@@ -21,10 +21,9 @@ Pure agent instructions stay at the repo root (`AGENTS.md`,
 `WIRING.md`). Indexes and doc-system notes the agent maintains live at
 the `docs/` root. None of that syncs.
 
-**Everything under `docs/knowledge/` is published.** On a synced project
-that is a public wiki page or a KB article, on the next sync, without
-anyone approving it. Nothing else under `docs/` is - that distinction is
-what the directory is for.
+**Everything under `docs/knowledge/` is published.** On a synced project that is a wiki page or a KB article, on the next sync, without anyone approving it. Nothing else under `docs/` is - that distinction is what the directory is for.
+
+**Who can then read it is not the same question, and the tracker does not answer it.** A YouTrack KB is behind auth; a GitHub wiki inherits the repo's visibility, so on a public repo the same sentence means the open web. Publishing there is not reversible - a page deleted later was still readable, and anything cloned in between stays out. The binding says which model a project is in, and the GitHub sync states it on every run.
 
 An image a document needs lives **beside that document**, and is embedded by filename (`![Flow](checkout-flow.png)`). Both bindings carry it; how differs enough to matter, so read the binding before replacing one.
 
@@ -65,6 +64,24 @@ never a fresh `RAD-0001`. The identifier is the identity; the directory is
 only organisation. Wiki page names are flat and globally unique, so a
 restarted sequence collides.
 
+**The record types, and their prefixes.** These were convention rather than documentation for a long time, which meant a project filing its first specification had nothing to follow and coined its own - so the list is written down now.
+
+| Prefix | For | Authored by |
+|---|---|---|
+| `ADR-` | Decisions | `to-adr` |
+| `PRD-` | Requirements | `to-prd` |
+| `RAD-` | Research logs | `to-rad` |
+| `DOC-` | Documents | - |
+| `STRY-` | Stories | `to-issues` |
+
+**Numbering a living document is not a contradiction.** A specification or a guide is edited in place and never superseded, so it looks like it should not carry a sequence - but `DOC-` has always been numbered and always been maintained in place, and the identifier is doing a different job than a version. It gives the document a name that does not move when the title does. A record's title is fixed the day it is written; a living document's title drifts as its subject sharpens, and under a pure-title filename every retitle is a file rename, a wiki page rename and a dead inbound link. Stable identity matters more for the documents that get rewritten, not less.
+
+**A guide is a `DOC-` in `guides/`, and a specification is a `DOC-` in `specifications/`.** There is no separate prefix for either, because the directory already says what the document is *about* - and a prefix's job is to say how to *read* it. That is what `RAD-`, `ADR-` and `PRD-` do, and why they cannot collapse into each other: a research log may be inconclusive, a decision is settled, a requirement is normative, and two of them covering the same subject must still be read differently. A specification and an informational page are both descriptive prose maintained in place, so they share a prefix. `DOC-` is a single sequence across `documents/`, `guides/` and `specifications/` alike - numbering is per record type, not per directory.
+
+**Everything cited needs an identifier; almost nothing needs a new prefix.** Those are two different questions, and running them together is what produces record types nobody needed. If a story, a brief or a code comment will name the document, it needs an identifier - and `DOC-` *is* an identifier. A new **prefix** is earned only when the document has to be READ differently from every type above: a `RAD-` may be inconclusive, an `ADR-` is settled, a `PRD-` is normative, a `STRY-` carries a completion gate. If the honest answer is "it covers a different subject", that is what the directory is for, and the document is a `DOC-`.
+
+**Too many prefixes make a messy system, and they are not needed.** That is the whole reason the list is this short, and it outranks any individual case for adding one. Keep it short: the wiki sync recognises exactly these prefixes and nothing else, deliberately, because an extra spelling left in the source reads as permission to use it. A project that does earn a new type adds it here first, because adding the prefix later makes every existing reference to those documents wrong.
+
 `docs/design/` is a **companion tree to `docs/knowledge/`**, not a section
 inside it: design records plus the images that make them worth reading.
 It stays git-native because it is mostly not prose - mockups, exports, a
@@ -99,14 +116,14 @@ falls back to the directory stem, de-hyphenated and title-cased, so
 
 | Directory | Section title | What belongs there |
 |---|---|---|
-| `decisions/` | Architecture Decision Records | One hard-to-reverse choice each; append-only history |
+| `decisions/` | Architecture Decision Records | One hard-to-reverse choice each. The *decision* is append-only - reversing it takes a new record that supersedes this one - while the document around it is maintained: a fact that was wrong, or a name that has since changed, is corrected in place |
 | `requirements/` | Product Requirements | PRD narratives + Stories tables of tracker IDs (never AC) |
-| `specifications/` | Specifications | How a thing IS - architecture, component specs; update in place |
+| `specifications/` | Specifications | How a thing IS - architecture, component specs; update in place. May be **binding**: where the project says so, code contradicting a specification is a bug in the code, not a stale document. The section's `README.md` is where that is declared. Numbered `DOC-`, sharing the sequence with `documents/` |
 | `research/` | Research | Investigations - question, trail, findings. Postmortems and worked case studies are kinds of investigation and belong here, as files or as a sub-group if there are enough to warrant one |
-| `reference/` | Reference | External facts: vendors, prospects, regulations, domain material - and the **Domain Glossary** (the project's canonical terms; `AGENTS.md` at the repo root points at it so agents find it without a path) |
-| `guides/` | Developer Guides | How-to - onboarding, environment, CI |
-| `testing/` | Quality Assurance | Durable test plans and protocols (QA *runs* are issues) |
-| `compliance/` | Mandates & Compliance | Legal/regulatory rules the work must satisfy |
+| `reference/` | Reference | External facts: vendors, prospects, domain material - and the **Domain Glossary** (the project's canonical terms; `AGENTS.md` at the repo root points at it so agents find it without a path) |
+| `guides/` | Developer Guides | How-to - onboarding, environment, CI. Numbered `DOC-`, sharing the sequence with `documents/` |
+| `testing/` | Quality Assurance | Durable feature test plans - a folder per feature, its README the index, one article per sequence. A *run* is a tracker record where the project has a tracker wired, and never a document either way |
+| `compliance/` | Mandates & Compliance | Legal/regulatory rules the work must satisfy, and the project's mapping of each one onto what the code does. **Regulations live here, not in `reference/`** - they are not external facts kept close, they are rules with consequences, and a reader looking for what binds the project looks in one place. A `regulations/` directory is the same section under an older name: the installer's KB migration renames it onto `compliance/` |
 | `support/` | Support | Support knowledge, runbooks, customer-facing material |
 | `documents/` | Documents | Informational pages that explain the project - what it is, why it exists, how the pieces relate. Numbered `DOC-0001-…`, and maintained in place rather than dated and closed. Also the honest home for a KB document that fits no other section |
 
@@ -187,10 +204,14 @@ carry the correction outward.
 Not everything needs replicating. A thing that changes nothing for anyone
 outside engineering has one version, in PD, and that is the normal case.
 
+**This is for a tree already organised by audience, where somebody owns each tier.** It is not a licence to pair every requirement with a brief. A one-off restatement for a particular reader is not a replica: it is a short summary in the conversation, or an artifact in `docs/outbox/` if it has to be sent - see `to-prd`. A second document authored beside the first, which nobody owns and nobody reads, is how two sources of truth start.
+
 ## Distinctions that matter
 
 - **spec vs adr**: a spec describes how a thing IS; an ADR records why a
-  choice was made. Specs update in place; ADRs are append-only.
+  choice was made. Specs update in place; an ADR's *decision* is append-only
+  - a reversal is a new record that supersedes it - while the document around
+  it is corrected in place like any other.
 - **research vs reference**: research is your investigation (trail and
   conclusion); reference is someone else's facts kept close.
 - **vendors vs prospects** (both under Reference): a vendor you use or
@@ -199,10 +220,7 @@ outside engineering has one version, in PD, and that is the normal case.
   vendors when they become active.
 - **Quality Assurance vs story QA**: per-story Gherkin lives in the
   story's `## QA` section; the KB section holds what spans stories.
-- **Mandate vs procedure**: the rule ("PIPEDA requires consent") and the
-  project's response ("how we check for it") are separate documents that
-  cite each other. Both live in the KB; they just sit in different
-  sections with different audiences.
+- **Mandate vs mapping vs procedure**: three documents, not one. The *rule* ("PIPEDA 4.3 requires consent") and the project's *mapping* of it onto the code ("consent is captured at signup, stored in `consents`, withdrawable from settings") both live in `compliance/` - an auditor reads them together, and a mapping filed away from the rule it maps is a register nobody finds. The *procedure* ("how to run the consent audit") is a how-to and belongs in `guides/`. All three cite each other.
 
 ## No status frontmatter
 

@@ -4,7 +4,9 @@ import io.github.aughtone.datetime.format.platform.MultiplatformPostFormatter
 import io.github.aughtone.datetime.format.resources.NumberingSystem
 import io.github.aughtone.datetime.format.resources.Resources
 import io.github.aughtone.datetime.format.resources.formats.FieldFormats
+import io.github.aughtone.datetime.format.resources.formats.IntervalFormats
 import io.github.aughtone.toolbox.InternalAughtoneFormatApi
+import io.github.aughtone.toolbox.Separators
 import io.github.aughtone.types.locale.Locale
 import kotlinx.datetime.isoDayNumber
 import kotlinx.datetime.number
@@ -387,7 +389,8 @@ internal fun fieldPattern(skeleton: String, locale: Locale): String {
  *
  * Month and weekday names take the form the language uses inside a date, or the stand-alone form
  * where CLDR's pattern asks for it, in lower case where CLDR writes it so ("июнь 2024 г."); digits
- * follow [numberingSystem], or the locale's default.
+ * follow [numberingSystem], or the locale's default. [separators] decides the spaces: ordinary
+ * spaces for [Separators.Ascii], no-break ones for [Separators.Typographic].
  *
  * @throws IllegalArgumentException if [skeleton] is not a skeleton of those fields, or names a
  *   field whose value is not given: a date field without [date], a time field without [time], or a
@@ -402,6 +405,7 @@ fun formatFieldsSkeleton(
     timeZone: TimeZone? = null,
     instant: Instant? = null,
     numberingSystem: NumberingSystem? = null,
+    separators: Separators = Separators.Ascii,
 ): String {
     val request = parseRequest(skeleton)
     for (kind in request.keys) {
@@ -415,8 +419,21 @@ fun formatFieldsSkeleton(
     val withEra = if (date != null && date.year <= 0 && FieldKind.Year in request && FieldKind.Era !in request) "G$skeleton" else skeleton
     val pattern = fieldPattern(withEra, locale)
     val text = renderFieldPattern(pattern, locale, date, time, timeZone, instant)
-    return MultiplatformPostFormatter.applyNumberingSystem(text, locale, numberingSystem)
+    return MultiplatformPostFormatter.applyNumberingSystem(text, locale, numberingSystem).withSeparators(separators)
 }
+
+/** The 4.3 signature, kept so a 4.3 readable module still links against this one. */
+@InternalAughtoneFormatApi
+@Deprecated("Kept for binary compatibility.", level = DeprecationLevel.HIDDEN)
+fun formatFieldsSkeleton(
+    skeleton: String,
+    locale: Locale,
+    date: LocalDate? = null,
+    time: LocalTime? = null,
+    timeZone: TimeZone? = null,
+    instant: Instant? = null,
+    numberingSystem: NumberingSystem? = null,
+): String = formatFieldsSkeleton(skeleton, locale, date, time, timeZone, instant, numberingSystem, Separators.Ascii)
 
 /** Writes the fields of a CLDR [pattern] from these values, in Latin digits. */
 internal fun renderFieldPattern(
@@ -507,4 +524,275 @@ private fun renderField(
         'v' -> timeZone!!.genericDisplayName(if (count >= 4) TextWidth.Full else TextWidth.Abbreviated, locale)
         else -> ""
     }
+}
+
+// ── Ranges of chosen fields ──────────────────────────────────────────────────
+//
+// A range of a chosen set of fields follows ICU's DateIntervalFormat, the reference
+// implementation of CLDR's interval formats (UTS #35, Dates, "Interval Formats"): the greatest
+// field that differs between the two ends picks the interval pattern of the nearest published
+// skeleton, which writes what both ends share once. A difference only in fields smaller than any
+// shown is not shown, and the ends are written as one. A difference in a field larger than any
+// shown adds that field to both ends ("Jun 1, 2026 – Jun 1, 2027" for a month and a day,
+// "Jun 2026 – Jun 2027" for a month). Where
+// no pattern fits, two complete values are joined with the locale's fallback.
+
+/**
+ * The calendar fields a range compares, in ICU's order from the largest. [size] orders them: a
+ * larger field has a larger size.
+ */
+private enum class RangeField(val kind: FieldKind, val size: Int) {
+    Era(FieldKind.Era, 8), Year(FieldKind.Year, 7), Month(FieldKind.Month, 6), Day(FieldKind.Day, 5),
+    DayPeriod(FieldKind.DayPeriod, 4), Hour(FieldKind.Hour, 3), Minute(FieldKind.Minute, 2), Second(FieldKind.Second, 1),
+}
+
+/** The range field a skeleton field counts as; a weekday counts as its day, as in ICU. */
+private fun rangeFieldOf(kind: FieldKind): RangeField? = when (kind) {
+    FieldKind.Weekday -> RangeField.Day
+    FieldKind.Zone -> null
+    else -> RangeField.entries.first { it.kind == kind }
+}
+
+/** One end of a range: the values its fields are written from. */
+private class RangeEnd(val date: LocalDate?, val time: LocalTime?, val instant: Instant?)
+
+/** The largest field that differs between [start] and [end], or `null` when they agree to the second. */
+private fun largestDifference(start: RangeEnd, end: RangeEnd): RangeField? {
+    val a = start.date
+    val b = end.date
+    if (a != null && b != null) {
+        if ((a.year <= 0) != (b.year <= 0)) return RangeField.Era
+        if (a.year != b.year) return RangeField.Year
+        if (a.month != b.month) return RangeField.Month
+        if (a.day != b.day) return RangeField.Day
+    }
+    val s = start.time
+    val e = end.time
+    if (s != null && e != null) {
+        if ((s.hour < 12) != (e.hour < 12)) return RangeField.DayPeriod
+        if (s.hour != e.hour) return RangeField.Hour
+        if (s.minute != e.minute) return RangeField.Minute
+        if (s.second != e.second) return RangeField.Second
+    }
+    return null
+}
+
+/** The letters of a skeleton and how many times each is written, as ICU compares interval skeletons. */
+private fun letterWidths(skeleton: String): Map<Char, Int> = buildMap {
+    for (letter in skeleton) {
+        // ICU reads a specific zone as a generic one, and the other hour letters as h and H.
+        val read = when (letter) { 'z' -> 'v'; 'k' -> 'H'; 'K' -> 'h'; 'L' -> 'M'; 'c' -> 'E'; else -> letter }
+        this[read] = (this[read] ?: 0) + 1
+    }
+}
+
+/**
+ * The interval skeleton nearest to [skeleton] among [published], as ICU's
+ * `DateIntervalInfo::getBestSkeleton` chooses it, and whether it has the same fields: `null` when
+ * the nearest has fields of its own or lacks one of [skeleton]'s, which ICU does not use.
+ */
+private fun bestIntervalSkeleton(skeleton: String, published: Collection<String>): String? {
+    val wanted = letterWidths(skeleton)
+    var best: String? = null
+    var bestDistance = Int.MAX_VALUE
+    var bestSameFields = false
+    for (candidate in published) {
+        val offered = letterWidths(candidate)
+        var distance = 0
+        var sameFields = true
+        for (letter in wanted.keys + offered.keys) {
+            val w = wanted[letter] ?: 0
+            val o = offered[letter] ?: 0
+            when {
+                w == o -> Unit
+                w == 0 || o == 0 -> { distance += 0x1000; sameFields = false }
+                letter == 'M' && (w <= 2) != (o <= 2) -> distance += 0x100
+                else -> distance += abs(w - o)
+            }
+        }
+        if (distance < bestDistance) {
+            best = candidate
+            bestDistance = distance
+            bestSameFields = sameFields
+            if (distance == 0) break
+        }
+    }
+    return best?.takeIf { bestSameFields }
+}
+
+/** [tokens] written back as a pattern, with literals quoted. */
+private fun patternOf(tokens: List<PatternToken>): String = tokens.joinToString("") { token ->
+    when (token) {
+        is PatternToken.Literal -> quoted(token.text)
+        is PatternToken.Field -> token.letter.toString().repeat(token.count)
+    }
+}
+
+/** [request] with [kinds] added in their narrowest numeric form, as ICU extends a skeleton. */
+private fun Skeleton.with(vararg kinds: FieldKind): Skeleton {
+    val fields = LinkedHashMap(this)
+    for (kind in kinds) if (kind !in fields) fields[kind] = SkeletonField(LETTER_OF.getValue(kind), 1)
+    return fields
+}
+
+private val LETTER_OF = mapOf(FieldKind.Era to 'G', FieldKind.Year to 'y', FieldKind.Month to 'M', FieldKind.Day to 'd')
+
+/** [skeleton] as the interval data's key: in field order, the AM/PM marker left out. */
+private fun intervalKeyOf(skeleton: Skeleton): String = keyOf(skeleton)
+
+/**
+ * The interval pattern for [request]'s fields when [field] is the largest that differs, adjusted to
+ * the requested widths, or `null` when the locale publishes none that fits. A larger date field
+ * the request lacks is added, as ICU adds it: a year that differs on a month and a day finds the
+ * year's pattern of the month, day and year skeleton, and on a month alone that of the month and
+ * year skeleton. A month is added only between a day and a year, so a range of years stays one.
+ */
+private fun intervalPattern(request: Skeleton, field: RangeField, formats: IntervalFormats): String? {
+    val published = formats.patterns
+    var best = bestIntervalSkeleton(intervalKeyOf(request), published.keys) ?: return null
+    var extended = request
+    val showsDay = FieldKind.Day in request || FieldKind.Weekday in request
+    fun extend(kind: FieldKind, letter: Char) {
+        if (kind in extended || published[best]?.get(letter) != null) return
+        val key = letter + best
+        val found = if (published[key]?.get(letter) != null) key else bestIntervalSkeleton(intervalKeyOf(extended.with(kind)), published.keys)
+        if (found != null && published[found]?.get(letter) != null) {
+            best = found
+            extended = extended.with(kind)
+        }
+    }
+    when (field) {
+        RangeField.Month -> extend(FieldKind.Month, 'M')
+        // A month is added between a day and a year, never to a year on its own.
+        RangeField.Year -> { if (showsDay) extend(FieldKind.Month, 'M'); extend(FieldKind.Year, 'y') }
+        RangeField.Era -> { if (showsDay) extend(FieldKind.Month, 'M'); extend(FieldKind.Year, 'y'); extend(FieldKind.Era, 'G') }
+        else -> Unit
+    }
+    val byField = published[best] ?: return null
+    val hourLetter = request[FieldKind.Hour]?.letter?.let { if (it in "hK") 'h' else 'H' } ?: 'h'
+    val pattern = when (field) {
+        RangeField.Era -> byField['G']
+        RangeField.Year -> byField['y']
+        RangeField.Month -> byField['M']
+        RangeField.Day -> byField['d']
+        // A 24-hour skeleton has no AM/PM pattern; a change of AM/PM is a change of hour there.
+        RangeField.DayPeriod -> byField['a'] ?: byField[hourLetter]
+        RangeField.Hour -> byField[hourLetter]
+        RangeField.Minute -> byField['m']
+        RangeField.Second -> null
+    } ?: return null
+    val publishedSkeleton = parseSkeleton(best) ?: return null
+    return adjust(pattern, publishedSkeleton, extended)
+}
+
+/**
+ * Writes the range from [start] to [end] by [request]'s fields in [locale], with the range's own
+ * separator marked for [finishRange].
+ */
+private fun formatFieldsRange(
+    request: Skeleton,
+    locale: Locale,
+    start: RangeEnd,
+    end: RangeEnd,
+    timeZone: TimeZone?,
+): String {
+    val formats = Resources.getFieldFormats(locale)
+    fun render(pattern: String, at: RangeEnd) = renderFieldPattern(pattern, locale, at.date, at.time, timeZone, at.instant)
+    fun single(skeleton: Skeleton, at: RangeEnd) = render(bestPattern(skeleton, formats), at)
+    fun fallback(skeleton: Skeleton) =
+        fillIntervalFallback(intervalFallbackFor(locale), single(skeleton, start), single(skeleton, end))
+    fun interval(pattern: String): String? {
+        val halves = splitIntervalTokens(tokenizePattern(pattern)) ?: return null
+        return render(patternOf(halves.first.withMarkedSeparator()), start) + render(patternOf(halves.second), end)
+    }
+
+    val field = largestDifference(start, end) ?: return single(request, start)
+    val shown = request.keys.mapNotNull(::rangeFieldOf)
+    // A difference only in fields smaller than any shown does not show.
+    if (shown.isEmpty() || field.size < shown.minOf { it.size }) return single(request, start)
+    // A date before year 1 is written as two complete dates, each with its era.
+    if ((start.date?.year ?: 1) <= 0 || (end.date?.year ?: 1) <= 0) return fallback(request.with(FieldKind.Era))
+
+    val intervals = Resources.getIntervalFormats(locale) ?: return fallback(request)
+    val dateKinds = request.keys.filter { it.isDate }
+    val timeKinds = request.keys.filterNot { it.isDate }
+    val dateField = field.kind.isDate
+    return when {
+        timeKinds.isEmpty() || dateKinds.isEmpty() && !dateField -> {
+            intervalPattern(request, field, intervals)?.let(::interval) ?: fallback(request)
+        }
+        dateKinds.isEmpty() -> {
+            // Times on different days: each end in full, with a short date, as ICU writes them.
+            fallback(request.with(FieldKind.Year, FieldKind.Month, FieldKind.Day))
+        }
+        dateField -> {
+            // Different days: each end in full, with every date field down to the one that differs.
+            val added = buildList {
+                add(FieldKind.Day)
+                if (field.size >= RangeField.Month.size) add(FieldKind.Month)
+                if (field.size >= RangeField.Year.size) add(FieldKind.Year)
+            }
+            fallback(request.with(*added.toTypedArray()))
+        }
+        else -> {
+            // One day: the date once, then the range of times, joined by the locale's medium
+            // date-time pattern, as ICU joins them in a range.
+            val dateRequest = request.filterKeys { it.isDate }
+            val timeRequest = request.filterKeys { !it.isDate }
+            val datePattern = bestPattern(dateRequest, formats)
+            val join = intervals.dateTimeJoin
+            val timeInterval = intervalPattern(timeRequest, field, intervals)
+            if (timeInterval != null) {
+                interval(fill(join, timeInterval, datePattern)) ?: fallback(request)
+            } else {
+                val times = fillIntervalFallback(intervalFallbackFor(locale), single(timeRequest, start), single(timeRequest, end))
+                render(fill(join, TIME_RANGE_SLOT.toString(), datePattern), start).replace(TIME_RANGE_SLOT.toString(), times)
+            }
+        }
+    }
+}
+
+/** Stands in a date-time pattern for a range of times rendered on its own. */
+private const val TIME_RANGE_SLOT = ''
+
+/**
+ * Writes the range from one date and time to another by [skeleton]'s fields, laid out as [locale]
+ * writes a range of that set of fields: what both ends share is written once.
+ *
+ * This is the engine behind `formatReadableFieldsRange` in `aughtone-format`'s readable module; it
+ * is public only so that module can reach it. The skeleton and the values are as
+ * [formatFieldsSkeleton] takes them, one set for each end. [separators] decides the spaces inside
+ * each end and [noBreak] whether the space after the range's dash can break; the space before it
+ * never does.
+ *
+ * @throws IllegalArgumentException as [formatFieldsSkeleton] does, for either end.
+ */
+@InternalAughtoneFormatApi
+fun formatFieldsRangeSkeleton(
+    skeleton: String,
+    locale: Locale,
+    startDate: LocalDate? = null,
+    startTime: LocalTime? = null,
+    endDate: LocalDate? = null,
+    endTime: LocalTime? = null,
+    timeZone: TimeZone? = null,
+    startInstant: Instant? = null,
+    endInstant: Instant? = null,
+    numberingSystem: NumberingSystem? = null,
+    separators: Separators = Separators.Ascii,
+    noBreak: Boolean = false,
+): String {
+    val request = parseRequest(skeleton)
+    for (kind in request.keys) {
+        when {
+            kind.isDate && (startDate == null || endDate == null) -> throw IllegalArgumentException("The ${kind.fieldName} needs a date")
+            kind == FieldKind.Zone && (timeZone == null || startInstant == null || endInstant == null) ->
+                throw IllegalArgumentException("The zone needs a time zone and an instant")
+            !kind.isDate && kind != FieldKind.Zone && (startTime == null || endTime == null) -> throw IllegalArgumentException("The ${kind.fieldName} needs a time")
+        }
+    }
+    val text = formatFieldsRange(
+        request, locale, RangeEnd(startDate, startTime, startInstant), RangeEnd(endDate, endTime, endInstant), timeZone,
+    )
+    return finishRange(MultiplatformPostFormatter.applyNumberingSystem(text, locale, numberingSystem), separators, noBreak)
 }

@@ -35,3 +35,5 @@ The notation formatters are pure, table-free transforms with no external depende
 | Phone number | `String.formatPhone` | `International` (default), `National`, `Rfc3966` |
 
 `formatPhone` is the one formatter that takes a dependency — `aughtone-phonenumber`, for per-country grouping metadata — because national/international grouping is not derivable from E.164 alone. That metadata is dead-code-eliminated for consumers who never format a phone.
+
+By default `formatPhone` groups with a no-break space (U+00A0) and a non-breaking hyphen (U+2011), so a number never wraps mid-number in a paragraph, a table cell or a chat bubble; `separators = PhoneSeparators.Ascii` gives the plain space and hyphen for text that is compared or processed as bytes. `Rfc3966` is a URI and keeps its ASCII hyphens.
