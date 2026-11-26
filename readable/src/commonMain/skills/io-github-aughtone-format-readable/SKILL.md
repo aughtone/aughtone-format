@@ -2,18 +2,19 @@
 name: io-github-aughtone-format-readable
 description: >-
   The human-readable-text member of the aughtone-format family, for Kotlin
-  Multiplatform. Show how long ago something happened or how soon it will
-  ("8 minutes ago", "in 3 days", "yesterday", time ago); a duration in words
-  ("2 hours", "1 week"); a date or time with only the fields you choose, laid out
-  as the locale does ("Jun 1", "1. Juni", "Sat 4 PM", "June 2024", a month and
-  day without the year); file sizes (KiB/MiB/GiB); distances, speeds and other
-  metric units ("1.5 km"); numbers with thousands separators or as compact
-  numbers ("1.5K", "1,5 Mio.", "150万"); percentages ("25%"); ordinals ("1st"); money ("$1,234.56", "1 234,56 €");
-  latitude/longitude in decimal degrees or DMS; a compass bearing ("225° (SW)");
-  a time zone's name; and a list joined with "and" or "or". Localized with plural
-  rules. Output is prose, never a value to parse back. For styled dates
-  ("Jan 12, 1952") use io.github.aughtone:format-datetime; for exact identifier
-  notation (masked cards, IBAN, IP) use io.github.aughtone:format-identifiers.
+  Multiplatform. Show how long ago something happened or how soon it will ("8
+  minutes ago", "in 3 days", "yesterday"); a duration in words ("2 hours", "1
+  week"), or read one from text ("10s", "1h 30m"); a date or time with only the
+  fields you choose, laid out as the locale does ("Jun 1", "1. Juni", "June
+  2024", a month and day without the year); file sizes (KiB/MiB); distances,
+  speeds and metric units ("1.5 km"); numbers with thousands separators or as
+  compact numbers ("1.5K", "150万"); percentages ("25%"); ordinals ("1st"); money
+  ("$1,234.56", "1 234,56 €"); latitude/longitude in decimal degrees or DMS; a
+  compass bearing ("225° (SW)"); a time zone's name; and a list joined with
+  "and" or "or". Localized with plural rules. Output is prose, never a value to
+  parse back. For styled dates ("Jan 12, 1952") use
+  io.github.aughtone:format-datetime; for exact identifier notation (masked
+  cards, IBAN, IP) use io.github.aughtone:format-identifiers.
 license: Apache-2.0
 metadata:
   version: "4.4.0"
@@ -49,6 +50,7 @@ Almost everything is an extension named `formatReadable…`, and nearly every fo
 ```kotlin
 import io.github.aughtone.readable.Locales
 import io.github.aughtone.readable.duration.formatReadable
+import io.github.aughtone.readable.duration.parseReadableOrNull
 import io.github.aughtone.readable.financial.CurrencySymbol
 import io.github.aughtone.readable.financial.formatReadable
 import io.github.aughtone.readable.list.formatReadableList
@@ -64,6 +66,7 @@ import io.github.aughtone.types.financial.Money
 import io.github.aughtone.types.quantitative.Distance
 import io.github.aughtone.types.units.UnitOfMeasure
 import kotlin.time.Clock
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.minutes
 
@@ -71,6 +74,7 @@ val usd = Currency(code = "USD", number = 840, digits = 2, name = "US Dollar", s
 val cad = Currency(code = "CAD", number = 124, digits = 2, name = "Canadian Dollar", symbol = "$")
 
 7.days.formatReadable(locale = Locales.English)                 // "1 week"
+Duration.parseReadableOrNull("1h 30m")                          // 90 minutes; null for text it cannot read
 1500.0.formatReadableAbbreviated(Locales.English)               // "1.5K": the locale's compact form
 1234.56.formatReadable(Locales.English, precision = 1)          // "1,234.6"
 0.256.formatReadablePercent(Locales.English)                     // "26%": a fraction, to no decimal places by default
@@ -167,6 +171,8 @@ The `geo`/`quantitative` families split by package: `Coordinates` extensions are
 
 **New in 4.4.0: `Separators` lives in `io.github.aughtone.toolbox`,** shared with `format-datetime`'s ranges. Numbers default to `Separators.Typographic`; dates, times and ranges to `Separators.Ascii`.
 
+**New in 4.4.0: `Duration.parseReadable`, in `io.github.aughtone.readable.duration`,** the one thing here that reads text. It reads a number and a unit, or several — `"10s"`, `"250ms"`, `"5 minutes"`, `"1h 30m"`, `"1.5h"`, `"-5s"` — into a `kotlin.time.Duration`, for a configuration value, a command-line option or a settings field. Four entry points, all extensions on `Duration.Companion`, so each needs its own import: `Duration.parseReadable(text)` throws `IllegalArgumentException`, `parseReadableOrNull(text)` returns `null`, `parseReadableOrElse(text) { failure -> … }` returns the fallback, and `parseReadableWithOutcome(text)` returns `DurationParseOutcome.Parsed(duration)` or `Failed(reason, position)` with a `DurationParseFailure` (`Empty`, `MissingNumber`, `MissingUnit`, `UnknownUnit`, `RepeatedUnit`, `OutOfRange`). The units are English words and abbreviations in any letter case, from `ns` to `years`; `m` is a minute and `mo` a month; a week is 7 days, a month 30 and a year 365, the lengths `formatReadable` scales by. **It is not locale-aware,** so it reads what `formatReadable` writes in English and nothing it writes in another language, and a bare number such as `"10"` is a failure, not seconds or milliseconds. What it reads back is the rounded value the text shows: `90.minutes.formatReadable()` is `"2 hours"`, which reads as two hours. Symptom of using stdlib `Duration.parse` for this: `"5 minutes"` and `"10 secs"` are refused, because it takes only Kotlin's own short units and ISO-8601.
+
 **New in 4.4.0: `formatReadablePercent`, in `io.github.aughtone.readable.number`.** Earlier versions had no percent formatting, so code written for them appends `"%"` to a formatted number, which is wrong wherever the sign is spaced (French, German, Swedish) or comes first (Turkish, Basque).
 
 **New in 4.3.0: Canadian Indigenous locales are found, and written in English.** `localeFor` now returns locales for Cree, Ojibwe, Mi'kmaq, Mohawk and 21 more (`cr-CA`, `hur-CA`, `atj-CA`, …). This library has no text in those languages, so they format in English, the same text as before they were found — do not read a non-null locale as a sign its output is in that language. Inuktitut (`iu`) is the one with its own text.
@@ -230,6 +236,6 @@ The legacy `toReadableRelative` overloads carry a stronger warning: they never f
 
 ## What it is not for
 
-- **Not canonical or machine-parseable output.** Everything here rounds, trims, and localizes; you cannot parse it back to the original value. For exact, round-trippable identifier notation use `io.github.aughtone:format-identifiers`.
+- **Not canonical or machine-parseable output.** Everything here rounds, trims, and localizes; you cannot parse it back to the original value. `Duration.parseReadable` reads duration text in English only, and gives the rounded value the text shows. For exact, round-trippable identifier notation use `io.github.aughtone:format-identifiers`.
 - **Not styled or fixed-layout date formatting.** The four styles (Short/Medium/Long/Full) are in `io.github.aughtone:format-datetime`; a layout fixed in every language is kotlinx-datetime's `Format { }`. This module writes relative phrasing, and dates with chosen fields laid out by the locale.
 - **Not a full CLDR/ICU localization engine.** The plural, ordinal, and unit rules are simplified and English-backstopped; do not rely on it for exhaustive per-language correctness.

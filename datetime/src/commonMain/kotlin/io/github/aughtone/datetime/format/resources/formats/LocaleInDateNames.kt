@@ -38,10 +38,14 @@ internal val localeInDateNames: Map<String, InDateNames> = mapOf(
     "fi" to InDateNames(
         monthsFull = listOf("tammikuuta", "helmikuuta", "maaliskuuta", "huhtikuuta", "toukokuuta", "kesäkuuta", "heinäkuuta", "elokuuta", "syyskuuta", "lokakuuta", "marraskuuta", "joulukuuta"),
         monthsAbbreviated = listOf("tammi", "helmi", "maalis", "huhti", "touko", "kesä", "heinä", "elo", "syys", "loka", "marras", "joulu"),
+        daysFull = listOf("maanantaina", "tiistaina", "keskiviikkona", "torstaina", "perjantaina", "lauantaina", "sunnuntaina"),
+        daysAbbreviated = listOf("ma", "ti", "ke", "to", "pe", "la", "su"),
     ),
     "fr" to InDateNames(
         monthsFull = listOf("janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"),
         monthsAbbreviated = listOf("janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."),
+        daysFull = listOf("lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"),
+        daysAbbreviated = listOf("lun.", "mar.", "mer.", "jeu.", "ven.", "sam.", "dim."),
     ),
     "it" to InDateNames(
         monthsFull = listOf("gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"),
@@ -61,14 +65,20 @@ internal val localeInDateNames: Map<String, InDateNames> = mapOf(
     "pt" to InDateNames(
         monthsFull = listOf("janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"),
         monthsAbbreviated = listOf("jan.", "fev.", "mar.", "abr.", "mai.", "jun.", "jul.", "ago.", "set.", "out.", "nov.", "dez."),
+        daysFull = listOf("segunda-feira", "terça-feira", "quarta-feira", "quinta-feira", "sexta-feira", "sábado", "domingo"),
+        daysAbbreviated = listOf("seg.", "ter.", "qua.", "qui.", "sex.", "sáb.", "dom."),
     ),
     "ru" to InDateNames(
         monthsFull = listOf("января", "февраля", "марта", "апреля", "мая", "июня", "июля", "августа", "сентября", "октября", "ноября", "декабря"),
         monthsAbbreviated = listOf("янв.", "февр.", "мар.", "апр.", "мая", "июн.", "июл.", "авг.", "сент.", "окт.", "нояб.", "дек."),
+        daysFull = listOf("понедельник", "вторник", "среда", "четверг", "пятница", "суббота", "воскресенье"),
+        daysAbbreviated = listOf("пн", "вт", "ср", "чт", "пт", "сб", "вс"),
     ),
     "uk" to InDateNames(
         monthsFull = listOf("січня", "лютого", "березня", "квітня", "травня", "червня", "липня", "серпня", "вересня", "жовтня", "листопада", "грудня"),
         monthsAbbreviated = listOf("січ.", "лют.", "бер.", "квіт.", "трав.", "черв.", "лип.", "серп.", "вер.", "жовт.", "лист.", "груд."),
+        daysFull = listOf("понеділок", "вівторок", "середа", "четвер", "пʼятниця", "субота", "неділя"),
+        daysAbbreviated = listOf("пн", "вт", "ср", "чт", "пт", "сб", "нд"),
     ),
     "uz" to InDateNames(
         monthsFull = listOf("yanvar", "fevral", "mart", "aprel", "may", "iyun", "iyul", "avgust", "sentabr", "oktabr", "noyabr", "dekabr"),

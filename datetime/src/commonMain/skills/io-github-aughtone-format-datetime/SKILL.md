@@ -68,7 +68,7 @@ Pair<Instant?, Instant?>(start, null).format(placeholder = "#")     // "… - #"
 val date = 1_700_000_000_000L.toLocalDate()
 
 // Standalone localized weekday / month names
-DayOfWeek.MONDAY.displayName(locale = localeFor("fr")!!)            // "lundi"
+DayOfWeek.MONDAY.displayName(locale = localeFor("fr")!!)            // "Lundi"
 Month.MARCH.displayName(TextWidth.Abbreviated, localeFor("en")!!)   // "Mar"
 ```
 
@@ -94,7 +94,7 @@ Month.MARCH.displayName(TextWidth.Abbreviated, localeFor("en")!!)   // "Mar"
 
 **The AM/PM marker goes where the language writes it.** After the time for most languages (`4:08 PM`), before it for Korean, Hungarian and Turkish, and before it with no space for Japanese and Chinese.
 
-**Month and weekday names inside a date are not always the names `displayName` returns.** Inside a date they are CLDR's in-date form: lower case in Spanish, French, Italian, Portuguese, Czech, Kazakh, Uzbek and Vietnamese (`15 de marzo de 2024`, `viernes, 15 de marzo de 2024`), and a different grammatical form in Czech, Finnish, Polish, Russian and Ukrainian (`5 марта 2024 г.`). `Month.displayName` and `DayOfWeek.displayName` give the stand-alone name, which these languages capitalise (`Marzo`, `Март`). A date that opens a sentence is not capitalised for you. Symptom: a hand-built date string that reads wrong to a native speaker — format the whole date instead of concatenating a name.
+**Month and weekday names inside a date are not always the names `displayName` returns.** Inside a date they are CLDR's in-date form: lower case in Spanish, French, Italian, Portuguese, Czech, Kazakh, Uzbek and Vietnamese (`15 de marzo de 2024`, `viernes, 15 de marzo de 2024`), and a different grammatical form in Czech, Finnish, Polish, Russian and Ukrainian (`5 марта 2024 г.`). `Month.displayName` and `DayOfWeek.displayName` give the stand-alone name, which these languages capitalise (`Marzo`, `Март`, `Lundi`). A date that opens a sentence is not capitalised for you. Symptom: a hand-built date string that reads wrong to a native speaker — format the whole date instead of concatenating a name.
 
 **These `Instant`s are `kotlin.time.Instant`, not `kotlinx.datetime.Instant`.** The `Instant` and `Pair<Instant?, Instant?>` APIs use the standard library's `kotlin.time.Instant`. Symptom: a type mismatch when you pass a `kotlinx.datetime.Instant`.
 
@@ -105,6 +105,8 @@ Month.MARCH.displayName(TextWidth.Abbreviated, localeFor("en")!!)   // "Mar"
 **New in 4.3.0: Canadian Indigenous locales are found, and written in English.** `localeFor` now returns locales for Cree, Ojibwe, Mi'kmaq, Mohawk and 21 more (`cr-CA`, `hur-CA`, `atj-CA`, …). This library has no text in those languages, so they format in English, the same text as before they were found — do not read a non-null locale as a sign its output is in that language. Inuktitut (`iu`) is the one with its own text.
 
 **Changed in 4.3.0: `kotlinx-serialization-json` no longer comes with this module.** It was an `api` dependency, so code could import `kotlinx.serialization.json` having declared only `io.github.aughtone:format-datetime`; that import now fails to resolve unless the project declares `org.jetbrains.kotlinx:kotlinx-serialization-json` itself. Compose UI and Compose resources are gone from its runtime classpath too. So is the empty Compose resources class 4.2 published, `io.github.aughtone.format.datetime.resources.Res`; nothing in it held data.
+
+**Changed in 4.4.0: `DayOfWeek.displayName` is capitalised in French, Portuguese, Finnish, Russian and Ukrainian.** It returns `"Lundi"` and `"Lun."` where it returned `"lundi"` and `"lun."`, to match `Month.displayName` (`"Mars"`), which those languages already capitalised. A weekday inside a formatted date stays lower case (`"lundi 3 mars 2025"`). Three in-date forms changed with it, to CLDR's: a Finnish range of dates writes its full weekdays as `"lauantaina 1. – maanantaina 3. kesäkuuta"` (was `"lauantai 1. – maanantai 3. kesäkuuta"`; a single date still reads `"lauantai 1. kesäkuuta"`), an abbreviated Portuguese weekday ends in a period (`"sáb., 1 de jun."`, was `"sáb, 1 de jun."`), and the Ukrainian Friday is written with U+02BC (`"пʼятниця"`). Symptom: a test or a comparison that expected the lower-case stand-alone name — lower-case it yourself if a sentence needs it.
 
 **New in 4.4.0: `separators` on every date and time formatter.** `format` on `LocalDate`, `LocalTime`, `LocalDateTime`, `Instant` and the `Pair`s takes `separators: Separators = Separators.Ascii` (from `io.github.aughtone.toolbox`). The default writes every space as U+0020, which a line can break at; `Separators.Typographic` makes them all no-break, so "Jun 1" never wraps between its month and its day — use it in a table cell, a chat bubble or a label. The default changed the bytes in one place: Belarusian, Bulgarian, Kazakh, Macedonian, Russian and Ukrainian wrote a no-break space before their year marker ("2024\u202Fг."), and now write U+0020 unless `Typographic` is passed.
 

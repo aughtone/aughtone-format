@@ -30,8 +30,8 @@ class DayOfWeekDisplayNameTest {
 
     @Test
     fun french() {
-        assertEquals("lundi", DayOfWeek.MONDAY.displayName(TextWidth.Full, localeFor("fr")!!))
-        assertEquals("lun.", DayOfWeek.MONDAY.displayName(TextWidth.Abbreviated, localeFor("fr")!!))
+        assertEquals("Lundi", DayOfWeek.MONDAY.displayName(TextWidth.Full, localeFor("fr")!!))
+        assertEquals("Lun.", DayOfWeek.MONDAY.displayName(TextWidth.Abbreviated, localeFor("fr")!!))
     }
 
     @Test
@@ -54,7 +54,7 @@ class DayOfWeekDisplayNameTest {
     @Test
     fun regionFallsBackToLanguage() {
         assertEquals(
-            "lundi",
+            "Lundi",
             DayOfWeek.MONDAY.displayName(TextWidth.Full, localeFor("fr-CA")!!),
         )
     }

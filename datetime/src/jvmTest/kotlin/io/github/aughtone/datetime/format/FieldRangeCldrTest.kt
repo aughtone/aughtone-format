@@ -62,11 +62,6 @@ class FieldRangeCldrTest {
             put("$key $skeleton 2024-06-01T09:00–2024-06-01T$end", "stand-alone weekday")
         }
         for (end in listOf("17:00", "11:30", "09:30")) put("kk EHm 2024-06-01T09:00–2024-06-01T$end", "stand-alone weekday")
-        // ICU writes the Finnish full weekday in its format form inside a range ("lauantaina");
-        // the library keeps the form its single value uses ("lauantai").
-        for (end in listOf("2024-06-03T17:00", "2024-09-30T17:00", "2025-06-01T09:00")) {
-            put("fi MMMMEEEEd 2024-06-01T09:00–$end", "format weekday")
-        }
         // Across years ICU shortens the Russian weekday in its fallback ("сб"); the library keeps
         // the requested full weekday.
         put("ru MMMMEEEEd 2024-06-01T09:00–2025-06-01T09:00", "fallback weekday width")

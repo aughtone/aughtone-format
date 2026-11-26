@@ -301,10 +301,11 @@ internal fun formatDateRange(
         ?: return fallback()
 
     val dayNames = DynamicLocalDateFormats.getDayOfWeekNamesResource(locale)
+    val standAloneDayNames = DynamicLocalDateFormats.getStandAloneDayOfWeekNamesResource(locale)
     val monthNames = DynamicLocalDateFormats.getMonthNamesResource(locale)
     fun render(tokens: List<PatternToken>, date: LocalDate): String {
         val base = if (date.year in 0..9999) date.year - date.year % 100 else 2000
-        return LocalDate.Format { appendDateTokens(tokens.withWidthsOf(singleTokens), dayNames, monthNames, base) }.format(date)
+        return LocalDate.Format { appendDateTokens(tokens.withWidthsOf(singleTokens), dayNames, monthNames, base, standAloneDayNames) }.format(date)
     }
     val text = render(halves.first.withMarkedSeparator(), start) + render(halves.second, end)
     // The post formatter writes the digits in the locale's system.

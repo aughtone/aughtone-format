@@ -36,6 +36,8 @@ currency layout can be sourced directly.
 | Navajo | `nv` | Basic-to-moderate CLDR for date/time and number formatting. |
 | Samoan / Tongan | `sm` / `to` | Good baseline CLDR for core locale operations. |
 
+**Note added 2026-11-26.** Checked against Unicode CLDR 48.0.0, two rows of this table are wrong. Navajo (`nv`) has a locale entry with no Navajo text in it: its month names are the placeholders `M01` to `M12` and its weekday names are English. Samoan (`sm`) has no locale at all. Neither can be generated from CLDR, so both belong with the languages below whose terms are collected from speakers, and both have a blank worksheet for that and not a confirmation sheet. Tongan (`to`), listed with Samoan, does have its own month and weekday names and date patterns, so its part of the row stands.
+
 ## Tier 2 — Manual data curation required (like `iu`)
 
 Unicode script support exists (characters display), but CLDR formatting data is sparse or

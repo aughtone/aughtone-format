@@ -10,6 +10,10 @@ import kotlinx.datetime.format.Padding
  *
  * The era field `G` is left out here; the era is added after formatting, when the date is known.
  *
+ * @param dayOfWeekNames The weekday names as the language writes them inside a date, for `E`.
+ * @param standAloneDayOfWeekNames The weekday names as the language writes them on their own, for
+ *   `c`, which a pattern uses where the weekday does not take its in-date form: Finnish writes
+ *   "perjantai 15. maaliskuuta" in a full date and "perjantaina" elsewhere.
  * @param twoDigitYearBase First year of the century that `yy` abbreviates. kotlinx-datetime prints
  *   a two-digit year only inside one hundred-year window and writes any other year in full with a
  *   sign, so the caller passes the century of the date being formatted.
@@ -21,19 +25,24 @@ internal fun DateTimeFormatBuilder.WithDate.appendPattern(
     dayOfWeekNames: DayOfWeekNamesResource,
     monthNames: MonthNamesResource,
     twoDigitYearBase: Int = 2000,
+    standAloneDayOfWeekNames: DayOfWeekNamesResource = dayOfWeekNames,
 ) {
-    appendDateTokens(tokenizePattern(pattern).withoutFields { it.letter == 'G' }, dayOfWeekNames, monthNames, twoDigitYearBase)
+    appendDateTokens(
+        tokenizePattern(pattern).withoutFields { it.letter == 'G' },
+        dayOfWeekNames, monthNames, twoDigitYearBase, standAloneDayOfWeekNames,
+    )
 }
 
 /**
  * Appends date [tokens] as they stand, with no tidying of the literal text around them. The
- * fields are those [appendPattern] accepts.
+ * fields and the name tables are those [appendPattern] accepts.
  */
 internal fun DateTimeFormatBuilder.WithDate.appendDateTokens(
     tokens: List<PatternToken>,
     dayOfWeekNames: DayOfWeekNamesResource,
     monthNames: MonthNamesResource,
     twoDigitYearBase: Int = 2000,
+    standAloneDayOfWeekNames: DayOfWeekNamesResource = dayOfWeekNames,
 ) {
     for (token in tokens) {
         when (token) {
@@ -45,7 +54,7 @@ internal fun DateTimeFormatBuilder.WithDate.appendDateTokens(
                     // A bare "y" is the year as it is: 800, not 0800.
                     else -> year(Padding.NONE)
                 }
-                // "L" is the stand-alone month and "c" the stand-alone weekday.
+                // "L" is the stand-alone month, written here with the in-date names.
                 'M', 'L' -> when (token.count) {
                     1 -> monthNumber(Padding.NONE)
                     2 -> monthNumber(Padding.ZERO)
@@ -56,9 +65,12 @@ internal fun DateTimeFormatBuilder.WithDate.appendDateTokens(
                     1 -> day(Padding.NONE)
                     else -> day(Padding.ZERO)
                 }
-                'E', 'c' -> when (token.count) {
-                    1, 2, 3 -> dayOfWeek(dayOfWeekNames.abbreviated)
-                    else -> dayOfWeek(dayOfWeekNames.full)
+                // "c" is the stand-alone weekday.
+                'E', 'c' -> (if (token.letter == 'c') standAloneDayOfWeekNames else dayOfWeekNames).let { names ->
+                    when (token.count) {
+                        1, 2, 3 -> dayOfWeek(names.abbreviated)
+                        else -> dayOfWeek(names.full)
+                    }
                 }
                 else -> throw IllegalArgumentException("Unrecognized pattern character: ${token.letter}")
             }

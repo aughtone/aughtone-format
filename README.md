@@ -15,6 +15,8 @@ Numbers and money from Unicode CLDR, native desktop targets, and control over wh
 - **Phone numbers do not wrap** (`:identifiers`): `formatPhone` groups with a no-break space and a non-breaking hyphen; `PhoneSeparators.Ascii` gives the plain characters.
 - **Native desktop targets** (every module): `macosArm64`, `linuxX64` and `linuxArm64`; `:viewable-compose` has `macosArm64` only.
 - **A locale's script chooses its text** (`:readable`): `zh-Hant` with any region reads Traditional Chinese, and a locale with no script reads the one its region writes.
+- **Durations read from text** (`:readable`): `Duration.parseReadable("1h 30m")`, with `parseReadableOrNull`, `parseReadableOrElse` and `parseReadableWithOutcome` — "10s", "250ms", "5 minutes", for a configuration value or a command-line option.
+- **Weekday names on their own are capitalised** (`:datetime`): `DayOfWeek.displayName` gives "Lundi" in French, as `Month.displayName` gives "Mars"; the same in Portuguese, Finnish, Russian and Ukrainian. Inside a date they stay lower case.
 - **Dependencies**: `aughtone-types` 4.3.0.
 
 ## 🚀 Major Updates in 4.3.0
@@ -62,7 +64,7 @@ A correctness release: no new API, many fixes to output. Code that pinned the ol
 
 ## 🚀 Major Updates in 4.1.0
 
-- **Standalone weekday & month names** (`:datetime`): `DayOfWeek.displayName(width, locale)` and `Month.displayName(width, locale)` (with a `TextWidth { Full, Abbreviated }` enum) expose the locale's day and month names — "Monday"/"Mon", "lundi", "mars" — without formatting a whole date.
+- **Standalone weekday & month names** (`:datetime`): `DayOfWeek.displayName(width, locale)` and `Month.displayName(width, locale)` (with a `TextWidth { Full, Abbreviated }` enum) expose the locale's day and month names — "Monday"/"Mon", "Lundi", "Mars" — without formatting a whole date.
 - **Localized time-zone names** (`:datetime`): `TimeZone.displayName(instant, width, locale)` gives the zone's daylight-aware *specific* name ("Eastern Standard Time" / "EST").
 - **Locale-correct list joining** (`:readable`): `List<String>.formatReadableList(locale, type)` — "Monday, Wednesday, and Friday" / "lundi, mercredi et vendredi" — from CLDR list patterns, ~55 locales.
 - **Zone names now delegate to the platform's CLDR** (java.time / Android ICU / Apple / Intl) with a small bundled Inuktitut supplement, replacing a ~500 KB bundled table — see [Coverage over consistency](#coverage-over-consistency). Wording follows the reader's OS and can differ across platforms.
@@ -112,6 +114,7 @@ Aughtone Format 3.1.0 focuses on relative-time expressiveness and completing loc
 - **Automatic Fallback**: Smartly switches from relative to absolute formatting based on configurable thresholds.
 - **Ordinal Numbers**: Localized ordinal suffix support (e.g., 1st, 2nd, 3.º, 第1).
 - **Duration Scaling**: Human-friendly duration strings with perceptual rounding (e.g., "2 weeks" vs "14 days").
+- **Duration Parsing**: A `Duration` read from text such as "10s", "5 minutes" or "1h 30m" (`Duration.parseReadable` in `:readable`), English units only.
 - **Numeric Abbreviations**: Scaling large numbers into abbreviated forms (e.g., 1.5K, 1.2M).
 - **Geospatial Formatting**: Localized altitude, azimuth (with cardinal directions), and coordinates.
 - **Dates with Chosen Fields**: A month and a day ("Jun 1"), a weekday and an hour, a month and a year — only the fields you name, laid out as each locale does from CLDR (`formatReadableFields` in `:readable`).
@@ -167,6 +170,11 @@ println(123L.formatReadableOrdinal(Locales.French))  // "123e"
 // Durations — scaled to the most significant unit and rounded
 println(90.minutes.formatReadable(locale = Locales.English)) // "2 hours"
 println(90.minutes.formatReadable(locale = Locales.Spanish)) // "2 horas"
+
+// Durations read from text — English units, for a config value or a command-line option
+println(Duration.parseReadable("1h 30m"))          // 1h 30m
+println(Duration.parseReadableOrNull("5 minutes")) // 5m
+println(Duration.parseReadableOrNull("soon"))      // null
 
 // Numbers and money
 println(1234567.891.formatReadable(Locales.German, precision = 2)) // "1.234.567,89"

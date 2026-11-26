@@ -57,6 +57,7 @@ Translating `kotlin.time.Duration` into natural language using smart-scaling.
     - Weeks: Used for durations $\ge 7$ days but $\le 3$ weeks.
     - Transition: 29 days remains as "29 days" to avoid rounding to "4 weeks" before hitting "1 month" (30 days).
 - **Precision**: Defaults to integer rounding for readable strings.
+- **Reading**: `Duration.parseReadable` reads a number and a unit, or several, into a `Duration` ("10s", "250ms", "5 minutes", "1h 30m"), for a configuration value or a command-line option. The units are English, from nanoseconds to years, with a week of 7 days, a month of 30 and a year of 365, the lengths the scaling above uses; it is not locale-aware. `parseReadableOrNull`, `parseReadableOrElse` and `parseReadableWithOutcome` return a `null`, a fallback or a typed failure where it throws.
 
 #### 6. Geospatial Data
 Human-readable representation of physical coordinates and orientations.

@@ -8,10 +8,11 @@ import kotlinx.datetime.isoDayNumber
 /**
  * The localized name of this day of the week, in the given [width].
  *
- * Returns just the name — `"Monday"` / `"Mon"` in English, `"lundi"` / `"lun."`
- * in French — not a formatted date. It reads the same bundled per-locale name
- * tables that [format] uses, so a weekday name here matches the weekday shown by
- * a full date rendered for the same [locale].
+ * Returns just the name — `"Monday"` / `"Mon"` in English, `"Lundi"` / `"Lun."`
+ * in French — not a formatted date. This is the name on its own, as a heading or
+ * a label shows it, which many languages capitalise. Inside a date some languages
+ * write the weekday differently — in lower case in French (`"lundi 3 mars 2025"`),
+ * in another form in Finnish — and [format] writes that form, so the two can differ.
  *
  * The [locale] is resolved with the same BCP-47 fallback as the rest of the
  * module: a region variant falls back to its language (`en-CA` → `en`), and a
@@ -21,7 +22,7 @@ import kotlinx.datetime.isoDayNumber
  * ```kotlin
  * DayOfWeek.MONDAY.displayName(locale = localeFor("en")!!)                       // "Monday"
  * DayOfWeek.MONDAY.displayName(TextWidth.Abbreviated, localeFor("en")!!)          // "Mon"
- * DayOfWeek.MONDAY.displayName(TextWidth.Full, localeFor("fr")!!)                 // "lundi"
+ * DayOfWeek.MONDAY.displayName(TextWidth.Full, localeFor("fr")!!)                 // "Lundi"
  * ```
  *
  * @param width whether to return the full or abbreviated name. Defaults to
